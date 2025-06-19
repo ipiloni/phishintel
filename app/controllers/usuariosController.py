@@ -41,7 +41,14 @@ class UsuariosController:
         nuevoUsuario = Usuario(nombreUsuario=data["nombreUsuario"],
                                password=hashedPassword,
                                nombre=data["nombre"],
-                               apellido=data["apellido"])
+                               apellido=data["apellido"],
+                               telefono=data.get("telefono"),
+                               correo=data.get("correo"),
+                               direccion=data.get("direccion"),
+                               esAdministrador=data.get("esAdministrador"))
+
+        if data.get("esAdministrador") is None:
+            nuevoUsuario.esAdministrador = False
 
         session.add(nuevoUsuario)
         session.commit()
