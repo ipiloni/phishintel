@@ -1,9 +1,8 @@
-from flask import jsonify, app, request
-
+from flask import jsonify, request
+from app.main import app
 from app.backend.models import Usuario
 from app.backend.models.error import responseError
 from app.config.db_config import SessionLocal
-
 
 @app.route("/usuarios", methods=["POST"])
 def crearUsuario():
