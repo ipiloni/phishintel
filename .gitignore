@@ -1,4 +1,4 @@
-./app/properties.env
+app/properties.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
