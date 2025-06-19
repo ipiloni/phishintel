@@ -11,5 +11,15 @@ class Usuario(Base):
     direccion  = Column(String, nullable=True)
     telefono = Column(String, nullable=True)
     correo = Column(String, nullable=True)
-    nombreUsuario = Column(String, nullable=True)
     esAdministrador = Column(Boolean, nullable=True)
+
+    def get(self):
+        return {
+            "idUsuario": self.idUsuario,
+            "nombre": self.nombre,
+            "apellido": self.apellido,
+            "direccion": self.direccion,
+            "telefono": self.telefono,
+            "correo": self.correo,
+            "esAdministrador": self.esAdministrador
+        }
