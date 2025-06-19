@@ -16,4 +16,4 @@ class Usuario(Base):
     correo = Column(String, nullable=True)
     nombreUsuario = Column(String, nullable=True)
     esAdministrador = Column(Boolean, nullable=True)
-    eventos = relationship("Evento", secondary=Usuario_Evento, backpopulates="usuarios")
+    eventos = relationship("Evento", secondary=Usuario_Evento, back_populates="usuarios")
