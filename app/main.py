@@ -29,5 +29,10 @@ def crearUsuario():
 def eliminarUsuario(idUsuario):
     return UsuariosController.eliminarUsuario(idUsuario)
 
+@app.route("/usuarios/<idUsuario>", methods=["PUT"])
+def editarUsuario(idUsuario):
+    data = request.get_json()
+    return UsuariosController.editarUsuario(idUsuario, data)
+
 if __name__ == "__main__":
     app.run(debug=True, port=8080)

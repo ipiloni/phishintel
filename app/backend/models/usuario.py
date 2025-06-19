@@ -1,10 +1,11 @@
-from sqlalchemy import Column, String, Boolean
+from sqlalchemy import Column, String, Boolean, Integer
 from app.config.db_config import Base
 
 class Usuario(Base):
     __tablename__ = 'usuarios'
 
-    idUsuario = Column(String, primary_key=True, nullable=False)
+    idUsuario = Column(Integer, primary_key=True, autoincrement=True)
+    nombreUsuario = Column(String, nullable=False)
     password = Column(String, nullable=False)
     nombre = Column(String, nullable=False)
     apellido = Column(String, nullable=False)
@@ -16,6 +17,7 @@ class Usuario(Base):
     def get(self):
         return {
             "idUsuario": self.idUsuario,
+            "nombreUsuario": self.nombreUsuario,
             "nombre": self.nombre,
             "apellido": self.apellido,
             "direccion": self.direccion,
