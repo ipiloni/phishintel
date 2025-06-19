@@ -1,11 +1,12 @@
-from config.db_config import Base, engine, SessionLocal
-from backend.models import Usuario
+from flask import Flask
+from sqlalchemy import create_engine
+from sqlalchemy.dialects.postgresql import aggregate_order_by
+from sqlalchemy.orm import sessionmaker
 
-Base.metadata.create_all(bind=engine) # Crea todas las tablas
+app = Flask(__name__)
 
-# Crear sesión y testear insert
-session = SessionLocal()
-nuevo_usuario = Usuario(nombre="Ignacio", correo="ignacio@phishintel.com")
-session.add(nuevo_usuario)
-session.commit()
-session.close()
+engine = create_engine("sqlite://phishintel.db")
+SessionLocal = sessionmaker(bind=engine)
+
+if __name__ == "__main__":
+    app.run(debug=True, port=8080)
