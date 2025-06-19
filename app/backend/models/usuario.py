@@ -1,7 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean
-from sqlalchemy.orm import relationship
-
-from app.config.base import Usuario_Evento
+from sqlalchemy import Column, String, Boolean
 from app.config.db_config import Base
 
 class Usuario(Base):
@@ -16,4 +13,3 @@ class Usuario(Base):
     correo = Column(String, nullable=True)
     nombreUsuario = Column(String, nullable=True)
     esAdministrador = Column(Boolean, nullable=True)
-    eventos = relationship("Evento", secondary=Usuario_Evento, back_populates="usuarios")
