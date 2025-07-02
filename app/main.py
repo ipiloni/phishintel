@@ -1,9 +1,7 @@
-import os
 from flask import Flask, request
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 from app.config.db_config import Base, engine
+from app.controllers.aiController import AIController
 from app.controllers.usuariosController import UsuariosController
 
 # Flask es la libreria que vamos a usar para generar los Endpoints
@@ -12,6 +10,14 @@ app = Flask(__name__)
 Base.metadata.create_all(engine)
 
 ########## ENDPOINTS ##########
+
+# ------ # GEMINI AI # ------ #
+@app.route("/email/gemini", methods=["POST"])
+def llamarIAGemini():
+    data = request.get_json()
+    return AIController.armarEmailGemini(data)
+
+# ------ # USUARIOS # ------ #
 @app.route("/usuarios", methods=["GET"])
 def obtenerUsuarios():
     return UsuariosController.obtenerUsuarios()
