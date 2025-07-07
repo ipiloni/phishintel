@@ -1,4 +1,3 @@
-from flask import jsonify
 from google import genai
 from pydantic import BaseModel
 from app.utils.config import get
