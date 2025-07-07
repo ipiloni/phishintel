@@ -1,8 +1,5 @@
 from sqlalchemy import ForeignKey, Table, Column, Integer
-from sqlalchemy.orm import DeclarativeBase
-
-class Base(DeclarativeBase):
-    pass
+from app.config.db_config import Base
 
 Usuario_Evento = Table(
     "Usuario_Evento",
