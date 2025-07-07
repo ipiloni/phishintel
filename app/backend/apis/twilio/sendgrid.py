@@ -9,7 +9,7 @@ def enviarMail(asunto, cuerpo, destinatario):
         from_email='ipiloni@frba.utn.edu.ar',
         to_emails=destinatario,
         subject=asunto,
-        plain_text_content=cuerpo
+        html_content=cuerpo
     )
     sg = SendGridAPIClient(api_key)
     return sg.send(message)

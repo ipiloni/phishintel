@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 from app.config.db_config import Base, engine
 from app.controllers.aiController import AIController
@@ -11,6 +11,11 @@ app = Flask(__name__)
 Base.metadata.create_all(engine)
 
 ########## ENDPOINTS ##########
+# ------ # REGISTRO DE EVENTOS # ------ #
+@app.route("/registro", methods=["GET"])
+def registrarClic():
+    print(f"Mira el tipo como apreto el boton no te puedo creer!")
+    return jsonify({"mensaje": "Como caiste pichon"})
 
 # ------ # ENVIO DE EMAILS # ------ #
 @app.route("/email", methods=["POST"])
