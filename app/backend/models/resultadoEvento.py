@@ -1,6 +1,7 @@
 import enum
 
 class ResultadoEvento(enum.Enum):
+    SIN_COMPROBAR = "SIN COMPROBAR"
     DISTINGUIDO = "DISTINGUIDO"
     SATISFACTORIO = "SATISFACTORIO"
     DESAPROBADO = "DESAPROBADO"

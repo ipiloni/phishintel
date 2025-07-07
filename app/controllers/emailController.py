@@ -1,7 +1,14 @@
+import datetime
+
 from flask import jsonify
 
 from app.backend.apis.twilio.sendgrid import enviarMail
+from app.backend.models import Registro
 from app.backend.models.error import responseError
+from app.backend.models.evento import Evento
+from app.backend.models.resultadoEvento import ResultadoEvento
+from app.backend.models.tipoEvento import TipoEvento
+from app.config.db_config import SessionLocal
 
 class EmailController:
 
@@ -15,6 +22,23 @@ class EmailController:
         cuerpo = data["cuerpo"]
 
         try:
+
+            registroEvento = Registro(
+                asunto=asunto,
+                cuerpo=cuerpo
+            )
+
+            evento = Evento(
+                tipoEvento=TipoEvento.CORREO,
+                fechaEvento=datetime.datetime.now(),
+                resultado=ResultadoEvento.SIN_COMPROBAR,
+                registro=registroEvento
+            )
+
+            session = SessionLocal()
+            session.add(evento)
+            session.commit()
+            session.close()
 
             response = enviarMail(asunto, cuerpo, destinatario)
 
