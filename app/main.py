@@ -2,6 +2,7 @@ from flask import Flask, request
 
 from app.config.db_config import Base, engine
 from app.controllers.aiController import AIController
+from app.controllers.emailController import EmailController
 from app.controllers.usuariosController import UsuariosController
 
 # Flask es la libreria que vamos a usar para generar los Endpoints
@@ -10,6 +11,12 @@ app = Flask(__name__)
 Base.metadata.create_all(engine)
 
 ########## ENDPOINTS ##########
+
+# ------ # ENVIO DE EMAILS # ------ #
+@app.route("/email", methods=["POST"])
+def enviarEmail():
+    data = request.get_json()
+    return EmailController.enviarMail(data)
 
 # ------ # GEMINI AI # ------ #
 @app.route("/email/gemini", methods=["POST"])
