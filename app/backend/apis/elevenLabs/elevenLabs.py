@@ -1,4 +1,5 @@
 import uuid
+from io import BytesIO
 
 from dotenv import load_dotenv
 from elevenlabs import VoiceSettings
@@ -25,6 +26,25 @@ def generarVoz(texto):
     )
 
     play(audio)
+
+def stt(ubicacion):
+    elevenlabs = ElevenLabs(
+        api_key=api_key,
+    )
+
+    with open(ubicacion, "rb") as file:
+        audio_data = BytesIO(file.read())
+
+    transcription = elevenlabs.speech_to_text.convert(
+        file=audio_data,
+        model_id="scribe_v1",  # Model to use, for now only "scribe_v1" is supported
+        tag_audio_events=True,  # Tag audio events like laughter, applause, etc.
+        language_code="spa", # Este siempre sera espaniol porque no trabajaremos en ingles para Proyecto Final
+        diarize=True,
+    )
+    return jsonify({
+        "traduccion": transcription.dict()["text"]
+    })
 
 def tts(text):
     elevenlabs = ElevenLabs(

@@ -19,6 +19,12 @@ def generarTTS():
     texto = data["texto"]
     return ElevenLabsController().generarTTS(texto)
 
+@app.route("/stt", methods=["POST"])
+def generarSTT():
+    data = request.get_json()
+    ubicacion = data["ubicacion"]
+    return ElevenLabsController().generarSTT(ubicacion)
+
 # ------ # REGISTRO DE EVENTOS # ------ #
 @app.route("/registro", methods=["GET"])
 def registrarClic():
