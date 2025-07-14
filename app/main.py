@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 
 from app.config.db_config import Base, engine
 from app.controllers.aiController import AIController
+from app.controllers.elevenLabsController import ElevenLabsController
 from app.controllers.emailController import EmailController
 from app.controllers.usuariosController import UsuariosController
 
@@ -11,6 +12,13 @@ app = Flask(__name__)
 Base.metadata.create_all(engine)
 
 ########## ENDPOINTS ##########
+# ------ # TEXT TO SPEECH # ------ #
+@app.route("/tts", methods=["POST"])
+def generarTTS():
+    data = request.get_json()
+    texto = data["texto"]
+    return ElevenLabsController().generarTTS(texto)
+
 # ------ # REGISTRO DE EVENTOS # ------ #
 @app.route("/registro", methods=["GET"])
 def registrarClic():
