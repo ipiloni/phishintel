@@ -4,6 +4,7 @@ from app.config.db_config import Base, engine
 from app.controllers.aiController import AIController
 from app.controllers.elevenLabsController import ElevenLabsController
 from app.controllers.emailController import EmailController
+from app.controllers.llamadasController import LlamadasController
 from app.controllers.usuariosController import UsuariosController
 
 # Flask es la libreria que vamos a usar para generar los Endpoints
@@ -24,6 +25,12 @@ def generarSTT():
     data = request.get_json()
     ubicacion = data["ubicacion"]
     return ElevenLabsController().generarSTT(ubicacion)
+
+# ------ # LLAMADA # ------ #
+@app.route("/llamar", methods=["POST"])
+def generarLlamada():
+    data = request.get_json()
+    return LlamadasController.llamar(data)
 
 # ------ # REGISTRO DE EVENTOS # ------ #
 @app.route("/registro", methods=["GET"])
