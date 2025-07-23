@@ -1,15 +1,20 @@
 from flask import jsonify
 from twilio.rest import Client
 
-client = Client("account_sid", "auth_token")
+from app.utils.config import get
 
-def llamar():
+account_sid = get("TWILIO_ACCOUNT_SID_IGNA")
+auth_token = get("TWILIO_AUTH_TOKEN_IGNA")
+
+client = Client(account_sid, auth_token)
+
+def llamar(destinatario, remitente):
   print(f"Llego a la llamada")
 
   call = client.calls.create(
     url="http://demo.twilio.com/docs/voice.xml",
-    to="+5491141635935",
-    from_="+18647148760"
+    to=destinatario,
+    from_=remitente,
   )
   print(f"Imprimo resultados")
 
