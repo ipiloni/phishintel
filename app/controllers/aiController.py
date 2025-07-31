@@ -1,4 +1,4 @@
-from google import genai
+import google.generativeai as genai
 from pydantic import BaseModel
 from app.utils.config import get
 from app.backend.models.error import responseError
@@ -9,6 +9,9 @@ class Email(BaseModel):
 
 api_key = get("GEMINI_API_KEY_IGNA")
 
+# Configurar la API key una sola vez al inicio
+genai.configure(api_key=api_key)
+
 class AIController:
 
     @staticmethod
@@ -16,15 +19,12 @@ class AIController:
         if not data or "contexto" not in data:
             return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'contexto'", 400)
 
-        client = genai.Client(api_key=api_key)
+        model = genai.GenerativeModel(model_name="gemini-1.5-flash")  # o gemini-pro, etc.
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=data["contexto"],
-            config={
-                "response_mime_type": "application/json",
-                "response_schema": Email,
-            }
-        )
-
-        return response.text, 201
+        try:
+            response = model.generate_content(
+                data["contexto"]
+            )
+            return response.text, 201
+        except Exception as e:
+            return responseError("ERROR_API", str(e), 500)
