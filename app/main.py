@@ -4,6 +4,7 @@ from app.config.db_config import Base, engine
 from app.controllers.aiController import AIController
 from app.controllers.elevenLabsController import ElevenLabsController
 from app.controllers.emailController import EmailController
+from app.controllers.eventosController import EventosController
 from app.controllers.llamadasController import LlamadasController
 from app.controllers.usuariosController import UsuariosController
 
@@ -37,6 +38,15 @@ def generarLlamada():
 def registrarClic():
     print(f"Mira el tipo como apreto el boton no te puedo creer!")
     return jsonify({"mensaje": "Como caiste pichon"})
+
+@app.route("/eventos", methods=["GET"])
+def obtenerEventos():
+    return EventosController.obtenerEventos()
+
+@app.route("/eventos", methods=["POST"])
+def crearEvento():
+    data = request.get_json()
+    return EventosController.crearEvento(data)
 
 # ------ # ENVIO DE EMAILS # ------ #
 @app.route("/email", methods=["POST"])

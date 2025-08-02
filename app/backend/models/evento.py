@@ -13,7 +13,7 @@ class Evento(Base):
     resultado = Column(SQLEnum(ResultadoEvento), nullable=False)
 
     # Relación con Registro (uno a uno)
-    registro = relationship("Registro", uselist=False, back_populates="evento")
+    registroEvento = relationship("RegistroEvento", uselist=False, back_populates="evento")
 
     # Relación con Usuario (muchos a muchos)
     usuarios = relationship("Usuario", secondary="Usuario_Evento", back_populates="eventos")

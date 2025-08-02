@@ -3,7 +3,7 @@ import datetime
 from flask import jsonify
 
 from app.backend.apis.twilio.sendgrid import enviarMail
-from app.backend.models import Registro
+from app.backend.models import RegistroEvento
 from app.backend.models.error import responseError
 from app.backend.models.evento import Evento
 from app.backend.models.resultadoEvento import ResultadoEvento
@@ -23,7 +23,7 @@ class EmailController:
 
         try:
 
-            registroEvento = Registro(
+            registroEvento = RegistroEvento(
                 asunto=asunto,
                 cuerpo=cuerpo
             )
@@ -31,8 +31,8 @@ class EmailController:
             evento = Evento(
                 tipoEvento=TipoEvento.CORREO,
                 fechaEvento=datetime.datetime.now(),
-                resultado=ResultadoEvento.SIN_COMPROBAR,
-                registro=registroEvento
+                resultado=ResultadoEvento.PENDIENTE,
+                registroEvento=registroEvento
             )
 
             session = SessionLocal()

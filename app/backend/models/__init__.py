@@ -1,4 +1,4 @@
 from .usuario import Usuario
 from .evento import Evento
-from .registro import Registro
+from .registroEvento import RegistroEvento
 from .asociaciones import Usuario_Evento
