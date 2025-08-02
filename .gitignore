@@ -198,3 +198,4 @@ cython_debug/
 .cursorindexingignore
 .idea/misc.xml
 .idea/phishintel.iml
+.idea/dbnavigator.xml
