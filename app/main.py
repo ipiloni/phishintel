@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify
 
 from app.config.db_config import Base, engine
-from app.controllers.aiController import AIController
-from app.controllers.elevenLabsController import ElevenLabsController
-from app.controllers.emailController import EmailController
-from app.controllers.eventosController import EventosController
-from app.controllers.llamadasController import LlamadasController
-from app.controllers.usuariosController import UsuariosController
+from app.controllers.emails.aiController import AIController
+from app.controllers.llamadas.elevenLabsController import ElevenLabsController
+from app.controllers.emails.emailController import EmailController
+from app.controllers.abm.eventosController import EventosController
+from app.controllers.llamadas.llamadasController import LlamadasController
+from app.controllers.abm.usuariosController import UsuariosController
 
 # Flask es la libreria que vamos a usar para generar los Endpoints
 app = Flask(__name__)
@@ -49,16 +49,20 @@ def crearEvento():
     return EventosController.crearEvento(data)
 
 # ------ # ENVIO DE EMAILS # ------ #
-@app.route("/email", methods=["POST"])
+@app.route("/email/enviarEmail", methods=["POST"]) # Esta ruta
 def enviarEmail():
     data = request.get_json()
     return EmailController.enviarMail(data)
 
-# ------ # GEMINI AI # ------ #
-@app.route("/email/gemini", methods=["POST"])
+@app.route("/email/generarEmail", methods=["POST"]) # Esta ruta llama a gemini y genera un asunto y texto en html
 def llamarIAGemini():
     data = request.get_json()
     return AIController.armarEmailGemini(data)
+
+@app.route("/email/generarYEnviarEmail", methods=["POST"])
+def generarYEnviarEmail():
+    data = request.get_json()
+    return EmailController.generarYEnviarMail(data)
 
 # ------ # USUARIOS # ------ #
 @app.route("/usuarios", methods=["GET"])
