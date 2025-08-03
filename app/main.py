@@ -7,7 +7,8 @@ from app.controllers.emails.emailController import EmailController
 from app.controllers.abm.eventosController import EventosController
 from app.controllers.llamadas.llamadasController import LlamadasController
 from app.controllers.abm.usuariosController import UsuariosController
-
+from app.utils import logger
+from app.controllers.fallaController import FallaController
 # Flask es la libreria que vamos a usar para generar los Endpoints
 app = Flask(__name__)
 
@@ -33,11 +34,11 @@ def generarLlamada():
     data = request.get_json()
     return LlamadasController.llamar(data)
 
-# ------ # REGISTRO DE EVENTOS # ------ #
-@app.route("/registro", methods=["GET"])
-def registrarClic():
-    print(f"Mira el tipo como apreto el boton no te puedo creer!")
-    return jsonify({"mensaje": "Como caiste pichon"})
+# ------ # ABM REGISTROS DE EVENTOS +  # ------ #
+# Sumar alguna manera de controlar quien produjo la falla
+@app.route("/sumarFalla", methods=["GET"])
+def sumarFalla():
+    return FallaController.sumarFalla()
 
 @app.route("/eventos", methods=["GET"])
 def obtenerEventos():

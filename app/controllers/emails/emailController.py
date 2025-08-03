@@ -81,16 +81,14 @@ class EmailController:
         contexto = (
             "Armame un email del estilo Phishing avisando a los empleados que hay una compra no reconocida. "
             "Que el cuerpo sea en formato html y tenga un botón 'Haz clic aquí' que te envíe a "
-            "'http://localhost:8080/registro'. Dame la respuesta en formato json con asunto y cuerpo asi mi codigo puede interpretarlo. "
+            "'http://localhost:8080/sumarFalla'. Dame la respuesta en formato json con asunto y cuerpo asi mi codigo puede interpretarlo. "
             "el json generado debe tener literalmente los nombres asunto y cuerpo, porque sino el codigo no lo puede interpretar"
         )
 
         try:
             # Llamada a Gemini para generar asunto y cuerpo
             texto_generado, _ = AIController.armarEmailGemini({"contexto": contexto})
-            logger.info(texto_generado)
             texto_generado = re.sub(r"```(?:json)?", "", texto_generado).strip()
-            logger.info(texto_generado)
             import json
             try:
                 email_generado = json.loads(texto_generado)
@@ -120,6 +118,7 @@ class EmailController:
                 response = enviarMailTwilio(asunto, cuerpo, destinatarios)
                 logger.success(f"Twilio sendgrid response: {response.status_code}")
             elif proveedor == "smtp":
+                logger.info("Espera un cachito que no lo hace al toque esto")
                 smtp = SMTPConnection("casarivadavia.ddns.net", "40587")
                 smtp.login("marcos", "linuxcasa")
                 message = smtp.compose_message(
