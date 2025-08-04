@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 
 from app.config.db_config import Base, engine
+from app.controllers.abm.areasController import AreasController
 from app.controllers.emails.aiController import AIController
 from app.controllers.llamadas.elevenLabsController import ElevenLabsController
 from app.controllers.emails.emailController import EmailController
@@ -33,6 +34,12 @@ def generarSTT():
 def generarLlamada():
     data = request.get_json()
     return LlamadasController.llamar(data)
+
+# ------ # AREAS # ------ #
+@app.route("/area", methods=["POST"])
+def crearArea():
+    data = request.get_json()
+    return AreasController.crearArea(data)
 
 # ------ # ABM REGISTROS DE EVENTOS +  # ------ #
 # Sumar alguna manera de controlar quien produjo la falla
@@ -90,3 +97,4 @@ def editarUsuario(idUsuario):
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
+
