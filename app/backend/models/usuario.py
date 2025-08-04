@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, Integer
+from sqlalchemy import Column, String, Boolean, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from app.config.db_config import Base
 
@@ -14,5 +14,8 @@ class Usuario(Base):
     telefono = Column(String, nullable=True)
     correo = Column(String, nullable=True)
     esAdministrador = Column(Boolean, nullable=True)
+    idArea = Column(Integer, ForeignKey('areas.idArea'), nullable=True)
+
+    area = relationship("Area", back_populates="usuarios")
 
     eventos = relationship("Evento", secondary="Usuario_Evento", back_populates="usuarios")
