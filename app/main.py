@@ -72,7 +72,7 @@ def enviarEmail():
 @app.route("/api/email/generar", methods=["POST"]) # Esta ruta llama a gemini y genera un asunto y texto en html
 def llamarIAGemini():
     data = request.get_json()
-    return AIController.armarEmailGemini(data)
+    return AIController.armarEmail(data)
 
 @app.route("/api/email/generar-enviar", methods=["POST"])
 def generarYEnviarEmail():

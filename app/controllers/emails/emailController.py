@@ -87,7 +87,7 @@ class EmailController:
 
         try:
             # Llamada a Gemini para generar asunto y cuerpo
-            texto_generado, _ = AIController.armarEmailGemini({"contexto": contexto})
+            texto_generado, _ = AIController.armarEmail({"contexto": contexto})
             texto_generado = re.sub(r"```(?:json)?", "", texto_generado).strip()
             import json
             try:
