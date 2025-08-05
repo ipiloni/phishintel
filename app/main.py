@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 
 from app.config.db_config import Base, engine
 from app.controllers.abm.areasController import AreasController
@@ -8,7 +8,6 @@ from app.controllers.emails.emailController import EmailController
 from app.controllers.abm.eventosController import EventosController
 from app.controllers.llamadas.llamadasController import LlamadasController
 from app.controllers.abm.usuariosController import UsuariosController
-from app.utils import logger
 from app.controllers.fallaController import FallaController
 # Flask es la libreria que vamos a usar para generar los Endpoints
 app = Flask(__name__)
@@ -36,10 +35,27 @@ def generarLlamada():
     return LlamadasController.llamar(data)
 
 # ------ # AREAS # ------ #
-@app.route("/area", methods=["POST"])
+@app.route("/areas", methods=["GET"])
+def obtenerAreas():
+    return AreasController.obtenerTodasLasAreas()
+
+@app.route("/areas", methods=["POST"])
 def crearArea():
     data = request.get_json()
     return AreasController.crearArea(data)
+
+@app.route("/areas/<idArea>", methods=["GET"])
+def obtenerArea(idArea):
+    return AreasController.obtenerArea(idArea)
+#
+# @app.route("/areas/<idArea>", methods=["DELETE"])
+# def eliminarArea(idArea):
+#     return AreasController.eliminarArea(idArea)
+#
+# @app.route("/areas/<idArea>", methods=["PUT"])
+# def editarArea(idArea):
+#     data = request.get_json()
+#     return AreasController.editarArea(idArea, data)
 
 # ------ # ABM REGISTROS DE EVENTOS +  # ------ #
 # Sumar alguna manera de controlar quien produjo la falla
@@ -75,7 +91,7 @@ def generarYEnviarEmail():
 # ------ # USUARIOS # ------ #
 @app.route("/usuarios", methods=["GET"])
 def obtenerUsuarios():
-    return UsuariosController.obtenerUsuarios()
+    return UsuariosController.obtenerTodosLosUsuarios()
 
 @app.route("/usuarios/<idUsuario>", methods=["GET"])
 def obtenerUsuario(idUsuario):

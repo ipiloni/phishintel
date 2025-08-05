@@ -17,7 +17,7 @@ class UsuariosController:
         return jsonify(usuario.get()), 200
 
     @staticmethod
-    def obtenerUsuarios():
+    def obtenerTodosLosUsuarios():
         session = SessionLocal()
         usuarios = session.query(Usuario)
         session.close()
