@@ -7,7 +7,10 @@ class RegistroEvento(Base):
 
     idRegistroEvento = Column(Integer, primary_key=True, autoincrement=True)
     idEvento = Column(Integer, ForeignKey("eventos.idEvento"), unique=True)
+    # Emails
     asunto = Column(String(255), nullable=True)
     cuerpo = Column(String(10000), nullable=True)
+    # SMS o Whatsapp
+    mensaje = Column(String(5000), nullable=True)
 
     evento = relationship("Evento", back_populates="registroEvento")
