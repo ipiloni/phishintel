@@ -7,6 +7,24 @@ from app.config.db_config import SessionLocal
 class AreasController:
 
     @staticmethod
+    def obtenerArea(idArea):
+        session = SessionLocal()
+        area = session.query(Area).filter_by(idArea=idArea).first()
+        session.close()
+        if area is None:
+            return responseError("AREA_NO_ENCONTRADA", "El area no existe", 404)
+
+        return jsonify(area.get()), 200
+
+    @staticmethod
+    def obtenerTodasLasAreas():
+        session = SessionLocal()
+        areas = session.query(Area)
+        session.close()
+        areasARetornar = [area.get() for area in areas]
+        return jsonify({"areas": areasARetornar}), 200
+
+    @staticmethod
     def crearArea(data):
 
         if not data or "nombreArea" not in data or "usuarios" not in data:
