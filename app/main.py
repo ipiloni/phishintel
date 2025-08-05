@@ -14,103 +14,118 @@ app = Flask(__name__)
 
 Base.metadata.create_all(engine)
 
-########## ENDPOINTS ##########
-# ------ # TEXT TO SPEECH # ------ #
-@app.route("/tts", methods=["POST"])
+# =================== ENDPOINTS =================== #
+
+# ------ # TRANSFORMADORES TTS Y STT # ------ #
+@app.route("/api/tts", methods=["POST"])
 def generarTTS():
     data = request.get_json()
     texto = data["texto"]
     return ElevenLabsController().generarTTS(texto)
 
-@app.route("/stt", methods=["POST"])
+@app.route("/api/stt", methods=["POST"])
 def generarSTT():
     data = request.get_json()
     ubicacion = data["ubicacion"]
     return ElevenLabsController().generarSTT(ubicacion)
 
+# ------ # MENSAJES # ------ #
+# @app.route("/api/mensajes/whatsapp", methods=["POST"])
+# def enviarMensajeWhatsapp():
+#     data = request.get_json()
+#     return MensajesController.enviarMensajeWhatsapp(data)
+#
+# @app.route("/api/mensajes/sms", methods=["POST"])
+# def enviarMensajeSMS():
+#     data = request.get_json()
+#     return MensajesController.enviarMensajeSMS(data)
+
 # ------ # LLAMADA # ------ #
-@app.route("/llamar", methods=["POST"])
+@app.route("/api/llamadas", methods=["POST"])
 def generarLlamada():
     data = request.get_json()
     return LlamadasController.llamar(data)
 
-# ------ # AREAS # ------ #
-@app.route("/areas", methods=["GET"])
-def obtenerAreas():
-    return AreasController.obtenerTodasLasAreas()
-
-@app.route("/areas", methods=["POST"])
-def crearArea():
-    data = request.get_json()
-    return AreasController.crearArea(data)
-
-@app.route("/areas/<idArea>", methods=["GET"])
-def obtenerArea(idArea):
-    return AreasController.obtenerArea(idArea)
-#
-# @app.route("/areas/<idArea>", methods=["DELETE"])
-# def eliminarArea(idArea):
-#     return AreasController.eliminarArea(idArea)
-#
-# @app.route("/areas/<idArea>", methods=["PUT"])
-# def editarArea(idArea):
-#     data = request.get_json()
-#     return AreasController.editarArea(idArea, data)
-
-# ------ # ABM REGISTROS DE EVENTOS +  # ------ #
+# ------ # REGISTROS DE EVENTOS +  # ------ #
 # Sumar alguna manera de controlar quien produjo la falla
-@app.route("/sumarFalla", methods=["GET"])
+@app.route("/api/sumar-falla", methods=["GET"])
 def sumarFalla():
     return FallaController.sumarFalla()
 
-@app.route("/eventos", methods=["GET"])
+@app.route("/api/eventos", methods=["GET"])
 def obtenerEventos():
     return EventosController.obtenerEventos()
 
-@app.route("/eventos", methods=["POST"])
+@app.route("/api/eventos", methods=["POST"])
 def crearEvento():
     data = request.get_json()
     return EventosController.crearEvento(data)
 
 # ------ # ENVIO DE EMAILS # ------ #
-@app.route("/email/enviarEmail", methods=["POST"]) # Esta ruta
+@app.route("/api/email/enviar", methods=["POST"]) # Esta ruta
 def enviarEmail():
     data = request.get_json()
     return EmailController.enviarMail(data)
 
-@app.route("/email/generarEmail", methods=["POST"]) # Esta ruta llama a gemini y genera un asunto y texto en html
+@app.route("/api/email/generar", methods=["POST"]) # Esta ruta llama a gemini y genera un asunto y texto en html
 def llamarIAGemini():
     data = request.get_json()
     return AIController.armarEmailGemini(data)
 
-@app.route("/email/generarYEnviarEmail", methods=["POST"])
+@app.route("/api/email/generar-enviar", methods=["POST"])
 def generarYEnviarEmail():
     data = request.get_json()
     return EmailController.generarYEnviarMail(data)
 
+# =================== ABM =================== #
+
 # ------ # USUARIOS # ------ #
-@app.route("/usuarios", methods=["GET"])
+@app.route("/api/usuarios", methods=["GET"])
 def obtenerUsuarios():
     return UsuariosController.obtenerTodosLosUsuarios()
 
-@app.route("/usuarios/<idUsuario>", methods=["GET"])
+@app.route("/api/usuarios/<idUsuario>", methods=["GET"])
 def obtenerUsuario(idUsuario):
     return UsuariosController.obtenerUsuario(idUsuario)
 
-@app.route("/usuarios", methods=["POST"])
+@app.route("/api/usuarios", methods=["POST"])
 def crearUsuario():
     data = request.get_json()
     return UsuariosController.crearUsuario(data)
 
-@app.route("/usuarios/<idUsuario>", methods=["DELETE"])
+@app.route("/api/usuarios/<idUsuario>", methods=["DELETE"])
 def eliminarUsuario(idUsuario):
     return UsuariosController.eliminarUsuario(idUsuario)
 
-@app.route("/usuarios/<idUsuario>", methods=["PUT"])
+@app.route("/api/usuarios/<idUsuario>", methods=["PUT"])
 def editarUsuario(idUsuario):
     data = request.get_json()
     return UsuariosController.editarUsuario(idUsuario, data)
 
+# ------ # AREAS # ------ #
+@app.route("/api/areas", methods=["GET"])
+def obtenerAreas():
+    return AreasController.obtenerTodasLasAreas()
+
+@app.route("/api/areas", methods=["POST"])
+def crearArea():
+    data = request.get_json()
+    return AreasController.crearArea(data)
+
+@app.route("/api/areas/<idArea>", methods=["GET"])
+def obtenerArea(idArea):
+    return AreasController.obtenerArea(idArea)
+#
+# @app.route("/api/areas/<idArea>", methods=["DELETE"])
+# def eliminarArea(idArea):
+#     return AreasController.eliminarArea(idArea)
+#
+# @app.route("/api/areas/<idArea>", methods=["PUT"])
+# def editarArea(idArea):
+#     data = request.get_json()
+#     return AreasController.editarArea(idArea, data)
+
+# =================== MAIN =================== #
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
-
+# =================== MAIN =================== #
