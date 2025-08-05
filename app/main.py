@@ -9,6 +9,8 @@ from app.controllers.abm.eventosController import EventosController
 from app.controllers.llamadas.llamadasController import LlamadasController
 from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.fallaController import FallaController
+from app.controllers.mensajes.mensajesController import MensajesController
+
 # Flask es la libreria que vamos a usar para generar los Endpoints
 app = Flask(__name__)
 
@@ -30,11 +32,11 @@ def generarSTT():
     return ElevenLabsController().generarSTT(ubicacion)
 
 # ------ # MENSAJES # ------ #
-# @app.route("/api/mensajes/whatsapp", methods=["POST"])
-# def enviarMensajeWhatsapp():
-#     data = request.get_json()
-#     return MensajesController.enviarMensajeWhatsapp(data)
-#
+@app.route("/api/mensajes/whatsapp", methods=["POST"])
+def enviarMensajeWhatsapp():
+    data = request.get_json()
+    return MensajesController.enviarMensajeWhatsapp(data)
+
 # @app.route("/api/mensajes/sms", methods=["POST"])
 # def enviarMensajeSMS():
 #     data = request.get_json()
