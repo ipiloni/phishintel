@@ -37,10 +37,10 @@ def enviarMensajeWhatsapp():
     data = request.get_json()
     return MensajesController.enviarMensajeWhatsapp(data)
 
-# @app.route("/api/mensajes/sms", methods=["POST"])
-# def enviarMensajeSMS():
-#     data = request.get_json()
-#     return MensajesController.enviarMensajeSMS(data)
+@app.route("/api/mensajes/sms", methods=["POST"])
+def enviarMensajeSMS():
+    data = request.get_json()
+    return MensajesController.enviarMensajeSMS(data)
 
 # ------ # LLAMADA # ------ #
 @app.route("/api/llamadas", methods=["POST"])
