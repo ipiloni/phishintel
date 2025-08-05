@@ -20,10 +20,29 @@ class MensajesController:
 
             message = client.messages.create(
                 body=data["mensaje"],
-                from_='whatsapp:' + data["remitente"],
+                from_='whatsapp:+14155238886',
+                # from_='whatsapp:' + data["remitente"], Comento esta linea porque no se si podremos probar otro remitente lol
                 to='whatsapp:' + data["destinatario"]
             )
 
-            return jsonify({"mensaje": f"Mensaje enviado con SID: {message.sid}"}), 201
+            return jsonify({"mensaje": f"Whatsapp enviado con SID: {message.sid}"}), 201
+        except Exception as e:
+            return responseError("ERROR_API", "Hubo un error al enviar mensaje por WhatsApp: " + str(e), 500)
+
+
+    @staticmethod
+    def enviarMensajeSMS(data):
+        if not data or "remitente" not in data or "destinatario" not in data or "mensaje" not in data:
+            return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios (remitente, destinatario o mensaje)'", 400)
+
+        try:
+            client = Client(account_sid, auth_token)
+            message = client.messages.create(
+                body=data["mensaje"],
+                from_='+19528009780',
+                to=data["destinatario"]
+            )
+
+            return jsonify({"mensaje": f"Mensaje SMS enviado con SID: {message.sid}"}), 201
         except Exception as e:
             return responseError("ERROR_API", "Hubo un error al enviar mensaje por WhatsApp: " + str(e), 500)
