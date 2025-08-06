@@ -17,10 +17,17 @@ class AIController:
             return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'contexto'", 400)
 
         contexto = data["contexto"]
+        formato = ""
+
+        if "formato" in data:
+            formato = "Quiero que el cuerpo del email sea en formato " + data["formato"]
 
         if "nivel" in data:
             if data["nivel"] not in [1, 2, 3]:
-                contexto = data["contexto"] + ". Imagina una escala de dificultad de la simulacion del 1 al 3, este email debe generarse con dificultad " + data["nivel"]
+                contexto = (
+                          "Armá un email del estilo Phishing. Necesito que la respuesta que me brindes sea sólamente asunto y cuerpo, en formato JSON. El contexto es el siguiente: "
+                        + data["contexto"]
+                        + ". Supone una escala de dificultad de la simulacion del 1 al 3, siendo 1 el más básico y 3 el más difícil o realista, este email debe generarse con dificultad " + data["nivel"])
             else:
                 return responseError("CAMPOS_OBLIGATORIOS", "El campo 'nivel' solo puede tener los valores 1, 2 o 3", 400)
 
@@ -28,7 +35,7 @@ class AIController:
 
         try:
             response = model.generate_content(
-                contexto
+                contexto + ". " + formato,
             )
             return response.text, 201
         except Exception as e:
