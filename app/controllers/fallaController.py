@@ -1,7 +1,8 @@
-#TODO
-
 from flask import jsonify
 from app.backend.models.error import responseError
+from app.backend.models.resultadoEvento import ResultadoEvento
+from app.backend.models.usuarioxevento import UsuarioxEvento
+from app.config.db_config import SessionLocal
 
 # Variable global para contar fallas
 conteo_fallas = {"total": 0}
@@ -9,9 +10,27 @@ conteo_fallas = {"total": 0}
 class FallaController:
 
     @staticmethod
-    def sumarFalla():
+    def sumarFalla(id_usuario, id_evento):
+        session = SessionLocal()
         try:
-            conteo_fallas["total"] += 1
-            return jsonify({"mensaje": "Falla registrada", "total": conteo_fallas["total"]}), 200
+            # Buscar relación usuario-evento
+            usuario_evento = session.query(UsuarioxEvento).filter_by(
+                idUsuario=id_usuario,
+                idEvento=id_evento
+            ).first()
+
+            if not usuario_evento:
+                session.close()
+                return responseError("RELACION_NO_ENCONTRADA", "No existe relación entre el usuario y el evento", 404)
+
+            # Actualizar a FALLA
+            usuario_evento.resultado = ResultadoEvento.FALLA
+            session.commit()
+
+            return jsonify({"mensaje": "Falla registrada", "idUsuario": id_usuario, "idEvento": id_evento}), 200
+
         except Exception as e:
+            session.rollback()
             return responseError("ERROR", f"No se pudo registrar la falla: {str(e)}", 500)
+        finally:
+            session.close()

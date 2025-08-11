@@ -7,22 +7,49 @@ from app.utils.hash import hash_password
 class UsuariosController:
 
     @staticmethod
+    def _serialize_usuario(usuario, exclude=None):
+        import datetime, enum
+        exclude = set(exclude or [])
+        data = {}
+        for col in usuario.__table__.columns:
+            name = col.name
+            if name in exclude:
+                continue
+            val = getattr(usuario, name)
+            if val is None:
+                data[name] = None
+            elif isinstance(val, enum.Enum):
+                data[name] = val.value
+            elif isinstance(val, (datetime.date, datetime.datetime)):
+                data[name] = val.isoformat()
+            else:
+                data[name] = val
+        return data
+
+    @staticmethod
     def obtenerUsuario(idUsuario):
         session = SessionLocal()
-        usuario = session.query(Usuario).filter_by(idUsuario=idUsuario).first()
-        session.close()
-        if usuario is None:
-            return responseError("USUARIO_NO_ENCONTRADO", "El usuario no existe", 404)
+        try:
+            usuario = session.query(Usuario).filter_by(idUsuario=idUsuario).first()
+            if usuario is None:
+                return responseError("USUARIO_NO_ENCONTRADO", "El usuario no existe", 404)
 
-        return jsonify(usuario.get()), 200
+            usuario_dict = UsuariosController._serialize_usuario(usuario, exclude=["password"])
+            return jsonify(usuario_dict), 200
+        finally:
+            session.close()
 
     @staticmethod
     def obtenerTodosLosUsuarios():
         session = SessionLocal()
-        usuarios = session.query(Usuario)
-        session.close()
-        usuariosARetornar = [usuario.get() for usuario in usuarios]
-        return jsonify({"usuarios": usuariosARetornar}), 200
+        try:
+            usuarios = session.query(Usuario).all()  # <- .all() para traer la lista antes de cerrar la sesión
+            usuariosARetornar = [
+                UsuariosController._serialize_usuario(u, exclude=["password"]) for u in usuarios
+            ]
+            return jsonify({"usuarios": usuariosARetornar}), 200
+        finally:
+            session.close()
 
     @staticmethod
     def crearUsuario(data):

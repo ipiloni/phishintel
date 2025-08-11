@@ -1,5 +1,6 @@
 from flask import Flask, request
 
+from app.backend.models.error import responseError
 from app.config.db_config import Base, engine
 from app.controllers.abm.areasController import AreasController
 from app.controllers.emails.aiController import AIController
@@ -49,10 +50,13 @@ def generarLlamada():
     return LlamadasController.llamar(data)
 
 # ------ # REGISTROS DE EVENTOS +  # ------ #
-# Sumar alguna manera de controlar quien produjo la falla
 @app.route("/api/sumar-falla", methods=["GET"])
 def sumarFalla():
-    return FallaController.sumarFalla()
+    id_usuario = request.args.get("idUsuario", type=int)
+    id_evento = request.args.get("idEvento", type=int)
+    if not id_usuario or not id_evento:
+        return responseError("CAMPOS_OBLIGATORIOS", "Faltan parámetros 'idUsuario' e 'idEvento'", 400)
+    return FallaController.sumarFalla(id_usuario, id_evento)
 
 @app.route("/api/eventos", methods=["GET"])
 def obtenerEventos():
