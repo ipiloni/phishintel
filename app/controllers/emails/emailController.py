@@ -2,11 +2,12 @@ import datetime
 import re
 
 from flask import jsonify
-from app.backend.models import RegistroEvento
+from app.backend.models import RegistroEvento, Usuario
 from app.backend.models.error import responseError
 from app.backend.models.evento import Evento
 from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.tipoEvento import TipoEvento
+from app.backend.models.usuarioxevento import UsuarioxEvento
 from app.config.db_config import SessionLocal
 from app.backend.apis.twilio.sendgrid import enviarMail as enviarMailTwilio
 from app.backend.apis.smtp.smtpconnection import SMTPConnection
@@ -71,60 +72,81 @@ class EmailController:
 
     @staticmethod
     def generarYEnviarMail(data):
-        if not data or "proveedor" not in data or "destinatarios" not in data or "remitente" not in data:
-            return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios como 'proveedor', 'destinatarios' o 'remitente'", 400)
+        if not data or "proveedor" not in data or "idUsuario" not in data or "remitente" not in data:
+            return responseError("CAMPOS_OBLIGATORIOS",
+                                 "Faltan campos obligatorios como 'proveedor', 'idUsuario' o 'remitente'", 400)
 
         proveedor = data["proveedor"]
-        destinatarios = data["destinatarios"]
+        id_usuario = data["idUsuario"]
         remitente = data["remitente"]
 
-        contexto = (
-            "Armame un email del estilo Phishing avisando a los empleados que hay una compra no reconocida. "
-            "Que el cuerpo sea en formato html y tenga un botón 'Haz clic aquí' que te envíe a "
-            "'http://localhost:8080/sumarFalla'. Dame la respuesta en formato json con asunto y cuerpo asi mi codigo puede interpretarlo. "
-            "el json generado debe tener literalmente los nombres asunto y cuerpo, porque sino el codigo no lo puede interpretar"
-        )
-
+        session = SessionLocal()
         try:
-            # Llamada a Gemini para generar asunto y cuerpo
+            # Buscar el usuario para obtener su email
+            usuario = session.query(Usuario).filter_by(idUsuario=id_usuario).first()
+            if not usuario or not usuario.correo:
+                session.close()
+                return responseError("USUARIO_NO_ENCONTRADO", "No se encontró el usuario o no tiene correo registrado",
+                                     404)
+
+            # Creamos el evento
+            registroEvento = RegistroEvento()
+            evento = Evento(
+                tipoEvento=TipoEvento.CORREO,
+                fechaEvento=datetime.datetime.now(),
+                registroEvento=registroEvento
+            )
+            session.add(evento)
+            session.commit()  # Para obtener idEvento
+
+            # Creamos registro en usuariosxeventos
+            usuario_evento = UsuarioxEvento(
+                idUsuario=id_usuario,
+                idEvento=evento.idEvento,
+                resultado=ResultadoEvento.PENDIENTE
+            )
+            session.add(usuario_evento)
+            session.commit()
+
+            # Contexto para IA con enlace personalizado
+            link_falla = f"http://localhost:8080/api/sumar-falla?idUsuario={id_usuario}&idEvento={evento.idEvento}"
+            contexto = (
+                "Armame un email del estilo Phishing avisando que hay una compra no reconocida. "
+                f"El cuerpo debe ser HTML con un botón 'Haz clic aquí' que apunte a '{link_falla}'. "
+                "Devuelve en formato JSON con las claves 'asunto' y 'cuerpo'."
+            )
+
+            # Llamada a Gemini
             texto_generado, _ = AIController.armarEmail({"contexto": contexto})
             texto_generado = re.sub(r"```(?:json)?", "", texto_generado).strip()
+
             import json
             try:
                 email_generado = json.loads(texto_generado)
                 asunto = email_generado.get("asunto")
                 cuerpo = email_generado.get("cuerpo")
             except Exception:
-                return responseError("ERROR_JSON", "La respuesta de Gemini no es un JSON válido con 'asunto' y 'cuerpo'", 500)
+                session.rollback()
+                session.close()
+                return responseError("ERROR_JSON",
+                                     "La respuesta de Gemini no es un JSON válido con 'asunto' y 'cuerpo'", 500)
 
-            if not asunto or not cuerpo:
-                return responseError("ERROR_DATOS_GENERADOS", "No se pudo extraer asunto o cuerpo del contenido generado", 500)
-
-            # Guardar en DB
-            registroEvento = RegistroEvento(asunto=asunto, cuerpo=cuerpo)
-            evento = Evento(
-                tipoEvento=TipoEvento.CORREO,
-                fechaEvento=datetime.datetime.now(),
-                resultado=ResultadoEvento.PENDIENTE,
-                registroEvento=registroEvento
-            )
-
-            session = SessionLocal()
-            session.add(evento)
+            # Guardar asunto y cuerpo en registroEvento
+            registroEvento.asunto = asunto
+            registroEvento.cuerpo = cuerpo
             session.commit()
 
-            # Envío según proveedor
+            # Enviar el email
             if proveedor == "twilio":
-                response = enviarMailTwilio(asunto, cuerpo, destinatarios)
+                response = enviarMailTwilio(asunto, cuerpo, usuario.correo)
                 logger.success(f"Twilio sendgrid response: {response.status_code}")
             elif proveedor == "smtp":
-                logger.info("Espera un cachito que no lo hace al toque esto")
                 smtp = SMTPConnection("casarivadavia.ddns.net", "40587")
                 smtp.login("marcos", "linuxcasa")
                 message = smtp.compose_message(
                     sender=remitente,
                     name="Administración PhishIntel",
-                    recipients=destinatarios,
+                    recipients=[usuario.correo],
                     subject=asunto,
                     html=cuerpo
                 )
@@ -133,8 +155,9 @@ class EmailController:
                 session.rollback()
                 return responseError("PROVEEDOR_INVALIDO", "Proveedor de correo no reconocido", 400)
 
+            idnuevo = evento.idEvento
             session.close()
-            return jsonify({"mensaje": "Email generado y enviado correctamente"}), 201
+            return jsonify({"mensaje": "Email generado y enviado correctamente", "idEvento": idnuevo}), 201
 
         except Exception as e:
             session.rollback()

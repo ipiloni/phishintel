@@ -18,4 +18,5 @@ class Usuario(Base):
 
     area = relationship("Area", back_populates="usuarios")
 
-    eventos = relationship("Evento", secondary="Usuario_Evento", back_populates="usuarios")
+    # Relación con eventos a través de UsuarioxEvento
+    eventosAsociados = relationship("UsuarioxEvento", back_populates="usuario")
