@@ -10,13 +10,13 @@ conteo_fallas = {"total": 0}
 class FallaController:
 
     @staticmethod
-    def sumarFalla(id_usuario, id_evento):
+    def sumarFalla(idUsuario, idEvento):
         session = SessionLocal()
         try:
             # Buscar relación usuario-evento
             usuario_evento = session.query(UsuarioxEvento).filter_by(
-                idUsuario=id_usuario,
-                idEvento=id_evento
+                idUsuario=idUsuario,
+                idEvento=idEvento
             ).first()
 
             if not usuario_evento:
@@ -27,7 +27,7 @@ class FallaController:
             usuario_evento.resultado = ResultadoEvento.FALLA
             session.commit()
 
-            return jsonify({"mensaje": "Falla registrada", "idUsuario": id_usuario, "idEvento": id_evento}), 200
+            return jsonify({"mensaje": "Falla registrada", "idUsuario": idUsuario, "idEvento": idEvento}), 200
 
         except Exception as e:
             session.rollback()
