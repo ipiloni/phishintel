@@ -52,11 +52,11 @@ def generarLlamada():
 # ------ # REGISTROS DE EVENTOS +  # ------ #
 @app.route("/api/sumar-falla", methods=["GET"])
 def sumarFalla():
-    id_usuario = request.args.get("idUsuario", type=int)
-    id_evento = request.args.get("idEvento", type=int)
-    if not id_usuario or not id_evento:
+    idUsuario = request.args.get("idUsuario", type=int)
+    idEvento = request.args.get("idEvento", type=int)
+    if not idUsuario or not idEvento:
         return responseError("CAMPOS_OBLIGATORIOS", "Faltan parámetros 'idUsuario' e 'idEvento'", 400)
-    return FallaController.sumarFalla(id_usuario, id_evento)
+    return FallaController.sumarFalla(idUsuario, idEvento)
 
 @app.route("/api/eventos", methods=["GET"])
 def obtenerEventos():
