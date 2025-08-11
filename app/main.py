@@ -62,10 +62,31 @@ def sumarFalla():
 def obtenerEventos():
     return EventosController.obtenerEventos()
 
+@app.route("/api/eventos/<int:idEvento>", methods=["GET"])
+def obtenerEventoPorId(idEvento):
+    return EventosController.obtenerEventoPorId(idEvento)
+
 @app.route("/api/eventos", methods=["POST"])
 def crearEvento():
     data = request.get_json()
     return EventosController.crearEvento(data)
+
+@app.route("/api/eventos/<int:idEvento>", methods=["PUT"])
+def editarEvento(idEvento):
+    data = request.get_json()
+    return EventosController.editarEvento(idEvento, data)
+
+@app.route("/api/eventos/<int:idEvento>/usuario/<int:idUsuario>", methods=["POST"])
+def asociarUsuarioEvento(idEvento, idUsuario):
+    data = request.get_json()
+    resultado_val = data.get("resultado")
+    if not resultado_val:
+        return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo 'resultado'", 400)
+    return EventosController.asociarUsuarioEvento(idEvento, idUsuario, resultado_val)
+
+@app.route("/api/eventos/<int:idEvento>", methods=["DELETE"])
+def eliminarEvento(idEvento):
+    return EventosController.eliminarEvento(idEvento)
 
 # ------ # ENVIO DE EMAILS # ------ #
 @app.route("/api/email/enviar", methods=["POST"]) # Esta ruta

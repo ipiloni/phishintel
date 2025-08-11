@@ -1,6 +1,6 @@
-from flask import jsonify
+from flask import jsonify, request
 from sqlalchemy.orm import joinedload
-from app.backend.models import Evento, RegistroEvento
+from app.backend.models import Evento, RegistroEvento, UsuarioxEvento, Usuario
 from app.backend.models.error import responseError
 from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.tipoEvento import TipoEvento
@@ -15,81 +15,99 @@ class EventosController:
         try:
             eventos = session.query(Evento).options(
                 joinedload(Evento.registroEvento),
-                joinedload(Evento.usuarios)
+                joinedload(Evento.usuariosAsociados).joinedload(UsuarioxEvento.usuario)
             ).all()
 
-            eventos_a_retornar = [{
-                "idEvento": evento.idEvento,
-                "tipoEvento": evento.tipoEvento.value,
-                "fechaEvento": evento.fechaEvento.isoformat(),
-                "resultado": evento.resultado.value,
-                "registroEvento": {
-                    "idRegistroEvento": evento.registroEvento.idRegistroEvento,
-                    "asunto": evento.registroEvento.asunto,
-                    "cuerpo": evento.registroEvento.cuerpo
-                } if evento.registroEvento else None,
-                "usuarios": [usuario.idUsuario for usuario in evento.usuarios]
-            } for evento in eventos]
+            eventos_a_retornar = []
+            for evento in eventos:
+                usuarios_info = []
+                for ux in evento.usuariosAsociados:
+                    usuarios_info.append({
+                        "idUsuario": ux.usuario.idUsuario,
+                        "nombreUsuario": ux.usuario.nombreUsuario,
+                        "resultado": ux.resultado.value
+                    })
+
+                eventos_a_retornar.append({
+                    "idEvento": evento.idEvento,
+                    "tipoEvento": evento.tipoEvento.value,
+                    "fechaEvento": evento.fechaEvento.isoformat(),
+                    "registroEvento": {
+                        "idRegistroEvento": evento.registroEvento.idRegistroEvento,
+                        "asunto": evento.registroEvento.asunto,
+                        "cuerpo": evento.registroEvento.cuerpo
+                    } if evento.registroEvento else None,
+                    "usuarios": usuarios_info
+                })
 
             return jsonify({"eventos": eventos_a_retornar}), 200
         finally:
             session.close()
 
-
-class EventosController:
 
     @staticmethod
-    def obtenerEventos():
+    def obtenerEventoPorId(idEvento):
         session = SessionLocal()
         try:
-            eventos = session.query(Evento).options(
+            evento = session.query(Evento).options(
                 joinedload(Evento.registroEvento),
-                joinedload(Evento.usuarios)
-            ).all()
+                joinedload(Evento.usuariosAsociados).joinedload(UsuarioxEvento.usuario)
+            ).filter_by(idEvento=idEvento).first()
 
-            eventos_a_retornar = [{
+            if not evento:
+                return responseError("EVENTO_NO_ENCONTRADO", "No se encontró el evento", 404)
+
+            usuarios_info = []
+            for ux in evento.usuariosAsociados:
+                usuarios_info.append({
+                    "idUsuario": ux.usuario.idUsuario,
+                    "nombreUsuario": ux.usuario.nombreUsuario,
+                    "resultado": ux.resultado.value
+                })
+
+            evento_info = {
                 "idEvento": evento.idEvento,
                 "tipoEvento": evento.tipoEvento.value,
                 "fechaEvento": evento.fechaEvento.isoformat(),
-                "resultado": evento.resultado.value,
                 "registroEvento": {
                     "idRegistroEvento": evento.registroEvento.idRegistroEvento,
                     "asunto": evento.registroEvento.asunto,
                     "cuerpo": evento.registroEvento.cuerpo
                 } if evento.registroEvento else None,
-                "usuarios": [usuario.idUsuario for usuario in evento.usuarios]
-            } for evento in eventos]
+                "usuarios": usuarios_info
+            }
 
-            return jsonify({"eventos": eventos_a_retornar}), 200
+            return jsonify(evento_info), 200
         finally:
             session.close()
+
 
     @staticmethod
     def crearEvento(data):
-        if not data or "tipoEvento" not in data or "fechaEvento" not in data or "resultado" not in data:
+        if not data or "tipoEvento" not in data or "fechaEvento" not in data:
             return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios para crear el evento", 400)
 
         try:
-            tipo_evento = data["tipoEvento"]
-            if tipo_evento not in [e.value for e in TipoEvento]:
+            tipo_evento_val = data["tipoEvento"]
+            if tipo_evento_val not in [e.value for e in TipoEvento]:
                 return responseError("TIPO_EVENTO_INVALIDO", "El tipo de evento no es válido", 400)
 
-            resultado = data["resultado"]
-            if resultado not in [r.value for r in ResultadoEvento]:
-                return responseError("RESULTADO_INVALIDO", "El resultado del evento no es válido", 400)
-
+            fecha_evento_str = data["fechaEvento"]
             try:
-                fecha_evento = datetime.fromisoformat(data["fechaEvento"])
+                fecha_evento = datetime.fromisoformat(fecha_evento_str)
             except ValueError:
                 return responseError("FECHA_INVALIDA", "El formato de la fecha no es válido", 400)
 
+            resultado_val = data.get("resultado")
+            if resultado_val:
+                if resultado_val not in [r.value for r in ResultadoEvento]:
+                    return responseError("RESULTADO_INVALIDO", "El resultado del evento no es válido", 400)
+
             session = SessionLocal()
 
-            # Create new event
             nuevo_evento = Evento(
-                tipoEvento=tipo_evento,
-                fechaEvento=fecha_evento,
-                resultado=resultado
+                tipoEvento=tipo_evento_val,
+                fechaEvento=fecha_evento
             )
 
             if "registroEvento" in data:
@@ -104,10 +122,142 @@ class EventosController:
             session.add(nuevo_evento)
             session.commit()
             session.refresh(nuevo_evento)
-            session.close()
 
-            return jsonify({"mensaje": "Evento creado correctamente", "idEvento": nuevo_evento.idEvento}), 201
+            # Si se pasa resultado y idUsuario para asociar, creamos esa relación
+            if resultado_val and "idUsuario" in data:
+                id_usuario = data["idUsuario"]
+                usuario = session.query(Usuario).filter_by(idUsuario=id_usuario).first()
+                if not usuario:
+                    session.rollback()
+                    session.close()
+                    return responseError("USUARIO_NO_ENCONTRADO", "No se encontró el usuario para asociar", 404)
+
+                usuario_evento = UsuarioxEvento(
+                    idUsuario=id_usuario,
+                    idEvento=nuevo_evento.idEvento,
+                    resultado=ResultadoEvento(resultado_val)
+                )
+                session.add(usuario_evento)
+                session.commit()
+
+            idevento = nuevo_evento.idEvento
+            session.close()
+            return jsonify({"mensaje": "Evento creado correctamente", "idEvento": idevento}), 201
 
         except Exception as e:
             session.close()
             return responseError("ERROR_CREACION_EVENTO", f"Error al crear el evento: {str(e)}", 500)
+
+
+    @staticmethod
+    def editarEvento(idEvento, data):
+        if not data:
+            return responseError("DATOS_VACIOS", "No se enviaron datos para modificar", 400)
+
+        session = SessionLocal()
+        try:
+            evento = session.query(Evento).filter_by(idEvento=idEvento).first()
+            if not evento:
+                return responseError("EVENTO_NO_ENCONTRADO", "No se encontró el evento a modificar", 404)
+
+            if "tipoEvento" in data:
+                tipo_evento_val = data["tipoEvento"]
+                if tipo_evento_val not in [e.value for e in TipoEvento]:
+                    return responseError("TIPO_EVENTO_INVALIDO", "El tipo de evento no es válido", 400)
+                evento.tipoEvento = tipo_evento_val
+
+            if "fechaEvento" in data:
+                try:
+                    evento.fechaEvento = datetime.fromisoformat(data["fechaEvento"])
+                except ValueError:
+                    return responseError("FECHA_INVALIDA", "El formato de la fecha no es válido", 400)
+
+            if "resultado" in data:
+                resultado_val = data["resultado"]
+                if resultado_val not in [r.value for r in ResultadoEvento]:
+                    return responseError("RESULTADO_INVALIDO", "El resultado del evento no es válido", 400)
+                evento.resultado = resultado_val
+
+            if "registroEvento" in data:
+                registro_evento_data = data["registroEvento"]
+                if evento.registroEvento is None:
+                    evento.registroEvento = RegistroEvento()
+                if "asunto" in registro_evento_data:
+                    evento.registroEvento.asunto = registro_evento_data["asunto"]
+                if "cuerpo" in registro_evento_data:
+                    evento.registroEvento.cuerpo = registro_evento_data["cuerpo"]
+
+            session.commit()
+            session.close()
+            return jsonify({"mensaje": "Evento modificado correctamente"}), 200
+
+        except Exception as e:
+            session.close()
+            return responseError("ERROR_MODIFICACION_EVENTO", f"Error al modificar el evento: {str(e)}", 500)
+
+
+    @staticmethod
+    def asociarUsuarioEvento(idEvento, idUsuario, resultado_val):
+        if resultado_val not in [r.value for r in ResultadoEvento]:
+            return responseError("RESULTADO_INVALIDO", "El resultado del evento no es válido", 400)
+
+        session = SessionLocal()
+        try:
+            evento = session.query(Evento).filter_by(idEvento=idEvento).first()
+            if not evento:
+                return responseError("EVENTO_NO_ENCONTRADO", "No se encontró el evento", 404)
+
+            usuario = session.query(Usuario).filter_by(idUsuario=idUsuario).first()
+            if not usuario:
+                return responseError("USUARIO_NO_ENCONTRADO", "No se encontró el usuario", 404)
+
+            # Verificar si la asociación ya existe
+            usuario_evento = session.query(UsuarioxEvento).filter_by(
+                idEvento=idEvento,
+                idUsuario=idUsuario
+            ).first()
+
+            if usuario_evento:
+                usuario_evento.resultado = ResultadoEvento(resultado_val)
+            else:
+                usuario_evento = UsuarioxEvento(
+                    idEvento=idEvento,
+                    idUsuario=idUsuario,
+                    resultado=ResultadoEvento(resultado_val)
+                )
+                session.add(usuario_evento)
+
+            session.commit()
+            session.close()
+            return jsonify({"mensaje": "Usuario asociado al evento correctamente"}), 200
+
+        except Exception as e:
+            session.close()
+            return responseError("ERROR_ASOCIAR_USUARIO_EVENTO", f"Error al asociar usuario al evento: {str(e)}", 500)
+
+
+    @staticmethod
+    def eliminarEvento(idEvento):
+        session = SessionLocal()
+        try:
+            evento = session.query(Evento).filter_by(idEvento=idEvento).first()
+
+            if not evento:
+                return responseError("EVENTO_NO_ENCONTRADO", "El evento no existe", 404)
+
+            # Borrar asociaciones usuarioxevento
+            session.query(UsuarioxEvento).filter_by(idEvento=idEvento).delete()
+
+            # Opcional: borrar registroEvento asociado si existe
+            if evento.registroEvento:
+                session.delete(evento.registroEvento)
+
+            # Borrar evento
+            session.delete(evento)
+            session.commit()
+            return jsonify({"mensaje": "Evento eliminado correctamente"}), 200
+        except Exception as e:
+            session.rollback()
+            return responseError("ERROR", f"No se pudo eliminar el evento: {str(e)}", 500)
+        finally:
+            session.close()

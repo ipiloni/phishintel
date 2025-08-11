@@ -1,5 +1,5 @@
 from flask import jsonify
-from app.backend.models import Usuario
+from app.backend.models import Usuario, UsuarioxEvento
 from app.backend.models.error import responseError
 from app.config.db_config import SessionLocal
 from app.utils.hash import hash_password
@@ -87,18 +87,24 @@ class UsuariosController:
     @staticmethod
     def eliminarUsuario(idUsuario):
         session = SessionLocal()
+        try:
+            usuario = session.query(Usuario).filter_by(idUsuario=idUsuario).first()
 
-        usuario = session.query(Usuario).filter_by(idUsuario=idUsuario).first()
+            if not usuario:
+                return responseError("USUARIO_NO_ENCONTRADO", "El usuario no existe", 404)
 
-        if not usuario:
+            # Borrar asociaciones usuarioxevento
+            session.query(UsuarioxEvento).filter_by(idUsuario=idUsuario).delete()
+
+            # Borrar usuario
+            session.delete(usuario)
+            session.commit()
+            return jsonify({"mensaje": "Usuario eliminado correctamente"}), 200
+        except Exception as e:
+            session.rollback()
+            return responseError("ERROR", f"No se pudo eliminar el usuario: {str(e)}", 500)
+        finally:
             session.close()
-            return responseError("USUARIO_NO_ENCONTRADO", "El usuario no existe", 404)
-
-        session.delete(usuario)
-        session.commit()
-        session.close()
-
-        return jsonify({"mensaje": "Usuario eliminado correctamente"}), 200
 
     @staticmethod
     def editarUsuario(idUsuario, data):
