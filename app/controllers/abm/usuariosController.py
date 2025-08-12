@@ -1,5 +1,6 @@
 from flask import jsonify
 from app.backend.models import Usuario, UsuarioxEvento
+from app.backend.models.area import Area
 from app.backend.models.error import responseError
 from app.config.db_config import SessionLocal
 from app.utils.hash import hash_password
@@ -130,6 +131,8 @@ class UsuariosController:
             usuario.correo = data["correo"]
         if "esAdministrador" in data:
             usuario.esAdministrador = data["esAdministrador"]
+        if "idArea" in data:
+            usuario.idArea = data["idArea"]
 
         session.commit()
         session.close()

@@ -3,6 +3,8 @@ from app.backend.models.error import responseError
 
 class LlamadasController:
 
+    # TODO: Esto deberemos hacerlo cuando podamos llamar!!!
+
     @staticmethod
     def llamar(data):
         if not data or "destinatario" not in data or "remitente" not in data:
