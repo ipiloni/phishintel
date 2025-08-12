@@ -10,11 +10,13 @@ class AreasController:
     def obtenerArea(idArea):
         session = SessionLocal()
         area = session.query(Area).filter_by(idArea=idArea).first()
-        session.close()
+
         if area is None:
             return responseError("AREA_NO_ENCONTRADA", "El area no existe", 404)
 
-        return jsonify(area.get()), 200
+        json = jsonify(area.get()), 200
+        session.close()
+        return json
 
     @staticmethod
     def obtenerTodasLasAreas():
@@ -70,3 +72,28 @@ class AreasController:
 
         finally:
             session.close()
+
+    @staticmethod
+    def eliminarArea(idArea):
+        session = SessionLocal()
+        try:
+            area = session.query(Area).filter_by(idArea=idArea).first()
+
+            if not area:
+                return responseError("AREA_NO_ENCONTRADA", "El area no existe", 404)
+
+            # Desasignar usuarios de esta área
+            for usuario in area.usuarios:
+                usuario.area = None  # Esto setea idArea a NULL
+
+            session.commit()
+
+            # Ahora eliminar el área
+            session.delete(area)
+            session.commit()
+            return jsonify({"mensaje": "Area eliminada correctamente"}), 200
+        except Exception as e:
+            session.rollback()
+            return responseError("ERROR", f"No se pudo eliminar el area: {str(e)}", 500)
+        finally:
+      

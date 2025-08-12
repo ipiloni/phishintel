@@ -9,7 +9,7 @@ class Area(Base):
     idArea = Column(Integer, primary_key=True, autoincrement=True)
     nombreArea = Column(String, nullable=False)
     datosDelArea = Column(JSON, nullable=True, default=list)
-    usuarios = relationship("Usuario", back_populates="area", cascade="all, delete-orphan")
+    usuarios = relationship("Usuario", back_populates="area", cascade="all")
 
     def agregarUsuario(self, usuario):
         if usuario not in self.usuarios:
@@ -30,3 +30,10 @@ class Area(Base):
         if self.datosDelArea and dato in self.datosDelArea:
             self.datosDelArea.remove(dato)
 
+    def get(self):
+        return {
+            "idArea": self.idArea,
+            "nombreArea": self.nombreArea,
+            "datosDelArea": self.datosDelArea,
+            "usuarios": [usuario.get() for usuario in self.usuarios]
+        }

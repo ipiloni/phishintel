@@ -20,3 +20,15 @@ class Usuario(Base):
 
     # Relación con eventos a través de UsuarioxEvento
     eventosAsociados = relationship("UsuarioxEvento", back_populates="usuario")
+
+    def get(self):
+        return {
+            "idUsuario": self.idUsuario,
+            "nombreUsuario": self.nombreUsuario,
+            "nombre": self.nombre,
+            "apellido": self.apellido,
+            "correo": self.correo,
+            "telefono": self.telefono,
+            "esAdministrador": self.esAdministrador,
+            "idArea": self.idArea
+        }

@@ -54,7 +54,7 @@ def sumarFalla():
     idUsuario = request.args.get("idUsuario", type=int)
     idEvento = request.args.get("idEvento", type=int)
     if not idUsuario or not idEvento:
-        return responseError("CAMPOS_OBLIGATORIOS", "Faltan parámetros 'idUsuario' e 'idEvento'", 400)
+        return responseError("CAMPOS_OBLIGATORIOS", "Faltan parámetros 'idUsuario' o 'idEvento'", 400)
     return FallaController.sumarFalla(idUsuario, idEvento)
 
 @app.route("/api/eventos", methods=["GET"])
@@ -141,15 +141,15 @@ def crearArea():
 @app.route("/api/areas/<idArea>", methods=["GET"])
 def obtenerArea(idArea):
     return AreasController.obtenerArea(idArea)
-#
-# @app.route("/api/areas/<idArea>", methods=["DELETE"])
-# def eliminarArea(idArea):
-#     return AreasController.eliminarArea(idArea)
-#
-# @app.route("/api/areas/<idArea>", methods=["PUT"])
-# def editarArea(idArea):
-#     data = request.get_json()
-#     return AreasController.editarArea(idArea, data)
+
+@app.route("/api/areas/<idArea>", methods=["DELETE"])
+def eliminarArea(idArea):
+   return AreasController.eliminarArea(idArea)
+
+@app.route("/api/areas/<idArea>", methods=["PUT"])
+def editarArea(idArea):
+    data = request.get_json()
+    return AreasController.editarArea(idArea, data)
 
 # =================== MAIN =================== #
 if __name__ == "__main__":
