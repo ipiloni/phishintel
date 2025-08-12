@@ -25,7 +25,7 @@ class AIController:
         if "nivel" in data:
             if data["nivel"] not in [1, 2, 3]:
                 contexto = (
-                          "Armá un email del estilo Phishing. Necesito que la respuesta que me brindes sea sólamente asunto y cuerpo, en formato JSON. El contexto es el siguiente: "
+                          "Armá un email del estilo Phishing. Necesito que la respuesta que me brindes sea sólamente 'asunto' y 'cuerpo', en formato JSON. El contexto es el siguiente: "
                         + data["contexto"]
                         + ". Supone una escala de dificultad de la simulacion del 1 al 3, siendo 1 el más básico y 3 el más difícil o realista, este email debe generarse con dificultad " + data["nivel"])
             else:

@@ -6,8 +6,7 @@ class ElevenLabsController:
     @staticmethod
     def generarTTS(data):
         log.info("Se recibio una solicitud para generar TTS: ", data)
-        texto = data["texto"]
-        ttsElevenLabs = elevenLabs.tts(texto)
+        ttsElevenLabs = elevenLabs.tts(data)
         log.info("Finalizo la solicitud")
         return ttsElevenLabs
 
