@@ -23,8 +23,7 @@ Base.metadata.create_all(engine)
 @app.route("/api/tts", methods=["POST"])
 def generarTTS():
     data = request.get_json()
-    texto = data["texto"]
-    return ElevenLabsController().generarTTS(texto)
+    return ElevenLabsController().generarTTS(data)
 
 @app.route("/api/stt", methods=["POST"])
 def generarSTT():
