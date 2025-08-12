@@ -53,10 +53,31 @@ def stt(ubicacion):
 def tts(data):
     texto = data["texto"]
     idVoz = data["idVoz"]
+    estabilidad = data["estabilidad"]
+    velocidad = data["velocidad"].strip().lower()
 
     if idVoz is None:
         log.warning("No se ha elegido un id de Voz, se utilizara la predeterminada.")
-        idVoz = "9rvdnhrYoXoUt4igKpBw"
+        idVoz = "O1CnH2NGEehfL1nmYACp"
+
+    if estabilidad is not None and (estabilidad < 0.0 or estabilidad > 1.0):
+        log.error("La estabilidad debe estar entre 0.0 y 1.0")
+        return responseError("PARAMETRO_INVALIDO", "La estabilidad debe estar entre 0.0 y 1.0.", 400)
+
+    if estabilidad is None:
+        estabilidad = 0.5
+
+    if velocidad is None:
+        velocidad_num = 1.0
+    elif velocidad == "normal":
+        velocidad_num = 1.0
+    elif velocidad == "rapida":
+        velocidad_num = 1.2
+    elif velocidad == "lenta":
+        velocidad_num = 0.7
+    else:
+        log.error("La velocidad debe ser 'Rapida', 'Normal' o 'Lenta'.")
+        return {"PARAMETRO_INVALIDO": "La velocidad debe ser 'Rapida', 'Normal' o 'Lenta'."}, 400
 
     try:
         elevenlabs = ElevenLabs(
@@ -71,20 +92,24 @@ def tts(data):
             model_id="eleven_turbo_v2_5", # use the turbo model for low latency
             # Optional voice settings that allow you to customize the output
             voice_settings=VoiceSettings(
-                stability=0.0,
+                stability=estabilidad,
+                    # Controla cuán repetitivo o predecible es el tono de voz.
+                    # Valores altos (~1.0): voz más monótona y consistente.
+                    # Valores bajos (~0.0): más emoción, variaciones en inflexión y ritmo.
                 similarity_boost=1.0,
                 style=0.0,
                 use_speaker_boost=True,
-                speed=1.0,
+                speed=velocidad_num,
             ),
         )
 
-        # Ruta absoluta a la carpeta /app/audios
-        audios_dir = os.path.join(os.path.dirname(__file__), "audios")
+        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
+        audios_dir = os.path.join(root_dir, "audios")
         os.makedirs(audios_dir, exist_ok=True) # Crear la carpeta si no existe
 
         # Nombre único para el archivo
-        save_file_path = os.path.join(audios_dir, f"{uuid.uuid4()}.mp3")
+        idAudio = uuid.uuid4()
+        save_file_path = os.path.join(audios_dir, f"{idAudio}.mp3")
 
         # Guardar el archivo de audio
         with open(save_file_path, "wb") as f:
@@ -95,7 +120,8 @@ def tts(data):
         log.info(f"Audio guardado en: {save_file_path}")
 
         return jsonify({
-            "mensaje": "Audio guardado correctamente!",
+            "mensaje": "Audio guardado correctamente",
+            "id": idAudio,
             "ubicacion": save_file_path
         })
 
