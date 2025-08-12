@@ -96,4 +96,30 @@ class AreasController:
             session.rollback()
             return responseError("ERROR", f"No se pudo eliminar el area: {str(e)}", 500)
         finally:
-      
+            session.close()
+
+    @staticmethod
+    def editarArea(idArea, datos):
+        session = SessionLocal()
+        try:
+            area = session.query(Area).filter_by(idArea=idArea).first()
+
+            if not area:
+                return responseError("AREA_NO_ENCONTRADA", "El área no existe", 404)
+
+            # Actualizar solo si está presente en 'datos'
+            if "nombreArea" in datos:
+                area.nombreArea = datos["nombreArea"]
+
+            if "datosDelArea" in datos:
+                area.datosDelArea = datos["datosDelArea"]
+
+            session.commit()
+
+            return jsonify({"mensaje": "Área editada correctamente"}), 200
+
+        except Exception as e:
+            session.rollback()
+            return responseError("ERROR", f"No se pudo editar el área: {str(e)}", 500)
+        finally:
+            session.close()
