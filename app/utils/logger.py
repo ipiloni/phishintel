@@ -7,4 +7,4 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-log = logging.getLogger("MiApp")
+log = logging.getLogger("PhishIntel")
