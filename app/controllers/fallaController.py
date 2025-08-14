@@ -3,6 +3,7 @@ from app.backend.models.error import responseError
 from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.usuarioxevento import UsuarioxEvento
 from app.config.db_config import SessionLocal
+from app.utils.logger import log
 
 # Variable global para contar fallas
 conteo_fallas = {"total": 0}
@@ -30,6 +31,7 @@ class FallaController:
             return jsonify({"mensaje": "Falla registrada", "idUsuario": idUsuario, "idEvento": idEvento}), 200
 
         except Exception as e:
+            log.error("Hubo un error al intentar sumar la falla: " + str(e))
             session.rollback()
             return responseError("ERROR", f"No se pudo registrar la falla: {str(e)}", 500)
         finally:
