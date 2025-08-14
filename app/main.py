@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 
 from app.backend.models.error import responseError
 from app.config.db_config import Base, engine
@@ -12,6 +12,7 @@ from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.fallaController import FallaController
 from app.controllers.mensajes.mensajesController import MensajesController
 from app.utils.logger import log
+import os
 
 # Flask es la libreria que vamos a usar para generar los Endpoints
 app = Flask(__name__)
@@ -152,6 +153,18 @@ def eliminarArea(idArea):
 def editarArea(idArea):
     data = request.get_json()
     return AreasController.editarArea(idArea, data)
+
+# ------ # FRONTEND # ------ #
+# Ruta para servir el enConstruccion.html
+# Ruta para el index
+@app.route("/")
+def index():
+    return send_from_directory(os.path.join(app.root_path, "frontend"), "enConstruccion.html")
+
+# Ruta para cualquier otro archivo dentro de frontend (CSS, JS, imágenes, vendor, etc.)
+@app.route("/<path:filename>")
+def frontend_files(filename):
+    return send_from_directory(os.path.join(app.root_path, "frontend"), filename)
 
 # =================== MAIN =================== #
 if __name__ == "__main__":
