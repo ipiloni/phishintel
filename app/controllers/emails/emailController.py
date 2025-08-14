@@ -16,63 +16,6 @@ from app.utils.logger import log
 
 
 class EmailController:
-
-    @staticmethod
-    def enviarMail(data):
-        if not data or "destinatario" not in data or "asunto" not in data or "cuerpo" not in data or "proveedor" not in data:
-            return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios como 'destinatario', 'asunto', 'cuerpo' o 'proveedor'", 400)
-
-        destinatario = data["destinatario"]
-        asunto = data["asunto"]
-        cuerpo = data["cuerpo"]
-        proveedor = data["proveedor"]  # "twilio" o "smtp"
-
-        try:
-            # Guardar evento y registro en DB
-            registroEvento = RegistroEvento(asunto=asunto, cuerpo=cuerpo)
-            # TODO: ojo aca que hay que corregir
-            evento = Evento(
-                tipoEvento=TipoEvento.CORREO,
-                fechaEvento=datetime.datetime.now(),
-                resultado=ResultadoEvento.PENDIENTE,
-                registroEvento=registroEvento
-            )
-
-            session = SessionLocal()
-            session.add(evento)
-            session.commit()
-
-            # Envío del mail según proveedor
-            if proveedor == "twilio":
-                response = enviarMailTwilio(asunto, cuerpo, destinatario)
-                log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
-            elif proveedor == "smtp":
-                log.info("Se esta enviando un mail por el SMTP")
-                smtp = SMTPConnection("casarivadavia.ddns.net", "40587")
-                log.info("Esta es la conexion")
-                smtp.login("marcos", "linuxcasa")
-                log.info("Logueo completado")
-                message = smtp.compose_message(
-                    sender="marcos@phishintel.org",
-                    name="Marcos",
-                    recipients=[destinatario],
-                    subject=asunto,
-                    html=cuerpo
-                )
-                smtp.send_mail(message)
-            else:
-                session.rollback()
-                return responseError("PROVEEDOR_INVALIDO", "Proveedor de correo no reconocido", 400)
-
-            session.close()
-            return jsonify({"mensaje": "Email enviado correctamente"}), 201
-
-        except Exception as e:
-            log.error(f"Hubo un error al intentar enviar el email: {str(e)}")
-            session.rollback()
-            session.close()
-            return responseError("ERROR", f"Hubo un error al enviar mail: {str(e)}", 500)
-
     @staticmethod
     def generarYEnviarMail(data):
         if not data or "proveedor" not in data or "idUsuario" not in data or "remitente" not in data:
@@ -166,3 +109,64 @@ class EmailController:
             session.rollback()
             session.close()
             return responseError("ERROR", f"Hubo un error al generar y enviar el mail: {str(e)}", 500)
+
+   ''' 
+   POR AHORA USAR GENERAR Y ENVIAR MAIL QUE ES EL QUE ANDA
+    @staticmethod
+    def enviarMail(data):
+        if not data or "destinatario" not in data or "asunto" not in data or "cuerpo" not in data or "proveedor" not in data:
+            return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios como 'destinatario', 'asunto', 'cuerpo' o 'proveedor'", 400)
+
+        destinatario = data["destinatario"]
+        asunto = data["asunto"]
+        cuerpo = data["cuerpo"]
+        proveedor = data["proveedor"]  # "twilio" o "smtp"
+
+        try:
+            # Guardar evento y registro en DB
+            registroEvento = RegistroEvento(asunto=asunto, cuerpo=cuerpo)
+            # TODO: ojo aca que hay que corregir
+            evento = Evento(
+                tipoEvento=TipoEvento.CORREO,
+                fechaEvento=datetime.datetime.now(),
+                resultado=ResultadoEvento.PENDIENTE,
+                registroEvento=registroEvento
+            )
+
+            session = SessionLocal()
+            session.add(evento)
+            session.commit()
+
+            # Envío del mail según proveedor
+            if proveedor == "twilio":
+                response = enviarMailTwilio(asunto, cuerpo, destinatario)
+                log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
+            elif proveedor == "smtp":
+                log.info("Se esta enviando un mail por el SMTP")
+                smtp = SMTPConnection("casarivadavia.ddns.net", "40587")
+                log.info("Esta es la conexion")
+                smtp.login("marcos", "linuxcasa")
+                log.info("Logueo completado")
+                message = smtp.compose_message(
+                    sender="marcos@phishintel.org",
+                    name="Marcos",
+                    recipients=[destinatario],
+                    subject=asunto,
+                    html=cuerpo
+                )
+                smtp.send_mail(message)
+            else:
+                session.rollback()
+                return responseError("PROVEEDOR_INVALIDO", "Proveedor de correo no reconocido", 400)
+
+            session.close()
+            return jsonify({"mensaje": "Email enviado correctamente"}), 201
+
+        except Exception as e:
+            log.error(f"Hubo un error al intentar enviar el email: {str(e)}")
+            session.rollback()
+            session.close()
+            return responseError("ERROR", f"Hubo un error al enviar mail: {str(e)}", 500)
+    '''
+
+
