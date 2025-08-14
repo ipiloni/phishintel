@@ -30,7 +30,7 @@ class SMTPConnection:
 
     def __connect(self):
         try:
-            log.info('Connecting to SMTP socket (' + self.socket + ')...')
+            log.info('Conectando al Socket SMTP... (' + self.socket + ')...')
             self.server = smtplib.SMTP(self.host, self.port)
         except (gaierror, OSError):
             log.error('Unable to establish connection to SMTP socket.')
@@ -93,9 +93,9 @@ class SMTPConnection:
 
     def send_mail(self, message):
         try:
-            log.info('Enviando Spoofing')
+            log.info('Enviando Mensaje Spoofeado...')
             self.server.sendmail(self.sender, self.recipients, message.as_string())
-            log.info('Mensaje enviado correctamente!')
+            log.success('¡Mensaje enviado correctamente al servidor SMTP!')
         except smtplib.SMTPException:
             log.error('Unable to send message. Check sender, recipients and message body')
             log.error(traceback.format_exc())
