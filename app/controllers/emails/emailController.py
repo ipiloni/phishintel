@@ -29,12 +29,10 @@ class EmailController:
 
         try:
             # Guardar evento y registro en DB
-            registroEvento = RegistroEvento(asunto=asunto, cuerpo=cuerpo)
-            # TODO: ojo aca que hay que corregir
+            registroEvento:RegistroEvento = RegistroEvento(asunto=asunto, cuerpo=cuerpo)
             evento = Evento(
                 tipoEvento=TipoEvento.CORREO,
                 fechaEvento=datetime.datetime.now(),
-                resultado=ResultadoEvento.PENDIENTE,
                 registroEvento=registroEvento
             )
 
@@ -47,11 +45,8 @@ class EmailController:
                 response = enviarMailTwilio(asunto, cuerpo, destinatario)
                 log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
             elif proveedor == "smtp":
-                log.info("Se esta enviando un mail por el SMTP")
                 smtp = SMTPConnection("casarivadavia.ddns.net", "40587")
-                log.info("Esta es la conexion")
                 smtp.login("marcos", "linuxcasa")
-                log.info("Logueo completado")
                 message = smtp.compose_message(
                     sender="marcos@phishintel.org",
                     name="Marcos",
@@ -142,7 +137,7 @@ class EmailController:
             # Enviar el email
             if proveedor == "twilio":
                 response = enviarMailTwilio(asunto, cuerpo, usuario.correo)
-                logger.success(f"Twilio sendgrid response: {response.status_code}")
+                log.success(f"Twilio sendgrid response: {response.status_code}")
             elif proveedor == "smtp":
                 smtp = SMTPConnection("casarivadavia.ddns.net", "40587")
                 smtp.login("marcos", "linuxcasa")
