@@ -11,6 +11,7 @@ from app.controllers.llamadas.llamadasController import LlamadasController
 from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.fallaController import FallaController
 from app.controllers.mensajes.mensajesController import MensajesController
+from app.utils.logger import log
 
 # Flask es la libreria que vamos a usar para generar los Endpoints
 app = Flask(__name__)
@@ -55,6 +56,7 @@ def sumarFalla():
     idEvento = request.args.get("idEvento", type=int)
     if not idUsuario or not idEvento:
         return responseError("CAMPOS_OBLIGATORIOS", "Faltan parámetros 'idUsuario' o 'idEvento'", 400)
+    log.info(f"se sumará una falla al usuario '{str(idUsuario)}' del evento '{str(idEvento)}'")
     return FallaController.sumarFalla(idUsuario, idEvento)
 
 @app.route("/api/eventos", methods=["GET"])
@@ -75,7 +77,7 @@ def editarEvento(idEvento):
     data = request.get_json()
     return EventosController.editarEvento(idEvento, data)
 
-@app.route("/api/eventos/<int:idEvento>/usuario/<int:idUsuario>", methods=["POST"])
+@app.route("/api/eventos/<int:idEvento>/usuarios/<int:idUsuario>", methods=["POST"])
 def asociarUsuarioEvento(idEvento, idUsuario):
     data = request.get_json()
     resultado_val = data.get("resultado")

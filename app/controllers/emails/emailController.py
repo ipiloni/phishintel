@@ -12,7 +12,8 @@ from app.config.db_config import SessionLocal
 from app.backend.apis.twilio.sendgrid import enviarMail as enviarMailTwilio
 from app.backend.apis.smtp.smtpconnection import SMTPConnection
 from app.controllers.emails.aiController import AIController
-from app.utils import logger  # Asegurate de que logger esté disponible
+from app.utils.logger import log
+
 
 class EmailController:
 
@@ -29,6 +30,7 @@ class EmailController:
         try:
             # Guardar evento y registro en DB
             registroEvento = RegistroEvento(asunto=asunto, cuerpo=cuerpo)
+            # TODO: ojo aca que hay que corregir
             evento = Evento(
                 tipoEvento=TipoEvento.CORREO,
                 fechaEvento=datetime.datetime.now(),
@@ -43,13 +45,13 @@ class EmailController:
             # Envío del mail según proveedor
             if proveedor == "twilio":
                 response = enviarMailTwilio(asunto, cuerpo, destinatario)
-                logger.success(f"Twilio sendgrid response: {response.status_code}")
+                log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
             elif proveedor == "smtp":
-                logger.info("Estamos mandando un mail por el smtp")
+                log.info("Se esta enviando un mail por el SMTP")
                 smtp = SMTPConnection("casarivadavia.ddns.net", "40587")
-                logger.info("esta es la conexion")
+                log.info("Esta es la conexion")
                 smtp.login("marcos", "linuxcasa")
-                logger.info("nos hemos logueado")
+                log.info("Logueo completado")
                 message = smtp.compose_message(
                     sender="marcos@phishintel.org",
                     name="Marcos",
@@ -66,6 +68,7 @@ class EmailController:
             return jsonify({"mensaje": "Email enviado correctamente"}), 201
 
         except Exception as e:
+            log.error(f"Hubo un error al intentar enviar el email: {str(e)}")
             session.rollback()
             session.close()
             return responseError("ERROR", f"Hubo un error al enviar mail: {str(e)}", 500)
