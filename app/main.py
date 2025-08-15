@@ -155,11 +155,11 @@ def editarArea(idArea):
     return AreasController.editarArea(idArea, data)
 
 # ------ # FRONTEND # ------ #
-# Ruta para servir el enConstruccion.html
+# Ruta para servir el index.html
 # Ruta para el index
 @app.route("/")
 def index():
-    return send_from_directory(os.path.join(app.root_path, "frontend"), "enConstruccion.html")
+    return send_from_directory(os.path.join(app.root_path, "frontend"), "index.html")
 
 # Ruta para cualquier otro archivo dentro de frontend (CSS, JS, imágenes, vendor, etc.)
 @app.route("/<path:filename>")
