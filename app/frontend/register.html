@@ -57,56 +57,66 @@
       </div>
     </div>
 
-    <!-- Registro Section -->
-    <section id="register" class="section">
-      <div class="container" data-aos="fade-up">
-        <div class="row justify-content-center">
-          <div class="col-lg-6">
-
-            <form action="procesar_registro.php" method="post" class="php-email-form">
-              <div class="form-group mb-3">
-                <label for="nombre">Nombre completo</label>
-                <input type="text" name="nombre" id="nombre" class="form-control" required>
-              </div>
-
-              <div class="form-group mb-3">
-                <label for="email">Correo electrónico</label>
-                <input type="email" name="email" id="email" class="form-control" required>
-              </div>
-
-              <div class="form-group mb-3">
-                <label for="usuario">Nombre de usuario</label>
-                <input type="text" name="usuario" id="usuario" class="form-control" required>
-              </div>
-
-              <div class="form-group mb-3">
-                <label for="password">Contraseña</label>
-                <input type="password" name="password" id="password" class="form-control" required>
-              </div>
-
-              <div class="form-group mb-4">
-                <label for="confirmar">Confirmar contraseña</label>
-                <input type="password" name="confirmar" id="confirmar" class="form-control" required>
-              </div>
-
-              <div class="text-center">
-                <button type="submit" class="btn btn-primary">Registrarme</button>
-              </div>
-
-              <div class="mt-3">
-                <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a></p>
-              </div>
-
-              <!-- Mensajes de validación -->
-              <div class="loading">Cargando...</div>
-              <div class="error-message"></div>
-              <div class="sent-message">Tu registro se ha completado con éxito</div>
-            </form>
-
-          </div>
+     <!-- Contact Section -->
+    <section id="contact" class="contact section">
+      <!-- Section Title -->
+      <div class="col-lg-6 mx-auto" data-aos="fade-left" data-aos-delay="200">
+        <div class="contact-form-wrapper">
+        <div class="form-header">
+          <h3>Registro de usuarios</h3>
+          <p>Crea tu cuenta llenando el formulario.</p>
         </div>
+
+        <form action="forms/register.php" method="post" class="php-email-form">
+          <div class="mb-3">
+            <label for="name" class="form-label">Nombre </label>
+            <input type="text" name="name" class="form-control" id="name" placeholder="Escribì tu nombre " required="">
+          </div>
+
+          <div class="mb-3">
+            <label for="surname" class="form-label">Apellido</label>
+            <input type="text" name="name" class="form-control" id="surname" placeholder="Escribì tu apellido" required="">
+          </div>
+
+          <div class="mb-3">
+            <label for="userName" class="form-label">Nombre de usuario</label>
+            <input type="text" name="name" class="form-control" id="userName" placeholder="Escribì tu nombre de usuario" required="">
+          </div>
+
+          <div class="mb-3">
+            <label for="emailAddress" class="form-label">Cuenta de correo</label>
+            <input type="email" class="form-control" name="email" id="emailAddress" placeholder="Escribì tu correo" required="">
+          </div>
+
+          <div class="mb-3">
+            <label for="phoneNumber" class="form-label">Número de teléfono</label>
+            <input type="tel" class="form-control" name="phone" id="phoneNumber" placeholder="Enter your phone number">
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" name="password" id="password" placeholder="Escriba una contraseña" required="">
+          </div>
+
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+            <input type="password" class="form-control" name="confirm_password" id="confirmPassword" placeholder="Confirmar Contraseña" required="">
+          </div>
+
+          <div class="my-3">
+            <div class="loading">Loading</div>
+            <div class="error-message"></div>
+            <div class="sent-message">Your account has been created successfully!</div>
+          </div>
+
+          <button type="submit" class="submit-btn">
+            <span>Register</span>
+            <i class="bi bi-arrow-right"></i>
+          </button>
+        </form>
       </div>
-    </section>
+    </div>
+    </section><!-- /Contact Section -->
 
   </main>
 
@@ -115,6 +125,49 @@
   <script src="assets/vendor/aos/aos.js"></script>
   <script>
     AOS.init();
+  </script>
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector(".php-email-form");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault(); // evita que recargue la página
+
+      // Capturar valores del formulario
+      const data = {
+        nombreUsuario: document.getElementById("userName").value.trim(),
+        password: document.getElementById("password").value.trim(),
+        nombre: document.getElementById("name").value.trim(),
+        apellido: document.getElementById("surname").value.trim(),
+        correo: document.getElementById("emailAddress").value.trim(),
+        telefono: document.getElementById("phoneNumber").value.trim()
+      };
+
+      // Hacer POST a la API
+      fetch("http://localhost:8080/api/usuarios", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Error en el registro");
+        }
+        return response.json();
+      })
+      .then(result => {
+        alert("Registro exitoso");
+        console.log("Respuesta del servidor:", result);
+        form.reset(); // limpiar el formulario
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Hubo un error al registrar el usuario");
+      });
+    });
+  });
   </script>
 
 </body>

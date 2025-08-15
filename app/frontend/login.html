@@ -46,64 +46,60 @@
 
   <main class="main">
 
-    <!-- Page Title -->
-    <div class="page-title">
-      <h1>Iniciar Sesión</h1>
-      <div class="breadcrumbs">
-        <ol>
-          <li><a href="/index">Home</a></li>
-          <li>Login</li>
-        </ol>
-      </div>
+  <!-- Page Title -->
+  <div class="page-title">
+    <h1>Login de Usuarios</h1>
+    <div class="breadcrumbs">
+      <ol>
+        <li><a href="/index">Home</a></li>
+        <li>Login</li>
+      </ol>
     </div>
+  </div>
 
-    <!-- Login Section -->
-    <section id="login" class="section">
-      <div class="container" data-aos="fade-up">
-        <div class="row justify-content-center">
-          <div class="col-lg-6">
-
-            <form action="procesar_login.php" method="post" class="php-email-form">
-              <div class="form-group mb-3">
-                <label for="usuario">Usuario o correo</label>
-                <input type="text" name="usuario" id="usuario" class="form-control" required>
-              </div>
-
-              <div class="form-group mb-4">
-                <label for="password">Contraseña</label>
-                <input type="password" name="password" id="password" class="form-control" required>
-              </div>
-
-              <div class="mb-3 d-flex justify-content-between align-items-center">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="recordar" id="recordar">
-                  <label class="form-check-label" for="recordar">
-                    Recuérdame
-                  </label>
-                </div>
-                <a href="#">¿Olvidaste tu contraseña?</a>
-              </div>
-
-              <div class="text-center">
-                <button type="submit" class="pepito" href="/principal">Ingresar</button>
-              </div>
-
-              <div class="mt-3">
-                <p>¿No tienes cuenta? <a href="/registro">Regístrate aquí</a></p>
-              </div>
-
-              <!-- Mensajes de validación -->
-              <div class="loading">Cargando...</div>
-              <div class="error-message"></div>
-              <div class="sent-message">Has iniciado sesión correctamente</div>
-            </form>
-
-          </div>
+  <!-- Contact Section -->
+  <section id="contact" class="contact section">
+    <!-- Section Title -->
+    <div class="col-lg-6 mx-auto" data-aos="fade-left" data-aos-delay="200">
+      <div class="contact-form-wrapper">
+        <div class="form-header">
+          <h3>User Login</h3>
+          <p>Enter your credentials to access your account.</p>
         </div>
-      </div>
-    </section>
 
-  </main>
+        <form action="forms/login.php" method="post" class="php-email-form">
+          <div class="mb-3">
+            <label for="loginEmail" class="form-label">Email Address</label>
+            <input type="email" class="form-control" name="email" id="loginEmail" placeholder="Enter your email address" required="">
+          </div>
+
+          <div class="mb-3">
+            <label for="loginPassword" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" id="loginPassword" placeholder="Enter your password" required="">
+          </div>
+
+          <div class="my-3">
+            <div class="loading">Loading</div>
+            <div class="error-message"></div>
+            <div class="sent-message">Login successful! Redirecting...</div>
+          </div>
+
+          <button type="submit" class="submit-btn">
+            <span>Login</span>
+            <i class="bi bi-arrow-right"></i>
+          </button>
+        </form>
+
+        <!-- Mensaje de registro -->
+        <p class="mt-3 text-center">
+          Don't have an account? <a href="/registro">Register here</a>
+        </p>
+      </div>  
+    </div>
+  </section><!-- /Contact Section -->
+
+</main>
+
 
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
