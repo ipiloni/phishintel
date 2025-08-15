@@ -183,6 +183,10 @@ h6 {
   color: var(--contrast-color);
   background: color-mix(in srgb, var(--accent-color), transparent 15%);
 }
+.header .btn-getstarted.btn-login {
+  margin-left: 20px;
+}
+
 
 @media (max-width: 1200px) {
   .header .logo {
@@ -212,6 +216,25 @@ h6 {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   /* optional border */
 }
+
+.pepito {
+  color: var(--contrast-color);
+  background: var(--accent-color);
+  font-size: 14px;
+  padding: 8px 26px;
+  border-radius: 50px;
+  transition: 0.3s;
+  margin: 0px; /* Mueve el botón a la derecha */
+  font-family: var(--nav-font);
+  font-weight: 600;
+  border: none;
+  box-shadow: none;
+}
+
+.pepito:hover {
+  background: color-mix(in srgb, var(--accent-color), transparent 15%);
+}
+
 
 /*--------------------------------------------------------------
 # Navigation Menu
@@ -580,6 +603,8 @@ h6 {
   background: var(--accent-color);
   text-decoration: none;
 }
+
+
 
 /*--------------------------------------------------------------
 # Scroll Top Button

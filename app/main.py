@@ -161,6 +161,25 @@ def editarArea(idArea):
 def index():
     return send_from_directory(os.path.join(app.root_path, "frontend"), "index.html")
 
+@app.route("/login")
+def login():
+   return send_from_directory(os.path.join(app.root_path, "frontend"), "login.html")
+
+@app.route("/registro")
+def registro():
+   return send_from_directory(os.path.join(app.root_path, "frontend"), "register.html")
+
+@app.route("/reportes")
+def reportes():
+   return send_from_directory(os.path.join(app.root_path, "frontend"), "reportes.html")
+
+@app.route("/principal")
+def principal():
+   return send_from_directory(os.path.join(app.root_path, "frontend"), "principal.html")
+@app.route("/usuarios")
+def usuarios():
+   return send_from_directory(os.path.join(app.root_path, "frontend"), "usuarios.html")
+
 # Ruta para cualquier otro archivo dentro de frontend (CSS, JS, imágenes, vendor, etc.)
 @app.route("/<path:filename>")
 def frontend_files(filename):
