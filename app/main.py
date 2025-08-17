@@ -1,7 +1,7 @@
 from flask import Flask
 from app.config.db_config import Base, engine
-from frontend import frontend
-from apis import apis
+from app.frontend import frontend
+from app.apis import apis
 
 app = Flask(__name__)
 Base.metadata.create_all(engine)
