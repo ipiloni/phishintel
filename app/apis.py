@@ -88,6 +88,11 @@ def eliminarEvento(idEvento):
     return EventosController.eliminarEvento(idEvento)
 
 # ------ # ENVIO DE EMAILS # ------ #
+@apis.route("/api/email/notificar", methods=["POST"]) # Esta ruta envia una notificacion con el email de PhishIntel
+def notificarViaEmail():
+    data = request.get_json()
+    return EmailController.enviarNotificacionPhishintel(data)
+
 @apis.route("/api/email/enviar", methods=["POST"]) # Esta ruta
 def enviarEmail():
     data = request.get_json()

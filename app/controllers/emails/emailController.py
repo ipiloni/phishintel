@@ -9,13 +9,31 @@ from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.tipoEvento import TipoEvento
 from app.backend.models.usuarioxevento import UsuarioxEvento
 from app.config.db_config import SessionLocal
-from app.backend.apis.twilio.sendgrid import enviarMail as enviarMailTwilio
+from app.backend.apis.twilio.sendgrid import enviarMail as enviarMailTwilio, enviarNotificacionEmail
 from app.backend.apis.smtp.smtpconnection import SMTPConnection
 from app.controllers.emails.aiController import AIController
 from app.utils.logger import log
 
-
 class EmailController:
+
+    ## Este metodo envia notificaciones de recuperar contrasenia, doble factor, etc. Es desde el email de Phishintel!
+    # deberia recibir el tipo de notificacion y, en base a este, definir que asunto y cuerpo enviar, estos deberian almacenarse en la bdd porque siempre van a ser iguales
+    @staticmethod
+    def enviarNotificacionPhishintel(data):
+        if not data or "destinatario" not in data or "asunto" not in data or "cuerpo" not in data:
+            return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios como 'destinatario', 'asunto', 'cuerpo' o 'proveedor'", 400)
+
+        destinatario = data["destinatario"]
+        asunto = data["asunto"]
+        cuerpo = data["cuerpo"]
+
+        try:
+            response = enviarNotificacionEmail(asunto, cuerpo, destinatario)
+            log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
+            return jsonify({"mensaje": "Email enviado correctamente"}), 201
+        except Exception as e:
+            log.error(f"Hubo un error al intentar enviar la notificacion: {str(e)}")
+            return responseError("ERROR", f"Hubo un error al intentar enviar la notificacion: {str(e)}", 500)
 
     @staticmethod
     def enviarMail(data):
