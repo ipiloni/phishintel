@@ -30,7 +30,7 @@ class EmailController:
         try:
             response = enviarNotificacionEmail(asunto, cuerpo, destinatario)
             log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
-            return jsonify({"mensaje": "Email enviado correctamente"}), 201
+            return jsonify({"mensaje": "Email encolado correctamente. No se asegura recepción correcta."}), 201
         except Exception as e:
             log.error(f"Hubo un error al intentar enviar la notificacion: {str(e)}")
             return responseError("ERROR", f"Hubo un error al intentar enviar la notificacion: {str(e)}", 500)
