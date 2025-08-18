@@ -35,8 +35,8 @@
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="/index">Home</a></li>
-          <li><a href="/registro" class="active">Registro</a></li>
+          <li><a href="/index.html" class="btn-getstarted btn-login">Home</a></li>
+          <li><a href="/registro" class="btn-getstarted btn-login">Registro</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -47,15 +47,9 @@
   <main class="main">
 
     <!-- Page Title -->
-    <div class="page-title">
-      <h1>Registro de Usuarios</h1>
-      <div class="breadcrumbs">
-        <ol>
-          <li><a href="/index">Home</a></li>
-          <li>Registro</li>
-        </ol>
-      </div>
-    </div>
+  <div class="page-title py-5">
+  </div>
+
 
      <!-- Contact Section -->
     <section id="contact" class="contact section">
@@ -64,53 +58,53 @@
         <div class="contact-form-wrapper">
         <div class="form-header">
           <h3>Registro de usuarios</h3>
-          <p>Crea tu cuenta llenando el formulario.</p>
+          <p>Completa tus datos para registrarte y crear tu cuenta.</p>
         </div>
 
         <form action="forms/register.php" method="post" class="php-email-form">
           <div class="mb-3">
-            <label for="name" class="form-label">Nombre </label>
-            <input type="text" name="name" class="form-control" id="name" placeholder="Escribì tu nombre " required="">
+            <label for="name" class="form-label">Nombre</label>
+            <input type="text" name="name" class="form-control" id="name" placeholder="Ingresa tu nombre " required="">
           </div>
 
           <div class="mb-3">
             <label for="surname" class="form-label">Apellido</label>
-            <input type="text" name="name" class="form-control" id="surname" placeholder="Escribì tu apellido" required="">
+            <input type="text" name="name" class="form-control" id="surname" placeholder="Ingresa tu apellido" required="">
           </div>
 
           <div class="mb-3">
             <label for="userName" class="form-label">Nombre de usuario</label>
-            <input type="text" name="name" class="form-control" id="userName" placeholder="Escribì tu nombre de usuario" required="">
+            <input type="text" name="name" class="form-control" id="userName" placeholder="Ingresa tu nombre de usuario" required="">
           </div>
 
           <div class="mb-3">
-            <label for="emailAddress" class="form-label">Cuenta de correo</label>
-            <input type="email" class="form-control" name="email" id="emailAddress" placeholder="Escribì tu correo" required="">
+            <label for="emailAddress" class="form-label">Correo electrónico</label>
+            <input type="email" class="form-control" name="email" id="emailAddress" placeholder="Ingresa tu correo electrónico" required="">
           </div>
 
           <div class="mb-3">
             <label for="phoneNumber" class="form-label">Número de teléfono</label>
-            <input type="tel" class="form-control" name="phone" id="phoneNumber" placeholder="Enter your phone number">
+            <input type="tel" class="form-control" name="phone" id="phoneNumber" placeholder="Ingresa tu número de telefono">
           </div>
 
           <div class="mb-3">
             <label for="password" class="form-label">Contraseña</label>
-            <input type="password" class="form-control" name="password" id="password" placeholder="Escriba una contraseña" required="">
+            <input type="password" class="form-control" name="password" id="password" placeholder="Ingresa tu contraseña" required="">
           </div>
 
           <div class="mb-3">
             <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-            <input type="password" class="form-control" name="confirm_password" id="confirmPassword" placeholder="Confirmar Contraseña" required="">
+            <input type="password" class="form-control" name="confirm_password" id="confirmPassword" placeholder="Ingresa nuevamente tu contraseña" required="">
           </div>
 
           <div class="my-3">
-            <div class="loading">Loading</div>
+            <div class="loading">Cargando</div>
             <div class="error-message"></div>
-            <div class="sent-message">Your account has been created successfully!</div>
+            <div class="sent-message">Tu cuenta fue creada correctamente!</div>
           </div>
 
           <button type="submit" class="submit-btn">
-            <span>Register</span>
+            <span>Registrarse</span>
             <i class="bi bi-arrow-right"></i>
           </button>
         </form>
