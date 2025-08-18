@@ -3,8 +3,8 @@ from twilio.rest import Client
 
 from app.utils.config import get
 
-account_sid = get("TWILIO_ACCOUNT_SID_IGNA")
-auth_token = get("TWILIO_AUTH_TOKEN_IGNA")
+account_sid = get("TWILIO_ACCOUNT_SID_MORA")
+auth_token = get("TWILIO_AUTH_TOKEN_MORA")
 
 client = Client(account_sid, auth_token)
 
