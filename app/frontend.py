@@ -1,5 +1,7 @@
-from flask import Blueprint, send_from_directory
+from flask import Blueprint, send_from_directory, request
 import os
+
+from app.controllers.login import AuthController
 
 frontend = Blueprint("frontend", __name__, static_folder="frontend")
 
@@ -38,6 +40,13 @@ def formLlamada():
 @frontend.route("/formEmail")
 def formEmail():
    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "formEmail.html")
+@frontend.route("/enConstruccion")
+def enConstruccion():
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "enConstruccion.html")
+@frontend.route("/verificarlogin", methods=["POST"])
+def verificarlogin():
+    data = request.get_json()
+    return AuthController.login(data)
 
 # Ruta para cualquier otro archivo dentro de frontend (CSS, JS, imágenes, vendor, etc.)
 @frontend.route("/<path:filename>")
