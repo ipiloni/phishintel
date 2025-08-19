@@ -49,114 +49,67 @@
     <!-- Page Title -->
     <div class="page-title py-5"></div>
 
-    <!-- Email Form Section -->
+    <!-- Formulario con Vue -->
     <section id="email" class="contact section">
       <div class="col-lg-8 mx-auto" data-aos="fade-left" data-aos-delay="200">
-        <div class="contact-form-wrapper">
+        <div id="app" class="contact-form-wrapper">
           <div class="form-header">
-            <h3>Generación de Email de Simulación</h3>
-            <p>Configura el contenido y los destinatarios del correo de simulación de phishing.</p>
+            <h3>Generación de Simulación</h3>
+            <p>Selecciona el área, usuario y nivel de dificultad.</p>
           </div>
 
           <form action="forms/generate-email.php" method="post" class="php-email-form">
 
-            <!-- Subject -->
+            <!-- Selector de Área -->
             <div class="mb-3">
-              <label for="subject" class="form-label">Asunto</label>
-              <input type="text" name="subject" class="form-control" id="subject" placeholder="Ej: Actualiza tu perfil" required>
-            </div>
-
-            <!-- Context -->
-            <div class="mb-3">
-              <label for="context" class="form-label">Contenido</label>
-              <textarea class="form-control" name="context" id="context" rows="5" placeholder="Escribe el contenido del mensaje" required></textarea>
-            </div>
-
-            <!-- Message Type -->
-            <div class="mb-3">
-              <label for="messageType" class="form-label">Tipo de Mensaje</label>
-              <select class="form-control" id="messageType" name="messageType">
-                <option>Email</option>
-                <option>Push</option>
-                <option>Email + Push</option>
+              <label for="areaSelect" class="form-label">Seleccionar Área</label>
+              <select v-model="filtroArea" class="form-control" id="areaSelect" name="area" required>
+                <option value="">-- Selecciona un área --</option>
+                <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
+                  {{ area.nombreArea }}
+                </option>
               </select>
             </div>
 
-            <!-- Target -->
+            <!-- Selector de Usuario -->
             <div class="mb-3">
-              <label for="target" class="form-label">Destino</label>
-              <select class="form-control" id="target" name="target">
-                <option>Profile Screen</option>
-                <option>Dashboard</option>
-                <option>Login Screen</option>
+              <label for="userSelect" class="form-label">Seleccionar Usuario</label>
+              <select class="form-control" id="userSelect" name="usuario" required>
+                <option value="">-- Selecciona un usuario --</option>
+                <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario.idUsuario">
+                  {{ usuario.nombre }} {{ usuario.apellido }}
+                </option>
               </select>
             </div>
 
-            <!-- Employees -->
+            <!-- Dificultad -->
             <div class="mb-3">
-              <label class="form-label">Seleccionar empleados</label>
+              <label class="form-label">Nivel de Dificultad</label>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="empleados[]" value="Juan Carlos" id="emp1">
-                <label class="form-check-label" for="emp1">Juan Carlos</label>
+                <input class="form-check-input" type="radio" name="dificultad" id="facil" value="Fácil" checked>
+                <label class="form-check-label" for="facil">Fácil (Desde phishintel@gmail.com)</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="empleados[]" value="Pepe Argento" id="emp2">
-                <label class="form-check-label" for="emp2">Pepe Argento</label>
+                <input class="form-check-input" type="radio" name="dificultad" id="medio" value="Medio">
+                <label class="form-check-label" for="medio">Medio (Desde pgcontrolcito.com)</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="empleados[]" value="Lucas Puotisto" id="emp3">
-                <label class="form-check-label" for="emp3">Lucas Puotisto</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="empleados[]" value="Hernan San Martin" id="emp4">
-                <label class="form-check-label" for="emp4">Hernan San Martin</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="empleados[]" value="Lucila de Rosso" id="emp5">
-                <label class="form-check-label" for="emp5">Lucila de Rosso</label>
+                <input class="form-check-input" type="radio" name="dificultad" id="dificil" value="Difícil">
+                <label class="form-check-label" for="dificil">Difícil (Desde pgcontrol.com.ar)</label>
               </div>
             </div>
 
-            <!-- Set Type -->
-            <div class="mb-3">
-              <label class="form-label">Tipo de Set</label>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="setType" id="news" value="News">
-                <label class="form-check-label" for="news">News</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="setType" id="reports" value="Reports">
-                <label class="form-check-label" for="reports">Reports</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="setType" id="docs" value="Documentos">
-                <label class="form-check-label" for="docs">Documentos</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="setType" id="media" value="Media">
-                <label class="form-check-label" for="media">Media</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="setType" id="text" value="Text">
-                <label class="form-check-label" for="text">Text</label>
-              </div>
+            <!-- Botón de enviar -->
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill">
+                <i class="bi bi-send"></i> Enviar
+              </button>
             </div>
 
-            <!-- Messages -->
-            <div class="my-3">
-              <div class="loading">Cargando</div>
-              <div class="error-message"></div>
-              <div class="sent-message">La plantilla se guardó correctamente.</div>
-            </div>
-
-            <button type="submit" class="submit-btn">
-              <span>Guardar Plantilla</span>
-              <i class="bi bi-arrow-right"></i>
-            </button>
           </form>
         </div>
       </div>
-    </section><!-- /Email Form Section -->
+    </section><!-- /Form Section -->
 
   </main>
 
@@ -166,5 +119,47 @@
   <script>
     AOS.init();
   </script>
+
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          areas: [],
+          filtroArea: ""
+        };
+      },
+      computed: {
+        usuariosFiltrados() {
+          const areaSeleccionada = this.areas.find(a => a.nombreArea === this.filtroArea);
+          return areaSeleccionada ? areaSeleccionada.usuarios : [];
+        }
+      },
+      async mounted() {
+        try {
+          const resp = await fetch("http://127.0.0.1:8080/api/areas", {
+            method: "GET",
+            mode: "cors", // 🔑 necesario si tu API está en otro puerto/host
+            headers: {
+              "Accept": "application/json"
+            }
+          });
+
+          if (!resp.ok) throw new Error("Error en la respuesta: " + resp.status);
+
+          const data = await resp.json();
+          this.areas = data.areas || [];
+        } catch (e) {
+          console.error("Error cargando áreas:", e);
+        }
+      }
+    }).mount("#app");
+  </script>
+
 </body>
 </html>
+
+
