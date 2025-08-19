@@ -17,10 +17,16 @@ import os
 # Flask es la libreria que vamos a usar para generar los Endpoints
 apis = Blueprint("apis", __name__)
 # =================== ENDPOINTS =================== #
-# ------ # TRANSFORMADORES TTS Y STT # ------ #
+# ------ # LLAMADAS TWILIO # ------ #
 @apis.route("/api/audios/<nombreAudio>", methods=["GET"])
 def enviarAudio(nombreAudio):
     return send_file(f"./audios/{nombreAudio}", mimetype="audio/mpeg")
+
+@apis.route("/api/twilio/respuesta", methods=["POST"])
+def procesarRespuestaLlamadaTwilio():
+    speech = request.form.get("SpeechResult")
+    confidence = request.form.get("Confidence")
+    return LlamadasController.procesarRespuesta(speech, confidence)
 
 # ------ # TRANSFORMADORES TTS Y STT # ------ #
 @apis.route("/api/tts", methods=["POST"])
