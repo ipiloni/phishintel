@@ -29,13 +29,13 @@
   <!-- ======= Header ======= -->
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container position-relative d-flex align-items-center justify-content-between">
-      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+      <a href="/index" class="logo d-flex align-items-center me-auto me-xl-0">
         <h1 class="sitename">PhishIntel</h1>
       </a>
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="/index" class="btn-getstarted btn-login">Home</a></li>
+          <li><a href="/principal" class="btn-getstarted btn-login">Home</a></li>
           <li><a href="/selectorCampania" class="btn-getstarted btn-login">Volver al Panel</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -101,7 +101,7 @@
 
             <!-- Botón de enviar -->
             <div class="text-center">
-              <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill">
+              <button type="button" class="btn btn-primary px-4 py-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#previewModal">>
                 <i class="bi bi-send"></i> Enviar
               </button>
             </div>
@@ -110,6 +110,31 @@
         </div>
       </div>
     </section><!-- /Form Section -->
+    <!-- Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="previewModalLabel">Email Preview</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Aquí mostramos la preview -->
+            <p><strong>Área:</strong> <span id="previewArea"></span></p>
+            <p><strong>Usuario:</strong> <span id="previewUsuario"></span></p>
+            <p><strong>Dificultad:</strong> <span id="previewDificultad"></span></p>
+            <hr>
+            <p><em>Este es el contenido del email que será enviado...</em></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" id="confirmSend" class="btn btn-primary">Confirmar y Enviar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
 
   </main>
 
@@ -158,8 +183,26 @@
       }
     }).mount("#app");
   </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.querySelector(".php-email-form");
+      const previewArea = document.getElementById("previewArea");
+      const previewUsuario = document.getElementById("previewUsuario");
+      const previewDificultad = document.getElementById("previewDificultad");
+      const confirmBtn = document.getElementById("confirmSend");
 
+      const previewModal = document.getElementById('previewModal');
+      previewModal.addEventListener('show.bs.modal', () => {
+        previewArea.textContent = document.getElementById("areaSelect").value;
+        previewUsuario.textContent = document.getElementById("userSelect").options[document.getElementById("userSelect").selectedIndex].text;
+        previewDificultad.textContent = document.querySelector("input[name='dificultad']:checked").value;
+      });
+
+      confirmBtn.addEventListener("click", () => {
+        form.submit();
+      });
+    });
+  </script>
 </body>
 </html>
-
 

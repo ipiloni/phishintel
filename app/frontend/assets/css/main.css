@@ -3824,7 +3824,54 @@ section,
     margin-top: 30px;
   }
 }
+/* Modal estilo oscuro */
+.modal-content {
+  background-color: #1a1a1a !important; /* fondo gris oscuro */
+  color: #eaeaea !important; /* texto claro */
+  border-radius: 10px;
+  border: 1px solid #444;
+}
 
+.modal-header {
+  background-color: #111 !important; /* aún más oscuro */
+  border-bottom: 1px solid #333;
+}
+
+.modal-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #e0e0e0 !important; /* violeta principal */
+}
+
+.modal-body {
+  color: #e0e0e0; /* texto claro */
+}
+
+.modal-footer {
+  background-color: #111 !important;
+  border-top: 1px solid #333;
+}
+
+/* Botones del modal */
+.modal-footer .btn-secondary {
+  background-color: #333;
+  border: none;
+  color: #fff;
+}
+
+.modal-footer .btn-secondary:hover {
+  background-color: #444;
+}
+
+.modal-footer .btn-primary {
+  background-color: #da02e5; /* violeta */
+  border: none;
+  color: #fff;
+}
+
+.modal-footer .btn-primary:hover {
+  background-color: #8e44ad; /* violeta un poco más oscuro */
+}
 /*--------------------------------------------------------------
 # Starter Section Section
 --------------------------------------------------------------*/
