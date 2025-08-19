@@ -3824,6 +3824,17 @@ section,
     margin-top: 30px;
   }
 }
+.btn-primary {
+  background-color: var(--accent-color) !important; /* violeta */
+  border-color: var(--accent-color) !important;
+  color: #fff !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-color) !important; /* violeta más oscuro */
+  border-color: var(--accent-color) !important;
+}
+
 /* Modal estilo oscuro */
 .modal-content {
   background-color: #1a1a1a !important; /* fondo gris oscuro */
