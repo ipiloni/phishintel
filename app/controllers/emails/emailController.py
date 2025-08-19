@@ -134,7 +134,6 @@ class EmailController:
 
             # Llamada a Gemini
             texto_generado, _ = AIController.armarEmail({"contexto": contexto})
-            texto_generado = re.sub(r"```(?:json)?", "", texto_generado).strip()
 
             import json
             try:
@@ -179,3 +178,5 @@ class EmailController:
             session.rollback()
             session.close()
             return responseError("ERROR", f"Hubo un error al generar y enviar el mail: {str(e)}", 500)
+
+

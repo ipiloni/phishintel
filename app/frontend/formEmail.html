@@ -52,13 +52,14 @@
     <!-- Formulario con Vue -->
     <section id="email" class="contact section">
       <div class="col-lg-8 mx-auto" data-aos="fade-left" data-aos-delay="200">
+        <!-- Vue App -->
         <div id="app" class="contact-form-wrapper">
           <div class="form-header">
             <h3>Generación de Simulación</h3>
             <p>Selecciona el área, usuario y nivel de dificultad.</p>
           </div>
 
-          <form action="forms/generate-email.php" method="post" class="php-email-form">
+          <form class="php-email-form" @submit.prevent="generarPreview">
 
             <!-- Selector de Área -->
             <div class="mb-3">
@@ -74,7 +75,7 @@
             <!-- Selector de Usuario -->
             <div class="mb-3">
               <label for="userSelect" class="form-label">Seleccionar Usuario</label>
-              <select class="form-control" id="userSelect" name="usuario" required>
+              <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" required>
                 <option value="">-- Selecciona un usuario --</option>
                 <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario.idUsuario">
                   {{ usuario.nombre }} {{ usuario.apellido }}
@@ -86,56 +87,51 @@
             <div class="mb-3">
               <label class="form-label">Nivel de Dificultad</label>
               <div class="form-check">
-                <input class="form-check-input" type="radio" name="dificultad" id="facil" value="Fácil" checked>
+                <input class="form-check-input" type="radio" v-model="nivel" id="facil" value="Fácil" checked>
                 <label class="form-check-label" for="facil">Fácil (Desde phishintel@gmail.com)</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="radio" name="dificultad" id="medio" value="Medio">
+                <input class="form-check-input" type="radio" v-model="nivel" id="medio" value="Medio">
                 <label class="form-check-label" for="medio">Medio (Desde pgcontrolcito.com)</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="radio" name="dificultad" id="dificil" value="Difícil">
+                <input class="form-check-input" type="radio" v-model="nivel" id="dificil" value="Difícil">
                 <label class="form-check-label" for="dificil">Difícil (Desde pgcontrol.com.ar)</label>
               </div>
             </div>
 
             <!-- Botón de enviar -->
             <div class="text-center">
-              <button type="button" class="btn btn-primary px-4 py-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#previewModal">>
-                <i class="bi bi-send"></i> Enviar
+              <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill">
+                <i class="bi bi-send"></i> Ver Preview
               </button>
             </div>
-
           </form>
-        </div>
+
+          <!-- Modal Preview (dentro de #app) -->
+          <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+              <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                  <h5 class="modal-title">Email Preview</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <h6>{{ modalAsunto }}</h6>
+                  <div v-html="modalCuerpo"></div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="button" class="btn btn-primary" @click="confirmarEnvio">Confirmar y Enviar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- End #app -->
       </div>
-    </section><!-- /Form Section -->
-    <!-- Modal -->
-    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="previewModalLabel">Email Preview</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-          </div>
-          <div class="modal-body">
-            <!-- Aquí mostramos la preview -->
-            <p><strong>Área:</strong> <span id="previewArea"></span></p>
-            <p><strong>Usuario:</strong> <span id="previewUsuario"></span></p>
-            <p><strong>Dificultad:</strong> <span id="previewDificultad"></span></p>
-            <hr>
-            <p><em>Este es el contenido del email que será enviado...</em></p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="button" id="confirmSend" class="btn btn-primary">Confirmar y Enviar</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-
+    </section>
   </main>
 
   <!-- Vendor JS Files -->
@@ -154,7 +150,12 @@
       data() {
         return {
           areas: [],
-          filtroArea: ""
+          filtroArea: "",
+          filtroUsuario: "",
+          nivel: "Fácil",
+          modalAsunto: "",
+          modalCuerpo: "",
+          emailGenerado: null
         };
       },
       computed: {
@@ -163,18 +164,58 @@
           return areaSeleccionada ? areaSeleccionada.usuarios : [];
         }
       },
+      methods: {
+        async generarPreview() {
+          try {
+            const resp = await fetch("http://localhost:8080/api/email/generar", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario}`,
+                formato: "html",
+                nivel: this.nivel
+              })
+            });
+
+            if (!resp.ok) throw new Error("Error generando el email");
+
+            const data = await resp.json();
+            this.modalAsunto = data.asunto || "Sin asunto";
+            this.modalCuerpo = data.cuerpo || "Sin cuerpo";
+            this.emailGenerado = data;
+
+            // Abrir modal
+            const modal = new bootstrap.Modal(document.getElementById("previewModal"));
+            modal.show();
+
+          } catch (e) {
+            console.error("Error:", e);
+            alert("No se pudo generar el email");
+          }
+        },
+
+        async confirmarEnvio() {
+          try {
+            const resp = await fetch("http://localhost:8080/api/enviar-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(this.emailGenerado)
+            });
+
+            if (!resp.ok) throw new Error("Error enviando el email");
+
+            alert("Email enviado correctamente ✅");
+            bootstrap.Modal.getInstance(document.getElementById("previewModal")).hide();
+
+          } catch (e) {
+            console.error("Error:", e);
+            alert("No se pudo enviar el email");
+          }
+        }
+      },
       async mounted() {
         try {
-          const resp = await fetch("http://127.0.0.1:8080/api/areas", {
-            method: "GET",
-            mode: "cors", // 🔑 necesario si tu API está en otro puerto/host
-            headers: {
-              "Accept": "application/json"
-            }
-          });
-
-          if (!resp.ok) throw new Error("Error en la respuesta: " + resp.status);
-
+          const resp = await fetch("http://localhost:8080/api/areas");
           const data = await resp.json();
           this.areas = data.areas || [];
         } catch (e) {
@@ -183,26 +224,9 @@
       }
     }).mount("#app");
   </script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const form = document.querySelector(".php-email-form");
-      const previewArea = document.getElementById("previewArea");
-      const previewUsuario = document.getElementById("previewUsuario");
-      const previewDificultad = document.getElementById("previewDificultad");
-      const confirmBtn = document.getElementById("confirmSend");
 
-      const previewModal = document.getElementById('previewModal');
-      previewModal.addEventListener('show.bs.modal', () => {
-        previewArea.textContent = document.getElementById("areaSelect").value;
-        previewUsuario.textContent = document.getElementById("userSelect").options[document.getElementById("userSelect").selectedIndex].text;
-        previewDificultad.textContent = document.querySelector("input[name='dificultad']:checked").value;
-      });
-
-      confirmBtn.addEventListener("click", () => {
-        form.submit();
-      });
-    });
-  </script>
 </body>
+
 </html>
+
 

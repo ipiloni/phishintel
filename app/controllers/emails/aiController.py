@@ -1,3 +1,5 @@
+import re
+
 import google.generativeai as genai
 from app.utils.config import get
 from app.backend.models.error import responseError
@@ -32,12 +34,13 @@ class AIController:
                 return responseError("CAMPOS_OBLIGATORIOS", "El campo 'nivel' solo puede tener los valores 1, 2 o 3", 400)
 
         model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-
+        
         try:
             response = model.generate_content(
                 contexto + ". " + formato,
             )
-            return response.text, 201
+            return re.sub(r"```(?:json)?", "", response.text).strip(), 201
+    
         except Exception as e:
             return responseError("ERROR_API", str(e), 500)
 
@@ -47,3 +50,4 @@ class AIController:
     #         return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'contexto'", 400)
     #
     #
+
