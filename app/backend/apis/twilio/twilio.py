@@ -9,8 +9,6 @@ auth_token = get("TWILIO_AUTH_TOKEN_MORA")
 client = Client(account_sid, auth_token)
 
 def llamar(destinatario, remitente):
-  print(f"Llego a la llamada")
-
   call = client.calls.create(
     url="http://demo.twilio.com/docs/voice.xml",
     to=destinatario,
