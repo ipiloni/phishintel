@@ -29,6 +29,16 @@ def principal():
 def usuarios():
    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "usuarios.html")
 
+@frontend.route("/selectorCampania")
+def selectorCampania():
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "selectorCampania.html")
+@frontend.route("/formLlamada")
+def formLlamada():
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "formEmail.html")
+@frontend.route("/formEmail")
+def formEmail():
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "formLlamada.html")
+
 # Ruta para cualquier otro archivo dentro de frontend (CSS, JS, imágenes, vendor, etc.)
 @frontend.route("/<path:filename>")
 def frontend_files(filename):

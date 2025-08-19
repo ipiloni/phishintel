@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Generar Email - PhishIntel</title>
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+</head>
+
+<body class="index-page">
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container position-relative d-flex align-items-center justify-content-between">
+      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+        <h1 class="sitename">PhishIntel</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="/index" class="btn-getstarted btn-login">Home</a></li>
+          <li><a href="/selectorCampania" class="btn-getstarted btn-login">Volver al Panel</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+  <!-- End Header -->
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title py-5"></div>
+
+    <!-- Email Form Section -->
+    <section id="email" class="contact section">
+      <div class="col-lg-8 mx-auto" data-aos="fade-left" data-aos-delay="200">
+        <div class="contact-form-wrapper">
+          <div class="form-header">
+            <h3>Generación de Email de Simulación</h3>
+            <p>Configura el contenido y los destinatarios del correo de simulación de phishing.</p>
+          </div>
+
+          <form action="forms/generate-email.php" method="post" class="php-email-form">
+
+            <!-- Subject -->
+            <div class="mb-3">
+              <label for="subject" class="form-label">Asunto</label>
+              <input type="text" name="subject" class="form-control" id="subject" placeholder="Ej: Actualiza tu perfil" required>
+            </div>
+
+            <!-- Context -->
+            <div class="mb-3">
+              <label for="context" class="form-label">Contenido</label>
+              <textarea class="form-control" name="context" id="context" rows="5" placeholder="Escribe el contenido del mensaje" required></textarea>
+            </div>
+
+            <!-- Message Type -->
+            <div class="mb-3">
+              <label for="messageType" class="form-label">Tipo de Mensaje</label>
+              <select class="form-control" id="messageType" name="messageType">
+                <option>Email</option>
+                <option>Push</option>
+                <option>Email + Push</option>
+              </select>
+            </div>
+
+            <!-- Target -->
+            <div class="mb-3">
+              <label for="target" class="form-label">Destino</label>
+              <select class="form-control" id="target" name="target">
+                <option>Profile Screen</option>
+                <option>Dashboard</option>
+                <option>Login Screen</option>
+              </select>
+            </div>
+
+            <!-- Employees -->
+            <div class="mb-3">
+              <label class="form-label">Seleccionar empleados</label>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="empleados[]" value="Juan Carlos" id="emp1">
+                <label class="form-check-label" for="emp1">Juan Carlos</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="empleados[]" value="Pepe Argento" id="emp2">
+                <label class="form-check-label" for="emp2">Pepe Argento</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="empleados[]" value="Lucas Puotisto" id="emp3">
+                <label class="form-check-label" for="emp3">Lucas Puotisto</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="empleados[]" value="Hernan San Martin" id="emp4">
+                <label class="form-check-label" for="emp4">Hernan San Martin</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="empleados[]" value="Lucila de Rosso" id="emp5">
+                <label class="form-check-label" for="emp5">Lucila de Rosso</label>
+              </div>
+            </div>
+
+            <!-- Set Type -->
+            <div class="mb-3">
+              <label class="form-label">Tipo de Set</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="setType" id="news" value="News">
+                <label class="form-check-label" for="news">News</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="setType" id="reports" value="Reports">
+                <label class="form-check-label" for="reports">Reports</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="setType" id="docs" value="Documentos">
+                <label class="form-check-label" for="docs">Documentos</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="setType" id="media" value="Media">
+                <label class="form-check-label" for="media">Media</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="setType" id="text" value="Text">
+                <label class="form-check-label" for="text">Text</label>
+              </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="my-3">
+              <div class="loading">Cargando</div>
+              <div class="error-message"></div>
+              <div class="sent-message">La plantilla se guardó correctamente.</div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+              <span>Guardar Plantilla</span>
+              <i class="bi bi-arrow-right"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section><!-- /Email Form Section -->
+
+  </main>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+</body>
+</html>

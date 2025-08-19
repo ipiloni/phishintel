@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Generar Llamada - PhishIntel</title>
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+</head>
+
+<body class="index-page">
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container position-relative d-flex align-items-center justify-content-between">
+      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+        <h1 class="sitename">PhishIntel</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="/index" class="btn-getstarted btn-login">Home</a></li>
+          <li><a href="/panel" class="btn-getstarted btn-login">Volver al Panel</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+  <!-- End Header -->
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title py-5"></div>
+
+    <!-- Call Form Section -->
+    <section id="call" class="contact section">
+      <div class="col-lg-8 mx-auto" data-aos="fade-left" data-aos-delay="200">
+        <div class="contact-form-wrapper">
+          <div class="form-header">
+            <h3>Generación de Llamada de Simulación</h3>
+            <p>Configura los parámetros de la llamada de simulación de phishing.</p>
+          </div>
+
+          <form action="forms/generate-call.php" method="post" class="php-email-form">
+
+            <!-- Seleccionar Área -->
+            <div class="mb-3">
+              <label for="area" class="form-label">Seleccionar área</label>
+              <select class="form-control" id="area" name="area" required>
+                <option value="">Elige un área</option>
+                <option>Area1</option>
+                <option>Area2</option>
+                <option>Area3</option>
+              </select>
+            </div>
+
+            <!-- Seleccionar Empleado -->
+            <div class="mb-3">
+              <label for="empleado" class="form-label">Seleccionar empleado</label>
+              <select class="form-control" id="empleado" name="empleado" required>
+                <option value="">Elige un empleado</option>
+                <option>Empleado1</option>
+                <option>Empleado2</option>
+                <option>Empleado3</option>
+              </select>
+            </div>
+
+            <!-- Contexto -->
+            <div class="mb-3">
+              <label for="context" class="form-label">Contexto</label>
+              <textarea class="form-control" name="context" id="context" rows="5" placeholder="Escribe el guion de la llamada" required></textarea>
+            </div>
+
+            <!-- Seleccionar Voz -->
+            <div class="mb-3">
+              <label for="voz" class="form-label">Seleccionar voz</label>
+              <select class="form-control" id="voz" name="voz" required>
+                <option value="">Elige una voz</option>
+                <option>Voz1</option>
+                <option>Voz2</option>
+                <option>Voz3</option>
+              </select>
+            </div>
+
+            <!-- Mensajes -->
+            <div class="my-3">
+              <div class="loading">Cargando</div>
+              <div class="error-message"></div>
+              <div class="sent-message">La llamada se generó correctamente.</div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+              <span>Guardar Plantilla</span>
+              <i class="bi bi-arrow-right"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section><!-- /Call Form Section -->
+
+  </main>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+</body>
+</html>
