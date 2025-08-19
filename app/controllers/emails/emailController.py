@@ -63,11 +63,11 @@ class EmailController:
                 response = enviarMailTwilio(asunto, cuerpo, destinatario)
                 log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
             elif proveedor == "smtp":
-                smtp = SMTPConnection("casarivadavia.ddns.net", "40587")
-                smtp.login("marcos", "linuxcasa")
+                smtp = SMTPConnection("mail.pgcontrol.com.ar", "26")
+                smtp.login("juan.perez@pgcontrol.com.ar", "juan.perez1")
                 message = smtp.compose_message(
-                    sender="marcos@phishintel.org",
-                    name="Marcos",
+                    sender="juan.perez@pgcontrol.com.ar",
+                    name="Administracion PG Control",
                     recipients=[destinatario],
                     subject=asunto,
                     html=cuerpo
@@ -157,11 +157,11 @@ class EmailController:
                 response = enviarMailTwilio(asunto, cuerpo, usuario.correo)
                 log.success(f"Twilio sendgrid response: {response.status_code}")
             elif proveedor == "smtp":
-                smtp = SMTPConnection("casarivadavia.ddns.net", "40587")
-                smtp.login("marcos", "linuxcasa")
+                smtp = SMTPConnection("mail.pgcontrol.com.ar", "26")
+                smtp.login("juan.perez@pgcontrol.com.ar", "juan.perez1")
                 message = smtp.compose_message(
                     sender=remitente,
-                    name="Administración PhishIntel",
+                    name="Administración PGControl",
                     recipients=[usuario.correo],
                     subject=asunto,
                     html=cuerpo
