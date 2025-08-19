@@ -1,4 +1,4 @@
-from flask import request, Blueprint
+from flask import request, Blueprint, send_file
 
 from app.backend.models.error import responseError
 from app.config.db_config import Base, engine
@@ -17,6 +17,10 @@ import os
 # Flask es la libreria que vamos a usar para generar los Endpoints
 apis = Blueprint("apis", __name__)
 # =================== ENDPOINTS =================== #
+# ------ # TRANSFORMADORES TTS Y STT # ------ #
+@apis.route("/api/audios/<nombreAudio>", methods=["GET"])
+def enviarAudio(nombreAudio):
+    return send_file(f"./audios/{nombreAudio}", mimetype="audio/mpeg")
 
 # ------ # TRANSFORMADORES TTS Y STT # ------ #
 @apis.route("/api/tts", methods=["POST"])
