@@ -23,7 +23,20 @@
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
 </head>
+<style>
+/* Personalizar los radios */
 
+/* Cuando está seleccionado → círculo rosa */
+.custom-radio:checked {
+  background-color: #da02e5; /* rosa */
+  border-color: #da02e5;
+}
+
+/* Para navegadores que usan -webkit-appearance */
+.custom-radio[type="radio"] {
+  accent-color: #da02e5; /* Soporta Chrome/Edge/Firefox modernos */
+}
+</style>
 <body class="index-page">
 
   <!-- ======= Header ======= -->
@@ -67,7 +80,7 @@
               <select v-model="filtroArea" class="form-control" id="areaSelect" name="area" required>
                 <option value="">-- Selecciona un área --</option>
                 <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
-                  {{ area.nombreArea }}
+                  {{ area.nombreArea }} 
                 </option>
               </select>
             </div>
@@ -77,28 +90,31 @@
               <label for="userSelect" class="form-label">Seleccionar Usuario</label>
               <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" required>
                 <option value="">-- Selecciona un usuario --</option>
-                <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario.idUsuario">
+                <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario">
                   {{ usuario.nombre }} {{ usuario.apellido }}
                 </option>
               </select>
             </div>
 
-            <!-- Dificultad -->
-            <div class="mb-3">
-              <label class="form-label">Nivel de Dificultad</label>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" v-model="nivel" id="facil" value="Fácil" checked>
-                <label class="form-check-label" for="facil">Fácil (Desde phishintel@gmail.com)</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" v-model="nivel" id="medio" value="Medio">
-                <label class="form-check-label" for="medio">Medio (Desde pgcontrolcito.com)</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" v-model="nivel" id="dificil" value="Difícil">
-                <label class="form-check-label" for="dificil">Difícil (Desde pgcontrol.com.ar)</label>
-              </div>
+                      <!-- Dificultad -->
+          <div class="mb-3">
+            <label class="form-label">Nivel de Dificultad</label>
+
+            <div class="form-check">
+              <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="facil" value="Fácil" checked>
+              <label class="form-check-label" for="facil">Fácil (Desde phishintel@gmail.com)</label>
             </div>
+
+            <div class="form-check">
+              <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="medio" value="Medio">
+              <label class="form-check-label" for="medio">Medio (Desde pgcontrolcito.com)</label>
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="dificil" value="Difícil">
+              <label class="form-check-label" for="dificil">Difícil (Desde pgcontrol.com.ar)</label>
+            </div>
+          </div>
 
             <!-- Botón de enviar -->
             <div class="text-center">
@@ -113,11 +129,15 @@
             <div class="modal-dialog modal-lg modal-dialog-centered">
               <div class="modal-content bg-dark text-white">
                 <div class="modal-header">
-                  <h5 class="modal-title">Email Preview</h5>
+                  <h5 class="modal-title">Vista previa del mail a enviar</h5>
                   <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                     aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                  <p><strong>Área: </strong>{{ filtroArea }} <span id="previewArea"></span></p>
+                  <p><strong>Usuario:  </strong> {{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}<span id="previewUsuario"></span></p>
+                  <p><strong>Dificultad: </strong> {{ nivel }}<span id="previewDificultad"></span></p>
+                  <hr>
                   <h6>{{ modalAsunto }}</h6>
                   <div v-html="modalCuerpo"></div>
                 </div>
@@ -155,7 +175,12 @@
           nivel: "Fácil",
           modalAsunto: "",
           modalCuerpo: "",
-          emailGenerado: null
+          emailGenerado: {
+          proveedor: "smtp",
+          idUsuario: null, 
+          asunto: "",
+          cuerpo: ""
+        }
         };
       },
       computed: {
@@ -171,7 +196,7 @@
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario}`,
+                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, Fecha dentro de 3 dias, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam. El asunto que solo diga "hola"`,
                 formato: "html",
                 nivel: this.nivel
               })
@@ -182,12 +207,16 @@
             const data = await resp.json();
             this.modalAsunto = data.asunto || "Sin asunto";
             this.modalCuerpo = data.cuerpo || "Sin cuerpo";
-            this.emailGenerado = data;
-
+            
+            this.emailGenerado.asunto = data.asunto;
+            this.emailGenerado.cuerpo = data.cuerpo;
+            this.emailGenerado.idUsuario = this.filtroUsuario.idUsuario;
+            
+            
             // Abrir modal
             const modal = new bootstrap.Modal(document.getElementById("previewModal"));
             modal.show();
-
+            alert(this.emailGenerado.idUsuario);
           } catch (e) {
             console.error("Error:", e);
             alert("No se pudo generar el email");
@@ -196,12 +225,12 @@
 
         async confirmarEnvio() {
           try {
-            const resp = await fetch("http://localhost:8080/api/enviar-email", {
+            const resp = await fetch("http://localhost:8080/api/email/enviar-id", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(this.emailGenerado)
             });
-
+    
             if (!resp.ok) throw new Error("Error enviando el email");
 
             alert("Email enviado correctamente ✅");

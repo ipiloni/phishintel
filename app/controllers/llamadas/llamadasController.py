@@ -1,7 +1,7 @@
 from flask import Response, jsonify
 from twilio.twiml.voice_response import VoiceResponse
 
-from app.apis import enviarAudio
+#from app.apis import enviarAudio
 from app.backend.apis.ai import gemini
 from app.backend.apis.twilio import twilio
 from app.backend.models.error import responseError
