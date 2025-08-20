@@ -12,10 +12,15 @@ from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.fallaController import FallaController
 from app.controllers.mensajes.mensajesController import MensajesController
 from app.utils.logger import log
+from flask_cors import CORS
 import os
 
 # Flask es la libreria que vamos a usar para generar los Endpoints
 apis = Blueprint("apis", __name__)
+
+CORS(apis, resources={r"/api/*": {"origins": "*"}},
+     allow_headers=["Content-Type", "Authorization"],
+     supports_credentials=True)
 # =================== ENDPOINTS =================== #
 # ------ # LLAMADAS TWILIO # ------ #
 @apis.route("/api/audios/<nombreAudio>", methods=["GET"])
@@ -107,6 +112,11 @@ def notificarViaEmail():
 def enviarEmail():
     data = request.get_json()
     return EmailController.enviarMail(data)
+
+@apis.route("/api/email/enviar-id", methods=["POST"]) # Esta ruta
+def enviarEmailPorID():
+    data = request.get_json()
+    return EmailController.enviarMailPorID(data)
 
 @apis.route("/api/email/generar", methods=["POST"]) # Esta ruta llama a gemini y genera un asunto y texto en html
 def llamarIAGemini():
