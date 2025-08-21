@@ -42,7 +42,7 @@
   <!-- ======= Header ======= -->
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container position-relative d-flex align-items-center justify-content-between">
-      <a href="/index" class="logo d-flex align-items-center me-auto me-xl-0">
+      <a href="/" class="logo d-flex align-items-center me-auto me-xl-0">
         <h1 class="sitename">PhishIntel</h1>
       </a>
 
@@ -134,10 +134,12 @@
                     aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                  <p><strong>Opciones Elegidas </strong></p>
                   <p><strong>Área: </strong>{{ filtroArea }} <span id="previewArea"></span></p>
                   <p><strong>Usuario:  </strong> {{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}<span id="previewUsuario"></span></p>
                   <p><strong>Dificultad: </strong> {{ nivel }}<span id="previewDificultad"></span></p>
                   <hr>
+                  <p><strong>Mail generado por IA</strong></p>
                   <h6>{{ modalAsunto }}</h6>
                   <div v-html="modalCuerpo"></div>
                 </div>
@@ -196,7 +198,7 @@
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, Fecha dentro de 3 dias, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam. El asunto que solo diga "hola"`,
+                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam.`,
                 formato: "html",
                 nivel: this.nivel
               })
@@ -211,12 +213,11 @@
             this.emailGenerado.asunto = data.asunto;
             this.emailGenerado.cuerpo = data.cuerpo;
             this.emailGenerado.idUsuario = this.filtroUsuario.idUsuario;
-            
-            
+
             // Abrir modal
             const modal = new bootstrap.Modal(document.getElementById("previewModal"));
             modal.show();
-            alert(this.emailGenerado.idUsuario);
+
           } catch (e) {
             console.error("Error:", e);
             alert("No se pudo generar el email");
