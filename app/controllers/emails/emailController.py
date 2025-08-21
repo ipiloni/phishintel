@@ -153,6 +153,7 @@ class EmailController:
 
             # Enviar el email
             if proveedor == "twilio":
+
                 response = enviarMailTwilio(asunto, cuerpo, usuario.correo)
                 log.success(f"Twilio sendgrid response: {response.status_code}")
             elif proveedor == "smtp":
@@ -220,8 +221,13 @@ class EmailController:
 
             # Enviar email
             if proveedor == "twilio":
-                response = enviarMailTwilio(asunto, cuerpo, usuario.correo)
-                log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
+                datanueva = {
+                    "destinatario": "juan.perez@pgcontrol.com.ar",
+                    "asunto": data["asunto"],
+                    "cuerpo": data["cuerpo"]
+                }
+                response, status = EmailController.enviarNotificacionPhishintel(datanueva)
+                log.info(f"Respuesta del servicio Twilio sendgrid: {response}")
             elif proveedor == "smtp":
                 smtp = SMTPConnection("mail.pgcontrol.com.ar", "26")
                 smtp.login("juan.perez@pgcontrol.com.ar", "juan.perez1")
