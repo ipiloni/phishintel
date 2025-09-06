@@ -36,10 +36,10 @@ def selectorCampania():
    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "selectorCampania.html")
 @frontend.route("/formLlamada")
 def formLlamada():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "formLlamada.html")
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "campaniaLlamada.html")
 @frontend.route("/formEmail")
 def formEmail():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "formEmail.html")
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "campaniaEmail.html")
 @frontend.route("/enConstruccion")
 def enConstruccion():
    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "enConstruccion.html")
