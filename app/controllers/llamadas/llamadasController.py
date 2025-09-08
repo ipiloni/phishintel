@@ -1,8 +1,6 @@
 from flask import Response, jsonify
 from twilio.twiml.voice_response import VoiceResponse
 
-#from app.apis import enviarAudio
-from app.backend.apis.ai import gemini
 from app.backend.apis.twilio import twilio
 from app.backend.models.error import responseError
 from app.controllers.llamadas.elevenLabsController import ElevenLabsController
@@ -10,47 +8,38 @@ from app.utils.logger import log
 
 class LlamadasController:
 
-    # TODO: Esto deberemos hacerlo cuando podamos llamar!!!
-
     @staticmethod
     def llamar(data):
         if not data or "destinatario" not in data or "remitente" not in data:
             return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'destinatario', o 'remitente'", 400)
 
+        objetivo = """
+            Eres el jefe de un área dentro de la empresa PG Control.
+            Tu objetivo es simular un intento de phishing telefónico, como parte de un entrenamiento de seguridad.
+            Debes hablar de manera convincente, pero sin agresividad, intentando que el empleado abra un link 
+            que se le enviará por SMS. 
+    
+            Reglas:
+            - Mantén un tono serio y autoritario, como un superior jerárquico.
+            - No uses amenazas extremas, solo urgencia laboral.
+            - Habla en frases cortas, naturales, como en una llamada real.
+            - En ningún momento digas que es un entrenamiento: eso se evalúa después.
+            - Mantén la coherencia del rol de “jefe de área”.
+            - Solamente responde lo que el jefe debe decir.
+        """
+
         destinatario = data["destinatario"]
         remitente = data["remitente"]
+        # objetivo = data["objetivo"]
+
+        # url_audio = obtenerUrlAudio(objetivo);
+        url_audio = None
 
         if destinatario == remitente:
             return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
 
-        return twilio.llamar(destinatario, remitente)
+        return twilio.llamar(destinatario, remitente, url_audio)
 
-    # @staticmethod
-    # def generarLlamada(idDestinatario, idRemitente, objetivo):
-    #
-    # # 1. obtener destinatario y remitente, en caso de que no existan o que el numero de telefono
-    # # del destinatario no este cargado en la base, se tira un error 404.
-    #
-    # # 2. Armar el prompt en la IA (dolor de huevos/ovarios)
-    #
-
-
-    # @staticmethod
-    # def generarEndpointAudio(ubicacionAudio):
-    #
-    #     @app.route("/audio_endpoint", methods=["GET", "POST"])
-    #     def audio_endpoint():
-    #         response = VoiceResponse()
-    #         # Twilio requiere que el audio esté accesible públicamente por URL
-    #         response.play(ubicacionAudio)
-    #         return Response(str(response), mimetype="text/xml")
-    #
-    #     # Devuelve la URL absoluta del endpoint (para pasársela al create call)
-    #     return url_for("audio_endpoint", _external=True)
-
-    # @staticmethod
-    # def generarRespuesta(data):
-    #     if not data or "conversacion" not in data or "objetivo" not in data:
 
     @staticmethod
     def procesarRespuesta(speech, confidence):
@@ -64,7 +53,8 @@ class LlamadasController:
 
         conversacion.append(speech)
         # 3. generar una respuesta
-        respuestaEnTexto = gemini.generarRespuesta(conversacion)
+        # respuestaEnTexto = gemini.generarRespuesta(prompt, conversacion)
+        respuestaEnTexto = ""
 
         # 3.1. armar el audio
         data = jsonify({
@@ -76,7 +66,7 @@ class LlamadasController:
         audio = ElevenLabsController.generarTTS(data)
         
         # 3.2. exponer audio en internet
-        urlAudio = enviarAudio(audio)
+        urlAudio = None # enviarAudio(audio)
 
         # 4. enviar a twilio un audio con la respuesta
         response = VoiceResponse()
