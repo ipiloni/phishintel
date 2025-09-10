@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from flask import jsonify
 
+from app.backend.apis.ai.gemini import Gemini
 from app.backend.models.error import responseError
 from app.utils.config import get
 from app.utils.logger import log
@@ -74,3 +75,7 @@ class GeminiController:
         else:
             log.error(f"No se pudo acceder al perfil: {resp.status_code}")
             return {}
+
+    @staticmethod
+    def generarTexto(objetivo, conversacion):
+        return Gemini.generarRespuesta(objetivo, conversacion)

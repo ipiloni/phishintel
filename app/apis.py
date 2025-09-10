@@ -25,6 +25,9 @@ CORS(apis, resources={r"/api/*": {"origins": "*"}},
 # ------ # LLAMADAS TWILIO # ------ #
 @apis.route("/api/audios/<nombreAudio>", methods=["GET"])
 def enviarAudio(nombreAudio):
+    return obtenerAudio(nombreAudio)
+
+def obtenerAudio(nombreAudio): # es una funcion que nos permite reutilizarla internamente
     return send_file(f"./audios/{nombreAudio}", mimetype="audio/mpeg")
 
 @apis.route("/api/twilio/respuesta", methods=["POST"])
@@ -32,6 +35,11 @@ def procesarRespuestaLlamadaTwilio():
     speech = request.form.get("SpeechResult")
     confidence = request.form.get("Confidence")
     return LlamadasController.procesarRespuesta(speech, confidence)
+
+@apis.route("/api/llamadas", methods=["POST"])
+def generarLlamada():
+    data = request.get_json()
+    return LlamadasController.llamar(data)
 
 # ------ # TRANSFORMADORES TTS Y STT # ------ #
 @apis.route("/api/tts", methods=["POST"])
@@ -55,12 +63,6 @@ def enviarMensajeWhatsapp():
 def enviarMensajeSMS():
     data = request.get_json()
     return MensajesController.enviarMensajeSMS(data)
-
-# ------ # LLAMADA # ------ #
-@apis.route("/api/llamadas", methods=["POST"])
-def generarLlamada():
-    data = request.get_json()
-    return LlamadasController.llamar(data)
 
 # ------ # REGISTROS DE EVENTOS +  # ------ #
 @apis.route("/api/sumar-falla", methods=["GET"])
