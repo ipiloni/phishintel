@@ -55,11 +55,7 @@ def stt(ubicacion):
         log.error("Hubo un error al generar el STT: " + str(e))
         return responseError("ERROR_ELEVENLABS", "Hubo un error en la llamada a ElevenLabs: " + str(e), 500)
 
-def tts(data):
-    texto = data["texto"]
-    idVoz = data["idVoz"]
-    estabilidad = data["estabilidad"]
-    velocidad = data["velocidad"].strip().lower()
+def tts(texto, idVoz, estabilidad, velocidad):
 
     if idVoz is None:
         log.warning("No se ha elegido un id de Voz, se utilizara la predeterminada.")
@@ -124,11 +120,11 @@ def tts(data):
 
         log.info(f"Audio guardado en: {save_file_path}")
 
-        return jsonify({
+        return {
             "mensaje": "Audio guardado correctamente",
-            "id": idAudio,
+            "idAudio": str(idAudio),
             "ubicacion": save_file_path
-        })
+        }
 
     except Exception as e:
         log.error("Hubo un error en la llamada a ElevenLabs: " + str(e))
