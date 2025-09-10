@@ -25,9 +25,9 @@ CORS(apis, resources={r"/api/*": {"origins": "*"}},
 # ------ # LLAMADAS TWILIO # ------ #
 @apis.route("/api/audios/<nombreAudio>", methods=["GET"])
 def enviarAudio(nombreAudio):
-    return obtenerAudio(nombreAudio)
+    return exponerAudio(nombreAudio)
 
-def obtenerAudio(nombreAudio): # es una funcion que nos permite reutilizarla internamente
+def exponerAudio(nombreAudio): # es una funcion que nos permite reutilizarla internamente
     return send_file(f"./audios/{nombreAudio}", mimetype="audio/mpeg")
 
 @apis.route("/api/twilio/respuesta", methods=["POST"])

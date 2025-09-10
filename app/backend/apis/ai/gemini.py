@@ -3,7 +3,7 @@ import google.generativeai as genai
 from app.utils.config import get
 from app.utils.logger import log
 
-api_key = get("GEMINI_API_KEY_IGNA")
+api_key = get("GEMINI_API_KEY_IGNA")c
 
 # Configurar la API key una sola vez al inicio
 genai.configure(api_key=api_key)

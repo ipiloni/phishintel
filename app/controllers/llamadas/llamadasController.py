@@ -4,8 +4,11 @@ from app.backend.apis.elevenLabs import elevenLabs
 from app.backend.apis.twilio import twilio
 from app.backend.models.error import responseError
 from app.controllers.geminiController import GeminiController
+from app.utils.config import get
 from app.utils.conversacion import conversacionActual
 from app.utils.logger import log
+
+password = get("LLAMAR_PASSWORD")
 
 class LlamadasController:
 
@@ -20,58 +23,69 @@ class LlamadasController:
         # 5. Genera la llamada via Twilio al destinatario y le envia la URL del endpoint donde se encuentra el audio a reproducir
         """
 
-        if not data or "destinatario" not in data or "remitente" not in data:
-            return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'destinatario', o 'remitente'", 400)
+        if data["password"] != password:
+            return responseError("CREDENCIAL_INCORRECTA", "Password incorrecto", 401)
 
-        destinatario = data["destinatario"]
-        remitente = data["remitente"]
+        try:
+            if not data or "destinatario" not in data or "remitente" not in data:
+                return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'destinatario', o 'remitente'",400)
 
-        if "objetivo" not in data:
-            log.warn("No se indico un Objetivo en la llamada, se utilizara uno predeterminado")
-            objetivo = """
-                Eres el jefe de un área dentro de la empresa PG Control.
-                Tu objetivo es simular un intento de phishing telefónico, como parte de un entrenamiento de seguridad.
-                Debes hablar de manera convincente, pero sin agresividad, intentando que el empleado abra un link 
-                que se le enviará por SMS. 
-        
-                Reglas:
-                - Si la conversacion esta vacia, pues comienza con un saludo. Espera a la respuesta del empleado.
-                - Mantén un tono serio y autoritario, como un superior jerárquico.
-                - No uses amenazas extremas, solo urgencia laboral.
-                - Responde **solo con una frase corta** que el jefe diría en esta interacción. No digas nada más ni avances la conversación.
-                - En ningún momento digas que es un entrenamiento: eso se evalúa después.
-                - Mantén la coherencia del rol de “jefe de área”.
-                - Solamente responde lo que el jefe debe decir.
-                - El empleado se llama Marcos Gurruchaga, trabaja en PGControl en el area de Ciberseguridad
-            """
+            destinatario = data["destinatario"]
+            remitente = data["remitente"]
 
-        texto = GeminiController.generarTexto(objetivo, conversacionActual)
+            if "objetivo" not in data:
+                log.warn("No se indico un Objetivo en la llamada, se utilizara uno predeterminado")
+                objetivo = """
+                    Eres el jefe de un área dentro de la empresa PG Control.
+                    Tu objetivo es simular un intento de phishing telefónico, como parte de un entrenamiento de seguridad.
+                    Debes hablar de manera convincente, pero sin agresividad, intentando que el empleado abra un link 
+                    que se le enviará por SMS. 
 
-        log.info(f"La IA genero el texto: {texto}")
+                    Reglas:
+                    - Si la conversacion esta vacia, pues comienza con un saludo. Espera a la respuesta del empleado.
+                    - Mantén un tono serio y autoritario, como un superior jerárquico.
+                    - No uses amenazas extremas, solo urgencia laboral.
+                    - Responde **solo con una frase corta** que el jefe diría en esta interacción. No digas nada más ni avances la conversación.
+                    - En ningún momento digas que es un entrenamiento: eso se evalúa después.
+                    - Mantén la coherencia del rol de “jefe de área”.
+                    - Solamente responde lo que el jefe debe decir.
+                    - El empleado se llama Marcos Gurruchaga, trabaja en PGControl en el area de Ciberseguridad
+                """
 
-        conversacionActual.append({"rol": "IA", "mensaje": texto})
+            texto = GeminiController.generarTexto(objetivo, conversacionActual)
 
-        idVoz = data.get("vozRemitente", "O1CnH2NGEehfL1nmYACp") # esto es un get o default, intenta obtener vozRemitente y si no lo pasaron toma el default
+            log.info(f"La IA genero el texto: {texto}")
 
-        elevenLabsResponse = elevenLabs.tts(texto, idVoz, None, None) # por el momento estabilidad y velocidad en None
+            conversacionActual.append({"rol": "IA", "mensaje": texto})
 
-        idAudio = elevenLabsResponse["idAudio"]
+            idVoz = data.get("vozRemitente",
+                             "O1CnH2NGEehfL1nmYACp")  # esto es un get o default, intenta obtener vozRemitente y si no lo pasaron toma el default
 
-        from app.apis import obtenerAudio
-        urlAudio = obtenerAudio(f"{idAudio}.mp3")
+            elevenLabsResponse = elevenLabs.tts(texto, idVoz, None,None)  # por el momento estabilidad y velocidad en None
 
-        if destinatario == remitente:
-            return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
+            idAudio = elevenLabsResponse["idAudio"]
 
-        url = "http://localhost:8080"  # localhost, ngrok o cuando se despliegue
-        urlAudio = f"{url}/api/audios/{idAudio}.mp3"
+            from app.apis import exponerAudio
+            exponerAudio(f"{idAudio}.mp3")  # expone el archivo .mp3 a internet para que Twilio pueda reproducirlo
 
-        return jsonify({
-            "remitente": remitente,
-            "destinatario": destinatario,
-            "urlAudio": urlAudio
-        })
-        # return twilio.llamar(destinatario, remitente, urlAudio)
+            if destinatario == remitente:
+                return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
+
+            url = "http://localhost:8080"  # localhost, ngrok o cuando se despliegue
+            urlAudio = f"{url}/api/audios/{idAudio}.mp3"
+
+            return jsonify({
+                "remitente": remitente,
+                "destinatario": destinatario,
+                "urlAudio": urlAudio
+            })
+
+            # return twilio.llamar(destinatario, remitente, urlAudio)
+
+        except Exception as e:
+            log.error(e)
+            return responseError("ERROR_AL_LLAMAR", f"Hubo un error al intentar ejecutar la llamada: {str(e)}", 500)
+
 
 
     @staticmethod
