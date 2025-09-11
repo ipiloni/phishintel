@@ -81,7 +81,72 @@ def openapi_spec():
                                         {"type": "array", "items": {"$ref": "#/components/schemas/UsuarioCreate"}},
                                         {"type": "object", "properties": {"usuarios": {"type": "array", "items": {"$ref": "#/components/schemas/UsuarioCreate"}}}}
                                     ]
-                                }
+                                },
+                                "example": [
+                                    {
+                                        "nombreUsuario": "nachoscocco",
+                                        "password": "ignacio.scocco1",
+                                        "nombre": "Ignacio",
+                                        "apellido": "Scocco",
+                                        "correo": "ignacio.scocco@pgcontrol.com.ar"
+                                    },
+                                    {
+                                        "nombreUsuario": "manuginobili",
+                                        "password": "manuel.ginobili1",
+                                        "nombre": "Manuel",
+                                        "apellido": "Ginobili",
+                                        "correo": "manuel.ginobili@pgcontrol.com.ar"
+                                    },
+                                    {
+                                        "nombreUsuario": "juanperez",
+                                        "password": "juan.perez1",
+                                        "nombre": "Juan",
+                                        "apellido": "Perez",
+                                        "correo": "juan.perez@pgcontrol.com.ar"
+                                    },
+                                    {
+                                        "nombreUsuario": "pipiromagnoli",
+                                        "password": "leandro.romagnoli1",
+                                        "nombre": "Leandro",
+                                        "apellido": "Romagnoli",
+                                        "correo": "leandro.romagnoli@pgcontrol.com.ar"
+                                    },
+                                    {
+                                        "nombreUsuario": "lauramartinez",
+                                        "password": "laura.martinez1",
+                                        "nombre": "Laura",
+                                        "apellido": "Martinez",
+                                        "correo": "laura.martinez@pgcontrol.com.ar"
+                                    },
+                                    {
+                                        "nombreUsuario": "carloslopez",
+                                        "password": "carlos.lopez1",
+                                        "nombre": "Carlos",
+                                        "apellido": "Lopez",
+                                        "correo": "carlos.lopez@pgcontrol.com.ar"
+                                    },
+                                    {
+                                        "nombreUsuario": "leonardopisculichi",
+                                        "password": "leonardo.pisculichi1",
+                                        "nombre": "Leonardo",
+                                        "apellido": "Pisculichi",
+                                        "correo": "leonardo.pisculichi@pgcontrol.com.ar"
+                                    },
+                                    {
+                                        "nombreUsuario": "davidnalbandian",
+                                        "password": "david.nalbandian1",
+                                        "nombre": "David",
+                                        "apellido": "Nalbandian",
+                                        "correo": "david.nalbandian@pgcontrol.com.ar"
+                                    },
+                                    {
+                                        "nombreUsuario": "delpo",
+                                        "password": "juan.delpotro1",
+                                        "nombre": "Juan Martin",
+                                        "apellido": "Del Potro",
+                                        "correo": "juan.delpotro@pgcontrol.com.ar"
+                                    }
+                                ]
                             }
                         }
                     },
@@ -220,7 +285,21 @@ def openapi_spec():
                                         {"type": "array", "items": {"$ref": "#/components/schemas/AreaCreate"}},
                                         {"type": "object", "properties": {"areas": {"type": "array", "items": {"$ref": "#/components/schemas/AreaCreate"}}}}
                                     ]
-                                }
+                                },
+                                "example": [
+                                    {
+                                        "nombreArea": "Ventas",
+                                        "usuarios": [1, 2, 3]
+                                    },
+                                    {
+                                        "nombreArea": "RRHH",
+                                        "usuarios": [4, 5, 6]
+                                    },
+                                    {
+                                        "nombreArea": "Compras",
+                                        "usuarios": [7, 8, 9]
+                                    }
+                                ]
                             }
                         }
                     },
