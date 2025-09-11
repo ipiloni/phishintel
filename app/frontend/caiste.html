@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Caíste en el Phishing - PhishIntel</title>
+
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Raleway&display=swap" rel="stylesheet">
+
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <link href="assets/css/main.css" rel="stylesheet">
+  <style>
+    .alert-caiste {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      border: none;
+      color: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+    }
+    
+    .alert-caiste .alert-heading {
+      color: white;
+      font-weight: bold;
+    }
+    
+    .btn-warning {
+      background-color: #ffc107;
+      border-color: #ffc107;
+      color: #212529;
+      font-weight: bold;
+      padding: 12px 30px;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-warning:hover {
+      background-color: #e0a800;
+      border-color: #d39e00;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+    }
+    
+    .phishing-icon {
+      font-size: 4rem;
+      color: #dc3545;
+      margin-bottom: 1rem;
+    }
+    
+    .warning-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body class="index-page">
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container position-relative d-flex align-items-center justify-content-between">
+      <a href="/" class="logo d-flex align-items-center me-auto me-xl-0">
+        <h1 class="sitename">PhishIntel</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="/principal" class="btn-getstarted btn-login">Home</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+  <!-- End Header -->
+
+  <main class="main">
+    <div class="page-title py-5"></div>
+
+    <section class="section">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center">
+          <div class="col-lg-8 col-xl-6">
+            <div class="alert alert-caiste text-center" role="alert">
+              <div class="phishing-icon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+              </div>
+              <h2 class="alert-heading mb-4">¡Caíste en el Phishing!</h2>
+              <p class="warning-text mb-4">
+                Has sido víctima de una simulación de phishing. Esto es parte de un ejercicio de seguridad 
+                para ayudarte a reconocer y evitar amenazas reales.
+              </p>
+              <p class="warning-text mb-4">
+                <strong>Ten cuidado con los enlaces</strong> que recibes por correo electrónico. 
+                Siempre verifica la fuente antes de hacer clic en cualquier enlace.
+              </p>
+              <hr style="border-color: rgba(255,255,255,0.3);">
+              <p class="mb-4">
+                <small>Esta simulación ha sido registrada para fines de entrenamiento en seguridad.</small>
+              </p>
+              <a href="/principal" class="btn btn-warning">
+                <i class="bi bi-house-fill me-2"></i>
+                Volver al Inicio
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+    <div class="container copyright text-center mt-4">
+      <p>© <span>Copyright</span> <strong class="px-1">PhishIntel</strong> <span>All Rights Reserved</span></p>
+    </div>
+
+  <!-- End Footer -->
+
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/typed.js/typed.umd.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+  <script>
+    // Obtener parámetros de la URL
+    function getUrlParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return {
+        idUsuario: urlParams.get('idUsuario'),
+        idEvento: urlParams.get('idEvento')
+      };
+    }
+
+    // Llamar a sumar-falla cuando se carga la página
+    document.addEventListener('DOMContentLoaded', function() {
+      const params = getUrlParams();
+      
+      if (params.idUsuario && params.idEvento) {
+        // Hacer llamada AJAX a sumar-falla
+        fetch(`/api/sumar-falla?idUsuario=${params.idUsuario}&idEvento=${params.idEvento}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Falla registrada:', data);
+        })
+        .catch(error => {
+          console.error('Error al registrar falla:', error);
+        });
+      }
+    });
+  </script>
+
+</body>
+
+</html>
