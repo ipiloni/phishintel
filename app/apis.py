@@ -187,3 +187,8 @@ def eliminarArea(idArea):
 def editarArea(idArea):
     data = request.get_json()
     return AreasController.editarArea(idArea, data)
+
+# ------ # AREAS - REPORTES # ------ #
+@apis.route("/api/areas/fallas", methods=["GET"])
+def obtenerFallasPorArea():
+    return AreasController.obtenerFallasPorArea()

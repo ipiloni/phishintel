@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>ABM - PhishIntel</title>
+
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Raleway&display=swap" rel="stylesheet">
+
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <link href="assets/css/main.css" rel="stylesheet">
+</head>
+
+<body class="index-page">
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container position-relative d-flex align-items-center justify-content-between">
+      <a href="/" class="logo d-flex align-items-center me-auto me-xl-0">
+        <h1 class="sitename">PhishIntel</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="/principal" class="btn-getstarted btn-login">Home</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+  <!-- End Header -->
+
+  <main class="main">
+    <div class="page-title py-5"></div>
+
+    <section class="section">
+      <div id="app" class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-4" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" :class="{active: activeTab==='areas'}" @click="activeTab='areas'" type="button" role="tab">
+              <i class="bi bi-building"></i> Áreas
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" :class="{active: activeTab==='usuarios'}" @click="activeTab='usuarios'" type="button" role="tab">
+              <i class="bi bi-people"></i> Usuarios
+            </button>
+          </li>
+        </ul>
+
+        <!-- ÁREAS -->
+        <div v-show="activeTab==='areas'">
+          <div class="row g-4">
+            <!-- Form crear/editar Área -->
+            <div class="col-lg-7">
+              <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0">{{ areaForm.idArea ? 'Editar Área' : 'Crear Área' }}</h5>
+                </div>
+                <div class="card-body">
+                  <form @submit.prevent="submitArea" class="php-email-form">
+                    <div class="mb-3">
+                      <label class="form-label">Nombre del Área</label>
+                      <input class="form-control" v-model="areaForm.nombreArea" placeholder="Ej: Ventas" required>
+                    </div>
+
+                    <div class="mb-2 d-flex justify-content-between align-items-center">
+                      <label class="form-label mb-0">Asignación de usuarios</label>
+                      <small class="text-muted" v-if="!areaForm.idArea">Se asignarán al crear el área</small>
+                      <small class="text-muted" v-else>Se actualizarán asignaciones al guardar</small>
+                    </div>
+
+                    <div class="row g-2 align-items-center">
+                      <div class="col-5">
+                        <div class="small text-muted mb-1">Disponibles</div>
+                        <select class="form-select" size="8" multiple v-model="seleccionDisponibles">
+                          <option v-for="u in usuariosDisponibles" :key="u.idUsuario" :value="u.idUsuario">
+                            {{ u.nombre }} {{ u.apellido }} — de: {{ nombreArea(u.idArea) }}
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-2 d-flex flex-column align-items-center gap-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm" @click="agregarSeleccion"><i class="bi bi-chevron-right"></i></button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" @click="quitarSeleccion"><i class="bi bi-chevron-left"></i></button>
+                      </div>
+                      <div class="col-5">
+                        <div class="small text-muted mb-1">Asignados</div>
+                        <select class="form-select" size="8" multiple v-model="seleccionAsignados">
+                          <option v-for="u in usuariosAsignados" :key="u.idUsuario" :value="u.idUsuario">
+                            {{ u.nombre }} {{ u.apellido }} — de: {{ nombreArea(u.idArea) }}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3">
+                      <button type="submit" class="btn btn-primary">
+                        <i class="bi" :class="areaForm.idArea ? 'bi-save' : 'bi-plus-circle' "></i>
+                        {{ areaForm.idArea ? 'Guardar cambios' : 'Crear Área' }}
+                      </button>
+                      <button v-if="areaForm.idArea" type="button" class="btn btn-secondary" @click="resetAreaForm">
+                        Cancelar
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lista de Áreas -->
+            <div class="col-lg-5">
+              <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0">Áreas</h5>
+                  <button class="btn btn-outline-primary btn-sm" @click="cargarAreas"><i class="bi bi-arrow-clockwise"></i></button>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Usuarios</th>
+                        <th class="text-end">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="a in areas" :key="a.idArea">
+                        <td>{{ a.idArea }}</td>
+                        <td>{{ a.nombreArea }}</td>
+                        <td>{{ (a.usuarios||[]).length }}</td>
+                        <td class="text-end">
+                          <button class="btn btn-sm btn-outline-secondary me-2" @click="editarArea(a)"><i class="bi bi-pencil"></i></button>
+                          <button class="btn btn-sm btn-outline-danger" @click="eliminarArea(a)"><i class="bi bi-trash"></i></button>
+                        </td>
+                      </tr>
+                      <tr v-if="areas.length===0">
+                        <td colspan="4" class="text-center text-muted">Sin áreas</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- USUARIOS -->
+        <div v-show="activeTab==='usuarios'">
+          <div class="row g-4">
+            <!-- Form crear/editar Usuario -->
+            <div class="col-lg-5">
+              <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0">{{ usuarioForm.idUsuario ? 'Editar Usuario' : 'Crear Usuario' }}</h5>
+                </div>
+                <div class="card-body">
+                  <form @submit.prevent="submitUsuario" class="php-email-form">
+                    <div class="mb-3">
+                      <label class="form-label">Nombre de usuario</label>
+                      <input class="form-control" v-model="usuarioForm.nombreUsuario" :required="!usuarioForm.idUsuario">
+                    </div>
+                    <div class="mb-3" v-if="!usuarioForm.idUsuario">
+                      <label class="form-label">Password</label>
+                      <input type="password" class="form-control" v-model="usuarioForm.password" :required="!usuarioForm.idUsuario">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Nombre</label>
+                      <input class="form-control" v-model="usuarioForm.nombre" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Apellido</label>
+                      <input class="form-control" v-model="usuarioForm.apellido" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Correo</label>
+                      <input type="email" class="form-control" v-model="usuarioForm.correo">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Teléfono</label>
+                      <input class="form-control" v-model="usuarioForm.telefono">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Área</label>
+                      <select class="form-select" v-model.number="usuarioForm.idArea">
+                        <option :value="null">Sin área</option>
+                        <option v-for="a in areas" :key="a.idArea" :value="a.idArea">{{ a.nombreArea }}</option>
+                      </select>
+                      <small class="text-muted">Para crear, el área se asignará luego de la creación.</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                      <button type="submit" class="btn btn-primary">
+                        <i class="bi" :class="usuarioForm.idUsuario ? 'bi-save' : 'bi-plus-circle' "></i>
+                        {{ usuarioForm.idUsuario ? 'Guardar cambios' : 'Crear Usuario' }}
+                      </button>
+                      <button v-if="usuarioForm.idUsuario" type="button" class="btn btn-secondary" @click="resetUsuarioForm">Cancelar</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lista de Usuarios -->
+            <div class="col-lg-7">
+              <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0">Usuarios</h5>
+                  <button class="btn btn-outline-primary btn-sm" @click="cargarUsuarios"><i class="bi bi-arrow-clockwise"></i></button>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Área</th>
+                        <th class="text-end">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="u in usuarios" :key="u.idUsuario">
+                        <td>{{ u.idUsuario }}</td>
+                        <td>{{ u.nombreUsuario }}</td>
+                        <td>{{ u.nombre }}</td>
+                        <td>{{ u.apellido }}</td>
+                        <td>{{ nombreArea(u.idArea) }}</td>
+                        <td class="text-end">
+                          <button class="btn btn-sm btn-outline-secondary me-2" @click="editarUsuario(u)"><i class="bi bi-pencil"></i></button>
+                          <button class="btn btn-sm btn-outline-danger" @click="eliminarUsuario(u)"><i class="bi bi-trash"></i></button>
+                        </td>
+                      </tr>
+                      <tr v-if="usuarios.length===0">
+                        <td colspan="6" class="text-center text-muted">Sin usuarios</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp } = Vue;
+
+    const API = 'http://localhost:8080';
+
+    createApp({
+      data() {
+        return {
+          activeTab: 'areas',
+          areas: [],
+          usuarios: [],
+          seleccionDisponibles: [],
+          seleccionAsignados: [],
+          areaForm: {
+            idArea: null,
+            nombreArea: '',
+            usuariosSeleccionados: []
+          },
+          usuarioForm: {
+            idUsuario: null,
+            nombreUsuario: '',
+            password: '',
+            nombre: '',
+            apellido: '',
+            correo: '',
+            telefono: '',
+            idArea: null
+          }
+        }
+      },
+      computed: {
+        usuariosAsignados() {
+          const selected = new Set((this.areaForm.usuariosSeleccionados || []).map(v => Number(v)));
+          return this.usuarios.filter(u => selected.has(Number(u.idUsuario)));
+        },
+        usuariosDisponibles() {
+          const selected = new Set((this.areaForm.usuariosSeleccionados || []).map(v => Number(v)));
+          return this.usuarios.filter(u => !selected.has(Number(u.idUsuario)));
+        },
+        destinoAreaNombre() {
+          return this.areaForm.idArea ? this.nombreArea(this.areaForm.idArea) : '(nueva área)';
+        }
+      },
+      methods: {
+        nombreArea(idArea) {
+          const a = this.areas.find(x => x.idArea === idArea);
+          return a ? a.nombreArea : '—';
+        },
+        usuariosDeArea(idArea) {
+          return this.usuarios.filter(u => u.idArea === idArea);
+        },
+        usuariosNoAsignados(idArea) {
+          return this.usuarios.filter(u => u.idArea !== idArea && (u.idArea == null || u.idArea !== idArea));
+        },
+        agregarSeleccion() {
+          const set = new Set((this.areaForm.usuariosSeleccionados || []).map(v => Number(v)));
+          this.seleccionDisponibles.forEach(id => set.add(Number(id)));
+          this.areaForm.usuariosSeleccionados = Array.from(set.values());
+          this.seleccionDisponibles = [];
+        },
+        quitarSeleccion() {
+          const quitar = new Set((this.seleccionAsignados || []).map(v => Number(v)));
+          this.areaForm.usuariosSeleccionados = (this.areaForm.usuariosSeleccionados || []).map(v => Number(v)).filter(id => !quitar.has(Number(id)));
+          this.seleccionAsignados = [];
+        },
+        // ------- ÁREAS -------
+        async cargarAreas() {
+          const resp = await fetch(`${API}/api/areas`);
+          const data = await resp.json();
+          this.areas = data.areas || [];
+          // Si estoy editando un área, recalcular listas derivadas
+          if (this.areaForm.idArea) {
+            const idArea = this.areaForm.idArea;
+            this.areaForm.usuariosSeleccionados = this.usuarios.filter(u => u.idArea === idArea).map(u => u.idUsuario);
+          }
+        },
+        editarArea(area) {
+          this.areaForm.idArea = area.idArea;
+          this.areaForm.nombreArea = area.nombreArea;
+          // Pre-cargar asignados actuales
+          this.areaForm.usuariosSeleccionados = this.usuarios.filter(u => u.idArea === area.idArea).map(u => u.idUsuario);
+          this.seleccionDisponibles = [];
+          this.seleccionAsignados = [];
+        },
+        resetAreaForm() {
+          this.areaForm = { idArea: null, nombreArea: '', usuariosSeleccionados: [] };
+          this.seleccionDisponibles = [];
+          this.seleccionAsignados = [];
+        },
+        async submitArea() {
+          try {
+            if (!this.areaForm.idArea) {
+              // Crear área (permite asignar usuarios en payload)
+              const payload = {
+                nombreArea: this.areaForm.nombreArea,
+                usuarios: this.areaForm.usuariosSeleccionados
+              };
+              const resp = await fetch(`${API}/api/areas`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              if (!resp.ok) throw new Error('Error creando área');
+            } else {
+              // Editar nombre de área
+              const resp = await fetch(`${API}/api/areas/${this.areaForm.idArea}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombreArea: this.areaForm.nombreArea })
+              });
+              if (!resp.ok) throw new Error('Error editando área');
+
+              // Sin endpoint masivo de asignación, dif vamos por usuario (PUT /usuarios/{id})
+              const idArea = this.areaForm.idArea;
+              const asignadosActuales = new Set(this.usuarios.filter(u => u.idArea === idArea).map(u => u.idUsuario));
+              const asignadosDeseados = new Set(this.areaForm.usuariosSeleccionados);
+
+              // Usuarios a asignar (antes no estaban)
+              const aAsignar = Array.from(asignadosDeseados).filter(id => !asignadosActuales.has(id));
+              // Usuarios a quitar (antes estaban y ya no)
+              const aQuitar = Array.from(asignadosActuales).filter(id => !asignadosDeseados.has(id));
+
+              // Ejecutar actualizaciones secuenciales para claridad
+              for (const idUsuario of aAsignar) {
+                await fetch(`${API}/api/usuarios/${idUsuario}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ idArea })
+                });
+              }
+              for (const idUsuario of aQuitar) {
+                await fetch(`${API}/api/usuarios/${idUsuario}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ idArea: null })
+                });
+              }
+            }
+            await this.cargarAreas();
+            await this.cargarUsuarios();
+            this.resetAreaForm();
+          } catch (e) {
+            alert(e.message || 'Error en operación de área');
+          }
+        },
+        async eliminarArea(area) {
+          if (!confirm(`¿Eliminar el área "${area.nombreArea}"?`)) return;
+          const resp = await fetch(`${API}/api/areas/${area.idArea}`, { method: 'DELETE' });
+          if (!resp.ok) { alert('No se pudo eliminar el área'); return; }
+          await this.cargarAreas();
+          await this.cargarUsuarios();
+        },
+
+        // ------- USUARIOS -------
+        async cargarUsuarios() {
+          const resp = await fetch(`${API}/api/usuarios`);
+          const data = await resp.json();
+          this.usuarios = data.usuarios || [];
+        },
+        editarUsuario(usuario) {
+          this.usuarioForm = {
+            idUsuario: usuario.idUsuario,
+            nombreUsuario: usuario.nombreUsuario,
+            password: '',
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
+            correo: usuario.correo,
+            telefono: usuario.telefono,
+            idArea: usuario.idArea
+          };
+          this.activeTab = 'usuarios';
+        },
+        resetUsuarioForm() {
+          this.usuarioForm = { idUsuario: null, nombreUsuario: '', password: '', nombre: '', apellido: '', correo: '', telefono: '', idArea: null };
+        },
+        async submitUsuario() {
+          try {
+            if (!this.usuarioForm.idUsuario) {
+              // Crear usuario (sin área — se asigna luego si corresponde)
+              const payload = {
+                nombreUsuario: this.usuarioForm.nombreUsuario,
+                password: this.usuarioForm.password,
+                nombre: this.usuarioForm.nombre,
+                apellido: this.usuarioForm.apellido,
+                correo: this.usuarioForm.correo || undefined,
+                telefono: this.usuarioForm.telefono || undefined
+              };
+              const resp = await fetch(`${API}/api/usuarios`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              if (!resp.ok) throw new Error('Error creando usuario');
+
+              // Si seleccionó área, actualizar idArea con PUT
+              if (this.usuarioForm.idArea) {
+                const createdList = await fetch(`${API}/api/usuarios`).then(r => r.json());
+                const nuevo = (createdList.usuarios || []).slice(-1)[0];
+                if (nuevo) {
+                  await fetch(`${API}/api/usuarios/${nuevo.idUsuario}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idArea: this.usuarioForm.idArea })
+                  });
+                }
+              }
+            } else {
+              // Editar usuario (incluye reasignar área)
+              const payload = {
+                nombreUsuario: this.usuarioForm.nombreUsuario,
+                nombre: this.usuarioForm.nombre,
+                apellido: this.usuarioForm.apellido,
+                correo: this.usuarioForm.correo,
+                telefono: this.usuarioForm.telefono,
+                idArea: this.usuarioForm.idArea
+              };
+              const resp = await fetch(`${API}/api/usuarios/${this.usuarioForm.idUsuario}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+              if (!resp.ok) throw new Error('Error editando usuario');
+            }
+            await this.cargarUsuarios();
+            await this.cargarAreas();
+            this.resetUsuarioForm();
+          } catch (e) {
+            alert(e.message || 'Error en operación de usuario');
+          }
+        },
+        async eliminarUsuario(usuario) {
+          if (!confirm(`¿Eliminar al usuario ${usuario.nombre} ${usuario.apellido}?`)) return;
+          const resp = await fetch(`${API}/api/usuarios/${usuario.idUsuario}`, { method: 'DELETE' });
+          if (!resp.ok) { alert('No se pudo eliminar el usuario'); return; }
+          await this.cargarUsuarios();
+          await this.cargarAreas();
+        }
+      },
+      async mounted() {
+        await Promise.all([this.cargarAreas(), this.cargarUsuarios()]);
+      }
+    }).mount('#app');
+  </script>
+
+</body>
+
+</html>
+

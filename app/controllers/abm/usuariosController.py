@@ -171,7 +171,7 @@ class UsuariosController:
             return responseError("USUARIO_NO_ENCONTRADO", "El usuario no existe", 404)
 
         if "nombreUsuario" in data:
-            usuario.nombreUsuario = data.get("nombreUsuario"),
+            usuario.nombreUsuario = data.get("nombreUsuario")
         if "nombre" in data:
             usuario.nombre = data["nombre"]
         if "apellido" in data:

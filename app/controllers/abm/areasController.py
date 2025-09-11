@@ -1,5 +1,8 @@
 from flask import jsonify
+from sqlalchemy import func
 from app.backend.models import Usuario
+from app.backend.models.usuarioxevento import UsuarioxEvento
+from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.area import Area
 from app.backend.models.error import responseError
 from app.config.db_config import SessionLocal
@@ -174,5 +177,77 @@ class AreasController:
         except Exception as e:
             session.rollback()
             return responseError("ERROR", f"No se pudo editar el área: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def obtenerFallasPorArea():
+        session = SessionLocal()
+        try:
+            # Traer todas las áreas para garantizar inclusión aunque no tengan fallas
+            todas_las_areas = session.query(Area.idArea, Area.nombreArea).all()
+
+            # Inicializar el diccionario con todas las áreas sin fallas
+            areas_dict = {
+                a.idArea: {
+                    "idArea": a.idArea,
+                    "nombreArea": a.nombreArea,
+                    "totalFallas": 0,
+                    "empleadosConFalla": 0,
+                    "empleados": []
+                }
+                for a in todas_las_areas
+            }
+
+            # Query de fallas por usuario y área (solo cuenta FALLA)
+            resultados = (
+                session.query(
+                    Area.idArea,
+                    Area.nombreArea,
+                    Usuario.idUsuario,
+                    Usuario.nombre,
+                    Usuario.apellido,
+                    func.count(UsuarioxEvento.idEvento).label("cantidadFallas")
+                )
+                .join(Usuario, Usuario.idArea == Area.idArea)
+                .join(UsuarioxEvento, UsuarioxEvento.idUsuario == Usuario.idUsuario)
+                .filter(UsuarioxEvento.resultado == ResultadoEvento.FALLA)
+                .group_by(
+                    Area.idArea,
+                    Area.nombreArea,
+                    Usuario.idUsuario,
+                    Usuario.nombre,
+                    Usuario.apellido
+                )
+                .all()
+            )
+
+            # Completar métricas con los resultados
+            for r in resultados:
+                area_info = areas_dict.get(r.idArea)
+                if not area_info:
+                    # Por seguridad, aunque no debería pasar
+                    areas_dict[r.idArea] = {
+                        "idArea": r.idArea,
+                        "nombreArea": r.nombreArea,
+                        "totalFallas": 0,
+                        "empleadosConFalla": 0,
+                        "empleados": []
+                    }
+                    area_info = areas_dict[r.idArea]
+
+                area_info["empleados"].append({
+                    "idUsuario": r.idUsuario,
+                    "nombre": r.nombre,
+                    "apellido": r.apellido,
+                    "cantidadFallas": int(r.cantidadFallas)
+                })
+                area_info["empleadosConFalla"] += 1
+                area_info["totalFallas"] += int(r.cantidadFallas)
+
+            return jsonify({"areas": list(areas_dict.values())}), 200
+        except Exception as e:
+            session.rollback()
+            return responseError("ERROR", f"No se pudo obtener el resumen de fallas por área: {str(e)}", 500)
         finally:
             session.close()
