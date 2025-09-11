@@ -1,10 +1,149 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Reportes - PhishIntel</title>
+
+    <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Raleway&display=swap" rel="stylesheet">
+    <link href="assets/css/main.css" rel="stylesheet">
+    <style>
+      .card.bg-dark .card-header { background-color: #1f1f1f; border-bottom: 1px solid #3a3a3a; }
+      .card.bg-dark .card-body { background-color: #1b1b1b; }
+      .card.bg-dark, .card.bg-dark .card-body, .card.bg-dark .card-header { color: #f1f1f1; }
+      .nav-tabs { border-bottom: 1px solid #3a3a3a; }
+      .nav-tabs .nav-link { color: #dddddd; }
+      .nav-tabs .nav-link:hover { color: #ffffff; }
+      .nav-tabs .nav-link.active { color: #ffffff; background-color: #1f1f1f; border-color: #3a3a3a #3a3a3a #1f1f1f; }
+    </style>
 </head>
-<body>
+<body class="index-page">
+
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container position-relative d-flex align-items-center justify-content-between">
+      <a href="/principal" class="logo d-flex align-items-center me-auto me-xl-0">
+        <h1 class="sitename">PhishIntel</h1>
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="/principal" class="btn-getstarted btn-login">Salir</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <br>
+    <section class="section">
+      <div class="container" data-aos="fade-up">
+        <div class="mb-3">
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-area" data-bs-toggle="tab" data-bs-target="#panel-area" type="button" role="tab">
+                <i class="bi bi-bar-chart"></i> Fallas por Área
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-fecha" data-bs-toggle="tab" data-bs-target="#panel-fecha" type="button" role="tab">
+                <i class="bi bi-calendar3"></i> Fallas por Fecha
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-campania" data-bs-toggle="tab" data-bs-target="#panel-campania" type="button" role="tab">
+                <i class="bi bi-graph-up"></i> Rendimiento por Campaña
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div class="tab-content">
+          <div class="tab-pane fade show active" id="panel-area" role="tabpanel" aria-labelledby="tab-area">
+            <div class="row g-4">
+              <div class="col-lg-9">
+                <div class="card p-3 bg-dark text-white">
+                  <div id="chartFallasPorArea"></div>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="card p-3 h-100 d-flex align-items-center justify-content-center bg-dark text-white">
+                  <div class="text-center">
+                    <div class="mb-2"><i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i></div>
+                    <h5 class="mb-1">Total de Fallas</h5>
+                    <div id="totalFallas" class="display-5">0</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="panel-fecha" role="tabpanel" aria-labelledby="tab-fecha">
+            <div class="card p-4 bg-dark text-white">
+              <h5 class="mb-2">Fallas por Fecha</h5>
+              <p class="mb-0 text-muted">Próximamente</p>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="panel-campania" role="tabpanel" aria-labelledby="tab-campania">
+            <div class="card p-4 bg-dark text-white">
+              <h5 class="mb-2">Rendimiento por Campaña</h5>
+              <p class="mb-0 text-muted">Próximamente</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script> AOS.init(); </script>
+  <!-- ApexCharts -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+  <script>
+    async function cargarFallasPorArea() {
+      try {
+        const resp = await fetch('/api/areas/fallas');
+        if (!resp.ok) throw new Error('Error al obtener datos');
+        const data = await resp.json();
+
+        const areas = (data.areas || []).sort((a,b) => a.idArea - b.idArea);
+        const labels = areas.map(a => a.nombreArea);
+        const valores = areas.map(a => a.totalFallas);
+        const total = valores.reduce((acc, v) => acc + v, 0);
+        document.getElementById('totalFallas').textContent = total;
+
+        const opciones = {
+          chart: { type: 'bar', height: 420, toolbar: { show: false }, foreColor: '#f1f1f1' },
+          theme: { mode: 'dark' },
+          grid: { borderColor: '#444' },
+          plotOptions: { bar: { horizontal: false, columnWidth: '45%', borderRadius: 6 } },
+          dataLabels: { enabled: true, style: { colors: ['#ffffff'] } },
+          xaxis: { categories: labels, labels: { style: { colors: '#ffffff' } } },
+          yaxis: { title: { text: 'Cantidad de fallas', style: { color: '#ffffff' } }, labels: { style: { colors: '#ffffff' } } },
+          series: [{ name: 'Fallas', data: valores }],
+          colors: ['#ff4d4f'],
+          tooltip: { theme: 'dark', y: { formatter: (val) => `${val} fallas` } }
+        };
+
+        const chart = new ApexCharts(document.querySelector('#chartFallasPorArea'), opciones);
+        chart.render();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarFallasPorArea);
+  </script>
 
 </body>
 </html>
