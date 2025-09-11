@@ -18,6 +18,83 @@
   <link href="assets/vendor/aos/aos.css" rel="stylesheet">
 
   <link href="assets/css/main.css" rel="stylesheet">
+  <style>
+    /* Dark theme for forms and lists */
+.card.bg-dark .card-header { background-color: #1f1f1f; border-bottom: 1px solid #3a3a3a; }
+.card.bg-dark .card-body { background-color: #1b1b1b; }
+.card.bg-dark, .card.bg-dark .card-body, .card.bg-dark .card-header { color: #f1f1f1; }
+
+.form-control, .form-select {
+  background-color: #212529; /* similar to modal */
+  color: #f8f9fa;
+  border-color: #495057;
+}
+.form-control::placeholder { color: #adb5bd; }
+.form-control:focus, .form-select:focus { box-shadow: none; border-color: #6c757d; }
+
+/* Dual list labels */
+.small.text-muted { color: #b0b0b0 !important; }
+
+/* Tabs in dark */
+.nav-tabs { border-bottom: 1px solid #3a3a3a; }
+.nav-tabs .nav-link { color: #dddddd; }
+.nav-tabs .nav-link:hover { color: #ffffff; }
+.nav-tabs .nav-link.active {
+  color: #ffffff;
+  background-color: #1f1f1f;
+  border-color: #3a3a3a #3a3a3a #1f1f1f;
+}
+
+/* Table dark tweaks */
+.table-dark th, .table-dark td { color: #f8f9fa; }
+.table-dark thead th { border-bottom: 1px solid #3a3a3a; }
+
+/* Brand color accents (rosa) */
+.btn-outline-primary {
+  color: #da02e5;
+  border-color: #da02e5;
+}
+.btn-outline-primary:hover {
+  background-color: #da02e5 !important;
+  border-color: #da02e5 !important;
+  color: #fff !important;
+}
+.btn-outline-primary:focus, .btn-outline-primary:focus-visible {
+  background-color: #da02e5 !important;
+  border-color: #da02e5 !important;
+  color: #fff !important;
+  box-shadow: 0 0 0 0.25rem rgba(218, 2, 229, 0.25) !important;
+}
+.btn-outline-primary:active, .btn-outline-primary.active, .show > .btn-outline-primary.dropdown-toggle {
+  background-color: #da02e5 !important;
+  border-color: #da02e5 !important;
+  color: #fff !important;
+}
+.btn-outline-primary:active:focus, .btn-outline-primary.active:focus {
+  box-shadow: 0 0 0 0.25rem rgba(218, 2, 229, 0.3) !important;
+}
+
+.btn-primary {
+  background-color: #da02e5;
+  border-color: #da02e5;
+}
+.btn-primary:hover {
+  background-color: #b101bd;
+  border-color: #b101bd;
+}
+.btn-primary:focus, .btn-primary:focus-visible {
+  background-color: #b101bd;
+  border-color: #b101bd;
+  box-shadow: 0 0 0 0.25rem rgba(218, 2, 229, 0.25);
+}
+.btn-primary:active, .btn-primary.active, .show > .btn-primary.dropdown-toggle {
+  background-color: #b101bd;
+  border-color: #b101bd;
+}
+.btn-primary:active:focus, .btn-primary.active:focus {
+  box-shadow: 0 0 0 0.25rem rgba(218, 2, 229, 0.3);
+}
+  </style>
 </head>
 
 <body class="index-page">
@@ -64,8 +141,8 @@
           <div class="row g-4">
             <!-- Form crear/editar Área -->
             <div class="col-lg-7">
-              <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="card h-100 bg-dark text-white">
+                <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
                   <h5 class="mb-0">{{ areaForm.idArea ? 'Editar Área' : 'Crear Área' }}</h5>
                 </div>
                 <div class="card-body">
@@ -120,13 +197,13 @@
 
             <!-- Lista de Áreas -->
             <div class="col-lg-5">
-              <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="card h-100 bg-dark text-white">
+                <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
                   <h5 class="mb-0">Áreas</h5>
                   <button class="btn btn-outline-primary btn-sm" @click="cargarAreas"><i class="bi bi-arrow-clockwise"></i></button>
                 </div>
                 <div class="table-responsive">
-                  <table class="table table-hover mb-0">
+                  <table class="table table-hover table-dark mb-0">
                     <thead>
                       <tr>
                         <th>#</th>
@@ -161,8 +238,8 @@
           <div class="row g-4">
             <!-- Form crear/editar Usuario -->
             <div class="col-lg-5">
-              <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="card h-100 bg-dark text-white">
+                <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
                   <h5 class="mb-0">{{ usuarioForm.idUsuario ? 'Editar Usuario' : 'Crear Usuario' }}</h5>
                 </div>
                 <div class="card-body">
@@ -213,13 +290,13 @@
 
             <!-- Lista de Usuarios -->
             <div class="col-lg-7">
-              <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="card h-100 bg-dark text-white">
+                <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
                   <h5 class="mb-0">Usuarios</h5>
                   <button class="btn btn-outline-primary btn-sm" @click="cargarUsuarios"><i class="bi bi-arrow-clockwise"></i></button>
                 </div>
                 <div class="table-responsive">
-                  <table class="table table-hover mb-0">
+                  <table class="table table-hover table-dark mb-0">
                     <thead>
                       <tr>
                         <th>#</th>
