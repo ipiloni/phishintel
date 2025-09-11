@@ -13,7 +13,7 @@ def llamar(destinatario, remitente, url_audio):
     log.info(f"Se recibio una solicitud para llamar al destinatario {str(destinatario)}")
 
     call = client.calls.create(
-      url=url_audio,
+      url=url_audio, # endpoint donde twilio obtiene la tarea que debe hacer
       to=destinatario,
       from_=remitente,
     )

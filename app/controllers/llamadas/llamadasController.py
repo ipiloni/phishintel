@@ -1,11 +1,12 @@
 from flask import jsonify
+from twilio.twiml.voice_response import VoiceResponse
 
 from app.backend.apis.elevenLabs import elevenLabs
 from app.backend.apis.twilio import twilio
 from app.backend.models.error import responseError
 from app.controllers.geminiController import GeminiController
 from app.utils.config import get
-from app.utils.conversacion import conversacionActual, objetivoActual, idVozActual, remitente, destinatario
+from app.utils.conversacion import conversacionActual, objetivoActual, idVozActual, remitente, destinatario, urlAudioActual
 from app.utils.logger import log
 
 password = get("LLAMAR_PASSWORD")
@@ -73,12 +74,12 @@ class LlamadasController:
                 return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
 
             url = "http://localhost:8080"  # localhost, ngrok o cuando se despliegue
-            urlAudio = f"{url}/api/audios/{idAudio}.mp3"
+            urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
 
             return jsonify({
                 "remitente": remitente,
                 "destinatario": destinatario,
-                "urlAudio": urlAudio
+                "mensaje": "la llamada se ha iniciado"
             })
 
             # return twilio.llamar(destinatario, remitente, urlAudio)
@@ -132,3 +133,11 @@ class LlamadasController:
         except Exception as e:
             log.error(e)
             return responseError("ERROR_AL_LLAMAR", f"Hubo un error al intentar ejecutar la llamada: {str(e)}", 500)
+
+    @staticmethod
+    def reproducirAudioInicial():
+        log.info("El usuario atendio la llamada. Reproduciendo audio...")
+        response = VoiceResponse()
+        gather = response.gather(input="speech", action="http://localhost:8080/api/twilio/respuesta", method="POST")
+        gather.play(urlAudioActual)
+        return str(response)
