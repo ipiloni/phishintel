@@ -3,3 +3,4 @@ destinatario = ""
 conversacionActual = []
 objetivoActual = ""
 idVozActual = ""
+urlAudioActual = ""

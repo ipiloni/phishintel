@@ -41,6 +41,10 @@ def generarLlamada():
     data = request.get_json()
     return LlamadasController.llamar(data)
 
+@apis.route("/api/twilio/accion", methods=["POST"])
+def reproducirAudioInicial():
+    LlamadasController.reproducirAudioInicial()
+
 # ------ # TRANSFORMADORES TTS Y STT # ------ #
 @apis.route("/api/tts", methods=["POST"])
 def generarTTS():
