@@ -34,7 +34,7 @@
       </a>
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="/principal" class="btn-getstarted btn-login">Salir</a></li>
+          <li><a href="/principal" class="btn-getstarted btn-login">Home</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -129,7 +129,7 @@
           plotOptions: { bar: { horizontal: false, columnWidth: '45%', borderRadius: 6 } },
           dataLabels: { enabled: true, style: { colors: ['#ffffff'] } },
           xaxis: { categories: labels, labels: { style: { colors: '#ffffff' } } },
-          yaxis: { title: { text: 'Cantidad de fallas', style: { color: '#ffffff' } }, labels: { style: { colors: '#ffffff' } } },
+          yaxis: { title: { text: 'Cantidad de fallas', style: { color: '#ffffff', fontSize: '16px' } }, labels: { style: { colors: '#ffffff' } } },
           series: [{ name: 'Fallas', data: valores }],
           colors: ['#ff4d4f'],
           tooltip: { theme: 'dark', y: { formatter: (val) => `${val} fallas` } }

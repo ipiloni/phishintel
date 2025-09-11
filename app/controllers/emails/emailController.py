@@ -219,15 +219,21 @@ class EmailController:
             session.add(usuario_evento)
             session.commit()
 
+            # Construir link a caiste con parámetros y agregar botón al cuerpo
+            link_caiste = f"http://localhost:8080/caiste?idUsuario={id_usuario}&idEvento={evento.idEvento}"
+            boton_html = (
+                f"<div style=\"margin-top:20px;text-align:center\">"
+                f"<a href=\"{link_caiste}\" style=\"background-color:#d9534f;color:#ffffff;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;font-family:Arial,Helvetica,sans-serif\">"
+                f"Ver"
+                f"</a>"
+                f"</div>"
+            )
+            cuerpo_con_boton = f"{cuerpo}{boton_html}"
+
             # Enviar email
             if proveedor == "twilio":
-                datanueva = {
-                    "destinatario": "juan.perez@pgcontrol.com.ar",
-                    "asunto": data["asunto"],
-                    "cuerpo": data["cuerpo"]
-                }
-                response, status = EmailController.enviarNotificacionPhishintel(datanueva)
-                log.info(f"Respuesta del servicio Twilio sendgrid: {response}")
+                response = enviarNotificacionEmail(asunto, cuerpo_con_boton, "phishingintel@gmail.com")
+                log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
             elif proveedor == "smtp":
                 smtp = SMTPConnection("mail.pgcontrol.com.ar", "26")
                 smtp.login("juan.perez@pgcontrol.com.ar", "juan.perez1")
@@ -236,7 +242,7 @@ class EmailController:
                     name="Administración PGControl",
                     recipients=[usuario.correo],
                     subject=asunto,
-                    html=cuerpo
+                    html=cuerpo_con_boton
                 )
                 smtp.send_mail(message)
             else:
