@@ -74,6 +74,59 @@ class AreasController:
             session.close()
 
     @staticmethod
+    def crearAreasBatch(payload):
+        if not payload:
+            return responseError("CAMPOS_OBLIGATORIOS", "Se requiere un cuerpo con 'areas'", 400)
+
+        areas_data = payload if isinstance(payload, list) else payload.get("areas")
+        if not isinstance(areas_data, list):
+            return responseError("CAMPOS_OBLIGATORIOS", "'areas' debe ser una lista", 400)
+
+        session = SessionLocal()
+        resultados = []
+        try:
+            for idx, data in enumerate(areas_data):
+                try:
+                    if not data or "nombreArea" not in data or "usuarios" not in data:
+                        resultados.append({"index": idx, "ok": False, "error": "Faltan campos obligatorios"})
+                        continue
+
+                    areaExistente = session.query(Area).filter_by(nombreArea=data["nombreArea"]).first()
+                    if areaExistente is not None:
+                        resultados.append({"index": idx, "ok": False, "error": f"Área ya existe id={areaExistente.idArea}"})
+                        continue
+
+                    usuarios_ids = data["usuarios"]
+                    if not isinstance(usuarios_ids, list) or not all(isinstance(id, int) for id in usuarios_ids):
+                        resultados.append({"index": idx, "ok": False, "error": "La lista de usuarios debe contener solo IDs numéricos"})
+                        continue
+
+                    usuarios = session.query(Usuario).filter(Usuario.idUsuario.in_(usuarios_ids)).all()
+                    if len(usuarios) != len(set(usuarios_ids)):
+                        resultados.append({"index": idx, "ok": False, "error": "Uno o más usuarios no existen"})
+                        continue
+
+                    nuevaArea = Area(
+                        nombreArea=data["nombreArea"],
+                        datosDelArea=data.get("datosArea"),
+                        usuarios=usuarios
+                    )
+                    session.add(nuevaArea)
+                    session.flush()
+                    resultados.append({"index": idx, "ok": True, "idArea": nuevaArea.idArea})
+                except Exception as e:
+                    resultados.append({"index": idx, "ok": False, "error": str(e)})
+
+            session.commit()
+            ok_count = sum(1 for r in resultados if r.get("ok"))
+            return jsonify({"creadas": ok_count, "resultados": resultados}), 201
+        except Exception as e:
+            session.rollback()
+            return responseError("ERROR", f"No se pudo crear el batch de áreas: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
     def eliminarArea(idArea):
         session = SessionLocal()
         try:

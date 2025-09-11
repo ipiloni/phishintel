@@ -146,6 +146,11 @@ def crearUsuario():
     data = request.get_json()
     return UsuariosController.crearUsuario(data)
 
+@apis.route("/api/usuarios/batch", methods=["POST"])
+def crearUsuariosBatch():
+    data = request.get_json()
+    return UsuariosController.crearUsuariosBatch(data)
+
 @apis.route("/api/usuarios/<idUsuario>", methods=["DELETE"])
 def eliminarUsuario(idUsuario):
     return UsuariosController.eliminarUsuario(idUsuario)
@@ -164,6 +169,11 @@ def obtenerAreas():
 def crearArea():
     data = request.get_json()
     return AreasController.crearArea(data)
+
+@apis.route("/api/areas/batch", methods=["POST"])
+def crearAreasBatch():
+    data = request.get_json()
+    return AreasController.crearAreasBatch(data)
 
 @apis.route("/api/areas/<idArea>", methods=["GET"])
 def obtenerArea(idArea):
