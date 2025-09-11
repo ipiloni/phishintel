@@ -307,6 +307,32 @@ def openapi_spec():
                 }
             }
             ,
+            "/api/areas/fallas": {
+                "get": {
+                    "summary": "Obtener fallas por área (agregado por empleados)",
+                    "tags": ["Áreas"],
+                    "responses": {
+                        "200": {
+                            "description": "Listado de áreas con métricas de fallas",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "areas": {
+                                                "type": "array",
+                                                "items": {"$ref": "#/components/schemas/AreaFallas"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {"description": "Error del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
+            }
+            ,
             "/api/eventos": {
                 "get": {
                     "summary": "Obtener todos los eventos",
@@ -444,6 +470,25 @@ def openapi_spec():
                         "telefono": {"type": "string", "nullable": True},
                         "esAdministrador": {"type": "boolean", "nullable": True},
                         "idArea": {"type": "integer", "nullable": True}
+                    }
+                },
+                "EmpleadoFalla": {
+                    "type": "object",
+                    "properties": {
+                        "idUsuario": {"type": "integer"},
+                        "nombre": {"type": "string"},
+                        "apellido": {"type": "string"},
+                        "cantidadFallas": {"type": "integer"}
+                    }
+                },
+                "AreaFallas": {
+                    "type": "object",
+                    "properties": {
+                        "idArea": {"type": "integer"},
+                        "nombreArea": {"type": "string"},
+                        "totalFallas": {"type": "integer"},
+                        "empleadosConFalla": {"type": "integer"},
+                        "empleados": {"type": "array", "items": {"$ref": "#/components/schemas/EmpleadoFalla"}}
                     }
                 },
                 "Area": {

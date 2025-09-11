@@ -22,7 +22,11 @@ def registro():
 
 @frontend.route("/reportes")
 def reportes():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "reportes.html")
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalReportes.html")
+
+@frontend.route("/abm")
+def abm():
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalABM.html")
 
 @frontend.route("/principal")
 def principal():
@@ -33,7 +37,7 @@ def usuarios():
 
 @frontend.route("/selectorCampania")
 def selectorCampania():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "selectorCampania.html")
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalSelectorCampania.html")
 @frontend.route("/formLlamada")
 def formLlamada():
    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "campaniaLlamada.html")
