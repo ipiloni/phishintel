@@ -8,10 +8,15 @@ def openapi_spec():
     spec = {
         "openapi": "3.0.3",
         "info": {
-            "title": "PhishIntel API",
+            "title": "PhishIntel API Privada",
             "version": "1.0.0",
-            "description": "Documentación básica de endpoints de Usuarios"
+            "description": "Documentación básica de endpoints"
         },
+        "tags": [
+            {"name": "Usuarios", "description": "Gestión de usuarios"},
+            {"name": "Áreas", "description": "Gestión de áreas"},
+            {"name": "Eventos", "description": "Gestión de eventos"}
+        ],
         "paths": {
             "/api/usuarios": {
                 "get": {
@@ -63,7 +68,44 @@ def openapi_spec():
                     }
                 }
             },
+            "/api/usuarios/batch": {
+                "post": {
+                    "summary": "Crear múltiples usuarios",
+                    "tags": ["Usuarios"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {"type": "array", "items": {"$ref": "#/components/schemas/UsuarioCreate"}},
+                                        {"type": "object", "properties": {"usuarios": {"type": "array", "items": {"$ref": "#/components/schemas/UsuarioCreate"}}}}
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {"description": "Resultado del batch"},
+                        "400": {"description": "Solicitud inválida"}
+                    }
+                }
+            },
             "/api/usuarios/{idUsuario}": {
+                "get": {
+                    "summary": "Obtener usuario por ID",
+                    "tags": ["Usuarios"],
+                    "parameters": [
+                        {"name": "idUsuario", "in": "path", "required": True, "schema": {"type": "string"}}
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Usuario encontrado",
+                            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Usuario"}}}
+                        },
+                        "404": {"description": "Usuario no encontrado", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                },
                 "put": {
                     "summary": "Editar un usuario",
                     "tags": ["Usuarios"],
@@ -95,9 +137,223 @@ def openapi_spec():
                     }
                 }
             }
+            ,
+            "/api/areas": {
+                "get": {
+                    "summary": "Obtener todas las áreas",
+                    "tags": ["Áreas"],
+                    "responses": {
+                        "200": {
+                            "description": "Lista de áreas",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "areas": {"type": "array", "items": {"$ref": "#/components/schemas/Area"}}
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "post": {
+                    "summary": "Crear un área",
+                    "tags": ["Áreas"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AreaCreate"}}}
+                    },
+                    "responses": {"201": {"description": "Área creada"}, "400": {"description": "Solicitud inválida"}}
+                }
+            },
+            "/api/areas/{idArea}": {
+                "get": {
+                    "summary": "Obtener área por ID",
+                    "tags": ["Áreas"],
+                    "parameters": [
+                        {"name": "idArea", "in": "path", "required": True, "schema": {"type": "string"}}
+                    ],
+                    "responses": {
+                        "200": {"description": "Área encontrada", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Area"}}}},
+                        "404": {"description": "Área no encontrada", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                },
+                "put": {
+                    "summary": "Editar un área",
+                    "tags": ["Áreas"],
+                    "parameters": [
+                        {"name": "idArea", "in": "path", "required": True, "schema": {"type": "string"}}
+                    ],
+                    "requestBody": {
+                        "required": True,
+                        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AreaUpdate"}}}
+                    },
+                    "responses": {
+                        "200": {"description": "Área editada", "content": {"application/json": {"schema": {"type": "object", "properties": {"mensaje": {"type": "string"}}}}}},
+                        "404": {"description": "Área no encontrada", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                },
+                "delete": {
+                    "summary": "Eliminar un área",
+                    "tags": ["Áreas"],
+                    "parameters": [
+                        {"name": "idArea", "in": "path", "required": True, "schema": {"type": "string"}}
+                    ],
+                    "responses": {
+                        "200": {"description": "Área eliminada", "content": {"application/json": {"schema": {"type": "object", "properties": {"mensaje": {"type": "string"}}}}}},
+                        "404": {"description": "Área no encontrada", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
+            },
+            "/api/areas/batch": {
+                "post": {
+                    "summary": "Crear múltiples áreas",
+                    "tags": ["Áreas"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {"type": "array", "items": {"$ref": "#/components/schemas/AreaCreate"}},
+                                        {"type": "object", "properties": {"areas": {"type": "array", "items": {"$ref": "#/components/schemas/AreaCreate"}}}}
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "responses": {"201": {"description": "Resultado del batch"}, "400": {"description": "Solicitud inválida"}}
+                }
+            }
+            ,
+            "/api/eventos": {
+                "get": {
+                    "summary": "Obtener todos los eventos",
+                    "tags": ["Eventos"],
+                    "responses": {
+                        "200": {
+                            "description": "Lista de eventos",
+                            "content": {"application/json": {"schema": {"type": "object", "properties": {"eventos": {"type": "array", "items": {"$ref": "#/components/schemas/Evento"}}}}}}
+                        }
+                    }
+                },
+                "post": {
+                    "summary": "Crear un evento",
+                    "tags": ["Eventos"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/EventoCreate"},
+                                "example": {
+                                    "tipoEvento": "CORREO",
+                                    "fechaEvento": "2025-08-11T10:30:00",
+                                    "resultado": "PENDIENTE",
+                                    "registroEvento": {
+                                        "asunto": "Prueba de asunto del evento",
+                                        "cuerpo": "<p>Este es el cuerpo del evento en HTML o texto</p>"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {"201": {"description": "Evento creado"}, "400": {"description": "Solicitud inválida"}}
+                }
+            },
+            "/api/eventos/{idEvento}": {
+                "get": {
+                    "summary": "Obtener evento por ID",
+                    "tags": ["Eventos"],
+                    "parameters": [{"name": "idEvento", "in": "path", "required": True, "schema": {"type": "integer"}}],
+                    "responses": {"200": {"description": "Evento", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Evento"}}}}, "404": {"description": "No encontrado"}}
+                },
+                "put": {
+                    "summary": "Editar un evento",
+                    "tags": ["Eventos"],
+                    "parameters": [{"name": "idEvento", "in": "path", "required": True, "schema": {"type": "integer"}}],
+                    "requestBody": {"required": True, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/EventoUpdate"}}}},
+                    "responses": {"200": {"description": "Evento editado"}, "404": {"description": "No encontrado"}}
+                },
+                "delete": {
+                    "summary": "Eliminar un evento",
+                    "tags": ["Eventos"],
+                    "parameters": [{"name": "idEvento", "in": "path", "required": True, "schema": {"type": "integer"}}],
+                    "responses": {"200": {"description": "Evento eliminado"}, "404": {"description": "No encontrado"}}
+                }
+            },
+            "/api/eventos/{idEvento}/usuarios/{idUsuario}": {
+                "post": {
+                    "summary": "Asociar usuario a evento con resultado",
+                    "tags": ["Eventos"],
+                    "parameters": [
+                        {"name": "idEvento", "in": "path", "required": True, "schema": {"type": "integer"}},
+                        {"name": "idUsuario", "in": "path", "required": True, "schema": {"type": "integer"}}
+                    ],
+                    "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["resultado"], "properties": {"resultado": {"$ref": "#/components/schemas/ResultadoEvento"}}}}}},
+                    "responses": {"200": {"description": "Asociado"}, "400": {"description": "Solicitud inválida"}, "404": {"description": "No encontrado"}}
+                }
+            }
         },
         "components": {
             "schemas": {
+                "ResultadoEvento": {
+                    "type": "string",
+                    "enum": ["PENDIENTE", "REPORTADO", "FALLA"]
+                },
+                "TipoEvento": {
+                    "type": "string",
+                    "enum": ["LLAMADA", "CORREO", "MENSAJE", "VIDEOLLAMADA"]
+                },
+                "RegistroEvento": {
+                    "type": "object",
+                    "properties": {
+                        "idRegistroEvento": {"type": "integer"},
+                        "asunto": {"type": "string"},
+                        "cuerpo": {"type": "string"}
+                    }
+                },
+                "Evento": {
+                    "type": "object",
+                    "properties": {
+                        "idEvento": {"type": "integer"},
+                        "tipoEvento": {"$ref": "#/components/schemas/TipoEvento"},
+                        "fechaEvento": {"type": "string", "format": "date-time"},
+                        "registroEvento": {"$ref": "#/components/schemas/RegistroEvento"},
+                        "usuarios": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "idUsuario": {"type": "integer"},
+                                    "nombreUsuario": {"type": "string"},
+                                    "resultado": {"$ref": "#/components/schemas/ResultadoEvento"}
+                                }
+                            }
+                        }
+                    }
+                },
+                "EventoCreate": {
+                    "type": "object",
+                    "required": ["tipoEvento", "fechaEvento"],
+                    "properties": {
+                        "tipoEvento": {"$ref": "#/components/schemas/TipoEvento"},
+                        "fechaEvento": {"type": "string", "format": "date-time"},
+                        "registroEvento": {"type": "object", "properties": {"asunto": {"type": "string"}, "cuerpo": {"type": "string"}}},
+                        "idUsuario": {"type": "integer"},
+                        "resultado": {"$ref": "#/components/schemas/ResultadoEvento"}
+                    }
+                },
+                "EventoUpdate": {
+                    "type": "object",
+                    "properties": {
+                        "tipoEvento": {"$ref": "#/components/schemas/TipoEvento"},
+                        "fechaEvento": {"type": "string", "format": "date-time"},
+                        "resultado": {"$ref": "#/components/schemas/ResultadoEvento"},
+                        "registroEvento": {"type": "object", "properties": {"asunto": {"type": "string"}, "cuerpo": {"type": "string"}}}
+                    }
+                },
                 "Usuario": {
                     "type": "object",
                     "properties": {
@@ -109,6 +365,31 @@ def openapi_spec():
                         "telefono": {"type": "string", "nullable": True},
                         "esAdministrador": {"type": "boolean", "nullable": True},
                         "idArea": {"type": "integer", "nullable": True}
+                    }
+                },
+                "Area": {
+                    "type": "object",
+                    "properties": {
+                        "idArea": {"type": "integer"},
+                        "nombreArea": {"type": "string"},
+                        "datosDelArea": {"type": "array", "items": {"type": "string"}, "nullable": True},
+                        "usuarios": {"type": "array", "items": {"$ref": "#/components/schemas/Usuario"}}
+                    }
+                },
+                "AreaCreate": {
+                    "type": "object",
+                    "required": ["nombreArea", "usuarios"],
+                    "properties": {
+                        "nombreArea": {"type": "string"},
+                        "usuarios": {"type": "array", "items": {"type": "integer"}},
+                        "datosArea": {"type": "array", "items": {"type": "string"}}
+                    }
+                },
+                "AreaUpdate": {
+                    "type": "object",
+                    "properties": {
+                        "nombreArea": {"type": "string"},
+                        "datosDelArea": {"type": "array", "items": {"type": "string"}}
                     }
                 },
                 "UsuarioCreate": {
@@ -172,7 +453,9 @@ def swagger_ui():
         url: '/api/openapi.json',
         dom_id: '#swagger-ui',
         presets: [SwaggerUIBundle.presets.apis],
-        layout: 'BaseLayout'
+        layout: 'BaseLayout',
+        tagsSorter: function(a, b) { return 0; },
+        operationsSorter: 'alpha'
       });
     </script>
   </body>

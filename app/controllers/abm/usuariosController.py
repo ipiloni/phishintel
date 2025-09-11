@@ -86,6 +86,59 @@ class UsuariosController:
         return jsonify({"mensaje": "Usuario creado correctamente"}), 201
 
     @staticmethod
+    def crearUsuariosBatch(payload):
+        if not payload:
+            return responseError("CAMPOS_OBLIGATORIOS", "Se requiere un cuerpo con 'usuarios'", 400)
+
+        usuarios_data = payload if isinstance(payload, list) else payload.get("usuarios")
+        if not isinstance(usuarios_data, list):
+            return responseError("CAMPOS_OBLIGATORIOS", "'usuarios' debe ser una lista", 400)
+
+        session = SessionLocal()
+        resultados = []
+        try:
+            for idx, data in enumerate(usuarios_data):
+                try:
+                    if not data or "nombreUsuario" not in data or "password" not in data or "nombre" not in data or "apellido" not in data:
+                        resultados.append({"index": idx, "ok": False, "error": "Faltan campos obligatorios"})
+                        continue
+
+                    existente = session.query(Usuario).filter_by(nombreUsuario=data["nombreUsuario"]).first()
+                    if existente is not None:
+                        resultados.append({"index": idx, "ok": False, "error": f"Usuario ya existe id={existente.idUsuario}"})
+                        continue
+
+                    hashed = hash_password(data["password"])
+                    nuevo = Usuario(
+                        nombreUsuario=data["nombreUsuario"],
+                        password=hashed,
+                        nombre=data["nombre"],
+                        apellido=data["apellido"],
+                        telefono=data.get("telefono"),
+                        correo=data.get("correo"),
+                        direccion=data.get("direccion"),
+                        esAdministrador=data.get("esAdministrador"),
+                        idArea=data.get("idArea")
+                    )
+                    if data.get("esAdministrador") is None:
+                        nuevo.esAdministrador = False
+
+                    session.add(nuevo)
+                    session.flush()
+                    resultados.append({"index": idx, "ok": True, "idUsuario": nuevo.idUsuario})
+                except Exception as e:
+                    resultados.append({"index": idx, "ok": False, "error": str(e)})
+
+            session.commit()
+            ok_count = sum(1 for r in resultados if r.get("ok"))
+            return jsonify({"creados": ok_count, "resultados": resultados}), 201
+        except Exception as e:
+            session.rollback()
+            return responseError("ERROR", f"No se pudo crear el batch: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
     def eliminarUsuario(idUsuario):
         session = SessionLocal()
         try:
