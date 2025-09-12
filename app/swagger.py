@@ -15,7 +15,8 @@ def openapi_spec():
         "tags": [
             {"name": "Usuarios", "description": "Gestión de usuarios"},
             {"name": "Áreas", "description": "Gestión de áreas"},
-            {"name": "Eventos", "description": "Gestión de eventos"}
+            {"name": "Eventos", "description": "Gestión de eventos"},
+            {"name": "Emails", "description": "Envío de emails y notificaciones"}
         ],
         "paths": {
             "/api/usuarios": {
@@ -399,6 +400,77 @@ def openapi_spec():
                     "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["resultado"], "properties": {"resultado": {"$ref": "#/components/schemas/ResultadoEvento"}}}}}},
                     "responses": {"200": {"description": "Asociado"}, "400": {"description": "Solicitud inválida"}, "404": {"description": "No encontrado"}}
                 }
+            },
+            "/api/email/enviar-id": {
+                "post": {
+                    "summary": "Enviar email por ID de usuario",
+                    "tags": ["Emails"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/EmailEnviarID"},
+                                "example": {
+                                    "proveedor": "twilio",
+                                    "idUsuario": 1,
+                                    "asunto": "Notificación importante",
+                                    "cuerpo": "<p>Este es un email de prueba</p>"
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {"description": "Email enviado correctamente"},
+                        "400": {"description": "Solicitud inválida"},
+                        "404": {"description": "Usuario no encontrado"}
+                    }
+                }
+            },
+            "/api/email/generar": {
+                "post": {
+                    "summary": "Generar email con IA (solo generar, no enviar)",
+                    "tags": ["Emails"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/EmailGenerar"},
+                                "example": {
+                                    "contexto": "Armame un email del estilo Phishing avisando que hay una compra no reconocida",
+                                    "formato": "HTML",
+                                    "nivel": "2"
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {"description": "Email generado correctamente"},
+                        "400": {"description": "Solicitud inválida"}
+                    }
+                }
+            },
+            "/api/email/notificar": {
+                "post": {
+                    "summary": "Enviar notificación desde PhishIntel",
+                    "tags": ["Emails"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/EmailNotificar"},
+                                "example": {
+                                    "destinatario": "phishingintel@gmail.com",
+                                    "asunto": "Notificación de seguridad",
+                                    "cuerpo": "<p>Se ha detectado una actividad sospechosa en su cuenta</p>"
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {"description": "Notificación enviada correctamente"},
+                        "400": {"description": "Solicitud inválida"}
+                    }
+                }
             }
         },
         "components": {
@@ -549,6 +621,34 @@ def openapi_spec():
                     "properties": {
                         "codigo": {"type": "string"},
                         "descripcion": {"type": "string"}
+                    }
+                },
+                "EmailEnviarID": {
+                    "type": "object",
+                    "required": ["proveedor", "idUsuario", "asunto", "cuerpo"],
+                    "properties": {
+                        "proveedor": {"type": "string", "enum": ["twilio", "smtp"]},
+                        "idUsuario": {"type": "integer"},
+                        "asunto": {"type": "string"},
+                        "cuerpo": {"type": "string"}
+                    }
+                },
+                "EmailGenerar": {
+                    "type": "object",
+                    "required": ["contexto"],
+                    "properties": {
+                        "contexto": {"type": "string"},
+                        "formato": {"type": "string"},
+                        "nivel": {"type": "integer", "minimum": 1, "maximum": 3}
+                    }
+                },
+                "EmailNotificar": {
+                    "type": "object",
+                    "required": ["destinatario", "asunto", "cuerpo"],
+                    "properties": {
+                        "destinatario": {"type": "string"},
+                        "asunto": {"type": "string"},
+                        "cuerpo": {"type": "string"}
                     }
                 }
             }
