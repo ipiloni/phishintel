@@ -475,7 +475,7 @@ def openapi_spec():
             },
             "/api/mensajes/whatsapp-twilio": {
                 "post": {
-                    "summary": "Enviar mensaje por WhatsApp (Twilio) - NO FUNCIONAL",
+                    "summary": "⚠️ SOLO NRO IGNA - Enviar mensaje por WhatsApp (Twilio) - ",
                     "description": "⚠️ Este endpoint no funciona correctamente actualmente",
                     "tags": ["Mensajes"],
                     "requestBody": {
@@ -500,7 +500,7 @@ def openapi_spec():
             },
             "/api/mensajes/sms": {
                 "post": {
-                    "summary": "Enviar mensaje por SMS",
+                    "summary": "⚠️ SOLO NRO IGNA - Enviar mensaje por SMS",
                     "tags": ["Mensajes"],
                     "requestBody": {
                         "required": True,
@@ -524,8 +524,8 @@ def openapi_spec():
             },
             "/api/mensajes/whatsapp-selenium": {
                 "post": {
-                    "summary": "Enviar mensaje por WhatsApp usando Selenium - NO FUNCIONAL",
-                    "description": "⚠️ Este endpoint no funciona correctamente actualmente. Envía un mensaje de WhatsApp usando Selenium WebDriver. Requiere que el usuario esté previamente logueado en WhatsApp Web en Chrome Profile 14.",
+                    "summary": "❌️ NO FUNCIONA - Enviar mensaje por WhatsApp usando Selenium ",
+                    "description": "❌ Este endpoint no funciona correctamente actualmente. Envía un mensaje de WhatsApp usando Selenium WebDriver. Requiere que el usuario esté previamente logueado en WhatsApp Web en Chrome Profile 14.",
                     "tags": ["Mensajes"],
                     "requestBody": {
                         "required": True,
@@ -565,7 +565,7 @@ def openapi_spec():
             },
             "/api/mensajes/whatsapp-whapi": {
                 "post": {
-                    "summary": "Enviar mensaje por WhatsApp usando whapi.cloud",
+                    "summary": "✅ FUNCIONA - Enviar mensaje por WhatsApp usando whapi.cloud",
                     "description": "Envía un mensaje de WhatsApp usando la API de whapi.cloud. Si no se especifica destinatario, se envía al número por defecto +54 9 11 4163-5935. El sistema formatea automáticamente los números argentinos al formato requerido (549XXXXXXXXX).",
                     "tags": ["Mensajes"],
                     "requestBody": {
