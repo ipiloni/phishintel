@@ -16,7 +16,8 @@ def openapi_spec():
             {"name": "Usuarios", "description": "Gestión de usuarios"},
             {"name": "Áreas", "description": "Gestión de áreas"},
             {"name": "Eventos", "description": "Gestión de eventos"},
-            {"name": "Emails", "description": "Envío de emails y notificaciones"}
+            {"name": "Emails", "description": "Envío de emails y notificaciones"},
+            {"name": "Mensajes", "description": "Envío de mensajes WhatsApp y SMS"}
         ],
         "paths": {
             "/api/usuarios": {
@@ -471,6 +472,138 @@ def openapi_spec():
                         "400": {"description": "Solicitud inválida"}
                     }
                 }
+            },
+            "/api/mensajes/whatsapp-twilio": {
+                "post": {
+                    "summary": "Enviar mensaje por WhatsApp (Twilio) - NO FUNCIONAL",
+                    "description": "⚠️ Este endpoint no funciona correctamente actualmente",
+                    "tags": ["Mensajes"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/MensajeWhatsApp"},
+                                "example": {
+                                    "remitente": "+14155238886",
+                                    "destinatario": "+5493775639378",
+                                    "mensaje": "Esta es una prueba desde Phishintel API localhost:8080"
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {"description": "Mensaje WhatsApp enviado correctamente"},
+                        "400": {"description": "Solicitud inválida"},
+                        "500": {"description": "Error en el servicio"}
+                    }
+                }
+            },
+            "/api/mensajes/sms": {
+                "post": {
+                    "summary": "Enviar mensaje por SMS",
+                    "tags": ["Mensajes"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/MensajeSMS"},
+                                "example": {
+                                    "remitente": "+19528009780",
+                                    "destinatario": "+543775639378",
+                                    "mensaje": "Esta es una prueba desde Phishintel API localhost:8080"
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {"description": "Mensaje SMS enviado correctamente"},
+                        "400": {"description": "Solicitud inválida"},
+                        "500": {"description": "Error en el servicio"}
+                    }
+                }
+            },
+            "/api/mensajes/whatsapp-selenium": {
+                "post": {
+                    "summary": "Enviar mensaje por WhatsApp usando Selenium - NO FUNCIONAL",
+                    "description": "⚠️ Este endpoint no funciona correctamente actualmente. Envía un mensaje de WhatsApp usando Selenium WebDriver. Requiere que el usuario esté previamente logueado en WhatsApp Web en Chrome Profile 14.",
+                    "tags": ["Mensajes"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/MensajeWhatsAppSelenium"},
+                                "example": {
+                                    "destinatario": "Marcos Gurruchaga",
+                                    "mensaje": "Hola, esto es un mensaje desde Python"
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {
+                            "description": "Mensaje WhatsApp enviado correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "destinatario": {"type": "string"},
+                                            "contenido": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Solicitud inválida - Faltan campos obligatorios"},
+                        "404": {"description": "Contacto no encontrado, perfil Profile 14 no existe o ChromeDriver no encontrado"},
+                        "408": {"description": "Timeout - Asegúrate de estar logueado en Profile 14 de WhatsApp Web"},
+                        "409": {"description": "Directorio de datos de Chrome en uso - Cierra Chrome y vuelve a intentar"},
+                        "500": {"description": "Error en el servicio, perfil de Chrome, campo de mensaje, botón de enviar no encontrado o elemento obsoleto"}
+                    }
+                }
+            },
+            "/api/mensajes/whatsapp-whapi": {
+                "post": {
+                    "summary": "Enviar mensaje por WhatsApp usando whapi.cloud",
+                    "description": "Envía un mensaje de WhatsApp usando la API de whapi.cloud. Si no se especifica destinatario, se envía al número por defecto +54 9 11 4163-5935. El sistema formatea automáticamente los números argentinos al formato requerido (549XXXXXXXXX).",
+                    "tags": ["Mensajes"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/MensajeWhapiCloud"},
+                                "example": {
+                                    "mensaje": "Hola, esto es un mensaje desde PhishIntel via whapi.cloud",
+                                    "destinatario": "+54 9 11 4163-5935"
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {
+                            "description": "Mensaje WhatsApp enviado correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "destinatario": {"type": "string"},
+                                            "destinatario_formateado": {"type": "string"},
+                                            "contenido": {"type": "string"},
+                                            "id": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Solicitud inválida - Falta el campo obligatorio 'mensaje' o número inválido"},
+                        "500": {"description": "Token no configurado o error en el servicio"},
+                        "503": {"description": "Error de conexión con whapi.cloud"},
+                        "408": {"description": "Timeout al enviar mensaje"}
+                    }
+                }
             }
         },
         "components": {
@@ -649,6 +782,40 @@ def openapi_spec():
                         "destinatario": {"type": "string"},
                         "asunto": {"type": "string"},
                         "cuerpo": {"type": "string"}
+                    }
+                },
+                "MensajeWhatsApp": {
+                    "type": "object",
+                    "required": ["remitente", "destinatario", "mensaje"],
+                    "properties": {
+                        "remitente": {"type": "string", "description": "Número de teléfono del remitente (formato internacional)"},
+                        "destinatario": {"type": "string", "description": "Número de teléfono del destinatario (formato internacional)"},
+                        "mensaje": {"type": "string", "description": "Contenido del mensaje"}
+                    }
+                },
+                "MensajeSMS": {
+                    "type": "object",
+                    "required": ["remitente", "destinatario", "mensaje"],
+                    "properties": {
+                        "remitente": {"type": "string", "description": "Número de teléfono del remitente (formato internacional)"},
+                        "destinatario": {"type": "string", "description": "Número de teléfono del destinatario (formato internacional)"},
+                        "mensaje": {"type": "string", "description": "Contenido del mensaje"}
+                    }
+                },
+                "MensajeWhatsAppSelenium": {
+                    "type": "object",
+                    "required": ["destinatario", "mensaje"],
+                    "properties": {
+                        "destinatario": {"type": "string", "description": "Número de teléfono o nombre del contacto (ej: 'Marcos Gurruchaga' o '+54 9 11 4163-5935')"},
+                        "mensaje": {"type": "string", "description": "Contenido del mensaje a enviar"}
+                    }
+                },
+                "MensajeWhapiCloud": {
+                    "type": "object",
+                    "required": ["mensaje"],
+                    "properties": {
+                        "mensaje": {"type": "string", "description": "Contenido del mensaje a enviar"},
+                        "destinatario": {"type": "string", "description": "Número de teléfono del destinatario (formato internacional). Si no se especifica, se usa +54 9 11 4163-5935 por defecto. El sistema formatea automáticamente números argentinos al formato 549XXXXXXXXX"}
                     }
                 }
             }
