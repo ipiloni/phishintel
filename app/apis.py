@@ -58,8 +58,8 @@ def generarSTT():
     return ElevenLabsController().generarSTT(ubicacion)
 
 # ------ # MENSAJES # ------ #
-@apis.route("/api/mensajes/whatsapp", methods=["POST"])
-def enviarMensajeWhatsapp():
+@apis.route("/api/mensajes/whatsapp-twilio", methods=["POST"])
+def enviarMensajeWhatsappTwilio():
     data = request.get_json()
     return MensajesController.enviarMensajeWhatsapp(data)
 
@@ -67,6 +67,16 @@ def enviarMensajeWhatsapp():
 def enviarMensajeSMS():
     data = request.get_json()
     return MensajesController.enviarMensajeSMS(data)
+
+@apis.route("/api/mensajes/whatsapp-selenium", methods=["POST"])
+def enviarMensajeWhatsappSelenium():
+    data = request.get_json()
+    return MensajesController.enviarMensajeWhatsappSelenium(data)
+
+@apis.route("/api/mensajes/whatsapp-whapi", methods=["POST"])
+def enviarMensajeWhatsappWhapi():
+    data = request.get_json()
+    return MensajesController.enviarMensajeWhapiCloud(data)
 
 # ------ # REGISTROS DE EVENTOS +  # ------ #
 @apis.route("/api/sumar-falla", methods=["GET"])
