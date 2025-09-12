@@ -78,6 +78,11 @@ def enviarMensajeWhatsappWhapi():
     data = request.get_json()
     return MensajesController.enviarMensajeWhapiCloud(data)
 
+@apis.route("/api/mensajes/whatsapp-grupo-whapi", methods=["POST"])
+def enviarMensajeWhatsappGrupoWhapi():
+    data = request.get_json()
+    return MensajesController.enviarMensajeWhapiGrupo(data)
+
 # ------ # REGISTROS DE EVENTOS +  # ------ #
 @apis.route("/api/sumar-falla", methods=["GET"])
 def sumarFalla():

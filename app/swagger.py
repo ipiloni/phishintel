@@ -13,17 +13,17 @@ def openapi_spec():
             "description": "Documentación básica de endpoints"
         },
         "tags": [
-            {"name": "Usuarios", "description": "Gestión de usuarios"},
-            {"name": "Áreas", "description": "Gestión de áreas"},
-            {"name": "Eventos", "description": "Gestión de eventos"},
-            {"name": "Emails", "description": "Envío de emails y notificaciones"},
-            {"name": "Mensajes", "description": "Envío de mensajes WhatsApp y SMS"}
+            {"name": "👥 Usuarios", "description": "Gestión de usuarios"},
+            {"name": "🏢 Áreas", "description": "Gestión de áreas"},
+            {"name": "📅 Eventos", "description": "Gestión de eventos"},
+            {"name": "📧 Emails", "description": "Envío de emails y notificaciones"},
+            {"name": "💬 Mensajes", "description": "Envío de mensajes WhatsApp y SMS"}
         ],
         "paths": {
             "/api/usuarios": {
                 "get": {
                     "summary": "Obtener todos los usuarios",
-                    "tags": ["Usuarios"],
+                    "tags": ["👥 Usuarios"],
                     "responses": {
                         "200": {
                             "description": "Lista de usuarios",
@@ -45,7 +45,7 @@ def openapi_spec():
                 },
                 "post": {
                     "summary": "Crear un usuario",
-                    "tags": ["Usuarios"],
+                    "tags": ["👥 Usuarios"],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -73,7 +73,7 @@ def openapi_spec():
             "/api/usuarios/batch": {
                 "post": {
                     "summary": "Crear múltiples usuarios",
-                    "tags": ["Usuarios"],
+                    "tags": ["👥 Usuarios"],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -161,7 +161,7 @@ def openapi_spec():
             "/api/usuarios/{idUsuario}": {
                 "get": {
                     "summary": "Obtener usuario por ID",
-                    "tags": ["Usuarios"],
+                    "tags": ["👥 Usuarios"],
                     "parameters": [
                         {"name": "idUsuario", "in": "path", "required": True, "schema": {"type": "string"}}
                     ],
@@ -175,7 +175,7 @@ def openapi_spec():
                 },
                 "put": {
                     "summary": "Editar un usuario",
-                    "tags": ["Usuarios"],
+                    "tags": ["👥 Usuarios"],
                     "parameters": [
                         {"name": "idUsuario", "in": "path", "required": True, "schema": {"type": "string"}}
                     ],
@@ -194,7 +194,7 @@ def openapi_spec():
                 },
                 "delete": {
                     "summary": "Eliminar un usuario",
-                    "tags": ["Usuarios"],
+                    "tags": ["👥 Usuarios"],
                     "parameters": [
                         {"name": "idUsuario", "in": "path", "required": True, "schema": {"type": "string"}}
                     ],
@@ -208,7 +208,7 @@ def openapi_spec():
             "/api/areas": {
                 "get": {
                     "summary": "Obtener todas las áreas",
-                    "tags": ["Áreas"],
+                    "tags": ["🏢 Áreas"],
                     "responses": {
                         "200": {
                             "description": "Lista de áreas",
@@ -227,7 +227,7 @@ def openapi_spec():
                 },
                 "post": {
                     "summary": "Crear un área",
-                    "tags": ["Áreas"],
+                    "tags": ["🏢 Áreas"],
                     "requestBody": {
                         "required": True,
                         "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AreaCreate"}}}
@@ -238,7 +238,7 @@ def openapi_spec():
             "/api/areas/{idArea}": {
                 "get": {
                     "summary": "Obtener área por ID",
-                    "tags": ["Áreas"],
+                    "tags": ["🏢 Áreas"],
                     "parameters": [
                         {"name": "idArea", "in": "path", "required": True, "schema": {"type": "string"}}
                     ],
@@ -249,7 +249,7 @@ def openapi_spec():
                 },
                 "put": {
                     "summary": "Editar un área",
-                    "tags": ["Áreas"],
+                    "tags": ["🏢 Áreas"],
                     "parameters": [
                         {"name": "idArea", "in": "path", "required": True, "schema": {"type": "string"}}
                     ],
@@ -264,7 +264,7 @@ def openapi_spec():
                 },
                 "delete": {
                     "summary": "Eliminar un área",
-                    "tags": ["Áreas"],
+                    "tags": ["🏢 Áreas"],
                     "parameters": [
                         {"name": "idArea", "in": "path", "required": True, "schema": {"type": "string"}}
                     ],
@@ -277,7 +277,7 @@ def openapi_spec():
             "/api/areas/batch": {
                 "post": {
                     "summary": "Crear múltiples áreas",
-                    "tags": ["Áreas"],
+                    "tags": ["🏢 Áreas"],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -312,7 +312,7 @@ def openapi_spec():
             "/api/areas/fallas": {
                 "get": {
                     "summary": "Obtener fallas por área (agregado por empleados)",
-                    "tags": ["Áreas"],
+                    "tags": ["🏢 Áreas"],
                     "responses": {
                         "200": {
                             "description": "Listado de áreas con métricas de fallas",
@@ -338,7 +338,7 @@ def openapi_spec():
             "/api/eventos": {
                 "get": {
                     "summary": "Obtener todos los eventos",
-                    "tags": ["Eventos"],
+                    "tags": ["📅 Eventos"],
                     "responses": {
                         "200": {
                             "description": "Lista de eventos",
@@ -348,7 +348,7 @@ def openapi_spec():
                 },
                 "post": {
                     "summary": "Crear un evento",
-                    "tags": ["Eventos"],
+                    "tags": ["📅 Eventos"],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -372,20 +372,20 @@ def openapi_spec():
             "/api/eventos/{idEvento}": {
                 "get": {
                     "summary": "Obtener evento por ID",
-                    "tags": ["Eventos"],
+                    "tags": ["📅 Eventos"],
                     "parameters": [{"name": "idEvento", "in": "path", "required": True, "schema": {"type": "integer"}}],
                     "responses": {"200": {"description": "Evento", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Evento"}}}}, "404": {"description": "No encontrado"}}
                 },
                 "put": {
                     "summary": "Editar un evento",
-                    "tags": ["Eventos"],
+                    "tags": ["📅 Eventos"],
                     "parameters": [{"name": "idEvento", "in": "path", "required": True, "schema": {"type": "integer"}}],
                     "requestBody": {"required": True, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/EventoUpdate"}}}},
                     "responses": {"200": {"description": "Evento editado"}, "404": {"description": "No encontrado"}}
                 },
                 "delete": {
                     "summary": "Eliminar un evento",
-                    "tags": ["Eventos"],
+                    "tags": ["📅 Eventos"],
                     "parameters": [{"name": "idEvento", "in": "path", "required": True, "schema": {"type": "integer"}}],
                     "responses": {"200": {"description": "Evento eliminado"}, "404": {"description": "No encontrado"}}
                 }
@@ -393,7 +393,7 @@ def openapi_spec():
             "/api/eventos/{idEvento}/usuarios/{idUsuario}": {
                 "post": {
                     "summary": "Asociar usuario a evento con resultado",
-                    "tags": ["Eventos"],
+                    "tags": ["📅 Eventos"],
                     "parameters": [
                         {"name": "idEvento", "in": "path", "required": True, "schema": {"type": "integer"}},
                         {"name": "idUsuario", "in": "path", "required": True, "schema": {"type": "integer"}}
@@ -405,7 +405,7 @@ def openapi_spec():
             "/api/email/enviar-id": {
                 "post": {
                     "summary": "Enviar email por ID de usuario",
-                    "tags": ["Emails"],
+                    "tags": ["📧 Emails"],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -430,7 +430,7 @@ def openapi_spec():
             "/api/email/generar": {
                 "post": {
                     "summary": "Generar email con IA (solo generar, no enviar)",
-                    "tags": ["Emails"],
+                    "tags": ["📧 Emails"],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -453,7 +453,7 @@ def openapi_spec():
             "/api/email/notificar": {
                 "post": {
                     "summary": "Enviar notificación desde PhishIntel",
-                    "tags": ["Emails"],
+                    "tags": ["📧 Emails"],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -477,7 +477,7 @@ def openapi_spec():
                 "post": {
                     "summary": "⚠️ SOLO NRO IGNA - Enviar mensaje por WhatsApp (Twilio) - ",
                     "description": "⚠️ Este endpoint no funciona correctamente actualmente",
-                    "tags": ["Mensajes"],
+                    "tags": ["💬 Mensajes"],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -501,7 +501,7 @@ def openapi_spec():
             "/api/mensajes/sms": {
                 "post": {
                     "summary": "⚠️ SOLO NRO IGNA - Enviar mensaje por SMS",
-                    "tags": ["Mensajes"],
+                    "tags": ["💬 Mensajes"],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -526,7 +526,7 @@ def openapi_spec():
                 "post": {
                     "summary": "❌️ NO FUNCIONA - Enviar mensaje por WhatsApp usando Selenium ",
                     "description": "❌ Este endpoint no funciona correctamente actualmente. Envía un mensaje de WhatsApp usando Selenium WebDriver. Requiere que el usuario esté previamente logueado en WhatsApp Web en Chrome Profile 14.",
-                    "tags": ["Mensajes"],
+                    "tags": ["💬 Mensajes"],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -567,7 +567,7 @@ def openapi_spec():
                 "post": {
                     "summary": "✅ FUNCIONA - Enviar mensaje por WhatsApp usando whapi.cloud",
                     "description": "Envía un mensaje de WhatsApp usando la API de whapi.cloud. Si no se especifica destinatario, se envía al número por defecto +54 9 11 4163-5935. El sistema formatea automáticamente los números argentinos al formato requerido (549XXXXXXXXX).",
-                    "tags": ["Mensajes"],
+                    "tags": ["💬 Mensajes"],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -602,6 +602,47 @@ def openapi_spec():
                         "500": {"description": "Token no configurado o error en el servicio"},
                         "503": {"description": "Error de conexión con whapi.cloud"},
                         "408": {"description": "Timeout al enviar mensaje"}
+                    }
+                }
+            },
+            "/api/mensajes/whatsapp-grupo-whapi": {
+                "post": {
+                    "summary": "✅ FUNCIONA - Enviar mensaje a grupo de WhatsApp usando whapi.cloud",
+                    "description": "Envía un mensaje de WhatsApp a un grupo usando la API de whapi.cloud. Si no se especifica grupo_id, se envía al grupo por defecto 'Proyecto Grupo 8 🤝🏻✨🎉🙌🏻'. El grupo_id debe ser el identificador único del grupo de WhatsApp.",
+                    "tags": ["💬 Mensajes"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/MensajeWhapiGrupo"},
+                                "example": {
+                                    "mensaje": "Hola grupo! Este es un mensaje desde PhishIntel via whapi.cloud",
+                                    "grupo_id": "120363416003158863@g.us"
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {
+                            "description": "Mensaje WhatsApp enviado correctamente al grupo",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "grupo_id": {"type": "string"},
+                                            "contenido": {"type": "string"},
+                                            "id": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Solicitud inválida - Falta el campo obligatorio 'mensaje'"},
+                        "500": {"description": "Token no configurado o error en el servicio"},
+                        "503": {"description": "Error de conexión con whapi.cloud"},
+                        "408": {"description": "Timeout al enviar mensaje al grupo"}
                     }
                 }
             }
@@ -816,6 +857,14 @@ def openapi_spec():
                     "properties": {
                         "mensaje": {"type": "string", "description": "Contenido del mensaje a enviar"},
                         "destinatario": {"type": "string", "description": "Número de teléfono del destinatario (formato internacional). Si no se especifica, se usa +54 9 11 4163-5935 por defecto. El sistema formatea automáticamente números argentinos al formato 549XXXXXXXXX"}
+                    }
+                },
+                "MensajeWhapiGrupo": {
+                    "type": "object",
+                    "required": ["mensaje"],
+                    "properties": {
+                        "mensaje": {"type": "string", "description": "Contenido del mensaje a enviar al grupo"},
+                        "grupo_id": {"type": "string", "description": "ID del grupo de WhatsApp. Si no se especifica, se usa '120363416003158863@g.us' por defecto. El grupo_id debe ser el identificador único del grupo de WhatsApp"}
                     }
                 }
             }
