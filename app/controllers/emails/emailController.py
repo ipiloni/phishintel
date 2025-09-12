@@ -16,6 +16,87 @@ from app.utils.logger import log
 
 class EmailController:
 
+    # =================== MÉTODOS ACTIVOS (EN USO) =================== #
+
+    @staticmethod
+    def enviarMailPorID(data):
+        if not data or "proveedor" not in data or "idUsuario" not in data or "asunto" not in data or "cuerpo" not in data:
+            return responseError("CAMPOS_OBLIGATORIOS",
+                                 "Faltan campos obligatorios como 'proveedor', 'idUsuario', 'asunto' o 'cuerpo'", 400)
+
+        proveedor = data["proveedor"]
+        id_usuario = data["idUsuario"]
+        asunto = data["asunto"]
+        cuerpo = data["cuerpo"]
+
+        session = SessionLocal()
+        try:
+            # Buscar el usuario en la BD
+            usuario = session.query(Usuario).filter_by(idUsuario=id_usuario).first()
+            if not usuario or not usuario.correo:
+                session.close()
+                return responseError("USUARIO_NO_ENCONTRADO",
+                                     "No se encontró el usuario o no tiene correo registrado", 404)
+
+            # Crear el evento y registro
+            registroEvento = RegistroEvento(asunto=asunto, cuerpo=cuerpo)
+            evento = Evento(
+                tipoEvento=TipoEvento.CORREO,
+                fechaEvento=datetime.datetime.now(),
+                registroEvento=registroEvento
+            )
+            session.add(evento)
+            session.commit()  # Para obtener idEvento
+
+            # Vincular el evento con el usuario
+            usuario_evento = UsuarioxEvento(
+                idUsuario=id_usuario,
+                idEvento=evento.idEvento,
+                resultado=ResultadoEvento.PENDIENTE
+            )
+            session.add(usuario_evento)
+            session.commit()
+
+            # Construir link a caiste con parámetros y agregar botón al cuerpo
+            link_caiste = f"http://localhost:8080/caiste?idUsuario={id_usuario}&idEvento={evento.idEvento}"
+            boton_html = (
+                f"<div style=\"margin-top:20px;text-align:center\">"
+                f"<a href=\"{link_caiste}\" style=\"background-color:#d9534f;color:#ffffff;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;font-family:Arial,Helvetica,sans-serif\">"
+                f"Ver"
+                f"</a>"
+                f"</div>"
+            )
+            cuerpo_con_boton = f"{cuerpo}{boton_html}"
+
+            # Enviar email
+            if proveedor == "twilio":
+                response = enviarNotificacionEmail(asunto, cuerpo_con_boton, "phishingintel@gmail.com")
+                log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
+            elif proveedor == "smtp":
+                smtp = SMTPConnection("mail.pgcontrol.com.ar", "26")
+                smtp.login("juan.perez@pgcontrol.com.ar", "juan.perez1")
+                message = smtp.compose_message(
+                    sender="juan.perez@pgcontrol.com.ar",
+                    name="Administración PGControl",
+                    recipients=[usuario.correo],
+                    subject=asunto,
+                    html=cuerpo_con_boton
+                )
+                smtp.send_mail(message)
+            else:
+                session.rollback()
+                return responseError("PROVEEDOR_INVALIDO", "Proveedor de correo no reconocido", 400)
+
+            idnuevo = evento.idEvento
+            session.close()
+            return jsonify({"mensaje": "Email enviado correctamente", "idEvento": idnuevo}), 201
+
+        except Exception as e:
+            log.error(f"Error en enviarMailPorID: {str(e)}")
+            session.rollback()
+            session.close()
+            return responseError("ERROR", f"Hubo un error al enviar mail: {str(e)}", 500)
+
     ## Este metodo envia notificaciones de recuperar contrasenia, doble factor, etc. Es desde el email de Phishintel!
     # deberia recibir el tipo de notificacion y, en base a este, definir que asunto y cuerpo enviar, estos deberian almacenarse en la bdd porque siempre van a ser iguales
     @staticmethod
@@ -34,6 +115,8 @@ class EmailController:
         except Exception as e:
             log.error(f"Hubo un error al intentar enviar la notificacion: {str(e)}")
             return responseError("ERROR", f"Hubo un error al intentar enviar la notificacion: {str(e)}", 500)
+
+    # =================== MÉTODOS LEGACY (NO EN USO) =================== #
 
     @staticmethod
     def enviarMail(data):
@@ -179,83 +262,4 @@ class EmailController:
             session.rollback()
             session.close()
             return responseError("ERROR", f"Hubo un error al generar y enviar el mail: {str(e)}", 500)
-
-    @staticmethod
-    def enviarMailPorID(data):
-        if not data or "proveedor" not in data or "idUsuario" not in data or "asunto" not in data or "cuerpo" not in data:
-            return responseError("CAMPOS_OBLIGATORIOS",
-                                 "Faltan campos obligatorios como 'proveedor', 'idUsuario', 'asunto' o 'cuerpo'", 400)
-
-        proveedor = data["proveedor"]
-        id_usuario = data["idUsuario"]
-        asunto = data["asunto"]
-        cuerpo = data["cuerpo"]
-
-        session = SessionLocal()
-        try:
-            # Buscar el usuario en la BD
-            usuario = session.query(Usuario).filter_by(idUsuario=id_usuario).first()
-            if not usuario or not usuario.correo:
-                session.close()
-                return responseError("USUARIO_NO_ENCONTRADO",
-                                     "No se encontró el usuario o no tiene correo registrado", 404)
-
-            # Crear el evento y registro
-            registroEvento = RegistroEvento(asunto=asunto, cuerpo=cuerpo)
-            evento = Evento(
-                tipoEvento=TipoEvento.CORREO,
-                fechaEvento=datetime.datetime.now(),
-                registroEvento=registroEvento
-            )
-            session.add(evento)
-            session.commit()  # Para obtener idEvento
-
-            # Vincular el evento con el usuario
-            usuario_evento = UsuarioxEvento(
-                idUsuario=id_usuario,
-                idEvento=evento.idEvento,
-                resultado=ResultadoEvento.PENDIENTE
-            )
-            session.add(usuario_evento)
-            session.commit()
-
-            # Construir link a caiste con parámetros y agregar botón al cuerpo
-            link_caiste = f"http://localhost:8080/caiste?idUsuario={id_usuario}&idEvento={evento.idEvento}"
-            boton_html = (
-                f"<div style=\"margin-top:20px;text-align:center\">"
-                f"<a href=\"{link_caiste}\" style=\"background-color:#d9534f;color:#ffffff;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;font-family:Arial,Helvetica,sans-serif\">"
-                f"Ver"
-                f"</a>"
-                f"</div>"
-            )
-            cuerpo_con_boton = f"{cuerpo}{boton_html}"
-
-            # Enviar email
-            if proveedor == "twilio":
-                response = enviarNotificacionEmail(asunto, cuerpo_con_boton, "phishingintel@gmail.com")
-                log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
-            elif proveedor == "smtp":
-                smtp = SMTPConnection("mail.pgcontrol.com.ar", "26")
-                smtp.login("juan.perez@pgcontrol.com.ar", "juan.perez1")
-                message = smtp.compose_message(
-                    sender="juan.perez@pgcontrol.com.ar",
-                    name="Administración PGControl",
-                    recipients=[usuario.correo],
-                    subject=asunto,
-                    html=cuerpo_con_boton
-                )
-                smtp.send_mail(message)
-            else:
-                session.rollback()
-                return responseError("PROVEEDOR_INVALIDO", "Proveedor de correo no reconocido", 400)
-
-            idnuevo = evento.idEvento
-            session.close()
-            return jsonify({"mensaje": "Email enviado correctamente", "idEvento": idnuevo}), 201
-
-        except Exception as e:
-            log.error(f"Error en enviarMailPorID: {str(e)}")
-            session.rollback()
-            session.close()
-            return responseError("ERROR", f"Hubo un error al enviar mail: {str(e)}", 500)
 

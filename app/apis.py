@@ -109,16 +109,6 @@ def eliminarEvento(idEvento):
     return EventosController.eliminarEvento(idEvento)
 
 # ------ # ENVIO DE EMAILS # ------ #
-@apis.route("/api/email/notificar", methods=["POST"]) # Esta ruta envia una notificacion con el email de PhishIntel
-def notificarViaEmail():
-    data = request.get_json()
-    return EmailController.enviarNotificacionPhishintel(data)
-
-@apis.route("/api/email/enviar", methods=["POST"]) # Esta ruta
-def enviarEmail():
-    data = request.get_json()
-    return EmailController.enviarMail(data)
-
 @apis.route("/api/email/enviar-id", methods=["POST"]) # Esta ruta
 def enviarEmailPorID():
     data = request.get_json()
@@ -128,6 +118,16 @@ def enviarEmailPorID():
 def llamarIAGemini():
     data = request.get_json()
     return AIController.armarEmail(data)
+
+@apis.route("/api/email/notificar", methods=["POST"]) # Esta ruta envia una notificacion con el email de PhishIntel
+def notificarViaEmail():
+    data = request.get_json()
+    return EmailController.enviarNotificacionPhishintel(data)
+
+@apis.route("/api/email/enviar", methods=["POST"]) # Esta ruta
+def enviarEmail():
+    data = request.get_json()
+    return EmailController.enviarMail(data)
 
 @apis.route("/api/email/generar-enviar", methods=["POST"])
 def generarYEnviarEmail():
