@@ -468,3 +468,79 @@ class MensajesController:
             error_msg = f"Error inesperado al enviar mensaje con whapi.cloud: {str(e)}"
             log.error(error_msg)
             return responseError("ERROR_WHAPI", error_msg, 500)
+
+    @staticmethod
+    def enviarMensajeWhapiGrupo(data):
+        """
+        Envía un mensaje de WhatsApp a un grupo usando whapi.cloud API.
+
+        Args:
+            data (dict): Diccionario con los siguientes campos:
+                - mensaje (str): Mensaje a enviar
+                - grupo_id (str, opcional): ID del grupo de WhatsApp.
+                  Si no se proporciona, se usa el grupo por defecto "Proyecto Grupo 8 🤝🏻✨🎉🙌🏻"
+
+        Returns:
+            tuple: (response, status_code)
+        """
+        log.info("Se recibió una solicitud para enviar mensaje a grupo de WhatsApp con whapi.cloud")
+
+        # Validar campos obligatorios
+        if not data or "mensaje" not in data:
+            log.warn("Falta el campo obligatorio 'mensaje'")
+            return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'mensaje'", 400)
+
+        mensaje = data["mensaje"]
+        grupo_id = data.get("grupo_id", "120363416003158863@g.us")  # Grupo por defecto
+
+        try:
+            # Obtener el token desde las variables de entorno
+            token = get("WHAPI_CLOUD_TOKEN")
+            if not token:
+                log.error("Token de whapi.cloud no configurado")
+                return responseError("TOKEN_NO_CONFIGURADO", "Token de whapi.cloud no configurado", 500)
+
+            # URL de la API de whapi.cloud
+            url = "https://gate.whapi.cloud/messages/text"
+
+            # Headers para la petición
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            }
+
+            # Datos del mensaje
+            payload = {
+                "to": grupo_id,
+                "body": mensaje
+            }
+
+            log.info(f"Enviando mensaje al grupo '{grupo_id}': {mensaje}")
+
+            # Realizar la petición POST
+            response = requests.post(url, json=payload, headers=headers, timeout=30)
+
+            if response.status_code == 200:
+                response_data = response.json()
+                log.info(f"Mensaje enviado correctamente al grupo. ID: {response_data.get('id', 'N/A')}")
+                return jsonify({
+                    "mensaje": "Mensaje enviado correctamente al grupo via whapi.cloud",
+                    "grupo_id": grupo_id,
+                    "contenido": mensaje,
+                    "id": response_data.get('id', 'N/A')
+                }), 201
+            else:
+                error_msg = f"Error en whapi.cloud API: {response.status_code} - {response.text}"
+                log.error(error_msg)
+                return responseError("ERROR_API_WHAPI", error_msg, response.status_code)
+
+        except requests.exceptions.Timeout:
+            log.error("Timeout al enviar mensaje al grupo via whapi.cloud")
+            return responseError("TIMEOUT_ERROR", "Timeout al enviar mensaje al grupo via whapi.cloud", 408)
+        except requests.exceptions.ConnectionError:
+            log.error("Error de conexión con whapi.cloud")
+            return responseError("CONNECTION_ERROR", "Error de conexión con whapi.cloud", 503)
+        except Exception as e:
+            error_msg = f"Error inesperado al enviar mensaje al grupo con whapi.cloud: {str(e)}"
+            log.error(error_msg)
+            return responseError("ERROR_WHAPI", error_msg, 500)
