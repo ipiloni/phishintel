@@ -645,6 +645,42 @@ def openapi_spec():
                         "408": {"description": "Timeout al enviar mensaje al grupo"}
                     }
                 }
+            },
+            "/api/mensaje/generar": {
+                "post": {
+                    "summary": "🤖 Generar mensaje de phishing con IA (solo generar, no enviar)",
+                    "description": "Genera un mensaje de phishing personalizado usando Gemini AI. El mensaje se genera como texto plano para WhatsApp/SMS, adaptado al nivel de dificultad especificado.",
+                    "tags": ["💬 Mensajes"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/MensajeGenerar"},
+                                "example": {
+                                    "contexto": "Área: Ventas, Usuario: Juan Pérez, La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam.",
+                                    "nivel": "Medio"
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {
+                            "description": "Mensaje generado correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string", "description": "Contenido del mensaje generado por IA"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Solicitud inválida - Falta el campo obligatorio 'contexto'"},
+                        "500": {"description": "Error en la API de Gemini"}
+                    }
+                }
             }
         },
         "components": {
@@ -865,6 +901,14 @@ def openapi_spec():
                     "properties": {
                         "mensaje": {"type": "string", "description": "Contenido del mensaje a enviar al grupo"},
                         "grupo_id": {"type": "string", "description": "ID del grupo de WhatsApp. Si no se especifica, se usa '120363416003158863@g.us' por defecto. El grupo_id debe ser el identificador único del grupo de WhatsApp"}
+                    }
+                },
+                "MensajeGenerar": {
+                    "type": "object",
+                    "required": ["contexto"],
+                    "properties": {
+                        "contexto": {"type": "string", "description": "Contexto para generar el mensaje (área, usuario, fecha, etc.)"},
+                        "nivel": {"type": "string", "enum": ["Fácil", "Medio", "Difícil"], "description": "Nivel de dificultad del mensaje de phishing"}
                     }
                 }
             }
