@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Generar Mensaje - PhishIntel</title>
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+</head>
+<style>
+/* Personalizar los radios */
+
+/* Cuando está seleccionado → círculo rosa */
+.custom-radio:checked {
+  background-color: #da02e5; /* rosa */
+  border-color: #da02e5;
+}
+
+/* Para navegadores que usan -webkit-appearance */
+.custom-radio[type="radio"] {
+  accent-color: #da02e5; /* Soporta Chrome/Edge/Firefox modernos */
+}
+</style>
+<body class="index-page">
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container position-relative d-flex align-items-center justify-content-between">
+      <a href="/" class="logo d-flex align-items-center me-auto me-xl-0">
+        <h1 class="sitename">PhishIntel</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="/principal" class="btn-getstarted btn-login">Home</a></li>
+          <li><a href="/selectorCampania" class="btn-getstarted btn-login">Volver al Panel</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+  <!-- End Header -->
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title py-5"></div>
+
+    <!-- Formulario con Vue -->
+    <section id="mensaje" class="contact section">
+      <div class="col-lg-8 mx-auto" data-aos="fade-left" data-aos-delay="200">
+        <!-- Vue App -->
+        <div id="app" class="contact-form-wrapper">
+          <div class="form-header">
+            <h3>Generación de Simulación de Mensaje</h3>
+            <p>Selecciona el área, usuario y nivel de dificultad para generar un mensaje de phishing.</p>
+          </div>
+
+          <form class="php-email-form" @submit.prevent="generarPreview">
+
+            <!-- Selector de Área -->
+            <div class="mb-3">
+              <label for="areaSelect" class="form-label">Seleccionar Área</label>
+              <select v-model="filtroArea" class="form-control" id="areaSelect" name="area" required>
+                <option value="">-- Selecciona un área --</option>
+                <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
+                  {{ area.nombreArea }} 
+                </option>
+              </select>
+            </div>
+
+            <!-- Selector de Usuario (solo visible cuando hay área seleccionada) -->
+            <div class="mb-3" v-if="filtroArea">
+              <label for="userSelect" class="form-label">Seleccionar Usuario</label>
+              <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" required>
+                <option value="">-- Selecciona un usuario --</option>
+                <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario">
+                  {{ usuario.nombre }} {{ usuario.apellido }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Dificultad -->
+            <div class="mb-3">
+              <label class="form-label">Nivel de Dificultad</label>
+
+              <div class="form-check">
+                <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="facil" value="Fácil" checked>
+                <label class="form-check-label" for="facil">Fácil (Mensaje directo y obvio)</label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="medio" value="Medio">
+                <label class="form-check-label" for="medio">Medio (Mensaje con contexto corporativo)</label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="dificil" value="Difícil">
+                <label class="form-check-label" for="dificil">Difícil (Mensaje sofisticado y personalizado)</label>
+              </div>
+            </div>
+
+            <!-- Botón de enviar -->
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill">
+                <i class="bi bi-chat-dots"></i> Ver Preview
+              </button>
+            </div>
+          </form>
+
+          <!-- Modal Preview (dentro de #app) -->
+          <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+              <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                  <h5 class="modal-title">Vista previa del mensaje a enviar</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <p><strong>Opciones Elegidas </strong></p>
+                  <p><strong>Área: </strong>{{ filtroArea }} <span id="previewArea"></span></p>
+                  <p><strong>Usuario:  </strong> {{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}<span id="previewUsuario"></span></p>
+                  <p><strong>Dificultad: </strong> {{ nivel }}<span id="previewDificultad"></span></p>
+                  <hr>
+                  <p><strong>Mensaje generado por IA</strong></p>
+                  <div class="bg-light text-dark p-3 rounded">
+                    <div v-html="modalMensaje"></div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="button" class="btn btn-primary" @click="confirmarEnvio">Confirmar y Enviar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- End #app -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          areas: [],
+          filtroArea: "",
+          filtroUsuario: "",
+          nivel: "Fácil",
+          modalMensaje: "",
+          mensajeGenerado: {
+            proveedor: "twilio",
+            idUsuario: null, 
+            mensaje: ""
+          }
+        };
+      },
+      computed: {
+        usuariosFiltrados() {
+          const areaSeleccionada = this.areas.find(a => a.nombreArea === this.filtroArea);
+          return areaSeleccionada ? areaSeleccionada.usuarios : [];
+        }
+      },
+      watch: {
+        filtroArea() {
+          // Limpiar usuario seleccionado cuando cambie el área
+          this.filtroUsuario = "";
+        }
+      },
+      methods: {
+        async generarPreview() {
+          try {
+            // Por ahora, generamos un mensaje genérico basado en el nivel
+            let mensajeGenerico = "";
+            
+            switch(this.nivel) {
+              case "Fácil":
+                mensajeGenerico = `
+                  <p><strong>🚨 URGENTE - Verificación de Cuenta</strong></p>
+                  <p>Hola ${this.filtroUsuario.nombre},</p>
+                  <p>Tu cuenta ha sido suspendida por seguridad. Haz clic aquí para verificar: <a href="#">VERIFICAR AHORA</a></p>
+                  <p>Si no actúas en 24 horas, tu cuenta será eliminada.</p>
+                  <p>Equipo de Seguridad</p>
+                `;
+                break;
+              case "Medio":
+                mensajeGenerico = `
+                  <p><strong>Actualización de Política de Seguridad</strong></p>
+                  <p>Estimado/a ${this.filtroUsuario.nombre},</p>
+                  <p>Como parte de las nuevas políticas de seguridad de la empresa, necesitamos que actualices tu información de acceso.</p>
+                  <p>Por favor, accede al siguiente enlace para completar el proceso: <a href="#">ACTUALIZAR INFORMACIÓN</a></p>
+                  <p>Este proceso es obligatorio para todos los empleados del área de ${this.filtroArea}.</p>
+                  <p>Recursos Humanos</p>
+                `;
+                break;
+              case "Difícil":
+                mensajeGenerico = `
+                  <p><strong>Reunión de Seguridad - ${this.filtroArea}</strong></p>
+                  <p>Hola ${this.filtroUsuario.nombre},</p>
+                  <p>Te escribo porque necesitamos coordinar una reunión urgente sobre los nuevos protocolos de seguridad para el área de ${this.filtroArea}.</p>
+                  <p>He preparado un documento con los cambios que necesitamos implementar. Puedes revisarlo aquí: <a href="#">DOCUMENTO DE SEGURIDAD</a></p>
+                  <p>Por favor, confirma tu asistencia respondiendo a este mensaje.</p>
+                  <p>Saludos,<br>María González<br>Gerente de Seguridad IT</p>
+                `;
+                break;
+            }
+
+            this.modalMensaje = mensajeGenerico;
+            this.mensajeGenerado.mensaje = mensajeGenerico;
+            this.mensajeGenerado.idUsuario = this.filtroUsuario.idUsuario;
+
+            // Abrir modal
+            const modal = new bootstrap.Modal(document.getElementById("previewModal"));
+            modal.show();
+
+          } catch (e) {
+            console.error("Error:", e);
+            alert("No se pudo generar el mensaje");
+          }
+        },
+
+        async confirmarEnvio() {
+          try {
+            // Por ahora, simulamos el envío
+            alert("Mensaje enviado correctamente ✅");
+            bootstrap.Modal.getInstance(document.getElementById("previewModal")).hide();
+
+            // Aquí se podría agregar la llamada real al endpoint cuando esté disponible
+            // const resp = await fetch("http://localhost:8080/api/mensaje/enviar", {
+            //   method: "POST",
+            //   headers: { "Content-Type": "application/json" },
+            //   body: JSON.stringify(this.mensajeGenerado)
+            // });
+
+          } catch (e) {
+            console.error("Error:", e);
+            alert("No se pudo enviar el mensaje");
+          }
+        }
+      },
+      async mounted() {
+        try {
+          const resp = await fetch("http://localhost:8080/api/areas");
+          const data = await resp.json();
+          this.areas = data.areas || [];
+        } catch (e) {
+          console.error("Error cargando áreas:", e);
+        }
+      }
+    }).mount("#app");
+  </script>
+
+</body>
+
+</html>

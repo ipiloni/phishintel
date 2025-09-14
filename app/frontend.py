@@ -38,12 +38,17 @@ def usuarios():
 @frontend.route("/selectorCampania")
 def selectorCampania():
    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalSelectorCampania.html")
-@frontend.route("/formLlamada")
-def formLlamada():
+@frontend.route("/campania-llamada")
+def campaniaLlamada():
    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "campaniaLlamada.html")
-@frontend.route("/formEmail")
-def formEmail():
+@frontend.route("/campania-email")
+def campaniaEmail():
    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "campaniaEmail.html")
+
+@frontend.route("/campania-mensaje")
+def campaniaMensaje():
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "campaniaMensajes.html")
+
 @frontend.route("/enConstruccion")
 def enConstruccion():
    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "enConstruccion.html")

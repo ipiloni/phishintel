@@ -85,8 +85,8 @@
               </select>
             </div>
 
-            <!-- Selector de Usuario -->
-            <div class="mb-3">
+            <!-- Selector de Usuario (solo visible cuando hay área seleccionada) -->
+            <div class="mb-3" v-if="filtroArea">
               <label for="userSelect" class="form-label">Seleccionar Usuario</label>
               <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" required>
                 <option value="">-- Selecciona un usuario --</option>
@@ -189,6 +189,12 @@
         usuariosFiltrados() {
           const areaSeleccionada = this.areas.find(a => a.nombreArea === this.filtroArea);
           return areaSeleccionada ? areaSeleccionada.usuarios : [];
+        }
+      },
+      watch: {
+        filtroArea() {
+          // Limpiar usuario seleccionado cuando cambie el área
+          this.filtroUsuario = "";
         }
       },
       methods: {
