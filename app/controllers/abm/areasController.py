@@ -181,7 +181,10 @@ class AreasController:
             session.close()
 
     @staticmethod
-    def obtenerFallasPorArea():
+    def obtenerFallasPorArea(tipos_evento=None):
+        from app.backend.models.evento import Evento
+        from app.backend.models.tipoEvento import TipoEvento
+        
         session = SessionLocal()
         try:
             # Traer todas las áreas para garantizar inclusión aunque no tengan fallas
@@ -200,7 +203,7 @@ class AreasController:
             }
 
             # Query de fallas por usuario y área (solo cuenta FALLA)
-            resultados = (
+            query = (
                 session.query(
                     Area.idArea,
                     Area.nombreArea,
@@ -211,8 +214,16 @@ class AreasController:
                 )
                 .join(Usuario, Usuario.idArea == Area.idArea)
                 .join(UsuarioxEvento, UsuarioxEvento.idUsuario == Usuario.idUsuario)
+                .join(Evento, Evento.idEvento == UsuarioxEvento.idEvento)
                 .filter(UsuarioxEvento.resultado == ResultadoEvento.FALLA)
-                .group_by(
+            )
+            
+            # Aplicar filtro por tipos de evento si se especifica
+            if tipos_evento and len(tipos_evento) > 0:
+                query = query.filter(Evento.tipoEvento.in_(tipos_evento))
+            
+            resultados = (
+                query.group_by(
                     Area.idArea,
                     Area.nombreArea,
                     Usuario.idUsuario,
@@ -249,5 +260,173 @@ class AreasController:
         except Exception as e:
             session.rollback()
             return responseError("ERROR", f"No se pudo obtener el resumen de fallas por área: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def obtenerFallasPorFecha(periodos=None, tipos_evento=None):
+        from app.backend.models.evento import Evento
+        from app.backend.models.tipoEvento import TipoEvento
+        from sqlalchemy import extract, and_, or_
+        
+        session = SessionLocal()
+        try:
+            # Siempre agrupar por año-mes (formato YYYY-MM)
+            query = (
+                session.query(
+                    extract('year', Evento.fechaEvento).label("año"),
+                    extract('month', Evento.fechaEvento).label("mes"),
+                    func.count(UsuarioxEvento.idEvento).label("cantidadFallas")
+                )
+                .join(UsuarioxEvento, UsuarioxEvento.idEvento == Evento.idEvento)
+                .filter(UsuarioxEvento.resultado == ResultadoEvento.FALLA)
+            )
+            
+            # Aplicar filtros
+            if tipos_evento and len(tipos_evento) > 0:
+                query = query.filter(Evento.tipoEvento.in_(tipos_evento))
+            
+            # Aplicar filtro de períodos (meses, trimestres, años)
+            if periodos and len(periodos) > 0:
+                condiciones_periodo = []
+                
+                for periodo in periodos:
+                    if periodo.startswith('Q'):  # Trimestre: Q1-2024, Q2-2025, etc.
+                        try:
+                            quarter, year = periodo.split('-')
+                            quarter_num = int(quarter[1])  # Q1 -> 1, Q2 -> 2, etc.
+                            year_num = int(year)
+                            
+                            # Mapear trimestre a meses
+                            if quarter_num == 1:
+                                meses_trimestre = [1, 2, 3]
+                            elif quarter_num == 2:
+                                meses_trimestre = [4, 5, 6]
+                            elif quarter_num == 3:
+                                meses_trimestre = [7, 8, 9]
+                            elif quarter_num == 4:
+                                meses_trimestre = [10, 11, 12]
+                            else:
+                                continue
+                            
+                            condiciones_periodo.append(
+                                and_(
+                                    extract('year', Evento.fechaEvento) == year_num,
+                                    extract('month', Evento.fechaEvento).in_(meses_trimestre)
+                                )
+                            )
+                        except:
+                            continue
+                    
+                    elif periodo.isdigit() and len(periodo) == 4:  # Año: 2024, 2025, etc.
+                        year_num = int(periodo)
+                        condiciones_periodo.append(extract('year', Evento.fechaEvento) == year_num)
+                    
+                    elif '-' in periodo and len(periodo.split('-')) == 2:  # Mes-Año: 1-2024, 12-2025, etc.
+                        try:
+                            mes, año = periodo.split('-')
+                            mes_num = int(mes)
+                            año_num = int(año)
+                            condiciones_periodo.append(
+                                and_(
+                                    extract('year', Evento.fechaEvento) == año_num,
+                                    extract('month', Evento.fechaEvento) == mes_num
+                                )
+                            )
+                        except:
+                            continue
+                
+                if condiciones_periodo:
+                    query = query.filter(or_(*condiciones_periodo))
+            
+            # Agrupar y ordenar
+            resultados = (
+                query.group_by(
+                    extract('year', Evento.fechaEvento),
+                    extract('month', Evento.fechaEvento)
+                )
+                .order_by(
+                    extract('year', Evento.fechaEvento),
+                    extract('month', Evento.fechaEvento)
+                )
+                .all()
+            )
+            
+            # Formatear datos para el gráfico
+            periodos = []
+            fallas = []
+            
+            for r in resultados:
+                año_str = str(int(r.año))
+                mes_str = str(int(r.mes)).zfill(2)
+                periodos.append(f"{año_str}-{mes_str}")
+                fallas.append(int(r.cantidadFallas))
+            
+            # Calcular total
+            total_fallas = sum(fallas)
+            
+            # Obtener períodos disponibles para los filtros
+            periodos_disponibles = (
+                session.query(
+                    extract('year', Evento.fechaEvento).label('año'),
+                    extract('month', Evento.fechaEvento).label('mes')
+                )
+                .join(UsuarioxEvento, UsuarioxEvento.idEvento == Evento.idEvento)
+                .filter(UsuarioxEvento.resultado == ResultadoEvento.FALLA)
+                .distinct()
+                .order_by(extract('year', Evento.fechaEvento).desc(), extract('month', Evento.fechaEvento))
+                .all()
+            )
+            
+            # Generar opciones de filtro jerárquicas (versión simple que funciona)
+            años = []
+            meses = []
+            trimestres = []
+            
+            for p in periodos_disponibles:
+                año = int(p.año)
+                mes = int(p.mes)
+                
+                # Años
+                if año not in años:
+                    años.append(año)
+                
+                # Meses (formato: mes-año)
+                mes_periodo = f"{mes}-{año}"
+                if mes_periodo not in meses:
+                    meses.append(mes_periodo)
+                
+                # Trimestres
+                if mes <= 3:
+                    quarter = f"Q1-{año}"
+                elif mes <= 6:
+                    quarter = f"Q2-{año}"
+                elif mes <= 9:
+                    quarter = f"Q3-{año}"
+                else:
+                    quarter = f"Q4-{año}"
+                
+                if quarter not in trimestres:
+                    trimestres.append(quarter)
+            
+            # Ordenar listas
+            años.sort(reverse=True)
+            trimestres.sort(key=lambda x: (x.split('-')[1], x.split('-')[0]))
+            meses.sort(key=lambda x: (x.split('-')[1], x.split('-')[0]))
+            
+            return jsonify({
+                "periodos": periodos,
+                "fallas": fallas,
+                "totalFallas": total_fallas,
+                "filtros": {
+                    "años": años,
+                    "meses": meses,
+                    "trimestres": trimestres
+                }
+            }), 200
+            
+        except Exception as e:
+            session.rollback()
+            return responseError("ERROR", f"No se pudo obtener el reporte por fecha: {str(e)}", 500)
         finally:
             session.close()

@@ -22,6 +22,210 @@
       .nav-tabs { border-bottom: 1px solid #3a3a3a; }
       .nav-tabs .nav-link { color: #dddddd; }
       .nav-tabs .nav-link:hover { color: #ffffff; }
+      
+      /* Estilos para select múltiple mejorados - Oculto por defecto */
+      select[multiple] {
+        min-height: 40px;
+        max-height: 40px;
+        background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+        border: 2px solid #444;
+        border-radius: 12px;
+        color: #f1f1f1;
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+      }
+      
+       select[multiple]:focus {
+         border-color: #da02e5;
+         box-shadow: 0 0 0 3px rgba(218, 2, 229, 0.2);
+         outline: none;
+         max-height: 200px;
+         overflow-y: auto;
+       }
+       
+       select[multiple]:hover {
+         border-color: #da02e5;
+         cursor: pointer;
+       }
+      
+      select[multiple] option {
+        padding: 8px 12px;
+        margin: 2px 0;
+        border-radius: 6px;
+        background: transparent;
+        color: #f1f1f1;
+        transition: all 0.2s ease;
+        display: none;
+      }
+      
+      select[multiple]:focus option {
+        display: block;
+      }
+      
+      /* Asegurar que el placeholder se oculte cuando hay opciones visibles */
+      select[multiple]:focus .filter-placeholder {
+        display: none !important;
+      }
+      
+       select[multiple] option:hover {
+         background: rgba(218, 2, 229, 0.1);
+       }
+       
+       select[multiple] option:checked {
+         background: linear-gradient(135deg, #da02e5, #e533f0);
+         color: white;
+         font-weight: 600;
+         box-shadow: 0 2px 4px rgba(218, 2, 229, 0.3);
+       }
+      
+      /* Placeholder text para mostrar selecciones */
+      .filter-placeholder {
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        transform: translateY(-50%);
+        color: #888;
+        pointer-events: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+      
+      select[multiple]:focus .filter-placeholder {
+        opacity: 0;
+        visibility: hidden;
+      }
+      
+       /* Indicador de dropdown */
+       .filter-dropdown-icon {
+         position: absolute;
+         top: 50%;
+         right: 12px;
+         transform: translateY(-50%);
+         color: #da02e5;
+         pointer-events: none;
+         transition: transform 0.3s ease;
+       }
+      
+      select[multiple]:focus .filter-dropdown-icon {
+        transform: translateY(-50%) rotate(180deg);
+      }
+      
+      /* Ocultar opciones cuando se pierde el foco */
+      select[multiple]:not(:focus) {
+        max-height: 40px;
+        overflow: hidden;
+      }
+      
+      select[multiple]:not(:focus) option {
+        display: none;
+      }
+      
+      /* Mejorar la apariencia del placeholder cuando hay selecciones */
+      .filter-placeholder.has-selection {
+        color: #f1f1f1;
+        font-weight: 500;
+      }
+      
+      /* Mejorar la apariencia de los filtros */
+      .form-select-sm[multiple] {
+        font-size: 0.9rem;
+      }
+      
+       /* Estilos para los labels de filtros */
+       .filter-label {
+         background: linear-gradient(135deg, #da02e5, #e533f0);
+         color: white;
+         padding: 6px 12px;
+         border-radius: 20px;
+         font-size: 0.85rem;
+         font-weight: 600;
+         text-transform: uppercase;
+         letter-spacing: 0.5px;
+         box-shadow: 0 2px 8px rgba(218, 2, 229, 0.3);
+         border: none;
+         min-width: 80px;
+         text-align: center;
+       }
+      
+      /* Contenedor de filtros mejorado */
+      .filters-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+      
+      /* Espaciado mejorado entre filtros */
+      .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      
+      .filter-group:last-child {
+        margin-bottom: 0;
+      }
+      
+      /* Iconos para los filtros */
+      .filter-icon {
+        font-size: 1.1rem;
+        margin-right: 6px;
+      }
+      
+      /* Responsive para filtros */
+      @media (max-width: 768px) {
+        .filters-container {
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .filter-group {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 8px;
+        }
+        
+        .filter-label {
+          text-align: center;
+          min-width: auto;
+        }
+        
+        select[multiple] {
+          width: 100% !important;
+        }
+      }
+      
+      /* Animación suave para hover */
+      .filters-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      }
+      
+      /* Mejorar el scroll de los selects */
+      select[multiple]::-webkit-scrollbar {
+        width: 8px;
+      }
+      
+      select[multiple]::-webkit-scrollbar-track {
+        background: #2a2a2a;
+        border-radius: 4px;
+      }
+      
+       select[multiple]::-webkit-scrollbar-thumb {
+         background: #da02e5;
+         border-radius: 4px;
+       }
+       
+       select[multiple]::-webkit-scrollbar-thumb:hover {
+         background: #e533f0;
+       }
       .nav-tabs .nav-link.active { color: #ffffff; background-color: #1f1f1f; border-color: #3a3a3a #3a3a3a #1f1f1f; }
     </style>
 </head>
@@ -70,6 +274,27 @@
             <div class="row g-4">
               <div class="col-lg-9">
                 <div class="card p-3 bg-dark text-white">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Fallas por Área</h5>
+                    <div class="filters-container">
+                      <div class="filter-group">
+                        <span class="filter-label">
+                          <i class="bi bi-funnel filter-icon"></i>
+                          Tipo
+                        </span>
+                        <div style="position: relative; width: 220px;">
+                          <select id="filtroTipo" class="form-select form-select-sm" style="width: 100%;" multiple>
+                            <option value="CORREO">📧 Correo</option>
+                            <option value="MENSAJE">💬 Mensaje</option>
+                            <option value="LLAMADA">📞 Llamada</option>
+                            <option value="VIDEOLLAMADA">📹 Videollamada</option>
+                          </select>
+                          <div class="filter-placeholder" id="filtroTipoPlaceholder">Seleccionar tipos...</div>
+                          <i class="bi bi-chevron-down filter-dropdown-icon"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <div id="chartFallasPorArea"></div>
                 </div>
               </div>
@@ -86,9 +311,54 @@
           </div>
 
           <div class="tab-pane fade" id="panel-fecha" role="tabpanel" aria-labelledby="tab-fecha">
-            <div class="card p-4 bg-dark text-white">
-              <h5 class="mb-2">Fallas por Fecha</h5>
-              <p class="mb-0 text-muted">Próximamente</p>
+            <div class="row g-4">
+              <div class="col-lg-9">
+                <div class="card p-3 bg-dark text-white">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Fallas por Fecha</h5>
+                    <div class="filters-container">
+                      <div class="filter-group">
+                        <span class="filter-label">
+                          <i class="bi bi-calendar3 filter-icon"></i>
+                          Período
+                        </span>
+                        <div style="position: relative; width: 220px;">
+                          <select id="filtroPeriodo" class="form-select form-select-sm" style="width: 100%;" multiple>
+                          </select>
+                          <div class="filter-placeholder" id="filtroPeriodoPlaceholder">Seleccionar períodos...</div>
+                          <i class="bi bi-chevron-down filter-dropdown-icon"></i>
+                        </div>
+                      </div>
+                      <div class="filter-group">
+                        <span class="filter-label">
+                          <i class="bi bi-funnel filter-icon"></i>
+                          Tipo
+                        </span>
+                        <div style="position: relative; width: 180px;">
+                          <select id="filtroTipoFecha" class="form-select form-select-sm" style="width: 100%;" multiple>
+                            <option value="CORREO">📧 Correo</option>
+                            <option value="MENSAJE">💬 Mensaje</option>
+                            <option value="LLAMADA">📞 Llamada</option>
+                            <option value="VIDEOLLAMADA">📹 Videollamada</option>
+                          </select>
+                          <div class="filter-placeholder" id="filtroTipoFechaPlaceholder">Seleccionar tipos...</div>
+                          <i class="bi bi-chevron-down filter-dropdown-icon"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="chartFallasPorFecha"></div>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="card p-3 h-100 d-flex align-items-center justify-content-center bg-dark text-white">
+                  <div class="text-center">
+                    <div class="mb-2"><i class="bi bi-calendar3" style="font-size: 2rem;"></i></div>
+                    <h5 class="mb-1">Total de Fallas</h5>
+                    <div id="totalFallasFecha" class="display-5">0</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -110,9 +380,18 @@
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   <script>
-    async function cargarFallasPorArea() {
+    let chartInstance = null;
+
+    async function cargarFallasPorArea(tiposEvento = []) {
       try {
-        const resp = await fetch('/api/areas/fallas');
+        let url = '/api/areas/fallas';
+        if (tiposEvento.length > 0) {
+          const params = new URLSearchParams();
+          tiposEvento.forEach(tipo => params.append('tipo_evento', tipo));
+          url += `?${params.toString()}`;
+        }
+        
+        const resp = await fetch(url);
         if (!resp.ok) throw new Error('Error al obtener datos');
         const data = await resp.json();
 
@@ -120,6 +399,12 @@
         const labels = areas.map(a => a.nombreArea);
         const valores = areas.map(a => a.totalFallas);
         const total = valores.reduce((acc, v) => acc + v, 0);
+        
+        // Calcular porcentajes
+        const valoresPorcentuales = valores.map(valor => 
+          total > 0 ? ((valor / total) * 100).toFixed(1) : 0
+        );
+        
         document.getElementById('totalFallas').textContent = total;
 
         const opciones = {
@@ -127,22 +412,338 @@
           theme: { mode: 'dark' },
           grid: { borderColor: '#444' },
           plotOptions: { bar: { horizontal: false, columnWidth: '45%', borderRadius: 6 } },
-          dataLabels: { enabled: true, style: { colors: ['#ffffff'] } },
+          dataLabels: { enabled: true, style: { colors: ['#ffffff'] }, formatter: (val) => `${val}%` },
           xaxis: { categories: labels, labels: { style: { colors: '#ffffff' } } },
-          yaxis: { title: { text: 'Cantidad de fallas', style: { color: '#ffffff', fontSize: '16px' } }, labels: { style: { colors: '#ffffff' } } },
-          series: [{ name: 'Fallas', data: valores }],
-          colors: ['#ff4d4f'],
-          tooltip: { theme: 'dark', y: { formatter: (val) => `${val} fallas` } }
+          yaxis: { 
+            title: { text: 'Porcentaje de fallas', style: { color: '#ffffff', fontSize: '16px' } }, 
+            labels: { 
+              style: { colors: '#ffffff' },
+              formatter: (val) => `${val}%`
+            },
+            min: 0,
+            max: 100
+          },
+           series: [{ name: 'Fallas (%)', data: valoresPorcentuales }],
+           colors: ['#da02e5'],
+          tooltip: { 
+            theme: 'dark', 
+            y: { 
+              formatter: (val, { seriesIndex, dataPointIndex }) => {
+                const porcentaje = val;
+                const cantidad = valores[dataPointIndex];
+                return `${porcentaje}% (${cantidad} fallas)`;
+              }
+            } 
+          }
         };
 
-        const chart = new ApexCharts(document.querySelector('#chartFallasPorArea'), opciones);
-        chart.render();
+        // Destruir gráfico anterior si existe
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+        
+        chartInstance = new ApexCharts(document.querySelector('#chartFallasPorArea'), opciones);
+        chartInstance.render();
       } catch (e) {
         console.error(e);
       }
     }
 
-    document.addEventListener('DOMContentLoaded', cargarFallasPorArea);
+    // Función para actualizar placeholder
+    function actualizarPlaceholder(selectId, placeholderId) {
+      const select = document.getElementById(selectId);
+      const placeholder = document.getElementById(placeholderId);
+      const seleccionados = Array.from(select.selectedOptions);
+      
+      // Solo mostrar placeholder si el select no tiene foco
+      if (document.activeElement !== select) {
+        placeholder.style.display = 'block';
+        
+        if (seleccionados.length === 0) {
+          placeholder.textContent = placeholderId.includes('Periodo') ? 'Seleccionar períodos...' : 'Seleccionar tipos...';
+          placeholder.style.opacity = '1';
+          placeholder.classList.remove('has-selection');
+        } else if (seleccionados.length === 1) {
+          placeholder.textContent = seleccionados[0].textContent;
+          placeholder.style.opacity = '0.9';
+          placeholder.classList.add('has-selection');
+        } else {
+          placeholder.textContent = `${seleccionados.length} seleccionados`;
+          placeholder.style.opacity = '0.9';
+          placeholder.classList.add('has-selection');
+        }
+      } else {
+        // Si el select tiene foco, ocultar placeholder
+        placeholder.style.display = 'none';
+      }
+    }
+
+    // Event listener para el filtro
+    document.getElementById('filtroTipo').addEventListener('change', function() {
+      const tiposSeleccionados = Array.from(this.selectedOptions).map(option => option.value);
+      actualizarPlaceholder('filtroTipo', 'filtroTipoPlaceholder');
+      cargarFallasPorArea(tiposSeleccionados);
+    });
+
+    // Event listeners para ocultar/mostrar placeholder
+    document.getElementById('filtroTipo').addEventListener('focus', function() {
+      document.getElementById('filtroTipoPlaceholder').style.display = 'none';
+    });
+
+    document.getElementById('filtroTipo').addEventListener('blur', function() {
+      setTimeout(() => {
+        actualizarPlaceholder('filtroTipo', 'filtroTipoPlaceholder');
+      }, 100);
+    });
+
+    // Event listener para manejar clics en opciones (deselección sin Ctrl)
+    document.getElementById('filtroTipo').addEventListener('mousedown', function(e) {
+      // Ocultar placeholder inmediatamente
+      document.getElementById('filtroTipoPlaceholder').style.display = 'none';
+      
+      // Solo permitir deselección sin Ctrl si la opción ya está seleccionada
+      if (e.target.tagName === 'OPTION' && e.target.selected) {
+        e.preventDefault();
+        e.target.selected = false;
+        
+        // Actualizar placeholder después de un pequeño delay
+        setTimeout(() => {
+          actualizarPlaceholder('filtroTipo', 'filtroTipoPlaceholder');
+        }, 50);
+        
+        // Disparar evento change manualmente
+        this.dispatchEvent(new Event('change'));
+      }
+    });
+
+    // Variables para el gráfico de fecha
+    let chartFechaInstance = null;
+
+    // Función para cargar fallas por fecha
+    async function cargarFallasPorFecha(periodos = [], tiposEvento = []) {
+      try {
+        const params = new URLSearchParams();
+        periodos.forEach(periodo => params.append('periodo', periodo));
+        tiposEvento.forEach(tipo => params.append('tipo_evento', tipo));
+        
+        const url = `/api/areas/fallas-fecha?${params.toString()}`;
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('Error al obtener datos');
+        const data = await resp.json();
+
+        const periodosData = data.periodos || [];
+        const fallas = data.fallas || [];
+        const total = data.totalFallas || 0;
+        
+        // Actualizar total
+        document.getElementById('totalFallasFecha').textContent = total;
+
+        // Formatear etiquetas (siempre por mes)
+        const etiquetas = periodosData.map(periodo => {
+          const [año, mes] = periodo.split('-');
+          const nombresMeses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+                               'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+          return `${nombresMeses[parseInt(mes) - 1]} ${año}`;
+        });
+
+        // Configurar gráfico de barras
+        const opciones = {
+          chart: { 
+            type: 'bar', 
+            height: 420, 
+            toolbar: { show: false }, 
+            foreColor: '#f1f1f1' 
+          },
+          theme: { mode: 'dark' },
+          grid: { borderColor: '#444' },
+          plotOptions: { 
+            bar: { 
+              horizontal: false, 
+              columnWidth: '60%', 
+              borderRadius: 6 
+            } 
+          },
+          dataLabels: { 
+            enabled: true, 
+            style: { colors: ['#ffffff'] },
+            formatter: (val) => `${val}`
+          },
+          xaxis: { 
+            categories: etiquetas, 
+            labels: { 
+              style: { colors: '#ffffff' },
+              rotate: -45
+            }
+          },
+          yaxis: { 
+            title: { 
+              text: 'Cantidad de fallas', 
+              style: { color: '#ffffff', fontSize: '16px' } 
+            }, 
+            labels: { style: { colors: '#ffffff' } },
+            min: 0
+          },
+           series: [{ name: 'Fallas', data: fallas }],
+           colors: ['#da02e5'],
+          tooltip: { 
+            theme: 'dark', 
+            y: { 
+              formatter: (val) => `${val} fallas`
+            } 
+          }
+        };
+
+        // Destruir gráfico anterior si existe
+        if (chartFechaInstance) {
+          chartFechaInstance.destroy();
+        }
+        
+        chartFechaInstance = new ApexCharts(document.querySelector('#chartFallasPorFecha'), opciones);
+        chartFechaInstance.render();
+
+        // Actualizar opciones de filtros si es la primera carga
+        if (data.filtros) {
+          actualizarFiltros(data.filtros);
+        }
+
+      } catch (e) {
+        console.error('Error cargando fallas por fecha:', e);
+      }
+    }
+
+    // Función para actualizar las opciones de filtros jerárquicos
+    function actualizarFiltros(filtros) {
+      const selectPeriodo = document.getElementById('filtroPeriodo');
+      
+      // Limpiar opciones existentes
+      selectPeriodo.innerHTML = '';
+      
+      const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                           'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      
+      // Agregar años
+      if (filtros.años) {
+        filtros.años.forEach(año => {
+          const option = document.createElement('option');
+          option.value = año.toString();
+          option.textContent = `📅 ${año}`;
+          option.style.fontWeight = 'bold';
+          option.style.fontSize = '0.95rem';
+          selectPeriodo.appendChild(option);
+        });
+      }
+      
+       // Agregar trimestres
+       if (filtros.trimestres) {
+         filtros.trimestres.forEach(trimestre => {
+           const option = document.createElement('option');
+           option.value = trimestre;
+           option.textContent = `📊 ${trimestre}`;
+           option.style.color = '#da02e5';
+           option.style.fontWeight = '600';
+           option.style.fontSize = '0.9rem';
+           option.style.paddingLeft = '20px';
+           selectPeriodo.appendChild(option);
+         });
+       }
+      
+      // Agregar meses
+      if (filtros.meses) {
+        filtros.meses.forEach(mesPeriodo => {
+          const [mes, año] = mesPeriodo.split('-');
+          const option = document.createElement('option');
+          option.value = mesPeriodo;
+          option.textContent = `📅 ${nombresMeses[parseInt(mes) - 1]} ${año}`;
+          option.style.paddingLeft = '40px';
+          option.style.fontSize = '0.85rem';
+          option.style.opacity = '0.9';
+          selectPeriodo.appendChild(option);
+        });
+      }
+    }
+
+    // Event listeners para filtros de fecha
+    document.getElementById('filtroPeriodo').addEventListener('change', function() {
+      const periodos = Array.from(this.selectedOptions).map(option => option.value);
+      const tipos = Array.from(document.getElementById('filtroTipoFecha').selectedOptions).map(option => option.value);
+      actualizarPlaceholder('filtroPeriodo', 'filtroPeriodoPlaceholder');
+      cargarFallasPorFecha(periodos, tipos);
+    });
+
+    document.getElementById('filtroTipoFecha').addEventListener('change', function() {
+      const periodos = Array.from(document.getElementById('filtroPeriodo').selectedOptions).map(option => option.value);
+      const tipos = Array.from(this.selectedOptions).map(option => option.value);
+      actualizarPlaceholder('filtroTipoFecha', 'filtroTipoFechaPlaceholder');
+      cargarFallasPorFecha(periodos, tipos);
+    });
+
+    // Event listeners para ocultar/mostrar placeholder - Filtro Período
+    document.getElementById('filtroPeriodo').addEventListener('focus', function() {
+      document.getElementById('filtroPeriodoPlaceholder').style.display = 'none';
+    });
+
+    document.getElementById('filtroPeriodo').addEventListener('blur', function() {
+      setTimeout(() => {
+        actualizarPlaceholder('filtroPeriodo', 'filtroPeriodoPlaceholder');
+      }, 100);
+    });
+
+    // Event listener para manejar clics en opciones (deselección sin Ctrl) - Período
+    document.getElementById('filtroPeriodo').addEventListener('mousedown', function(e) {
+      // Ocultar placeholder inmediatamente
+      document.getElementById('filtroPeriodoPlaceholder').style.display = 'none';
+      
+      // Solo permitir deselección sin Ctrl si la opción ya está seleccionada
+      if (e.target.tagName === 'OPTION' && e.target.selected) {
+        e.preventDefault();
+        e.target.selected = false;
+        
+        // Actualizar placeholder después de un pequeño delay
+        setTimeout(() => {
+          actualizarPlaceholder('filtroPeriodo', 'filtroPeriodoPlaceholder');
+        }, 50);
+        
+        // Disparar evento change manualmente
+        this.dispatchEvent(new Event('change'));
+      }
+    });
+
+    // Event listeners para ocultar/mostrar placeholder - Filtro Tipo Fecha
+    document.getElementById('filtroTipoFecha').addEventListener('focus', function() {
+      document.getElementById('filtroTipoFechaPlaceholder').style.display = 'none';
+    });
+
+    document.getElementById('filtroTipoFecha').addEventListener('blur', function() {
+      setTimeout(() => {
+        actualizarPlaceholder('filtroTipoFecha', 'filtroTipoFechaPlaceholder');
+      }, 100);
+    });
+
+    // Event listener para manejar clics en opciones (deselección sin Ctrl) - Tipo Fecha
+    document.getElementById('filtroTipoFecha').addEventListener('mousedown', function(e) {
+      // Ocultar placeholder inmediatamente
+      document.getElementById('filtroTipoFechaPlaceholder').style.display = 'none';
+      
+      // Solo permitir deselección sin Ctrl si la opción ya está seleccionada
+      if (e.target.tagName === 'OPTION' && e.target.selected) {
+        e.preventDefault();
+        e.target.selected = false;
+        
+        // Actualizar placeholder después de un pequeño delay
+        setTimeout(() => {
+          actualizarPlaceholder('filtroTipoFecha', 'filtroTipoFechaPlaceholder');
+        }, 50);
+        
+        // Disparar evento change manualmente
+        this.dispatchEvent(new Event('change'));
+      }
+    });
+
+    // Cargar datos iniciales
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarFallasPorArea();
+      cargarFallasPorFecha(); // Cargar también el reporte por fecha
+    });
   </script>
 
 </body>
