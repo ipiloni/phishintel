@@ -1,4 +1,4 @@
-from flask import request, Blueprint, send_file, redirect, url_for
+from flask import request, Blueprint, send_file, redirect, url_for, jsonify
 
 from app.backend.models.error import responseError
 from app.config.db_config import Base, engine
@@ -11,6 +11,7 @@ from app.controllers.llamadas.llamadasController import LlamadasController
 from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.fallaController import FallaController
 from app.controllers.mensajes.mensajesController import MensajesController
+from app.controllers.mensajes.botTelegram import telegram_bot
 from app.utils.logger import log
 from flask_cors import CORS
 import os
@@ -154,6 +155,42 @@ def generarYEnviarEmail():
 def generarMensaje():
     data = request.get_json()
     return AIController.armarMensaje(data)
+
+@apis.route("/api/mensaje/enviar-id", methods=["POST"]) # Esta ruta envía un mensaje por ID de usuario
+def enviarMensajePorID():
+    data = request.get_json()
+    return MensajesController.enviarMensajePorID(data)
+
+# ------ # TELEGRAM BOT # ------ #
+@apis.route("/api/telegram/start", methods=["POST"]) # Inicia el bot de Telegram
+def iniciarBotTelegram():
+    import asyncio
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result = loop.run_until_complete(telegram_bot.start_bot())
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"mensaje": f"Error al iniciar el bot: {str(e)}", "status": "error"}), 500
+
+@apis.route("/api/telegram/stop", methods=["POST"]) # Detiene el bot de Telegram
+def detenerBotTelegram():
+    import asyncio
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result = loop.run_until_complete(telegram_bot.stop_bot())
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"mensaje": f"Error al detener el bot: {str(e)}", "status": "error"}), 500
+
+@apis.route("/api/telegram/status", methods=["GET"]) # Obtiene el estado del bot y usuarios registrados
+def estadoBotTelegram():
+    try:
+        status = telegram_bot.get_status()
+        return jsonify(status), 200
+    except Exception as e:
+        return jsonify({"mensaje": f"Error al obtener estado: {str(e)}", "status": "error"}), 500
 
 # =================== ABM =================== #
 

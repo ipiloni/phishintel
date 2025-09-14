@@ -116,6 +116,26 @@
               </div>
             </div>
 
+            <!-- Selector de Proveedor -->
+            <div class="mb-3">
+              <label class="form-label">Método de Envío</label>
+
+              <div class="form-check">
+                <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="whapi" value="whapi" checked>
+                <label class="form-check-label" for="whapi">WhatsApp (whapi.cloud)</label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="twilio" value="twilio">
+                <label class="form-check-label" for="twilio">SMS (Twilio)</label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="telegram" value="telegram">
+                <label class="form-check-label" for="telegram">Telegram Bot</label>
+              </div>
+            </div>
+
             <!-- Botón de enviar -->
             <div class="text-center">
               <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill">
@@ -138,6 +158,7 @@
                   <p><strong>Área: </strong>{{ filtroArea }} <span id="previewArea"></span></p>
                   <p><strong>Usuario:  </strong> {{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}<span id="previewUsuario"></span></p>
                   <p><strong>Dificultad: </strong> {{ nivel }}<span id="previewDificultad"></span></p>
+                  <p><strong>Método: </strong> {{ proveedor === 'whapi' ? 'WhatsApp' : proveedor === 'twilio' ? 'SMS' : 'Telegram' }}<span id="previewProveedor"></span></p>
                   <hr>
                   <p><strong>Mensaje generado por IA</strong></p>
                   <div class="bg-light text-dark p-3 rounded">
@@ -176,9 +197,10 @@
           filtroArea: "",
           filtroUsuario: "",
           nivel: "Fácil",
+          proveedor: "whapi",
           modalMensaje: "",
           mensajeGenerado: {
-            proveedor: "twilio",
+            proveedor: "whapi",
             idUsuario: null, 
             mensaje: ""
           }
@@ -228,16 +250,21 @@
 
         async confirmarEnvio() {
           try {
-            // Por ahora, simulamos el envío
+            const resp = await fetch("http://localhost:8080/api/mensaje/enviar-id", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                proveedor: this.proveedor,
+                idUsuario: this.filtroUsuario.idUsuario,
+                mensaje: this.mensajeGenerado.mensaje
+              })
+            });
+
+            if (!resp.ok) throw new Error("Error enviando el mensaje");
+
+            const data = await resp.json();
             alert("Mensaje enviado correctamente ✅");
             bootstrap.Modal.getInstance(document.getElementById("previewModal")).hide();
-
-            // Aquí se podría agregar la llamada real al endpoint cuando esté disponible
-            // const resp = await fetch("http://localhost:8080/api/mensaje/enviar", {
-            //   method: "POST",
-            //   headers: { "Content-Type": "application/json" },
-            //   body: JSON.stringify(this.mensajeGenerado)
-            // });
 
           } catch (e) {
             console.error("Error:", e);
