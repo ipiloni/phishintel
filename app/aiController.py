@@ -44,10 +44,39 @@ class AIController:
         except Exception as e:
             return responseError("ERROR_API", str(e), 500)
 
-    # @staticmethod
-    # def armarMensaje(data):
-    #     if not data or "contexto" not in data:
-    #         return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'contexto'", 400)
-    #
-    #
+    @staticmethod
+    def armarMensaje(data):
+        if not data or "contexto" not in data:
+            return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'contexto'", 400)
 
+        contexto = data["contexto"]
+        nivel = data.get("nivel", "Fácil")
+
+        # Construir el prompt para mensaje de WhatsApp
+        prompt = f"""Armá un mensaje de WhatsApp del estilo Phishing. 
+        El contexto es: {contexto}
+        Nivel de dificultad: {nivel}
+        
+        Necesito que me devuelvas SOLAMENTE el texto del mensaje, sin formato JSON, sin asunto, sin nada más. 
+        Solo el contenido del mensaje como si fuera un mensaje de WhatsApp real.
+        
+        El mensaje debe ser:
+        - Conciso (como un mensaje de WhatsApp)
+        - Creíble para el nivel de dificultad {nivel}
+        - Sin enlaces obvios o sospechosos
+        - Con un tono natural y conversacional"""
+
+        model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+        
+        try:
+            response = model.generate_content(prompt)
+            mensaje_texto = response.text.strip()
+            
+            # Limpiar cualquier formato que pueda haber agregado
+            mensaje_texto = re.sub(r"```(?:json)?", "", mensaje_texto).strip()
+            mensaje_texto = re.sub(r'^["\']|["\']$', "", mensaje_texto).strip()
+            
+            return {"mensaje": mensaje_texto}, 201
+    
+        except Exception as e:
+            return responseError("ERROR_API", str(e), 500)

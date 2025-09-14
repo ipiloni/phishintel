@@ -141,7 +141,7 @@
                   <hr>
                   <p><strong>Mensaje generado por IA</strong></p>
                   <div class="bg-light text-dark p-3 rounded">
-                    <div v-html="modalMensaje"></div>
+                    <pre style="white-space: pre-wrap; font-family: inherit;">{{ modalMensaje }}</pre>
                   </div>
                 </div>
                 <div class="modal-footer">
@@ -199,43 +199,21 @@
       methods: {
         async generarPreview() {
           try {
-            // Por ahora, generamos un mensaje genérico basado en el nivel
-            let mensajeGenerico = "";
-            
-            switch(this.nivel) {
-              case "Fácil":
-                mensajeGenerico = `
-                  <p><strong>🚨 URGENTE - Verificación de Cuenta</strong></p>
-                  <p>Hola ${this.filtroUsuario.nombre},</p>
-                  <p>Tu cuenta ha sido suspendida por seguridad. Haz clic aquí para verificar: <a href="#">VERIFICAR AHORA</a></p>
-                  <p>Si no actúas en 24 horas, tu cuenta será eliminada.</p>
-                  <p>Equipo de Seguridad</p>
-                `;
-                break;
-              case "Medio":
-                mensajeGenerico = `
-                  <p><strong>Actualización de Política de Seguridad</strong></p>
-                  <p>Estimado/a ${this.filtroUsuario.nombre},</p>
-                  <p>Como parte de las nuevas políticas de seguridad de la empresa, necesitamos que actualices tu información de acceso.</p>
-                  <p>Por favor, accede al siguiente enlace para completar el proceso: <a href="#">ACTUALIZAR INFORMACIÓN</a></p>
-                  <p>Este proceso es obligatorio para todos los empleados del área de ${this.filtroArea}.</p>
-                  <p>Recursos Humanos</p>
-                `;
-                break;
-              case "Difícil":
-                mensajeGenerico = `
-                  <p><strong>Reunión de Seguridad - ${this.filtroArea}</strong></p>
-                  <p>Hola ${this.filtroUsuario.nombre},</p>
-                  <p>Te escribo porque necesitamos coordinar una reunión urgente sobre los nuevos protocolos de seguridad para el área de ${this.filtroArea}.</p>
-                  <p>He preparado un documento con los cambios que necesitamos implementar. Puedes revisarlo aquí: <a href="#">DOCUMENTO DE SEGURIDAD</a></p>
-                  <p>Por favor, confirma tu asistencia respondiendo a este mensaje.</p>
-                  <p>Saludos,<br>María González<br>Gerente de Seguridad IT</p>
-                `;
-                break;
-            }
+            const resp = await fetch("http://localhost:8080/api/mensaje/generar", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam.`,
+                nivel: this.nivel
+              })
+            });
 
-            this.modalMensaje = mensajeGenerico;
-            this.mensajeGenerado.mensaje = mensajeGenerico;
+            if (!resp.ok) throw new Error("Error generando el mensaje");
+
+            const data = await resp.json();
+            this.modalMensaje = data.mensaje || "Sin mensaje";
+            
+            this.mensajeGenerado.mensaje = data.mensaje;
             this.mensajeGenerado.idUsuario = this.filtroUsuario.idUsuario;
 
             // Abrir modal

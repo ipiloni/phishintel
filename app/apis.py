@@ -3,7 +3,7 @@ from flask import request, Blueprint, send_file, redirect, url_for
 from app.backend.models.error import responseError
 from app.config.db_config import Base, engine
 from app.controllers.abm.areasController import AreasController
-from app.controllers.emails.aiController import AIController
+from app.aiController import AIController
 from app.controllers.llamadas.elevenLabsController import ElevenLabsController
 from app.controllers.emails.emailController import EmailController
 from app.controllers.abm.eventosController import EventosController
@@ -148,6 +148,12 @@ def enviarEmail():
 def generarYEnviarEmail():
     data = request.get_json()
     return EmailController.generarYEnviarMail(data)
+
+# ------ # MENSAJES # ------ #
+@apis.route("/api/mensaje/generar", methods=["POST"]) # Esta ruta llama a gemini y genera un mensaje de WhatsApp
+def generarMensaje():
+    data = request.get_json()
+    return AIController.armarMensaje(data)
 
 # =================== ABM =================== #
 
