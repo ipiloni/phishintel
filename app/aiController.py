@@ -80,3 +80,4 @@ class AIController:
     
         except Exception as e:
             return responseError("ERROR_API", str(e), 500)
+

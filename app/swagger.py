@@ -645,6 +645,167 @@ def openapi_spec():
                         "408": {"description": "Timeout al enviar mensaje al grupo"}
                     }
                 }
+            },
+            "/api/mensaje/generar": {
+                "post": {
+                    "summary": "🤖 Generar mensaje de phishing con IA (solo generar, no enviar)",
+                    "description": "Genera un mensaje de phishing personalizado usando Gemini AI. El mensaje se genera como texto plano para WhatsApp/SMS, adaptado al nivel de dificultad especificado.",
+                    "tags": ["💬 Mensajes"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/MensajeGenerar"},
+                                "example": {
+                                    "contexto": "Área: Ventas, Usuario: Juan Pérez, La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam.",
+                                    "nivel": "Medio"
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {
+                            "description": "Mensaje generado correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string", "description": "Contenido del mensaje generado por IA"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Solicitud inválida - Falta el campo obligatorio 'contexto'"},
+                        "500": {"description": "Error en la API de Gemini"}
+                    }
+                }
+            },
+            "/api/mensaje/enviar-id": {
+                "post": {
+                    "summary": "📱 Enviar mensaje de phishing por ID de usuario",
+                    "description": "Envía un mensaje de phishing a un usuario específico por su ID. Crea un evento de tipo MENSAJE y genera un enlace para que el usuario pueda reportar la falla. Soporta WhatsApp (whapi), SMS (twilio) y Telegram Bot.",
+                    "tags": ["💬 Mensajes"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/MensajeEnviarID"},
+                                "example": {
+                                    "proveedor": "telegram",
+                                    "idUsuario": 1,
+                                    "mensaje": "Hola! Tu cuenta ha sido suspendida por seguridad. Haz clic en el enlace para verificar tu identidad."
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {
+                            "description": "Mensaje enviado correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "idEvento": {"type": "integer", "description": "ID del evento creado"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Solicitud inválida - Faltan campos obligatorios o proveedor inválido"},
+                        "404": {"description": "Usuario no encontrado o sin teléfono registrado"},
+                        "500": {"description": "Error en el servicio o token no configurado"}
+                    }
+                }
+            },
+            "/api/telegram/start": {
+                "post": {
+                    "summary": "🤖 Iniciar Bot de Telegram",
+                    "description": "Inicia el bot de Telegram para recibir comandos /start de usuarios y registrar sus chat_ids. El bot se ejecuta en un hilo separado y puede recibir múltiples usuarios simultáneamente.",
+                    "tags": ["💬 Mensajes"],
+                    "responses": {
+                        "200": {
+                            "description": "Bot iniciado correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "status": {"type": "string", "enum": ["started", "running", "error"]},
+                                            "usuarios_registrados": {"type": "integer", "description": "Número de usuarios ya registrados"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {"description": "Error al iniciar el bot"}
+                    }
+                }
+            },
+            "/api/telegram/stop": {
+                "post": {
+                    "summary": "🛑 Detener Bot de Telegram",
+                    "description": "Detiene el bot de Telegram. Los usuarios registrados permanecen en memoria hasta que se reinicie el servidor.",
+                    "tags": ["💬 Mensajes"],
+                    "responses": {
+                        "200": {
+                            "description": "Bot detenido correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "status": {"type": "string", "enum": ["stopped", "error"]}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {"description": "Error al detener el bot"}
+                    }
+                }
+            },
+            "/api/telegram/status": {
+                "get": {
+                    "summary": "📊 Estado del Bot de Telegram",
+                    "description": "Obtiene el estado actual del bot de Telegram y la lista de usuarios registrados con sus chat_ids.",
+                    "tags": ["💬 Mensajes"],
+                    "responses": {
+                        "200": {
+                            "description": "Estado del bot obtenido correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "is_running": {"type": "boolean", "description": "Si el bot está ejecutándose"},
+                                            "usuarios_registrados": {"type": "integer", "description": "Número de usuarios registrados"},
+                                            "usuarios": {
+                                                "type": "object",
+                                                "description": "Diccionario con chat_ids como claves y información de usuarios como valores",
+                                                "additionalProperties": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "username": {"type": "string"},
+                                                        "first_name": {"type": "string"},
+                                                        "last_name": {"type": "string"},
+                                                        "phone_number": {"type": "string", "nullable": True}
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {"description": "Error al obtener el estado"}
+                    }
+                }
             }
         },
         "components": {
@@ -865,6 +1026,23 @@ def openapi_spec():
                     "properties": {
                         "mensaje": {"type": "string", "description": "Contenido del mensaje a enviar al grupo"},
                         "grupo_id": {"type": "string", "description": "ID del grupo de WhatsApp. Si no se especifica, se usa '120363416003158863@g.us' por defecto. El grupo_id debe ser el identificador único del grupo de WhatsApp"}
+                    }
+                },
+                "MensajeGenerar": {
+                    "type": "object",
+                    "required": ["contexto"],
+                    "properties": {
+                        "contexto": {"type": "string", "description": "Contexto para generar el mensaje (área, usuario, fecha, etc.)"},
+                        "nivel": {"type": "string", "enum": ["Fácil", "Medio", "Difícil"], "description": "Nivel de dificultad del mensaje de phishing"}
+                    }
+                },
+                "MensajeEnviarID": {
+                    "type": "object",
+                    "required": ["proveedor", "idUsuario", "mensaje"],
+                    "properties": {
+                        "proveedor": {"type": "string", "enum": ["whapi", "twilio", "telegram"], "description": "Proveedor para enviar el mensaje (whapi para WhatsApp, twilio para SMS, telegram para Telegram Bot)"},
+                        "idUsuario": {"type": "integer", "description": "ID del usuario al que se enviará el mensaje"},
+                        "mensaje": {"type": "string", "description": "Contenido del mensaje de phishing a enviar"}
                     }
                 }
             }
