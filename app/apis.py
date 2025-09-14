@@ -216,4 +216,48 @@ def editarArea(idArea):
 # ------ # AREAS - REPORTES # ------ #
 @apis.route("/api/areas/fallas", methods=["GET"])
 def obtenerFallasPorArea():
-    return AreasController.obtenerFallasPorArea()
+    from app.backend.models.tipoEvento import TipoEvento
+    
+    # Obtener parámetros de filtro por tipos de evento (múltiples)
+    tipos_evento_params = request.args.getlist('tipo_evento')
+    tipos_evento = []
+    
+    if tipos_evento_params:
+        # Mapear los valores del frontend a los enums
+        tipo_mapping = {
+            'CORREO': TipoEvento.CORREO,
+            'MENSAJE': TipoEvento.MENSAJE,
+            'LLAMADA': TipoEvento.LLAMADA,
+            'VIDEOLLAMADA': TipoEvento.VIDEOLLAMADA
+        }
+        tipos_evento = [tipo_mapping.get(tipo.upper()) for tipo in tipos_evento_params if tipo_mapping.get(tipo.upper())]
+    
+    return AreasController.obtenerFallasPorArea(tipos_evento if tipos_evento else None)
+
+@apis.route("/api/areas/fallas-fecha", methods=["GET"])
+def obtenerFallasPorFecha():
+    from app.backend.models.tipoEvento import TipoEvento
+    
+    # Obtener parámetros de filtro (múltiples)
+    tipos_evento_params = request.args.getlist('tipo_evento')
+    periodos_params = request.args.getlist('periodo')
+    
+    tipos_evento = []
+    periodos = []
+    
+    if tipos_evento_params:
+        tipo_mapping = {
+            'CORREO': TipoEvento.CORREO,
+            'MENSAJE': TipoEvento.MENSAJE,
+            'LLAMADA': TipoEvento.LLAMADA,
+            'VIDEOLLAMADA': TipoEvento.VIDEOLLAMADA
+        }
+        tipos_evento = [tipo_mapping.get(tipo.upper()) for tipo in tipos_evento_params if tipo_mapping.get(tipo.upper())]
+    
+    if periodos_params:
+        periodos = periodos_params
+    
+    return AreasController.obtenerFallasPorFecha(
+        periodos if periodos else None, 
+        tipos_evento if tipos_evento else None
+    )
