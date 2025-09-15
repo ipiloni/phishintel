@@ -21,7 +21,7 @@ class LlamadasController:
         # 2. Genera un texto inicial (lo que va a decir el remitente cuando lo atiendan)
         # 3. Genera el TTS del texto inicial
         # 4. Expone en un endpoint de la app el audio
-        # 5. Genera la llamada via Twilio al destinatario y le envia la URL del endpoint donde se encuentra el audio a reproducir
+        # 5. Genera la llamada via Twilio al destinatario y le una URL que le dice que hacer, esta URL le indica el endpoint donde se encuentra el audio a reproducir
         """
 
         if data["password"] != password:
@@ -79,7 +79,7 @@ class LlamadasController:
             return jsonify({
                 "remitente": remitente,
                 "destinatario": destinatario,
-                "mensaje": "la llamada se ha iniciado"
+                "mensaje": "La llamada se ha generado"
             })
 
             # return twilio.llamar(destinatario, remitente, urlAudio)
@@ -120,23 +120,23 @@ class LlamadasController:
             })
 
             # response = VoiceResponse()
-            # response.play(urlAudio)
             #
             # response.gather(
             #     input="speech",
             #     timeout=5,
             #     action="https://a552b2577df7.ngrok-free.app/api/twilio/respuesta" # TODO: este endpoint es nuestro. Cuando pase al despliegue se debe cambiar
             # )
+            # gather.play(urlAudio)
             #
-            # return Response(str(response), mimetype="text/xml")
+            # return str(response)
 
         except Exception as e:
             log.error(e)
             return responseError("ERROR_AL_LLAMAR", f"Hubo un error al intentar ejecutar la llamada: {str(e)}", 500)
 
     @staticmethod
-    def reproducirAudioInicial():
-        log.info("El usuario atendio la llamada. Reproduciendo audio...")
+    def generarAccionesEnLlamada():
+        log.info("Reproduciendo audio...")
         response = VoiceResponse()
         gather = response.gather(input="speech", action="http://localhost:8080/api/twilio/respuesta", method="POST")
         gather.play(urlAudioActual)

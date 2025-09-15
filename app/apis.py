@@ -1,9 +1,9 @@
-from flask import request, Blueprint, send_file, redirect, url_for, jsonify
+from flask import request, Blueprint, send_file, jsonify
 
 from app.backend.models.error import responseError
-from app.config.db_config import Base, engine
 from app.controllers.abm.areasController import AreasController
 from app.aiController import AIController
+from app.controllers.geminiController import GeminiController
 from app.controllers.llamadas.elevenLabsController import ElevenLabsController
 from app.controllers.emails.emailController import EmailController
 from app.controllers.abm.eventosController import EventosController
@@ -24,6 +24,14 @@ CORS(apis, resources={r"/api/*": {"origins": "*"}},
      supports_credentials=True)
 # =================== ENDPOINTS =================== #
 # ------ # LLAMADAS TWILIO # ------ #
+@apis.route("/api/ia/gemini", methods=["POST"])
+def enviarPromptGemini():
+    data = request.get_json()
+    objetivo = data["objetivo"]
+    conversacion = data["conversacion"]
+    return GeminiController.generarTexto(objetivo, conversacion)
+
+# ------ # LLAMADAS TWILIO # ------ #
 @apis.route("/api/audios/<nombreAudio>", methods=["GET"])
 def enviarAudio(nombreAudio):
     return exponerAudio(nombreAudio)
@@ -32,7 +40,7 @@ def exponerAudio(nombreAudio): # es una funcion que nos permite reutilizarla int
     return send_file(f"./audios/{nombreAudio}", mimetype="audio/mpeg")
 
 @apis.route("/api/twilio/respuesta", methods=["POST"])
-def procesarRespuestaLlamadaTwilio():
+def procesarRespuestaLlamada():
     speech = request.form.get("SpeechResult")
     confidence = request.form.get("Confidence")
     return LlamadasController.procesarRespuesta(speech, confidence)
@@ -43,8 +51,8 @@ def generarLlamada():
     return LlamadasController.llamar(data)
 
 @apis.route("/api/twilio/accion", methods=["POST"])
-def reproducirAudioInicial():
-    LlamadasController.reproducirAudioInicial()
+def generarAccionesEnLlamada():
+    LlamadasController.generarAccionesEnLlamada()
 
 # ------ # TRANSFORMADORES TTS Y STT # ------ #
 @apis.route("/api/tts", methods=["POST"])
