@@ -11,7 +11,7 @@ from app.controllers.llamadas.llamadasController import LlamadasController
 from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.fallaController import FallaController
 from app.controllers.mensajes.mensajesController import MensajesController
-from app.controllers.mensajes.botTelegram import telegram_bot
+from app.controllers.mensajes.telegramBot import telegram_bot
 from app.utils.logger import log
 from flask_cors import CORS
 import os
