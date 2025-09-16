@@ -170,34 +170,38 @@ def enviarMensajePorID():
     return MensajesController.enviarMensajePorID(data)
 
 # ------ # TELEGRAM BOT # ------ #
-@apis.route("/api/telegram/start", methods=["POST"]) # Inicia el bot de Telegram
+# ------ # TELEGRAM BOT # ------ #
+@apis.route("/api/telegram/start", methods=["POST"])  # Inicia el bot de Telegram
 def iniciarBotTelegram():
-    import asyncio
     try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        result = loop.run_until_complete(telegram_bot.start_bot())
-        return jsonify(result), 200
+        result = telegram_bot.start_bot()
+        result_dict = result.get_json()
+        if result_dict.get("status") == "error":
+            return result, 500
+        return result, 200
     except Exception as e:
+        log.error(f"Error en endpoint /api/telegram/start: {str(e)}", exc_info=True)
         return jsonify({"mensaje": f"Error al iniciar el bot: {str(e)}", "status": "error"}), 500
 
-@apis.route("/api/telegram/stop", methods=["POST"]) # Detiene el bot de Telegram
+@apis.route("/api/telegram/stop", methods=["POST"])  # Detiene el bot de Telegram
 def detenerBotTelegram():
-    import asyncio
     try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        result = loop.run_until_complete(telegram_bot.stop_bot())
-        return jsonify(result), 200
+        result = telegram_bot.stop_bot()
+        result_dict = result.get_json()
+        if result_dict.get("status") == "error":
+            return result, 500
+        return result, 200
     except Exception as e:
+        log.error(f"Error en endpoint /api/telegram/stop: {str(e)}", exc_info=True)
         return jsonify({"mensaje": f"Error al detener el bot: {str(e)}", "status": "error"}), 500
 
-@apis.route("/api/telegram/status", methods=["GET"]) # Obtiene el estado del bot y usuarios registrados
+@apis.route("/api/telegram/status", methods=["GET"])  # Obtiene el estado del bot y usuarios registrados
 def estadoBotTelegram():
     try:
         status = telegram_bot.get_status()
-        return jsonify(status), 200
+        return status, 200
     except Exception as e:
+        log.error(f"Error en endpoint /api/telegram/status: {str(e)}", exc_info=True)
         return jsonify({"mensaje": f"Error al obtener estado: {str(e)}", "status": "error"}), 500
 
 # =================== ABM =================== #
