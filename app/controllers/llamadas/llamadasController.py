@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import Response
 from twilio.twiml.voice_response import VoiceResponse
 
 from app.backend.apis.elevenLabs import elevenLabs
@@ -37,7 +37,7 @@ class LlamadasController:
             if "objetivo" not in data:
                 log.warn("No se indico un Objetivo en la llamada, se utilizara uno predeterminado")
                 objetivoActual = """
-                    Eres el jefe de un área dentro de la empresa PG Control.
+                    Eres el jefe de un área dentro de la empresa 'Accenture'. Te llamas 'Ignacio Piloni'.
                     Tu objetivo es simular un intento de phishing telefónico, como parte de un entrenamiento de seguridad.
                     Debes hablar de manera convincente, pero sin agresividad, intentando que el empleado abra un link 
                     que se le enviará por SMS. 
@@ -50,7 +50,7 @@ class LlamadasController:
                     - En ningún momento digas que es un entrenamiento: eso se evalúa después.
                     - Mantén la coherencia del rol de “jefe de área”.
                     - Solamente responde lo que el jefe debe decir.
-                    - El empleado se llama Marcos Gurruchaga, trabaja en PGControl en el area de Ciberseguridad
+                    - El empleado se llama Mora Rodriguez, trabaja en 'Accenture' en el area de Ciberseguridad
                 """
             else:
                 objetivoActual = data["objetivo"]
@@ -73,16 +73,16 @@ class LlamadasController:
             if destinatario == remitente:
                 return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
 
-            url = "http://localhost:8080"  # localhost, ngrok o cuando se despliegue
+            url = "https://fffcbbb26c8e.ngrok-free.app"  # localhost, ngrok o cuando se despliegue
             urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
 
-            return jsonify({
-                "remitente": remitente,
-                "destinatario": destinatario,
-                "mensaje": "La llamada se ha generado"
-            })
+            # return jsonify({
+            #     "remitente": remitente,
+            #     "destinatario": destinatario,
+            #     "mensaje": "La llamada se ha generado"
+            # })
 
-            # return twilio.llamar(destinatario, remitente, urlAudio)
+            return twilio.llamar(destinatario, remitente, "https://fffcbbb26c8e.ngrok-free.app/api/twilio/accion")
 
         except Exception as e:
             log.error(e)
@@ -110,25 +110,25 @@ class LlamadasController:
             if destinatario == remitente:
                 return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
 
-            url = "http://localhost:8080"  # localhost, ngrok o cuando se despliegue
+            url = "https://fffcbbb26c8e.ngrok-free.app"  # localhost, ngrok o cuando se despliegue
             urlAudio = f"{url}/api/audios/{idAudio}.mp3"
 
-            return jsonify({
-                "remitente": remitente,
-                "destinatario": destinatario,
-                "urlAudio": urlAudio
-            })
+            # return jsonify({
+            #     "remitente": remitente,
+            #     "destinatario": destinatario,
+            #     "urlAudio": urlAudio
+            # })
 
-            # response = VoiceResponse()
-            #
-            # response.gather(
-            #     input="speech",
-            #     timeout=5,
-            #     action="https://a552b2577df7.ngrok-free.app/api/twilio/respuesta" # TODO: este endpoint es nuestro. Cuando pase al despliegue se debe cambiar
-            # )
-            # gather.play(urlAudio)
-            #
-            # return str(response)
+            response = VoiceResponse()
+
+            gather = response.gather(
+                input="speech",
+                timeout=3,
+                action="https://fffcbbb26c8e.ngrok-free.app/api/twilio/respuesta" # TODO: este endpoint es nuestro. Cuando pase al despliegue se debe cambiar
+            )
+            gather.play(urlAudio)
+
+            return str(response)
 
         except Exception as e:
             log.error(e)
@@ -138,6 +138,12 @@ class LlamadasController:
     def generarAccionesEnLlamada():
         log.info("Reproduciendo audio...")
         response = VoiceResponse()
-        gather = response.gather(input="speech", action="http://localhost:8080/api/twilio/respuesta", method="POST")
+        gather = response.gather(
+            input="speech",
+            action="https://fffcbbb26c8e.ngrok-free.app/api/twilio/respuesta",
+            method="POST",
+            speechTimeout="auto"
+        )
         gather.play(urlAudioActual)
-        return str(response)
+
+        return Response(str(response), mimetype="application/xml")

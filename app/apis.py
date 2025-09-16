@@ -52,7 +52,7 @@ def generarLlamada():
 
 @apis.route("/api/twilio/accion", methods=["POST"])
 def generarAccionesEnLlamada():
-    LlamadasController.generarAccionesEnLlamada()
+    return LlamadasController.generarAccionesEnLlamada()
 
 # ------ # TRANSFORMADORES TTS Y STT # ------ #
 @apis.route("/api/tts", methods=["POST"])
