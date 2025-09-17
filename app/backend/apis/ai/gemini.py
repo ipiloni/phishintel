@@ -21,14 +21,20 @@ class Gemini:
             # Convertir la conversación a texto
             prompt = ""
             for msg in conversacion:
-                rol = msg.get("rol", "usuario")
-                contenido = msg.get("mensaje", "")
-                prompt += f"{rol}: {contenido}\n"
+                rol = msg.get("rol", "").lower()
+                contenido = msg.get("mensaje", "").strip()
+
+                if rol == "ia":
+                    prompt += f"IA: {contenido}\n"
+                elif rol == "destinatario":
+                    prompt += f"Usuario: {contenido}\n"
+
+            log.info(f"Conversacion que le enviamos a Gemini: {prompt}")
 
             # Concatenar con el prompt
-            input = objetivo + "\n" + prompt
+            prompt_final = objetivo + "\n" + prompt
 
-            response = model.generate_content(input)
+            response = model.generate_content(prompt_final)
 
             textoGenerado = response.candidates[0].content.parts[0].text
             return textoGenerado

@@ -1,12 +1,12 @@
-from flask import Response
-from twilio.twiml.voice_response import VoiceResponse
+from flask import Response, jsonify
+from twilio.twiml.voice_response import Gather, VoiceResponse, Play
 
 from app.backend.apis.elevenLabs import elevenLabs
 from app.backend.apis.twilio import twilio
 from app.backend.models.error import responseError
 from app.controllers.geminiController import GeminiController
 from app.utils.config import get
-from app.utils.conversacion import conversacionActual, objetivoActual, idVozActual, remitente, destinatario, urlAudioActual
+from app.utils import conversacion
 from app.utils.logger import log
 
 password = get("LLAMAR_PASSWORD")
@@ -34,9 +34,11 @@ class LlamadasController:
             destinatario = data["destinatario"]
             remitente = data["remitente"]
 
+            conversacion.conversacionActual.clear()
+
             if "objetivo" not in data:
                 log.warn("No se indico un Objetivo en la llamada, se utilizara uno predeterminado")
-                objetivoActual = """
+                conversacion.objetivoActual = """
                     Eres el jefe de un área dentro de la empresa 'Accenture'. Te llamas 'Ignacio Piloni'.
                     Tu objetivo es simular un intento de phishing telefónico, como parte de un entrenamiento de seguridad.
                     Debes hablar de manera convincente, pero sin agresividad, intentando que el empleado abra un link 
@@ -50,22 +52,29 @@ class LlamadasController:
                     - En ningún momento digas que es un entrenamiento: eso se evalúa después.
                     - Mantén la coherencia del rol de “jefe de área”.
                     - Solamente responde lo que el jefe debe decir.
+                    - Eres de Buenos Aires, Argentina. Por lo que el dialecto es muy importante que lo mantengas.
                     - El empleado se llama Mora Rodriguez, trabaja en 'Accenture' en el area de Ciberseguridad
                 """
             else:
-                objetivoActual = data["objetivo"]
+                conversacion.objetivoActual = data["objetivo"]
 
-            texto = GeminiController.generarTexto(objetivoActual, conversacionActual)
+            log.info(f"La Conversacion actual es la siguiente: {conversacion.conversacionActual}")
+
+            texto = GeminiController.generarTexto(conversacion.objetivoActual, conversacion.conversacionActual)
 
             log.info(f"La IA genero el texto: {texto}")
 
-            conversacionActual.append({"rol": "IA", "mensaje": texto})
+            conversacion.conversacionActual.append({"rol": "IA", "mensaje": texto})
 
-            idVozActual = data.get("vozRemitente", "O1CnH2NGEehfL1nmYACp")  # esto es un get o default, intenta obtener vozRemitente y si no lo pasaron toma el default
+            log.info(f"Ahora la conversacion actual es la siguiente: {conversacion.conversacionActual}")
 
-            elevenLabsResponse = elevenLabs.tts(texto, idVozActual, None,None)  # por el momento estabilidad y velocidad en None
+            conversacion.idVozActual = data.get("vozRemitente", "O1CnH2NGEehfL1nmYACp")  # esto es un get o default, intenta obtener vozRemitente y si no lo pasaron toma el default
+
+            elevenLabsResponse = elevenLabs.tts(texto, conversacion.idVozActual, None,None)  # por el momento estabilidad y velocidad en None
 
             idAudio = elevenLabsResponse["idAudio"]
+
+            log.info("Ponemos en internet el audio: " + str(idAudio))
 
             from app.apis import exponerAudio
             exponerAudio(f"{idAudio}.mp3")  # expone el archivo .mp3 a internet para que Twilio pueda reproducirlo
@@ -73,16 +82,12 @@ class LlamadasController:
             if destinatario == remitente:
                 return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
 
-            url = "https://fffcbbb26c8e.ngrok-free.app"  # localhost, ngrok o cuando se despliegue
-            urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
+            url = "https://demanding-messenger-microwave-pattern.trycloudflare.com"  # localhost, ngrok o cuando se despliegue
+            conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
 
-            # return jsonify({
-            #     "remitente": remitente,
-            #     "destinatario": destinatario,
-            #     "mensaje": "La llamada se ha generado"
-            # })
+            log.info(f"La URL del audio actual es: {conversacion.urlAudioActual}")
 
-            return twilio.llamar(destinatario, remitente, "https://fffcbbb26c8e.ngrok-free.app/api/twilio/accion")
+            return twilio.llamar(destinatario, remitente, "https://demanding-messenger-microwave-pattern.trycloudflare.com/api/twilio/accion")
 
         except Exception as e:
             log.error(e)
@@ -96,54 +101,71 @@ class LlamadasController:
 
             log.info(f"Lo que dijo el usuario fue: {str(speech)}")
 
-            conversacionActual.append({"rol": "destinatario", "mensaje": speech})
+            conversacion.conversacionActual.append({"rol": "destinatario", "mensaje": speech})
 
-            respuestaEnTexto = GeminiController.generarTexto(objetivoActual, conversacionActual)
+            texto = GeminiController.generarTexto(conversacion.objetivoActual, conversacion.conversacionActual)
 
-            elevenLabsResponse = elevenLabs.tts(respuestaEnTexto, idVozActual, None,None)  # por el momento estabilidad y velocidad en None
+            conversacion.conversacionActual.append({"rol": "IA", "mensaje": texto})
+
+            log.info(f"Se genero la siguiente respuesta: {texto}")
+
+            elevenLabsResponse = elevenLabs.tts(texto, conversacion.idVozActual, None,None)  # por el momento estabilidad y velocidad en None
 
             idAudio = elevenLabsResponse["idAudio"]
 
             from app.apis import exponerAudio
             exponerAudio(f"{idAudio}.mp3")  # expone el archivo .mp3 a internet para que Twilio pueda reproducirlo
 
-            if destinatario == remitente:
-                return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
+            log.info("Se expone el audio para que Twilio lo reproduzca")
 
-            url = "https://fffcbbb26c8e.ngrok-free.app"  # localhost, ngrok o cuando se despliegue
-            urlAudio = f"{url}/api/audios/{idAudio}.mp3"
+            url = "https://demanding-messenger-microwave-pattern.trycloudflare.com"  # localhost, ngrok o cuando se despliegue
+            conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
 
-            # return jsonify({
-            #     "remitente": remitente,
-            #     "destinatario": destinatario,
-            #     "urlAudio": urlAudio
-            # })
+            log.info(f"URL audio actual: {conversacion.urlAudioActual}")
 
             response = VoiceResponse()
 
-            gather = response.gather(
-                input="speech",
-                timeout=3,
-                action="https://fffcbbb26c8e.ngrok-free.app/api/twilio/respuesta" # TODO: este endpoint es nuestro. Cuando pase al despliegue se debe cambiar
-            )
-            gather.play(urlAudio)
+            response.play(conversacion.urlAudioActual)
 
-            return str(response)
+            gather = Gather(
+                input='speech',
+                language="es-MX",
+                action='https://demanding-messenger-microwave-pattern.trycloudflare.com/api/twilio/respuesta',
+                method='POST',
+                speech_timeout='auto',
+                timeout=3
+            )
+
+            response.append(gather)
+
+            log.info(f"Lo que le mandamos a twilio es: {str(response)}")
+
+            return Response(str(response), mimetype="application/xml")
 
         except Exception as e:
-            log.error(e)
+            log.error(f"Hubo un error en el procesamiento de la respuesta de la llamada: {str(e)}")
             return responseError("ERROR_AL_LLAMAR", f"Hubo un error al intentar ejecutar la llamada: {str(e)}", 500)
 
     @staticmethod
     def generarAccionesEnLlamada():
         log.info("Reproduciendo audio...")
         response = VoiceResponse()
-        gather = response.gather(
-            input="speech",
-            action="https://fffcbbb26c8e.ngrok-free.app/api/twilio/respuesta",
-            method="POST",
-            speechTimeout="auto"
+
+        log.info(f"URL actual de audio: {conversacion.urlAudioActual}")
+
+        response.play(conversacion.urlAudioActual)
+
+        gather = Gather(
+            input='speech',
+            language="es-MX",
+            action='https://demanding-messenger-microwave-pattern.trycloudflare.com/api/twilio/respuesta',
+            method='POST',
+            speech_timeout='auto',
+            timeout=3
         )
-        gather.play(urlAudioActual)
+
+        response.append(gather)
+
+        log.info(f"Lo que le mandamos a twilio es: {str(response)}")
 
         return Response(str(response), mimetype="application/xml")
