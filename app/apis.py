@@ -10,8 +10,10 @@ from app.controllers.abm.eventosController import EventosController
 from app.controllers.llamadas.llamadasController import LlamadasController
 from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.fallaController import FallaController
-from app.controllers.mensajes.mensajesController import MensajesController
-from app.controllers.mensajes.telegramBot import telegram_bot
+from app.controllers.mensajes.msjController import MsjController
+from app.controllers.mensajes.telegram import telegram_bot
+from app.controllers.mensajes.whatsapp import WhatsAppController
+from app.controllers.mensajes.sms import SMSController
 from app.utils.logger import log
 from flask_cors import CORS
 import os
@@ -70,27 +72,27 @@ def generarSTT():
 @apis.route("/api/mensajes/whatsapp-twilio", methods=["POST"])
 def enviarMensajeWhatsappTwilio():
     data = request.get_json()
-    return MensajesController.enviarMensajeWhatsapp(data)
+    return WhatsAppController.enviarMensajeTwilio(data)
 
 @apis.route("/api/mensajes/sms", methods=["POST"])
 def enviarMensajeSMS():
     data = request.get_json()
-    return MensajesController.enviarMensajeSMS(data)
+    return SMSController.enviarMensajeTwilio(data)
 
 @apis.route("/api/mensajes/whatsapp-selenium", methods=["POST"])
 def enviarMensajeWhatsappSelenium():
     data = request.get_json()
-    return MensajesController.enviarMensajeWhatsappSelenium(data)
+    return WhatsAppController.enviarMensajeSelenium(data)
 
 @apis.route("/api/mensajes/whatsapp-whapi", methods=["POST"])
 def enviarMensajeWhatsappWhapi():
     data = request.get_json()
-    return MensajesController.enviarMensajeWhapiCloud(data)
+    return WhatsAppController.enviarMensajeWhapi(data)
 
 @apis.route("/api/mensajes/whatsapp-grupo-whapi", methods=["POST"])
 def enviarMensajeWhatsappGrupoWhapi():
     data = request.get_json()
-    return MensajesController.enviarMensajeWhapiGrupo(data)
+    return WhatsAppController.enviarMensajeWhapiGrupo(data)
 
 # ------ # REGISTROS DE EVENTOS +  # ------ #
 @apis.route("/api/sumar-falla", methods=["GET"])
@@ -167,7 +169,7 @@ def generarMensaje():
 @apis.route("/api/mensaje/enviar-id", methods=["POST"]) # Esta ruta envía un mensaje por ID de usuario
 def enviarMensajePorID():
     data = request.get_json()
-    return MensajesController.enviarMensajePorID(data)
+    return MsjController.enviarMensajePorID(data)
 
 # ------ # TELEGRAM BOT # ------ #
 # ------ # TELEGRAM BOT # ------ #
