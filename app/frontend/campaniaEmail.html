@@ -96,30 +96,59 @@
               </select>
             </div>
 
-                      <!-- Dificultad -->
-          <div class="mb-3">
-            <label class="form-label">Nivel de Dificultad</label>
-
-            <div class="form-check">
-              <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="facil" value="Fácil" checked>
-              <label class="form-check-label" for="facil">Fácil (Desde phishintel@gmail.com)</label>
+            <!-- Dificultad -->
+            <div class="mb-4">
+              <label class="form-label mb-3">Nivel de Dificultad</label>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': nivel === 'Fácil', 'border-secondary': nivel !== 'Fácil' }"
+                       @click="nivel = 'Fácil'"
+                       :style="nivel === 'Fácil' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;">🟢</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Fácil</h6>
+                      <small class="card-text" style="font-size: 0.7em;">phishintel@gmail.com</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': nivel === 'Medio', 'border-secondary': nivel !== 'Medio' }"
+                       @click="nivel = 'Medio'"
+                       :style="nivel === 'Medio' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;">🟡</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Medio</h6>
+                      <small class="card-text" style="font-size: 0.7em;">pgcontrolcito.com</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': nivel === 'Difícil', 'border-secondary': nivel !== 'Difícil' }"
+                       @click="nivel = 'Difícil'"
+                       :style="nivel === 'Difícil' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;">🔴</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Difícil</h6>
+                      <small class="card-text" style="font-size: 0.7em;">pgcontrol.com.ar</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div class="form-check">
-              <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="medio" value="Medio">
-              <label class="form-check-label" for="medio">Medio (Desde pgcontrolcito.com)</label>
-            </div>
-
-            <div class="form-check">
-              <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="dificil" value="Difícil">
-              <label class="form-check-label" for="dificil">Difícil (Desde pgcontrol.com.ar)</label>
-            </div>
-          </div>
 
             <!-- Botón de enviar -->
             <div class="text-center">
-              <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill">
-                <i class="bi bi-send"></i> Ver Preview
+              <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill" :disabled="cargando">
+                <span v-if="cargando">
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Generando...
+                </span>
+                <span v-else>
+                  <i class="bi bi-send"></i> Ver Preview
+                </span>
               </button>
             </div>
           </form>
@@ -134,18 +163,93 @@
                     aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <p><strong>Opciones Elegidas </strong></p>
-                  <p><strong>Área: </strong>{{ filtroArea }} <span id="previewArea"></span></p>
-                  <p><strong>Usuario:  </strong> {{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}<span id="previewUsuario"></span></p>
-                  <p><strong>Dificultad: </strong> {{ nivel }}<span id="previewDificultad"></span></p>
-                  <hr>
-                  <p><strong>Mail generado por IA</strong></p>
-                  <h6>{{ modalAsunto }}</h6>
-                  <div v-html="modalCuerpo"></div>
+                  <div class="mb-4">
+                    <h6 class="mb-3" style="color: white;">
+                      <i class="bi bi-gear-fill me-2"></i>Opciones Elegidas
+                    </h6>
+                    
+                    <div class="row g-3">
+                      <!-- Área -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2">🏢</span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Área</small>
+                            <strong>{{ filtroArea }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Usuario -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2">👤</span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Usuario</small>
+                            <strong>{{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Dificultad -->
+                      <div class="col-12">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2">{{ nivel === 'Fácil' ? '🟢' : nivel === 'Medio' ? '🟡' : '🔴' }}</span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Dificultad</small>
+                            <strong>{{ nivel }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <hr class="my-4">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0" style="color: white;">
+                      <i class="bi bi-envelope me-2"></i>Email generado por IA
+                    </h6>
+                    <button type="button" class="btn btn-sm" @click="regenerarEmail" :disabled="cargandoRegenerar" style="border-color: #da02e5; color: #da02e5;">
+                      <span v-if="cargandoRegenerar">
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Regenerando...
+                      </span>
+                      <span v-else>
+                        <i class="bi bi-arrow-clockwise"></i> Regenerar
+                      </span>
+                    </button>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label class="form-label" style="color: white;">Asunto:</label>
+                    <input type="text" v-model="modalAsunto" class="form-control" style="background-color: #2d2d2d; color: white; border: 1px solid #444;">
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label class="form-label" style="color: white;">Cuerpo del email:</label>
+                    <textarea 
+                      v-model="modalCuerpoTexto" 
+                      class="form-control" 
+                      rows="8" 
+                      style="background-color: #2d2d2d; color: white; border: 1px solid #444; resize: vertical;"
+                      placeholder="El contenido del email aparecerá aquí..."
+                    ></textarea>
+                    <small class="text-muted" style="color: #ccc !important;">
+                      💡 Puedes usar **texto en negrita** y *texto en cursiva*. Usa doble salto de línea para crear párrafos separados.
+                    </small>
+                  </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                  <button type="button" class="btn btn-primary" @click="confirmarEnvio">Confirmar y Enviar</button>
+                  <button type="button" class="btn btn-primary" @click="confirmarEnvio" :disabled="cargandoEnvio">
+                    <span v-if="cargandoEnvio">
+                      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Enviando...
+                    </span>
+                    <span v-else>
+                      Confirmar y Enviar
+                    </span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -155,6 +259,31 @@
       </div>
     </section>
   </main>
+
+  <!-- Toast de notificación -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #da02e5;">
+      <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #da02e5;">
+        <i class="bi bi-check-circle-fill me-2" style="color: #da02e5;"></i>
+        <strong class="me-auto">Éxito</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+        Email enviado correctamente ✅
+      </div>
+    </div>
+    
+    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #da02e5;">
+      <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #da02e5;">
+        <i class="bi bi-exclamation-triangle-fill me-2" style="color: #da02e5;"></i>
+        <strong class="me-auto">Error</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+        No se pudo enviar el email
+      </div>
+    </div>
+  </div>
 
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -177,12 +306,16 @@
           nivel: "Fácil",
           modalAsunto: "",
           modalCuerpo: "",
+          modalCuerpoTexto: "", // Versión de texto plano para edición
+          cargando: false,
+          cargandoRegenerar: false,
+          cargandoEnvio: false,
           emailGenerado: {
-          proveedor: "twilio",
-          idUsuario: null, 
-          asunto: "",
-          cuerpo: ""
-        }
+            proveedor: "twilio",
+            idUsuario: null, 
+            asunto: "",
+            cuerpo: ""
+          }
         };
       },
       computed: {
@@ -199,6 +332,7 @@
       },
       methods: {
         async generarPreview() {
+          this.cargando = true;
           try {
             const resp = await fetch("http://localhost:8080/api/email/generar", {
               method: "POST",
@@ -215,6 +349,7 @@
             const data = await resp.json();
             this.modalAsunto = data.asunto || "Sin asunto";
             this.modalCuerpo = data.cuerpo || "Sin cuerpo";
+            this.modalCuerpoTexto = this.htmlToText(data.cuerpo || "Sin cuerpo");
             
             this.emailGenerado.asunto = data.asunto;
             this.emailGenerado.cuerpo = data.cuerpo;
@@ -226,12 +361,50 @@
 
           } catch (e) {
             console.error("Error:", e);
-            alert("No se pudo generar el email");
+            this.mostrarToastError();
+          } finally {
+            this.cargando = false;
+          }
+        },
+
+        async regenerarEmail() {
+          this.cargandoRegenerar = true;
+          try {
+            const resp = await fetch("http://localhost:8080/api/email/generar", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam.`,
+                formato: "html",
+                nivel: this.nivel
+              })
+            });
+
+            if (!resp.ok) throw new Error("Error regenerando el email");
+
+            const data = await resp.json();
+            this.modalAsunto = data.asunto || "Sin asunto";
+            this.modalCuerpo = data.cuerpo || "Sin cuerpo";
+            this.modalCuerpoTexto = this.htmlToText(data.cuerpo || "Sin cuerpo");
+            this.emailGenerado.asunto = data.asunto;
+            this.emailGenerado.cuerpo = data.cuerpo;
+
+          } catch (e) {
+            console.error("Error:", e);
+            this.mostrarToastError();
+          } finally {
+            this.cargandoRegenerar = false;
           }
         },
 
         async confirmarEnvio() {
+          this.cargandoEnvio = true;
           try {
+            // Actualizar los datos con los valores editados
+            this.emailGenerado.asunto = this.modalAsunto;
+            // Convertir el texto editado de vuelta a HTML
+            this.emailGenerado.cuerpo = this.textToHtml(this.modalCuerpoTexto);
+            
             const resp = await fetch("http://localhost:8080/api/email/enviar-id", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -240,13 +413,70 @@
     
             if (!resp.ok) throw new Error("Error enviando el email");
 
-            alert("Email enviado correctamente ✅");
+            this.mostrarToastExito();
             bootstrap.Modal.getInstance(document.getElementById("previewModal")).hide();
 
           } catch (e) {
             console.error("Error:", e);
-            alert("No se pudo enviar el email");
+            this.mostrarToastError();
+          } finally {
+            this.cargandoEnvio = false;
           }
+        },
+
+        mostrarToastExito() {
+          const toastElement = document.getElementById('successToast');
+          const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 4000
+          });
+          toast.show();
+        },
+
+        mostrarToastError() {
+          const toastElement = document.getElementById('errorToast');
+          const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 5000
+          });
+          toast.show();
+        },
+
+        // Convertir HTML a texto plano para edición
+        htmlToText(html) {
+          const temp = document.createElement('div');
+          temp.innerHTML = html;
+          
+          // Obtener el texto y limpiar espacios extra
+          let text = temp.textContent || temp.innerText || '';
+          
+          // Reemplazar múltiples espacios por uno solo
+          text = text.replace(/\s+/g, ' ');
+          
+          // Agregar saltos de línea después de saludos comunes
+          text = text.replace(/(Estimado|Estimada|Querido|Querida)\s+([A-Z][a-z]+\s+[A-Z][a-z]+),/g, '$1 $2,\n');
+          
+          // Agregar saltos de línea después de puntos seguidos de mayúscula
+          text = text.replace(/\.([A-Z])/g, '.\n$1');
+          
+          // Agregar saltos de línea después de "Atentamente," y similares
+          text = text.replace(/(Atentamente,|Saludos,|Cordialmente,|El equipo de)/g, '\n$1');
+          
+          // Limpiar espacios al inicio y final
+          text = text.trim();
+          
+          return text;
+        },
+
+        // Convertir texto plano a HTML básico
+        textToHtml(text) {
+          return text
+            .replace(/\n\n/g, '</p><p>') // Dobles saltos de línea = párrafos
+            .replace(/\n/g, '<br>')      // Saltos simples = <br>
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Negrita
+            .replace(/\*(.*?)\*/g, '<em>$1</em>') // Cursiva
+            .replace(/^/, '<p>')         // Agregar <p> al inicio
+            .replace(/$/, '</p>');       // Agregar </p> al final
         }
       },
       async mounted() {

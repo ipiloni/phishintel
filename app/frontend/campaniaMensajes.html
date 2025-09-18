@@ -97,94 +97,204 @@
             </div>
 
             <!-- Dificultad -->
-            <div class="mb-3">
-              <label class="form-label">Nivel de Dificultad</label>
-
-              <div class="form-check">
-                <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="facil" value="Fácil" checked>
-                <label class="form-check-label" for="facil">Fácil (Mensaje directo y obvio)</label>
-              </div>
-
-              <div class="form-check">
-                <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="medio" value="Medio">
-                <label class="form-check-label" for="medio">Medio (Mensaje con contexto corporativo)</label>
-              </div>
-
-              <div class="form-check">
-                <input class="form-check-input custom-radio" type="radio" v-model="nivel" id="dificil" value="Difícil">
-                <label class="form-check-label" for="dificil">Difícil (Mensaje sofisticado y personalizado)</label>
+            <div class="mb-4">
+              <label class="form-label mb-3">Nivel de Dificultad</label>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': nivel === 'Fácil', 'border-secondary': nivel !== 'Fácil' }"
+                       @click="nivel = 'Fácil'"
+                       :style="nivel === 'Fácil' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;">🟢</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Fácil</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Directo y obvio</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': nivel === 'Medio', 'border-secondary': nivel !== 'Medio' }"
+                       @click="nivel = 'Medio'"
+                       :style="nivel === 'Medio' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;">🟡</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Medio</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Contexto corporativo</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': nivel === 'Difícil', 'border-secondary': nivel !== 'Difícil' }"
+                       @click="nivel = 'Difícil'"
+                       :style="nivel === 'Difícil' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;">🔴</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Difícil</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Sofisticado y personalizado</small>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
             <!-- Selector de Medio -->
-            <div class="mb-3">
-              <label class="form-label">Medio de Comunicación</label>
-
-              <div class="form-check">
-                <input class="form-check-input custom-radio" type="radio" v-model="medio" id="telegram" value="telegram" checked>
-                <label class="form-check-label" for="telegram">📱 Telegram</label>
-              </div>
-
-              <div class="form-check">
-                <input class="form-check-input custom-radio" type="radio" v-model="medio" id="whatsapp" value="whatsapp">
-                <label class="form-check-label" for="whatsapp">💬 WhatsApp</label>
-              </div>
-
-              <div class="form-check">
-                <input class="form-check-input custom-radio" type="radio" v-model="medio" id="sms" value="sms">
-                <label class="form-check-label" for="sms">📱 SMS</label>
+            <div class="mb-4">
+              <label class="form-label mb-3">Medio de Comunicación</label>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': medio === 'telegram', 'border-secondary': medio !== 'telegram' }"
+                       @click="medio = 'telegram'"
+                       :style="medio === 'telegram' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;">📱</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Telegram</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Mensajería instantánea</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': medio === 'whatsapp', 'border-secondary': medio !== 'whatsapp' }"
+                       @click="medio = 'whatsapp'"
+                       :style="medio === 'whatsapp' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;">💬</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">WhatsApp</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Mensajería popular</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': medio === 'sms', 'border-secondary': medio !== 'sms' }"
+                       @click="medio = 'sms'"
+                       :style="medio === 'sms' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;">📲</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">SMS</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Mensaje de texto</small>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
             <!-- Selector de Proveedor (solo visible cuando hay medio seleccionado) -->
-            <div class="mb-3" v-if="medio">
-              <label class="form-label">Proveedor</label>
+            <div class="mb-4" v-if="medio">
+              <label class="form-label mb-3">Proveedor</label>
               
               <!-- Proveedores para Telegram -->
               <div v-if="medio === 'telegram'">
-                <div class="form-check">
-                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="telegram-bot" value="bot" checked>
-                  <label class="form-check-label" for="telegram-bot">🤖 Bot (✅ Funciona)</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="telegram-directo" value="directo" disabled>
-                  <label class="form-check-label" for="telegram-directo">📨 Mensaje Directo (🚧 Próximamente)</label>
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <div class="card h-100 cursor-pointer" 
+                         :class="{ 'border-0': proveedor === 'bot', 'border-secondary': proveedor !== 'bot' }"
+                         @click="proveedor = 'bot'"
+                         :style="proveedor === 'bot' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                      <div class="card-body text-center p-1">
+                        <div style="font-size: 1em;">🤖</div>
+                        <h6 class="card-title mb-0" style="font-size: 0.8em;">Bot de Telegram</h6>
+                        <small class="card-text" style="font-size: 0.7em;">✅ Funciona</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card h-100 cursor-pointer border-secondary" 
+                         style="cursor: not-allowed; opacity: 0.6; background-color: #2d2d2d; color: white;">
+                      <div class="card-body text-center p-1">
+                        <div style="font-size: 1em;">📨</div>
+                        <h6 class="card-title mb-0" style="font-size: 0.8em;">Mensaje Directo</h6>
+                        <small class="card-text" style="font-size: 0.7em;">🚧 Próximamente</small>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <!-- Proveedores para WhatsApp -->
               <div v-if="medio === 'whatsapp'">
-                <div class="form-check">
-                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="whatsapp-whapi" value="whapi" checked>
-                  <label class="form-check-label" for="whatsapp-whapi">☁️ whapi.cloud (✅ Funciona)</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="whatsapp-whapi-link-preview" value="whapi-link-preview">
-                  <label class="form-check-label" for="whatsapp-whapi-link-preview">🔗 whapi.cloud Link Preview (✅ Funciona)</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="whatsapp-twilio" value="twilio">
-                  <label class="form-check-label" for="whatsapp-twilio">📞 Twilio (⚠️ Limitado)</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="whatsapp-selenium" value="selenium">
-                  <label class="form-check-label" for="whatsapp-selenium">🤖 Selenium (❌ No funciona)</label>
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <div class="card h-100 cursor-pointer" 
+                         :class="{ 'border-0': proveedor === 'whapi', 'border-secondary': proveedor !== 'whapi' }"
+                         @click="proveedor = 'whapi'"
+                         :style="proveedor === 'whapi' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                      <div class="card-body text-center p-1">
+                        <div style="font-size: 1em;">☁️</div>
+                        <h6 class="card-title mb-0" style="font-size: 0.8em;">whapi.cloud</h6>
+                        <small class="card-text" style="font-size: 0.7em;">✅ Funciona</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card h-100 cursor-pointer" 
+                         :class="{ 'border-0': proveedor === 'whapi-link-preview', 'border-secondary': proveedor !== 'whapi-link-preview' }"
+                         @click="proveedor = 'whapi-link-preview'"
+                         :style="proveedor === 'whapi-link-preview' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                      <div class="card-body text-center p-1">
+                        <div style="font-size: 1em;">🔗</div>
+                        <h6 class="card-title mb-0" style="font-size: 0.8em;">whapi.cloud Link Preview</h6>
+                        <small class="card-text" style="font-size: 0.7em;">✅ Funciona</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card h-100 cursor-pointer" 
+                         :class="{ 'border-0': proveedor === 'twilio', 'border-secondary': proveedor !== 'twilio' }"
+                         @click="proveedor = 'twilio'"
+                         :style="proveedor === 'twilio' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                      <div class="card-body text-center p-1">
+                        <div style="font-size: 1em;">📞</div>
+                        <h6 class="card-title mb-0" style="font-size: 0.8em;">Twilio</h6>
+                        <small class="card-text" style="font-size: 0.7em;">⚠️ Limitado</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card h-100 cursor-pointer border-danger" 
+                         style="cursor: not-allowed; opacity: 0.6; background-color: #2d2d2d; color: white;">
+                      <div class="card-body text-center p-1">
+                        <div style="font-size: 1em;">🤖</div>
+                        <h6 class="card-title mb-0" style="font-size: 0.8em;">Selenium</h6>
+                        <small class="card-text" style="font-size: 0.7em;">❌ No funciona</small>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <!-- Proveedores para SMS -->
               <div v-if="medio === 'sms'">
-                <div class="form-check">
-                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="sms-twilio" value="twilio" checked>
-                  <label class="form-check-label" for="sms-twilio">📞 Twilio (⚠️ Limitado)</label>
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <div class="card h-100 cursor-pointer" 
+                         :class="{ 'border-0': proveedor === 'twilio', 'border-secondary': proveedor !== 'twilio' }"
+                         @click="proveedor = 'twilio'"
+                         :style="proveedor === 'twilio' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                      <div class="card-body text-center p-1">
+                        <div style="font-size: 1em;">📞</div>
+                        <h6 class="card-title mb-0" style="font-size: 0.8em;">Twilio</h6>
+                        <small class="card-text" style="font-size: 0.7em;">⚠️ Limitado</small>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- Botón de enviar -->
             <div class="text-center">
-              <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill">
-                <i class="bi bi-chat-dots"></i> Ver Preview
+              <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill" :disabled="cargando">
+                <span v-if="cargando">
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Generando...
+                </span>
+                <span v-else>
+                  <i class="bi bi-chat-dots"></i> Ver Preview
+                </span>
               </button>
             </div>
           </form>
@@ -199,32 +309,117 @@
                     aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <p><strong>Opciones Elegidas </strong></p>
-                  <p><strong>Área: </strong>{{ filtroArea }} <span id="previewArea"></span></p>
-                  <p><strong>Usuario:  </strong> {{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}<span id="previewUsuario"></span></p>
-                  <p><strong>Dificultad: </strong> {{ nivel }}<span id="previewDificultad"></span></p>
-                  <p><strong>Medio: </strong> {{ medio === 'whatsapp' ? 'WhatsApp' : medio === 'telegram' ? 'Telegram' : 'SMS' }}<span id="previewMedio"></span></p>
-                  <p><strong>Proveedor: </strong> {{ proveedor }}<span id="previewProveedor"></span></p>
-                  <hr>
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <p><strong>Mensaje generado por IA</strong></p>
-                    <button type="button" class="btn btn-sm btn-outline-primary" @click="regenerarMensaje">
-                      <i class="bi bi-arrow-clockwise"></i> Regenerar
+                  <div class="mb-4">
+                    <h6 class="mb-3" style="color: white;">
+                      <i class="bi bi-gear-fill me-2"></i>Opciones Elegidas
+                    </h6>
+                    
+                    <div class="row g-3">
+                      <!-- Área -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2">🏢</span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Área</small>
+                            <strong>{{ filtroArea }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Usuario -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2">👤</span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Usuario</small>
+                            <strong>{{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Dificultad -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2">{{ nivel === 'Fácil' ? '🟢' : nivel === 'Medio' ? '🟡' : '🔴' }}</span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Dificultad</small>
+                            <strong>{{ nivel }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Medio -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2">{{ medio === 'whatsapp' ? '💬' : medio === 'telegram' ? '📱' : '📲' }}</span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Medio</small>
+                            <strong>{{ medio === 'whatsapp' ? 'WhatsApp' : medio === 'telegram' ? 'Telegram' : 'SMS' }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Proveedor -->
+                      <div class="col-12">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2">
+                            {{ proveedor === 'bot' ? '🤖' : 
+                               proveedor === 'whapi' ? '☁️' : 
+                               proveedor === 'whapi-link-preview' ? '🔗' : 
+                               proveedor === 'twilio' ? '📞' : 
+                               proveedor === 'selenium' ? '🤖' : '📱' }}
+                          </span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Proveedor</small>
+                            <strong>
+                              {{ proveedor === 'bot' ? 'Bot de Telegram' : 
+                                 proveedor === 'whapi' ? 'whapi.cloud' : 
+                                 proveedor === 'whapi-link-preview' ? 'whapi.cloud Link Preview' : 
+                                 proveedor === 'twilio' ? 'Twilio' : 
+                                 proveedor === 'selenium' ? 'Selenium' : proveedor }}
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <hr class="my-4">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0" style="color: white;">
+                      <i class="bi bi-robot me-2"></i>Mensaje generado por IA
+                    </h6>
+                    <button type="button" class="btn btn-sm" @click="regenerarMensaje" :disabled="cargandoRegenerar" style="border-color: #da02e5; color: #da02e5;">
+                      <span v-if="cargandoRegenerar">
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Regenerando...
+                      </span>
+                      <span v-else>
+                        <i class="bi bi-arrow-clockwise"></i> Regenerar
+                      </span>
                     </button>
                   </div>
-                  <div class="bg-light text-dark p-3 rounded">
+                  <div class="p-3 rounded" style="background-color: #2d2d2d;">
                     <textarea 
                       v-model="modalMensaje" 
                       class="form-control border-0 bg-transparent" 
                       rows="6" 
-                      style="resize: vertical; font-family: inherit; white-space: pre-wrap;"
+                      style="resize: vertical; font-family: inherit; white-space: pre-wrap; color: white;"
                       placeholder="El mensaje aparecerá aquí..."
                     ></textarea>
                   </div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                  <button type="button" class="btn btn-primary" @click="confirmarEnvio">Confirmar y Enviar</button>
+                  <button type="button" class="btn btn-primary" @click="confirmarEnvio" :disabled="cargandoEnvio">
+                    <span v-if="cargandoEnvio">
+                      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Enviando...
+                    </span>
+                    <span v-else>
+                      Confirmar y Enviar
+                    </span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -234,6 +429,31 @@
       </div>
     </section>
   </main>
+
+  <!-- Toast de notificación -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #da02e5;">
+      <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #da02e5;">
+        <i class="bi bi-check-circle-fill me-2" style="color: #da02e5;"></i>
+        <strong class="me-auto">Éxito</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+        Mensaje enviado correctamente ✅
+      </div>
+    </div>
+    
+    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #da02e5;">
+      <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #da02e5;">
+        <i class="bi bi-exclamation-triangle-fill me-2" style="color: #da02e5;"></i>
+        <strong class="me-auto">Error</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+        No se pudo enviar el mensaje
+      </div>
+    </div>
+  </div>
 
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -257,6 +477,9 @@
           medio: "telegram",
           proveedor: "bot",
           modalMensaje: "",
+          cargando: false,
+          cargandoRegenerar: false,
+          cargandoEnvio: false,
           mensajeGenerado: {
             medio: "telegram",
             proveedor: "bot",
@@ -289,6 +512,7 @@
       },
       methods: {
         async generarPreview() {
+          this.cargando = true;
           try {
             const resp = await fetch("http://localhost:8080/api/mensaje/generar", {
               method: "POST",
@@ -315,11 +539,14 @@
 
           } catch (e) {
             console.error("Error:", e);
-            alert("No se pudo generar el mensaje");
+            this.mostrarToastError();
+          } finally {
+            this.cargando = false;
           }
         },
 
         async regenerarMensaje() {
+          this.cargandoRegenerar = true;
           try {
             const resp = await fetch("http://localhost:8080/api/mensaje/generar", {
               method: "POST",
@@ -338,11 +565,14 @@
 
           } catch (e) {
             console.error("Error:", e);
-            alert("No se pudo regenerar el mensaje");
+            this.mostrarToastError();
+          } finally {
+            this.cargandoRegenerar = false;
           }
         },
 
         async confirmarEnvio() {
+          this.cargandoEnvio = true;
           try {
             const resp = await fetch("http://localhost:8080/api/mensaje/enviar-id", {
               method: "POST",
@@ -358,13 +588,33 @@
             if (!resp.ok) throw new Error("Error enviando el mensaje");
 
             const data = await resp.json();
-            alert("Mensaje enviado correctamente ✅");
+            this.mostrarToastExito();
             bootstrap.Modal.getInstance(document.getElementById("previewModal")).hide();
 
           } catch (e) {
             console.error("Error:", e);
-            alert("No se pudo enviar el mensaje");
+            this.mostrarToastError();
+          } finally {
+            this.cargandoEnvio = false;
           }
+        },
+
+        mostrarToastExito() {
+          const toastElement = document.getElementById('successToast');
+          const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 4000
+          });
+          toast.show();
+        },
+
+        mostrarToastError() {
+          const toastElement = document.getElementById('errorToast');
+          const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 5000
+          });
+          toast.show();
         }
       },
       async mounted() {
