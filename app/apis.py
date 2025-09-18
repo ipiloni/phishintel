@@ -104,6 +104,12 @@ def enviarMensajeWhatsappWhapi():
     return WhatsAppController.enviarMensajeWhapi(data)
 
 
+@apis.route("/api/mensajes/whatsapp-whapi-link-preview", methods=["POST"])
+def enviarMensajeWhatsappWhapiLinkPreview():
+    data = request.get_json()
+    return WhatsAppController.enviarMensajeWhapiLinkPreview(data)
+
+
 @apis.route("/api/mensajes/whatsapp-grupo-whapi", methods=["POST"])
 def enviarMensajeWhatsappGrupoWhapi():
     data = request.get_json()

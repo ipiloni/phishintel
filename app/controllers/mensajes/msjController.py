@@ -33,7 +33,7 @@ class MsjController:
                 - idUsuario (int): ID del usuario al que enviar el mensaje
                 - mensaje (str): Contenido del mensaje
                 - proveedor (str, opcional): Proveedor específico dentro del medio
-                    - Para whatsapp: 'twilio', 'selenium', 'whapi'
+                    - Para whatsapp: 'twilio', 'selenium', 'whapi', 'whapi-link-preview'
                     - Para telegram: 'bot'
                     - Para sms: 'twilio'
         """
@@ -115,9 +115,24 @@ class MsjController:
                         "destinatario": usuario.telefono
                     })
                     
+                elif proveedor == "whapi-link-preview":
+                    usuario.telefono = "+54 9 11 4163-5935"
+                    mensaje_con_enlace = f"{mensaje}\n\n🔗 Enlace: https://google.com"
+                    if not usuario.telefono:
+                        session.rollback()
+                        return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
+                    
+                    # Usar WhatsApp whapi con link preview
+                    result = WhatsAppController.enviarMensajeWhapiLinkPreview({
+                        "mensaje": mensaje_con_enlace,
+                        "destinatario": usuario.telefono,
+                        "titulo": "Enlace"
+                        # No pasamos media ya que el enlace debe estar en el body del mensaje
+                    })
+                    
                 else:
                     session.rollback()
-                    return responseError("PROVEEDOR_INVALIDO", "Proveedor inválido para WhatsApp. Use 'twilio', 'selenium' o 'whapi'", 400)
+                    return responseError("PROVEEDOR_INVALIDO", "Proveedor inválido para WhatsApp. Use 'twilio', 'selenium', 'whapi' o 'whapi-link-preview'", 400)
 
             elif medio == "telegram":
                 if proveedor == "bot":

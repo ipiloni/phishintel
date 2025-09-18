@@ -3,6 +3,7 @@ import tempfile
 import requests
 import time
 import os
+import re
 
 from flask import jsonify
 from twilio.rest import Client
@@ -529,5 +530,117 @@ class WhatsAppController:
             return responseError("CONNECTION_ERROR", "Error de conexión con whapi.cloud", 503)
         except Exception as e:
             error_msg = f"Error inesperado al enviar mensaje al grupo con whapi.cloud: {str(e)}"
+            log.error(error_msg)
+            return responseError("ERROR_WHAPI", error_msg, 500)
+
+    @staticmethod
+    def enviarMensajeWhapiLinkPreview(data):
+        """
+        Envía un mensaje de WhatsApp con preview de enlace personalizado usando whapi.cloud API.
+        Usa el endpoint /messages/link-preview para crear enlaces clickeables con preview.
+        
+        IMPORTANTE: El mensaje DEBE contener el enlace en el texto para que funcione el preview.
+
+        Args:
+            data (dict): Diccionario con los siguientes campos:
+                - mensaje (str): Mensaje a enviar (DEBE contener el enlace en el texto)
+                - destinatario (str, opcional): Número de teléfono del destinatario.
+                  Si no se proporciona, se usa el número por defecto +54 9 11 4163-5935
+                - titulo (str, opcional): Título del enlace. Por defecto "Enlace"
+                - media (str, opcional): URL de la imagen para el preview. Por defecto None
+
+        Returns:
+            tuple: (response, status_code)
+        """
+        log.info("Se recibió una solicitud para enviar mensaje con link preview via WhatsApp con whapi.cloud")
+
+        # Validar campos obligatorios
+        if not data or "mensaje" not in data:
+            log.warn("Falta el campo obligatorio 'mensaje'")
+            return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'mensaje'", 400)
+
+        mensaje = data["mensaje"]
+        destinatario = data.get("destinatario", "+54 9 11 4163-5935")
+        titulo = data.get("titulo", "Enlace")
+        media = data.get("media")
+
+        # Validar que el mensaje contenga un enlace (requerido para link preview)
+        if not ("http://" in mensaje or "https://" in mensaje):
+            log.warn("El mensaje debe contener un enlace para usar link preview")
+            return responseError("ENLACE_REQUERIDO", "El mensaje debe contener un enlace (http:// o https://) para usar link preview", 400)
+
+        # Formatear el número: solo dígitos, formato internacional sin +
+        destinatario_limpio = ''.join(c for c in destinatario if c.isdigit())
+        if destinatario_limpio.startswith('0'):
+            destinatario_limpio = destinatario_limpio[1:]  # Remover 0 inicial si es local
+        if not destinatario_limpio.startswith('54'):
+            # Asumir que es local argentino y agregar 54 9
+            if len(destinatario_limpio) == 10:  # Ej: 91141635935
+                destinatario_formateado = '549' + destinatario_limpio
+            else:
+                return responseError("NUMERO_INVALIDO", "Formato de número no reconocido", 400)
+        else:
+            destinatario_formateado = destinatario_limpio
+
+        # Validar longitud aproximada (para Argentina: 13 dígitos)
+        if len(destinatario_formateado) != 13 or not destinatario_formateado.startswith('549'):
+            return responseError("NUMERO_INVALIDO", f"Número inválido: {destinatario_formateado}", 400)
+
+        try:
+            # Obtener el token desde las variables de entorno
+            token = get("WHAPI_CLOUD_TOKEN")
+            if not token:
+                log.error("Token de whapi.cloud no configurado")
+                return responseError("TOKEN_NO_CONFIGURADO", "Token de whapi.cloud no configurado", 500)
+
+            # URL de la API de whapi.cloud para link preview
+            url = "https://gate.whapi.cloud/messages/link_preview"
+
+            # Headers para la petición
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            }
+
+            # Datos del mensaje con link preview - parámetros requeridos
+            payload = {
+                "to": destinatario_formateado,
+                "body": mensaje,
+                "title": titulo
+            }
+
+            log.info(f"Enviando mensaje con link preview a {destinatario} (formateado: {destinatario_formateado})")
+            log.info(f"Payload completo: {payload}")
+            log.info(f"URL: {url}")
+            log.info(f"Headers: {headers}")
+
+            # Realizar la petición POST
+            response = requests.post(url, json=payload, headers=headers, timeout=30)
+
+            if response.status_code == 200:
+                response_data = response.json()
+                log.info(f"Mensaje con link preview enviado correctamente. ID: {response_data.get('id', 'N/A')}")
+                return jsonify({
+                    "mensaje": "Mensaje con link preview enviado correctamente via whapi.cloud",
+                    "destinatario": destinatario,
+                    "destinatario_formateado": destinatario_formateado,
+                    "contenido": mensaje,
+                    "titulo": titulo,
+                    "media": media,
+                    "id": response_data.get('id', 'N/A')
+                }), 201
+            else:
+                error_msg = f"Error en whapi.cloud API: {response.status_code} - {response.text}"
+                log.error(error_msg)
+                return responseError("ERROR_API_WHAPI", error_msg, response.status_code)
+
+        except requests.exceptions.Timeout:
+            log.error("Timeout al enviar mensaje con link preview via whapi.cloud")
+            return responseError("TIMEOUT_ERROR", "Timeout al enviar mensaje con link preview via whapi.cloud", 408)
+        except requests.exceptions.ConnectionError:
+            log.error("Error de conexión con whapi.cloud")
+            return responseError("CONNECTION_ERROR", "Error de conexión con whapi.cloud", 503)
+        except Exception as e:
+            error_msg = f"Error inesperado al enviar mensaje con link preview con whapi.cloud: {str(e)}"
             log.error(error_msg)
             return responseError("ERROR_WHAPI", error_msg, 500)
