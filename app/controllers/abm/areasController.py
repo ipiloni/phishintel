@@ -264,6 +264,79 @@ class AreasController:
             session.close()
 
     @staticmethod
+    def obtenerFallasPorCampania(areas=None):
+        from app.backend.models.evento import Evento
+        from app.backend.models.tipoEvento import TipoEvento
+        
+        session = SessionLocal()
+        try:
+            # Tipos de campaña hardcodeados
+            tipos_campania = [TipoEvento.CORREO, TipoEvento.MENSAJE, TipoEvento.LLAMADA, TipoEvento.VIDEOLLAMADA]
+            
+            # Inicializar el diccionario con todos los tipos de campaña
+            campanias_dict = {
+                tipo.value: {
+                    "tipo": tipo.value,
+                    "nombre": tipo.value,
+                    "totalFallas": 0,
+                    "areas": []
+                }
+                for tipo in tipos_campania
+            }
+
+            # Query de fallas por tipo de evento (campaña)
+            query = (
+                session.query(
+                    Evento.tipoEvento,
+                    Area.idArea,
+                    Area.nombreArea,
+                    func.count(UsuarioxEvento.idEvento).label("cantidadFallas")
+                )
+                .join(UsuarioxEvento, UsuarioxEvento.idEvento == Evento.idEvento)
+                .join(Usuario, Usuario.idUsuario == UsuarioxEvento.idUsuario)
+                .join(Area, Area.idArea == Usuario.idArea)
+                .filter(UsuarioxEvento.resultado == ResultadoEvento.FALLA)
+                .filter(Evento.tipoEvento.in_(tipos_campania))
+            )
+            
+            # Aplicar filtro por áreas si se especifica
+            if areas and len(areas) > 0:
+                # Convertir strings a enteros
+                areas_ids = [int(area) for area in areas if area.isdigit()]
+                if areas_ids:
+                    query = query.filter(Area.idArea.in_(areas_ids))
+            
+            resultados = (
+                query.group_by(
+                    Evento.tipoEvento,
+                    Area.idArea,
+                    Area.nombreArea
+                )
+                .all()
+            )
+
+            # Completar métricas con los resultados
+            for r in resultados:
+                campania_info = campanias_dict.get(r.tipoEvento.value)
+                if campania_info:
+                    campania_info["areas"].append({
+                        "idArea": r.idArea,
+                        "nombreArea": r.nombreArea,
+                        "cantidadFallas": int(r.cantidadFallas)
+                    })
+                    campania_info["totalFallas"] += int(r.cantidadFallas)
+
+            # Filtrar solo las campañas que tienen fallas
+            campanias_con_fallas = [campania for campania in campanias_dict.values() if campania["totalFallas"] > 0]
+
+            return jsonify({"campanias": campanias_con_fallas}), 200
+        except Exception as e:
+            session.rollback()
+            return responseError("ERROR", f"No se pudo obtener el resumen de fallas por campaña: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
     def obtenerFallasPorFecha(periodos=None, tipos_evento=None):
         from app.backend.models.evento import Evento
         from app.backend.models.tipoEvento import TipoEvento

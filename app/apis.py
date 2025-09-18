@@ -14,6 +14,7 @@ from app.controllers.mensajes.msjController import MsjController
 from app.controllers.mensajes.telegram import telegram_bot
 from app.controllers.mensajes.whatsapp import WhatsAppController
 from app.controllers.mensajes.sms import SMSController
+from app.controllers.ngrokController import NgrokController
 from app.utils.logger import log
 from flask_cors import CORS
 import os
@@ -366,3 +367,46 @@ def obtenerFallasPorFecha():
         periodos if periodos else None,
         tipos_evento if tipos_evento else None
     )
+
+
+@apis.route("/api/areas/fallas-campania", methods=["GET"])
+def obtenerFallasPorCampania():
+    # Obtener parámetros de filtro por áreas (múltiples)
+    areas_params = request.args.getlist('area')
+    areas = []
+
+    if areas_params:
+        areas = areas_params
+
+    return AreasController.obtenerFallasPorCampania(areas if areas else None)
+
+
+# ------ # NGROK # ------ #
+@apis.route("/api/ngrok/crear-tunel", methods=["POST"])
+def crear_tunel_ngrok():
+    """
+    Crea un túnel temporal de ngrok.
+    
+    Body (JSON):
+        - puerto (int, opcional): Puerto local al que hacer túnel (por defecto 8080)
+    """
+    data = request.get_json() or {}
+    puerto = data.get("puerto", 8080)
+    
+    return NgrokController.crear_tunel_temporal(puerto)
+
+
+@apis.route("/api/ngrok/obtener-url", methods=["GET"])
+def obtener_url_ngrok():
+    """
+    Obtiene la URL del túnel ngrok actualmente activo.
+    """
+    return NgrokController.obtener_url_tunel_actual()
+
+
+@apis.route("/api/ngrok/cerrar-tuneles", methods=["DELETE"])
+def cerrar_tuneles_ngrok():
+    """
+    Cierra todos los túneles ngrok activos.
+    """
+    return NgrokController.cerrar_tuneles()

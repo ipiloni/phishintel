@@ -19,6 +19,7 @@ from selenium.common.exceptions import StaleElementReferenceException, TimeoutEx
 from app.backend.models.error import responseError
 from app.utils.config import get
 from app.utils.logger import log
+from app.controllers.ngrokController import NgrokController
 
 
 class WhatsAppController:
@@ -538,6 +539,7 @@ class WhatsAppController:
         """
         Envía un mensaje de WhatsApp con preview de enlace personalizado usando whapi.cloud API.
         Usa el endpoint /messages/link-preview para crear enlaces clickeables con preview.
+        Crea un túnel ngrok temporal para el enlace.
         
         IMPORTANTE: El mensaje DEBE contener el enlace en el texto para que funcione el preview.
 
@@ -548,6 +550,8 @@ class WhatsAppController:
                   Si no se proporciona, se usa el número por defecto +54 9 11 4163-5935
                 - titulo (str, opcional): Título del enlace. Por defecto "Enlace"
                 - media (str, opcional): URL de la imagen para el preview. Por defecto None
+                - idUsuario (int, opcional): ID del usuario para el enlace
+                - idEvento (int, opcional): ID del evento para el enlace
 
         Returns:
             tuple: (response, status_code)
@@ -563,11 +567,61 @@ class WhatsAppController:
         destinatario = data.get("destinatario", "+54 9 11 4163-5935")
         titulo = data.get("titulo", "Enlace")
         media = data.get("media")
+        id_usuario = data.get("idUsuario")
+        id_evento = data.get("idEvento")
 
-        # Validar que el mensaje contenga un enlace (requerido para link preview)
-        if not ("http://" in mensaje or "https://" in mensaje):
-            log.warn("El mensaje debe contener un enlace para usar link preview")
-            return responseError("ENLACE_REQUERIDO", "El mensaje debe contener un enlace (http:// o https://) para usar link preview", 400)
+        # Crear túnel ngrok temporal si se proporcionan los IDs
+        url_enlace = None
+        if id_usuario and id_evento:
+            log.info("Creando túnel ngrok temporal para el enlace")
+            ngrok_result = NgrokController.crear_tunel_temporal(8080)
+            
+            if isinstance(ngrok_result, tuple) and len(ngrok_result) == 2:
+                response, status_code = ngrok_result
+                if status_code == 201:
+                    # Extraer la URL del túnel de la respuesta
+                    if hasattr(response, 'get_json'):
+                        response_data = response.get_json()
+                        url_publica = response_data.get('url_publica')
+                        if url_publica:
+                            # Construir el enlace completo con los parámetros
+                            url_enlace = f"{url_publica}/caiste?idUsuario={id_usuario}&idEvento={id_evento}"
+                            log.info(f"Enlace ngrok creado: {url_enlace}")
+                        else:
+                            log.error("No se pudo obtener la URL pública del túnel ngrok")
+                            return responseError("ERROR_NGROK_URL", "No se pudo obtener la URL pública del túnel ngrok", 500)
+                    else:
+                        log.error("Respuesta de ngrok no válida")
+                        return responseError("ERROR_NGROK_RESPONSE", "Respuesta de ngrok no válida", 500)
+                else:
+                    log.error(f"Error al crear túnel ngrok: {status_code}")
+                    return ngrok_result
+            else:
+                log.error("Error inesperado al crear túnel ngrok")
+                return responseError("ERROR_NGROK", "Error inesperado al crear túnel ngrok", 500)
+        else:
+            # Si no se proporcionan IDs, usar el enlace original del mensaje
+            if "http://" in mensaje or "https://" in mensaje:
+                # Extraer el enlace del mensaje
+                import re
+                url_match = re.search(r'https?://[^\s]+', mensaje)
+                if url_match:
+                    url_enlace = url_match.group()
+                else:
+                    log.warn("No se pudo extraer enlace del mensaje")
+                    return responseError("ENLACE_NO_EXTRAIBLE", "No se pudo extraer enlace del mensaje", 400)
+            else:
+                log.warn("El mensaje debe contener un enlace para usar link preview")
+                return responseError("ENLACE_REQUERIDO", "El mensaje debe contener un enlace (http:// o https://) para usar link preview", 400)
+
+        # Reemplazar el enlace en el mensaje con el enlace ngrok si existe
+        if url_enlace:
+            # Reemplazar cualquier enlace en el mensaje con el enlace ngrok
+            import re
+            mensaje_con_ngrok = re.sub(r'https?://[^\s]+', url_enlace, mensaje)
+            log.info(f"Mensaje actualizado con enlace ngrok: {mensaje_con_ngrok}")
+        else:
+            mensaje_con_ngrok = mensaje
 
         # Formatear el número: solo dígitos, formato internacional sin +
         destinatario_limpio = ''.join(c for c in destinatario if c.isdigit())
@@ -605,7 +659,7 @@ class WhatsAppController:
             # Datos del mensaje con link preview - parámetros requeridos
             payload = {
                 "to": destinatario_formateado,
-                "body": mensaje,
+                "body": mensaje_con_ngrok,
                 "title": titulo
             }
 
@@ -624,9 +678,10 @@ class WhatsAppController:
                     "mensaje": "Mensaje con link preview enviado correctamente via whapi.cloud",
                     "destinatario": destinatario,
                     "destinatario_formateado": destinatario_formateado,
-                    "contenido": mensaje,
+                    "contenido": mensaje_con_ngrok,
                     "titulo": titulo,
                     "media": media,
+                    "url_ngrok": url_enlace,
                     "id": response_data.get('id', 'N/A')
                 }), 201
             else:

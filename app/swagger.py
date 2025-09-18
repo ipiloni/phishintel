@@ -17,7 +17,8 @@ def openapi_spec():
             {"name": "🏢 Áreas", "description": "Gestión de áreas"},
             {"name": "📅 Eventos", "description": "Gestión de eventos"},
             {"name": "📧 Emails", "description": "Envío de emails y notificaciones"},
-            {"name": "💬 Mensajes", "description": "Envío de mensajes WhatsApp y SMS"}
+            {"name": "💬 Mensajes", "description": "Envío de mensajes WhatsApp y SMS"},
+            {"name": "🌐 Ngrok", "description": "Gestión de túneles ngrok temporales"}
         ],
         "paths": {
             "/api/usuarios": {
@@ -857,6 +858,94 @@ def openapi_spec():
                         "500": {"description": "Error al obtener el estado"}
                     }
                 }
+            },
+            "/api/ngrok/crear-tunel": {
+                "post": {
+                    "summary": "🌐 Crear túnel ngrok temporal",
+                    "description": "Crea un túnel temporal de ngrok para exponer el servidor local. Requiere que ngrok esté instalado y configurado con el token correspondiente.",
+                    "tags": ["🌐 Ngrok"],
+                    "requestBody": {
+                        "required": False,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/NgrokCrearTunel"},
+                                "example": {
+                                    "puerto": 8080
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {
+                            "description": "Túnel ngrok creado exitosamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "url_publica": {"type": "string", "description": "URL pública del túnel ngrok"},
+                                            "puerto_local": {"type": "integer", "description": "Puerto local expuesto"},
+                                            "proceso_id": {"type": "integer", "description": "ID del proceso ngrok"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "404": {"description": "ngrok no está instalado o no está en el PATH"},
+                        "500": {"description": "Error al configurar ngrok, token no configurado o error inesperado"}
+                    }
+                }
+            },
+            "/api/ngrok/obtener-url": {
+                "get": {
+                    "summary": "🔍 Obtener URL del túnel ngrok activo",
+                    "description": "Obtiene la URL del túnel ngrok actualmente activo. Consulta la API local de ngrok en el puerto 4040.",
+                    "tags": ["🌐 Ngrok"],
+                    "responses": {
+                        "200": {
+                            "description": "URL del túnel ngrok obtenida correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "url_publica": {"type": "string", "description": "URL pública del túnel ngrok"},
+                                            "estado": {"type": "string", "description": "Estado del túnel"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "404": {"description": "No hay túneles ngrok activos"},
+                        "500": {"description": "Error al consultar la API de ngrok"}
+                    }
+                }
+            },
+            "/api/ngrok/cerrar-tuneles": {
+                "delete": {
+                    "summary": "🛑 Cerrar todos los túneles ngrok",
+                    "description": "Cierra todos los túneles ngrok activos. Útil para limpiar recursos y liberar puertos.",
+                    "tags": ["🌐 Ngrok"],
+                    "responses": {
+                        "200": {
+                            "description": "Túneles ngrok cerrados exitosamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "tuneles_cerrados": {"type": "integer", "description": "Número de túneles cerrados"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {"description": "Error al consultar o cerrar túneles ngrok"}
+                    }
+                }
             }
         },
         "components": {
@@ -1095,6 +1184,12 @@ def openapi_spec():
                         "proveedor": {"type": "string", "description": "Proveedor específico dentro del medio. Para telegram: 'bot'. Para whatsapp: 'twilio', 'selenium', 'whapi', 'whapi-link-preview'. Para sms: 'twilio'"},
                         "idUsuario": {"type": "integer", "description": "ID del usuario al que se enviará el mensaje"},
                         "mensaje": {"type": "string", "description": "Contenido del mensaje de phishing a enviar"}
+                    }
+                },
+                "NgrokCrearTunel": {
+                    "type": "object",
+                    "properties": {
+                        "puerto": {"type": "integer", "description": "Puerto local al que hacer túnel (por defecto 8080)", "default": 8080, "minimum": 1, "maximum": 65535}
                     }
                 }
             }

@@ -250,67 +250,32 @@
     <section class="section">
       <div class="container" data-aos="fade-up">
         <div class="mb-3">
-          <ul class="nav nav-tabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="tab-area" data-bs-toggle="tab" data-bs-target="#panel-area" type="button" role="tab">
-                <i class="bi bi-bar-chart"></i> Fallas por Área
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="tab-fecha" data-bs-toggle="tab" data-bs-target="#panel-fecha" type="button" role="tab">
-                <i class="bi bi-calendar3"></i> Fallas por Fecha
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="tab-campania" data-bs-toggle="tab" data-bs-target="#panel-campania" type="button" role="tab">
-                <i class="bi bi-graph-up"></i> Rendimiento por Campaña
-              </button>
-            </li>
-          </ul>
+           <ul class="nav nav-tabs" role="tablist">
+             <li class="nav-item" role="presentation">
+               <button class="nav-link active" id="tab-fecha" data-bs-toggle="tab" data-bs-target="#panel-fecha" type="button" role="tab">
+                 <i class="bi bi-calendar3"></i> Fallas por Fecha
+               </button>
+             </li>
+             <li class="nav-item" role="presentation">
+               <button class="nav-link" id="tab-area" data-bs-toggle="tab" data-bs-target="#panel-area" type="button" role="tab">
+                 <i class="bi bi-pie-chart"></i> Fallas por Área
+               </button>
+             </li>
+             <li class="nav-item" role="presentation">
+               <button class="nav-link" id="tab-campania" data-bs-toggle="tab" data-bs-target="#panel-campania" type="button" role="tab">
+                 <i class="bi bi-graph-up"></i> Fallas por Tipo de Campaña
+               </button>
+             </li>
+             <li class="nav-item" role="presentation">
+               <button class="nav-link" id="tab-kpis" data-bs-toggle="tab" data-bs-target="#panel-kpis" type="button" role="tab">
+                 <i class="bi bi-speedometer2"></i> KPIs
+               </button>
+             </li>
+           </ul>
         </div>
 
         <div class="tab-content">
-          <div class="tab-pane fade show active" id="panel-area" role="tabpanel" aria-labelledby="tab-area">
-            <div class="row g-4">
-              <div class="col-lg-9">
-                <div class="card p-3 bg-dark text-white">
-                  <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">Fallas por Área</h5>
-                    <div class="filters-container">
-                      <div class="filter-group">
-                        <span class="filter-label">
-                          <i class="bi bi-funnel filter-icon"></i>
-                          Tipo
-                        </span>
-                        <div style="position: relative; width: 220px;">
-                          <select id="filtroTipo" class="form-select form-select-sm" style="width: 100%;" multiple>
-                            <option value="CORREO">📧 Correo</option>
-                            <option value="MENSAJE">💬 Mensaje</option>
-                            <option value="LLAMADA">📞 Llamada</option>
-                            <option value="VIDEOLLAMADA">📹 Videollamada</option>
-                          </select>
-                          <div class="filter-placeholder" id="filtroTipoPlaceholder">Seleccionar tipos...</div>
-                          <i class="bi bi-chevron-down filter-dropdown-icon"></i>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div id="chartFallasPorArea"></div>
-                </div>
-              </div>
-              <div class="col-lg-3">
-                <div class="card p-3 h-100 d-flex align-items-center justify-content-center bg-dark text-white">
-                  <div class="text-center">
-                    <div class="mb-2"><i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i></div>
-                    <h5 class="mb-1">Total de Fallas</h5>
-                    <div id="totalFallas" class="display-5">0</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="tab-pane fade" id="panel-fecha" role="tabpanel" aria-labelledby="tab-fecha">
+          <div class="tab-pane fade show active" id="panel-fecha" role="tabpanel" aria-labelledby="tab-fecha">
             <div class="row g-4">
               <div class="col-lg-9">
                 <div class="card p-3 bg-dark text-white">
@@ -362,10 +327,141 @@
             </div>
           </div>
 
+          <div class="tab-pane fade" id="panel-area" role="tabpanel" aria-labelledby="tab-area">
+            <div class="row g-4">
+              <div class="col-lg-9">
+                <div class="card p-3 bg-dark text-white">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Fallas por Área</h5>
+                    <div class="filters-container">
+                      <div class="filter-group">
+                        <span class="filter-label">
+                          <i class="bi bi-funnel filter-icon"></i>
+                          Tipo
+                        </span>
+                        <div style="position: relative; width: 220px;">
+                          <select id="filtroTipo" class="form-select form-select-sm" style="width: 100%;" multiple>
+                            <option value="CORREO">📧 Correo</option>
+                            <option value="MENSAJE">💬 Mensaje</option>
+                            <option value="LLAMADA">📞 Llamada</option>
+                            <option value="VIDEOLLAMADA">📹 Videollamada</option>
+                          </select>
+                          <div class="filter-placeholder" id="filtroTipoPlaceholder">Seleccionar tipos...</div>
+                          <i class="bi bi-chevron-down filter-dropdown-icon"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="chartFallasPorArea"></div>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="card p-3 h-100 d-flex align-items-center justify-content-center bg-dark text-white">
+                  <div class="text-center">
+                    <div class="mb-2"><i class="bi bi-exclamation-triangle" style="font-size: 2rem;"></i></div>
+                    <h5 class="mb-1">Total de Fallas</h5>
+                    <div id="totalFallas" class="display-5">0</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="tab-pane fade" id="panel-campania" role="tabpanel" aria-labelledby="tab-campania">
-            <div class="card p-4 bg-dark text-white">
-              <h5 class="mb-2">Rendimiento por Campaña</h5>
-              <p class="mb-0 text-muted">Próximamente</p>
+            <div class="row g-4">
+              <div class="col-lg-9">
+                <div class="card p-3 bg-dark text-white">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Fallas por Tipo de Campaña</h5>
+                    <div class="filters-container">
+                      <div class="filter-group">
+                        <span class="filter-label">
+                          <i class="bi bi-geo-alt filter-icon"></i>
+                          Área
+                        </span>
+                        <div style="position: relative; width: 220px;">
+                          <select id="filtroAreaCampania" class="form-select form-select-sm" style="width: 100%;" multiple>
+                          </select>
+                          <div class="filter-placeholder" id="filtroAreaCampaniaPlaceholder">Seleccionar áreas...</div>
+                          <i class="bi bi-chevron-down filter-dropdown-icon"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="chartFallasPorCampania"></div>
+                </div>
+              </div>
+              <div class="col-lg-3">
+                <div class="card p-3 h-100 d-flex align-items-center justify-content-center bg-dark text-white">
+                  <div class="text-center">
+                    <div class="mb-2"><i class="bi bi-graph-up" style="font-size: 2rem;"></i></div>
+                    <h5 class="mb-1">Total de Fallas</h5>
+                    <div id="totalFallasCampania" class="display-5">0</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="panel-kpis" role="tabpanel" aria-labelledby="tab-kpis">
+            <div class="row g-4">
+              <div class="col-12">
+                <div class="card p-4 bg-dark text-white">
+                  <div class="text-center">
+                    <div class="mb-4">
+                      <i class="bi bi-speedometer2" style="font-size: 4rem; color: #da02e5;"></i>
+                    </div>
+                    <h3 class="mb-3">KPIs en Construcción</h3>
+                    <p class="mb-4 text-muted fs-5">
+                      Estamos trabajando en una sección completa de KPIs que incluirá:
+                    </p>
+                    <div class="row g-3">
+                      <div class="col-md-6 col-lg-3">
+                        <div class="card bg-secondary p-3 h-100">
+                          <div class="text-center">
+                            <i class="bi bi-people-fill mb-2" style="font-size: 2rem; color: #00d4aa;"></i>
+                            <h6>Efectividad por Usuario</h6>
+                            <small class="text-muted">Métricas individuales de rendimiento</small>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-lg-3">
+                        <div class="card bg-secondary p-3 h-100">
+                          <div class="text-center">
+                            <i class="bi bi-clock-history mb-2" style="font-size: 2rem; color: #ff6b6b;"></i>
+                            <h6>Tiempo de Respuesta</h6>
+                            <small class="text-muted">Análisis de tiempos de reacción</small>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-lg-3">
+                        <div class="card bg-secondary p-3 h-100">
+                          <div class="text-center">
+                            <i class="bi bi-trophy-fill mb-2" style="font-size: 2rem; color: #feca57;"></i>
+                            <h6>Rankings y Comparativas</h6>
+                            <small class="text-muted">Comparaciones entre áreas y usuarios</small>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-lg-3">
+                        <div class="card bg-secondary p-3 h-100">
+                          <div class="text-center">
+                            <i class="bi bi-graph-up-arrow mb-2" style="font-size: 2rem; color: #4ecdc4;"></i>
+                            <h6>Tendencias y Proyecciones</h6>
+                            <small class="text-muted">Análisis predictivo y tendencias</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-4">
+                      <p class="text-muted">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Esta funcionalidad estará disponible próximamente
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -400,40 +496,102 @@
         const valores = areas.map(a => a.totalFallas);
         const total = valores.reduce((acc, v) => acc + v, 0);
         
-        // Calcular porcentajes
-        const valoresPorcentuales = valores.map(valor => 
-          total > 0 ? ((valor / total) * 100).toFixed(1) : 0
-        );
+        // Calcular porcentajes y crear datos en formato correcto
+        const datosTorta = areas.map((area, index) => {
+          const porcentaje = total > 0 ? parseFloat(((area.totalFallas / total) * 100).toFixed(1)) : 0;
+          return {
+            name: area.nombreArea,
+            value: porcentaje,
+            cantidad: area.totalFallas
+          };
+        });
         
         document.getElementById('totalFallas').textContent = total;
 
         const opciones = {
-          chart: { type: 'bar', height: 420, toolbar: { show: false }, foreColor: '#f1f1f1' },
-          theme: { mode: 'dark' },
-          grid: { borderColor: '#444' },
-          plotOptions: { bar: { horizontal: false, columnWidth: '45%', borderRadius: 6 } },
-          dataLabels: { enabled: true, style: { colors: ['#ffffff'] }, formatter: (val) => `${val}%` },
-          xaxis: { categories: labels, labels: { style: { colors: '#ffffff' } } },
-          yaxis: { 
-            title: { text: 'Porcentaje de fallas', style: { color: '#ffffff', fontSize: '16px' } }, 
-            labels: { 
-              style: { colors: '#ffffff' },
-              formatter: (val) => `${val}%`
-            },
-            min: 0,
-            max: 100
+          chart: { 
+            type: 'pie', 
+            height: 420, 
+            toolbar: { show: false }, 
+            foreColor: '#f1f1f1' 
           },
-           series: [{ name: 'Fallas (%)', data: valoresPorcentuales }],
-           colors: ['#da02e5'],
-          tooltip: { 
-            theme: 'dark', 
-            y: { 
-              formatter: (val, { seriesIndex, dataPointIndex }) => {
-                const porcentaje = val;
-                const cantidad = valores[dataPointIndex];
-                return `${porcentaje}% (${cantidad} fallas)`;
+          theme: { mode: 'dark' },
+          plotOptions: { 
+            pie: { 
+              expandOnClick: true,
+              donut: {
+                size: '60%',
+                labels: {
+                  show: true,
+                  name: {
+                    show: true,
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: '#f1f1f1'
+                  },
+                  value: {
+                    show: true,
+                    fontSize: '14px',
+                    fontWeight: 400,
+                    color: '#f1f1f1',
+                    formatter: function (val) {
+                      return val + '%'
+                    }
+                  },
+                  total: {
+                    show: false
+                  }
+                }
               }
             } 
+          },
+          dataLabels: { 
+            enabled: true, 
+            style: { 
+              colors: ['#ffffff'],
+              fontSize: '12px',
+              fontWeight: 600
+            }, 
+            formatter: (val, opts) => {
+              const dataPoint = datosTorta[opts.seriesIndex];
+              return `${dataPoint.name}\n${val}% (${dataPoint.cantidad})`;
+            }
+          },
+          series: datosTorta.map(item => item.value),
+          labels: datosTorta.map(item => item.name),
+          colors: ['#da02e5', '#00d4aa', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'],
+          tooltip: { 
+            theme: 'dark',
+            style: {
+              fontSize: '14px',
+              fontFamily: 'Arial, sans-serif'
+            },
+            fillSeriesColor: false,
+            marker: {
+              show: true
+            },
+            y: { 
+              formatter: (val, { seriesIndex, dataPointIndex }) => {
+                const dataPoint = datosTorta[dataPointIndex];
+                return `${dataPoint.name}: ${val}% (${dataPoint.cantidad} fallas)`;
+              }
+            } 
+          },
+          legend: {
+            position: 'bottom',
+            horizontalAlign: 'center',
+            fontSize: '14px',
+            fontFamily: 'Helvetica, Arial',
+            fontWeight: 400,
+            labels: {
+              colors: '#f1f1f1'
+            },
+            markers: {
+              width: 12,
+              height: 12,
+              strokeWidth: 0,
+              radius: 2
+            }
           }
         };
 
@@ -516,8 +674,11 @@
       }
     });
 
-    // Variables para el gráfico de fecha
-    let chartFechaInstance = null;
+     // Variables para el gráfico de fecha
+     let chartFechaInstance = null;
+     
+     // Variables para el gráfico de campaña
+     let chartCampaniaInstance = null;
 
     // Función para cargar fallas por fecha
     async function cargarFallasPorFecha(periodos = [], tiposEvento = []) {
@@ -606,10 +767,131 @@
           actualizarFiltros(data.filtros);
         }
 
-      } catch (e) {
-        console.error('Error cargando fallas por fecha:', e);
-      }
-    }
+       } catch (e) {
+         console.error('Error cargando fallas por fecha:', e);
+       }
+     }
+
+     // Función para cargar fallas por tipo de campaña
+     async function cargarFallasPorCampania(areas = []) {
+       try {
+         let url = '/api/areas/fallas-campania';
+         if (areas.length > 0) {
+           const params = new URLSearchParams();
+           areas.forEach(area => params.append('area', area));
+           url += `?${params.toString()}`;
+         }
+         
+         const resp = await fetch(url);
+         if (!resp.ok) throw new Error('Error al obtener datos');
+         const data = await resp.json();
+
+         const campanias = data.campanias || [];
+         const total = campanias.reduce((acc, campania) => acc + campania.totalFallas, 0);
+         
+         document.getElementById('totalFallasCampania').textContent = total;
+
+         // Crear datos para el gráfico de torta
+         const labels = campanias.map(campania => {
+           const nombres = {
+             'CORREO': '📧 Correo',
+             'MENSAJE': '💬 Mensaje', 
+             'LLAMADA': '📞 Llamada',
+             'VIDEOLLAMADA': '📹 Videollamada'
+           };
+           return nombres[campania.tipo] || campania.tipo;
+         });
+         
+         const valores = campanias.map(campania => campania.totalFallas);
+
+         const opciones = {
+           chart: { 
+             type: 'bar', 
+             height: 420, 
+             toolbar: { show: false }, 
+             foreColor: '#f1f1f1' 
+           },
+           theme: { mode: 'dark' },
+           grid: { borderColor: '#444' },
+           plotOptions: { 
+             bar: { 
+               horizontal: false, 
+               columnWidth: '60%', 
+               borderRadius: 6 
+             } 
+           },
+           dataLabels: { 
+             enabled: true, 
+             style: { colors: ['#ffffff'] },
+             formatter: (val) => `${val}`
+           },
+           xaxis: { 
+             categories: labels, 
+             labels: { 
+               style: { colors: '#ffffff' },
+               rotate: -45
+             }
+           },
+           yaxis: { 
+             title: { 
+               text: 'Cantidad de fallas', 
+               style: { color: '#ffffff', fontSize: '16px' } 
+             }, 
+             labels: { style: { colors: '#ffffff' } },
+             min: 0
+           },
+           series: [{ name: 'Fallas', data: valores }],
+           colors: ['#da02e5'],
+           tooltip: { 
+             theme: 'dark', 
+             y: { 
+               formatter: (val) => `${val} fallas`
+             } 
+           }
+         };
+
+         // Destruir gráfico anterior si existe
+         if (chartCampaniaInstance) {
+           chartCampaniaInstance.destroy();
+         }
+         
+         chartCampaniaInstance = new ApexCharts(document.querySelector('#chartFallasPorCampania'), opciones);
+         chartCampaniaInstance.render();
+
+         // Actualizar opciones de filtros de área si es la primera carga
+         if (campanias.length > 0 && document.getElementById('filtroAreaCampania').children.length === 0) {
+           // Obtener todas las áreas únicas de las campañas
+           const todasLasAreas = new Set();
+           campanias.forEach(campania => {
+             campania.areas.forEach(area => {
+               todasLasAreas.add(JSON.stringify({idArea: area.idArea, nombreArea: area.nombreArea}));
+             });
+           });
+           const areasUnicas = Array.from(todasLasAreas).map(areaStr => JSON.parse(areaStr));
+           actualizarFiltrosArea(areasUnicas);
+         }
+
+       } catch (e) {
+         console.error('Error cargando fallas por campaña:', e);
+       }
+     }
+
+     // Función para actualizar las opciones de filtros de área
+     function actualizarFiltrosArea(areas) {
+       const selectArea = document.getElementById('filtroAreaCampania');
+       
+       // Limpiar opciones existentes
+       selectArea.innerHTML = '';
+       
+       // Agregar áreas
+       areas.forEach(area => {
+         const option = document.createElement('option');
+         option.value = area.idArea.toString();
+         option.textContent = `🏢 ${area.nombreArea}`;
+         option.style.fontSize = '0.9rem';
+         selectArea.appendChild(option);
+       });
+     }
 
     // Función para actualizar las opciones de filtros jerárquicos
     function actualizarFiltros(filtros) {
@@ -739,11 +1021,50 @@
       }
     });
 
-    // Cargar datos iniciales
-    document.addEventListener('DOMContentLoaded', () => {
-      cargarFallasPorArea();
-      cargarFallasPorFecha(); // Cargar también el reporte por fecha
-    });
+     // Event listeners para filtros de campaña
+     document.getElementById('filtroAreaCampania').addEventListener('change', function() {
+       const areas = Array.from(this.selectedOptions).map(option => option.value);
+       actualizarPlaceholder('filtroAreaCampania', 'filtroAreaCampaniaPlaceholder');
+       cargarFallasPorCampania(areas);
+     });
+
+     // Event listeners para ocultar/mostrar placeholder - Filtro Área Campaña
+     document.getElementById('filtroAreaCampania').addEventListener('focus', function() {
+       document.getElementById('filtroAreaCampaniaPlaceholder').style.display = 'none';
+     });
+
+     document.getElementById('filtroAreaCampania').addEventListener('blur', function() {
+       setTimeout(() => {
+         actualizarPlaceholder('filtroAreaCampania', 'filtroAreaCampaniaPlaceholder');
+       }, 100);
+     });
+
+     // Event listener para manejar clics en opciones (deselección sin Ctrl) - Área Campaña
+     document.getElementById('filtroAreaCampania').addEventListener('mousedown', function(e) {
+       // Ocultar placeholder inmediatamente
+       document.getElementById('filtroAreaCampaniaPlaceholder').style.display = 'none';
+       
+       // Solo permitir deselección sin Ctrl si la opción ya está seleccionada
+       if (e.target.tagName === 'OPTION' && e.target.selected) {
+         e.preventDefault();
+         e.target.selected = false;
+         
+         // Actualizar placeholder después de un pequeño delay
+         setTimeout(() => {
+           actualizarPlaceholder('filtroAreaCampania', 'filtroAreaCampaniaPlaceholder');
+         }, 50);
+         
+         // Disparar evento change manualmente
+         this.dispatchEvent(new Event('change'));
+       }
+     });
+
+     // Cargar datos iniciales
+     document.addEventListener('DOMContentLoaded', () => {
+       cargarFallasPorFecha(); // Cargar primero el reporte por fecha
+       cargarFallasPorArea(); // Cargar también el reporte por área
+       cargarFallasPorCampania(); // Cargar también el reporte por campaña
+     });
   </script>
 
 </body>

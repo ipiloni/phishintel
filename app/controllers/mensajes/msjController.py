@@ -118,7 +118,7 @@ class MsjController:
                     
                 elif proveedor == "whapi-link-preview":
                     usuario.telefono = "+54 9 11 4163-5935"
-                    mensaje_con_enlace = f"{mensaje}\n\n🔗 Enlace: https://google.com"
+                    mensaje_con_enlace = f"{mensaje}\n\n🔗 Enlace: http://localhost:8080/caiste?idUsuario={id_usuario}&idEvento={evento.idEvento}"
                     if not usuario.telefono:
                         session.rollback()
                         return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
@@ -127,7 +127,9 @@ class MsjController:
                     result = WhatsAppController.enviarMensajeWhapiLinkPreview({
                         "mensaje": mensaje_con_enlace,
                         "destinatario": usuario.telefono,
-                        "titulo": "Enlace"
+                        "titulo": "Enlace",
+                        "idUsuario": id_usuario,
+                        "idEvento": evento.idEvento
                         # No pasamos media ya que el enlace debe estar en el body del mensaje
                     })
                     
