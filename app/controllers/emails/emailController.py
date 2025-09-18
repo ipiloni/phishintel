@@ -11,7 +11,7 @@ from app.backend.models.usuarioxevento import UsuarioxEvento
 from app.config.db_config import SessionLocal
 from app.backend.apis.twilio.sendgrid import enviarMail as enviarMailTwilio, enviarNotificacionEmail
 from app.backend.apis.smtp.smtpconnection import SMTPConnection
-from app.aiController import AIController
+from app.controllers.aiController import AIController
 from app.utils.logger import log
 
 class EmailController:

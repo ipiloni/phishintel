@@ -2,7 +2,7 @@ from flask import request, Blueprint, send_file, jsonify
 
 from app.backend.models.error import responseError
 from app.controllers.abm.areasController import AreasController
-from app.aiController import AIController
+from app.controllers.aiController import AIController
 from app.controllers.geminiController import GeminiController
 from app.controllers.llamadas.elevenLabsController import ElevenLabsController
 from app.controllers.emails.emailController import EmailController
