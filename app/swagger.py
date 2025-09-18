@@ -18,6 +18,7 @@ def openapi_spec():
             {"name": "📅 Eventos", "description": "Gestión de eventos"},
             {"name": "📧 Emails", "description": "Envío de emails y notificaciones"},
             {"name": "💬 Mensajes", "description": "Envío de mensajes WhatsApp y SMS"},
+            {"name": "🤖 Telegram Bot", "description": "Gestión del bot de Telegram"},
             {"name": "🌐 Ngrok", "description": "Gestión de túneles ngrok temporales"}
         ],
         "paths": {
@@ -777,7 +778,7 @@ def openapi_spec():
                 "post": {
                     "summary": "🤖 Iniciar Bot de Telegram",
                     "description": "Inicia el bot de Telegram para recibir comandos /start de usuarios y registrar sus chat_ids. El bot se ejecuta en un hilo separado y puede recibir múltiples usuarios simultáneamente.",
-                    "tags": ["💬 Mensajes"],
+                    "tags": ["🤖 Telegram Bot"],
                     "responses": {
                         "200": {
                             "description": "Bot iniciado correctamente",
@@ -802,7 +803,7 @@ def openapi_spec():
                 "post": {
                     "summary": "🛑 Detener Bot de Telegram",
                     "description": "Detiene el bot de Telegram. Los usuarios registrados permanecen en memoria hasta que se reinicie el servidor.",
-                    "tags": ["💬 Mensajes"],
+                    "tags": ["🤖 Telegram Bot"],
                     "responses": {
                         "200": {
                             "description": "Bot detenido correctamente",
@@ -826,7 +827,7 @@ def openapi_spec():
                 "get": {
                     "summary": "📊 Estado del Bot de Telegram",
                     "description": "Obtiene el estado actual del bot de Telegram y la lista de usuarios registrados con sus chat_ids.",
-                    "tags": ["💬 Mensajes"],
+                    "tags": ["🤖 Telegram Bot"],
                     "responses": {
                         "200": {
                             "description": "Estado del bot obtenido correctamente",
