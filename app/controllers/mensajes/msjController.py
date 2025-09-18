@@ -29,20 +29,20 @@ class MsjController:
         
         Args:
             data (dict): Diccionario con los siguientes campos:
-                - proveedor (str): Proveedor a usar ('whatsapp', 'telegram', 'sms')
+                - medio (str): Medio de comunicación ('whatsapp', 'telegram', 'sms')
                 - idUsuario (int): ID del usuario al que enviar el mensaje
                 - mensaje (str): Contenido del mensaje
-                - proveedor_especifico (str, opcional): Proveedor específico dentro del medio
+                - proveedor (str, opcional): Proveedor específico dentro del medio
                     - Para whatsapp: 'twilio', 'selenium', 'whapi'
                     - Para telegram: 'bot'
                     - Para sms: 'twilio'
         """
-        if not data or "proveedor" not in data or "idUsuario" not in data or "mensaje" not in data:
+        if not data or "medio" not in data or "idUsuario" not in data or "mensaje" not in data:
             return responseError("CAMPOS_OBLIGATORIOS",
-                                 "Faltan campos obligatorios como 'proveedor', 'idUsuario' o 'mensaje'", 400)
+                                 "Faltan campos obligatorios como 'medio', 'idUsuario' o 'mensaje'", 400)
 
-        proveedor = data["proveedor"]
-        proveedor_especifico = data.get("proveedor_especifico", "")
+        medio = data["medio"]
+        proveedor = data.get("proveedor", "")
         id_usuario = data["idUsuario"]
         mensaje = data["mensaje"]
 
@@ -79,9 +79,9 @@ class MsjController:
             mensaje_con_enlace = f"{mensaje}\n\n🔗 Enlace: {link_caiste}"
 
 
-            # Enviar mensaje según el proveedor
-            if proveedor == "whatsapp":
-                if proveedor_especifico == "twilio":
+            # Enviar mensaje según el medio
+            if medio == "whatsapp":
+                if proveedor == "twilio":
                     if not usuario.telefono:
                         session.rollback()
                         return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
@@ -92,7 +92,7 @@ class MsjController:
                         "destinatario": usuario.telefono
                     })
                     
-                elif proveedor_especifico == "selenium":
+                elif proveedor == "selenium":
                     if not usuario.telefono:
                         session.rollback()
                         return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
@@ -103,7 +103,7 @@ class MsjController:
                         "destinatario": usuario.telefono
                     })
                     
-                elif proveedor_especifico == "whapi":
+                elif proveedor == "whapi":
                     usuario.telefono = "+54 9 11 4163-5935"
                     if not usuario.telefono:
                         session.rollback()
@@ -117,10 +117,10 @@ class MsjController:
                     
                 else:
                     session.rollback()
-                    return responseError("PROVEEDOR_INVALIDO", "Proveedor específico inválido para WhatsApp. Use 'twilio', 'selenium' o 'whapi'", 400)
+                    return responseError("PROVEEDOR_INVALIDO", "Proveedor inválido para WhatsApp. Use 'twilio', 'selenium' o 'whapi'", 400)
 
-            elif proveedor == "telegram":
-                if proveedor_especifico == "bot":
+            elif medio == "telegram":
+                if proveedor == "bot":
                     # Usar Telegram Bot
                     # Intentar obtener chat_id del bot, si no hay usuarios registrados usar el hardcodeado
                     user_chat_ids = telegram_bot.get_user_chat_ids()
@@ -143,10 +143,10 @@ class MsjController:
                     
                 else:
                     session.rollback()
-                    return responseError("PROVEEDOR_INVALIDO", "Proveedor específico inválido para Telegram. Use 'bot'", 400)
+                    return responseError("PROVEEDOR_INVALIDO", "Proveedor inválido para Telegram. Use 'bot'", 400)
 
-            elif proveedor == "sms":
-                if proveedor_especifico == "twilio":
+            elif medio == "sms":
+                if proveedor == "twilio":
                     if not usuario.telefono:
                         session.rollback()
                         return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
@@ -159,11 +159,11 @@ class MsjController:
                     
                 else:
                     session.rollback()
-                    return responseError("PROVEEDOR_INVALIDO", "Proveedor específico inválido para SMS. Use 'twilio'", 400)
+                    return responseError("PROVEEDOR_INVALIDO", "Proveedor inválido para SMS. Use 'twilio'", 400)
 
             else:
                 session.rollback()
-                return responseError("PROVEEDOR_INVALIDO", "Proveedor no reconocido. Use 'whatsapp', 'telegram' o 'sms'", 400)
+                return responseError("MEDIO_INVALIDO", "Medio no reconocido. Use 'whatsapp', 'telegram' o 'sms'", 400)
 
             # Verificar si el envío fue exitoso
             if isinstance(result, tuple) and len(result) == 2:

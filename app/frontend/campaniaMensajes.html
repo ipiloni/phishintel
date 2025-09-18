@@ -116,23 +116,64 @@
               </div>
             </div>
 
-            <!-- Selector de Proveedor -->
+            <!-- Selector de Medio -->
             <div class="mb-3">
-              <label class="form-label">Método de Envío</label>
+              <label class="form-label">Medio de Comunicación</label>
 
               <div class="form-check">
-                <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="whapi" value="whapi" checked>
-                <label class="form-check-label" for="whapi">WhatsApp (whapi.cloud)</label>
+                <input class="form-check-input custom-radio" type="radio" v-model="medio" id="telegram" value="telegram" checked>
+                <label class="form-check-label" for="telegram">📱 Telegram</label>
               </div>
 
               <div class="form-check">
-                <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="twilio" value="twilio">
-                <label class="form-check-label" for="twilio">SMS (Twilio)</label>
+                <input class="form-check-input custom-radio" type="radio" v-model="medio" id="whatsapp" value="whatsapp">
+                <label class="form-check-label" for="whatsapp">💬 WhatsApp</label>
               </div>
 
               <div class="form-check">
-                <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="telegram" value="telegram">
-                <label class="form-check-label" for="telegram">Telegram Bot</label>
+                <input class="form-check-input custom-radio" type="radio" v-model="medio" id="sms" value="sms">
+                <label class="form-check-label" for="sms">📱 SMS</label>
+              </div>
+            </div>
+
+            <!-- Selector de Proveedor (solo visible cuando hay medio seleccionado) -->
+            <div class="mb-3" v-if="medio">
+              <label class="form-label">Proveedor</label>
+              
+              <!-- Proveedores para Telegram -->
+              <div v-if="medio === 'telegram'">
+                <div class="form-check">
+                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="telegram-bot" value="bot" checked>
+                  <label class="form-check-label" for="telegram-bot">🤖 Bot (✅ Funciona)</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="telegram-directo" value="directo" disabled>
+                  <label class="form-check-label" for="telegram-directo">📨 Mensaje Directo (🚧 Próximamente)</label>
+                </div>
+              </div>
+
+              <!-- Proveedores para WhatsApp -->
+              <div v-if="medio === 'whatsapp'">
+                <div class="form-check">
+                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="whatsapp-whapi" value="whapi" checked>
+                  <label class="form-check-label" for="whatsapp-whapi">☁️ whapi.cloud (✅ Funciona)</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="whatsapp-twilio" value="twilio">
+                  <label class="form-check-label" for="whatsapp-twilio">📞 Twilio (⚠️ Limitado)</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="whatsapp-selenium" value="selenium">
+                  <label class="form-check-label" for="whatsapp-selenium">🤖 Selenium (❌ No funciona)</label>
+                </div>
+              </div>
+
+              <!-- Proveedores para SMS -->
+              <div v-if="medio === 'sms'">
+                <div class="form-check">
+                  <input class="form-check-input custom-radio" type="radio" v-model="proveedor" id="sms-twilio" value="twilio" checked>
+                  <label class="form-check-label" for="sms-twilio">📞 Twilio (⚠️ Limitado)</label>
+                </div>
               </div>
             </div>
 
@@ -158,11 +199,23 @@
                   <p><strong>Área: </strong>{{ filtroArea }} <span id="previewArea"></span></p>
                   <p><strong>Usuario:  </strong> {{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}<span id="previewUsuario"></span></p>
                   <p><strong>Dificultad: </strong> {{ nivel }}<span id="previewDificultad"></span></p>
-                  <p><strong>Método: </strong> {{ proveedor === 'whapi' ? 'WhatsApp' : proveedor === 'twilio' ? 'SMS' : 'Telegram' }}<span id="previewProveedor"></span></p>
+                  <p><strong>Medio: </strong> {{ medio === 'whatsapp' ? 'WhatsApp' : medio === 'telegram' ? 'Telegram' : 'SMS' }}<span id="previewMedio"></span></p>
+                  <p><strong>Proveedor: </strong> {{ proveedor }}<span id="previewProveedor"></span></p>
                   <hr>
-                  <p><strong>Mensaje generado por IA</strong></p>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <p><strong>Mensaje generado por IA</strong></p>
+                    <button type="button" class="btn btn-sm btn-outline-primary" @click="regenerarMensaje">
+                      <i class="bi bi-arrow-clockwise"></i> Regenerar
+                    </button>
+                  </div>
                   <div class="bg-light text-dark p-3 rounded">
-                    <pre style="white-space: pre-wrap; font-family: inherit;">{{ modalMensaje }}</pre>
+                    <textarea 
+                      v-model="modalMensaje" 
+                      class="form-control border-0 bg-transparent" 
+                      rows="6" 
+                      style="resize: vertical; font-family: inherit; white-space: pre-wrap;"
+                      placeholder="El mensaje aparecerá aquí..."
+                    ></textarea>
                   </div>
                 </div>
                 <div class="modal-footer">
@@ -197,10 +250,12 @@
           filtroArea: "",
           filtroUsuario: "",
           nivel: "Fácil",
-          proveedor: "whapi",
+          medio: "telegram",
+          proveedor: "bot",
           modalMensaje: "",
           mensajeGenerado: {
-            proveedor: "whapi",
+            medio: "telegram",
+            proveedor: "bot",
             idUsuario: null, 
             mensaje: ""
           }
@@ -216,6 +271,16 @@
         filtroArea() {
           // Limpiar usuario seleccionado cuando cambie el área
           this.filtroUsuario = "";
+        },
+        medio() {
+          // Resetear proveedor cuando cambie el medio
+          if (this.medio === 'telegram') {
+            this.proveedor = 'bot';
+          } else if (this.medio === 'whatsapp') {
+            this.proveedor = 'whapi';
+          } else if (this.medio === 'sms') {
+            this.proveedor = 'twilio';
+          }
         }
       },
       methods: {
@@ -237,6 +302,8 @@
             
             this.mensajeGenerado.mensaje = data.mensaje;
             this.mensajeGenerado.idUsuario = this.filtroUsuario.idUsuario;
+            this.mensajeGenerado.medio = this.medio;
+            this.mensajeGenerado.proveedor = this.proveedor;
 
             // Abrir modal
             const modal = new bootstrap.Modal(document.getElementById("previewModal"));
@@ -248,15 +315,39 @@
           }
         },
 
+        async regenerarMensaje() {
+          try {
+            const resp = await fetch("http://localhost:8080/api/mensaje/generar", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam.`,
+                nivel: this.nivel
+              })
+            });
+
+            if (!resp.ok) throw new Error("Error regenerando el mensaje");
+
+            const data = await resp.json();
+            this.modalMensaje = data.mensaje || "Sin mensaje";
+            this.mensajeGenerado.mensaje = data.mensaje;
+
+          } catch (e) {
+            console.error("Error:", e);
+            alert("No se pudo regenerar el mensaje");
+          }
+        },
+
         async confirmarEnvio() {
           try {
             const resp = await fetch("http://localhost:8080/api/mensaje/enviar-id", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
+                medio: this.medio,
                 proveedor: this.proveedor,
                 idUsuario: this.filtroUsuario.idUsuario,
-                mensaje: this.mensajeGenerado.mensaje
+                mensaje: this.modalMensaje
               })
             });
 

@@ -685,7 +685,7 @@ def openapi_spec():
             "/api/mensaje/enviar-id": {
                 "post": {
                     "summary": "📱 Enviar mensaje de phishing por ID de usuario",
-                    "description": "Envía un mensaje de phishing a un usuario específico por su ID. Crea un evento de tipo MENSAJE y genera un enlace para que el usuario pueda reportar la falla. Soporta múltiples proveedores: WhatsApp (twilio, selenium, whapi), SMS (twilio) y Telegram (bot).",
+                    "description": "Envía un mensaje de phishing a un usuario específico por su ID. Crea un evento de tipo MENSAJE y genera un enlace para que el usuario pueda reportar la falla. Soporta múltiples medios y proveedores: Telegram (bot), WhatsApp (twilio, selenium, whapi), SMS (twilio).",
                     "tags": ["💬 Mensajes"],
                     "requestBody": {
                         "required": True,
@@ -693,20 +693,29 @@ def openapi_spec():
                             "application/json": {
                                 "schema": {"$ref": "#/components/schemas/MensajeEnviarID"},
                                 "examples": {
-                                    "whatsapp_whapi": {
-                                        "summary": "WhatsApp con whapi",
+                                    "telegram_bot": {
+                                        "summary": "Telegram con Bot (✅ Funciona)",
                                         "value": {
-                                            "proveedor": "whatsapp",
-                                            "proveedor_especifico": "whapi",
+                                            "medio": "telegram",
+                                            "proveedor": "bot",
+                                            "idUsuario": 1,
+                                            "mensaje": "Hola! Tu cuenta ha sido suspendida por seguridad. Haz clic en el enlace para verificar tu identidad."
+                                        }
+                                    },
+                                    "whatsapp_whapi": {
+                                        "summary": "WhatsApp con whapi (✅ Funciona)",
+                                        "value": {
+                                            "medio": "whatsapp",
+                                            "proveedor": "whapi",
                                             "idUsuario": 1,
                                             "mensaje": "Hola! Tu cuenta ha sido suspendida por seguridad. Haz clic en el enlace para verificar tu identidad."
                                         }
                                     },
                                     "whatsapp_twilio": {
-                                        "summary": "WhatsApp con Twilio",
+                                        "summary": "WhatsApp con Twilio (⚠️ Limitado)",
                                         "value": {
-                                            "proveedor": "whatsapp",
-                                            "proveedor_especifico": "twilio",
+                                            "medio": "whatsapp",
+                                            "proveedor": "twilio",
                                             "idUsuario": 1,
                                             "mensaje": "Hola! Tu cuenta ha sido suspendida por seguridad. Haz clic en el enlace para verificar tu identidad."
                                         }
@@ -714,26 +723,17 @@ def openapi_spec():
                                     "whatsapp_selenium": {
                                         "summary": "WhatsApp con Selenium (❌ No funciona)",
                                         "value": {
-                                            "proveedor": "whatsapp",
-                                            "proveedor_especifico": "selenium",
-                                            "idUsuario": 1,
-                                            "mensaje": "Hola! Tu cuenta ha sido suspendida por seguridad. Haz clic en el enlace para verificar tu identidad."
-                                        }
-                                    },
-                                    "telegram_bot": {
-                                        "summary": "Telegram con Bot",
-                                        "value": {
-                                            "proveedor": "telegram",
-                                            "proveedor_especifico": "bot",
+                                            "medio": "whatsapp",
+                                            "proveedor": "selenium",
                                             "idUsuario": 1,
                                             "mensaje": "Hola! Tu cuenta ha sido suspendida por seguridad. Haz clic en el enlace para verificar tu identidad."
                                         }
                                     },
                                     "sms_twilio": {
-                                        "summary": "SMS con Twilio",
+                                        "summary": "SMS con Twilio (⚠️ Limitado)",
                                         "value": {
-                                            "proveedor": "sms",
-                                            "proveedor_especifico": "twilio",
+                                            "medio": "sms",
+                                            "proveedor": "twilio",
                                             "idUsuario": 1,
                                             "mensaje": "Hola! Tu cuenta ha sido suspendida por seguridad. Haz clic en el enlace para verificar tu identidad."
                                         }
@@ -757,7 +757,7 @@ def openapi_spec():
                                 }
                             }
                         },
-                        "400": {"description": "Solicitud inválida - Faltan campos obligatorios o proveedor inválido"},
+                        "400": {"description": "Solicitud inválida - Faltan campos obligatorios o medio/proveedor inválido"},
                         "404": {"description": "Usuario no encontrado o sin teléfono registrado"},
                         "500": {"description": "Error en el servicio o token no configurado"}
                     }
@@ -1080,10 +1080,10 @@ def openapi_spec():
                 },
                 "MensajeEnviarID": {
                     "type": "object",
-                    "required": ["proveedor", "idUsuario", "mensaje"],
+                    "required": ["medio", "idUsuario", "mensaje"],
                     "properties": {
-                        "proveedor": {"type": "string", "enum": ["whatsapp", "telegram", "sms"], "description": "Medio para enviar el mensaje (whatsapp, telegram, sms)"},
-                        "proveedor_especifico": {"type": "string", "description": "Proveedor específico dentro del medio. Para whatsapp: 'twilio', 'selenium', 'whapi'. Para telegram: 'bot'. Para sms: 'twilio'"},
+                        "medio": {"type": "string", "enum": ["telegram", "whatsapp", "sms"], "description": "Medio de comunicación (telegram, whatsapp, sms)"},
+                        "proveedor": {"type": "string", "description": "Proveedor específico dentro del medio. Para telegram: 'bot'. Para whatsapp: 'twilio', 'selenium', 'whapi'. Para sms: 'twilio'"},
                         "idUsuario": {"type": "integer", "description": "ID del usuario al que se enviará el mensaje"},
                         "mensaje": {"type": "string", "description": "Contenido del mensaje de phishing a enviar"}
                     }
