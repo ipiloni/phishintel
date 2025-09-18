@@ -75,9 +75,10 @@ class MsjController:
             session.commit()
 
             # Construir link a caiste con parámetros y agregar al mensaje
-            link_caiste = f"http://localhost:8080/caiste?idUsuario={id_usuario}&idEvento={evento.idEvento}"
+            link_caiste = f"http://127.0.0.1:8080/caiste?idUsuario={id_usuario}&idEvento={evento.idEvento}"
             mensaje_con_enlace = f"{mensaje}\n\n🔗 Enlace: {link_caiste}"
-
+            mensaje_html = f"{mensaje}\n\n🔗 <a href=\"{link_caiste}\">Click Aqui</a>"
+            print(mensaje_html)
 
             # Enviar mensaje según el medio
             if medio == "whatsapp":
@@ -151,8 +152,8 @@ class MsjController:
                             return responseError("CHAT_ID_NO_CONFIGURADO", "No hay usuarios registrados y no se configuró TELEGRAM_DEFAULT_CHAT_ID", 500)
                         log.info(f"No hay usuarios registrados, usando chat_id configurado: {chat_id}")
                     
-                    result = TelegramController.enviarMensaje({
-                        "mensaje": mensaje_con_enlace,
+                    result = TelegramController.enviarMensajeHTML({
+                        "mensaje": mensaje_html,
                         "chat_id": chat_id
                     })
                     

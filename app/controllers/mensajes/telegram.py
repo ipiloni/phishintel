@@ -250,6 +250,66 @@ class TelegramController:
             log.error(error_msg)
             return responseError("ERROR_TELEGRAM", error_msg, 500)
 
+    @staticmethod
+    def enviarMensajeHTML(data):
+        """
+        Envía un mensaje de Telegram usando el bot con formato HTML.
+        Permite enviar enlaces clickeables y otros elementos HTML.
+        
+        Args:
+            data (dict): Diccionario con los siguientes campos:
+                - mensaje (str): Mensaje a enviar (puede contener HTML)
+                - chat_id (str, opcional): Chat ID del destinatario
+                
+        Returns:
+            tuple: (response, status_code)
+        """
+        log.info("Se recibió una solicitud para enviar mensaje HTML via Telegram")
+
+        if not data or "mensaje" not in data:
+            log.warn("Falta el campo obligatorio 'mensaje'")
+            return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'mensaje'", 400)
+
+        mensaje = data["mensaje"]
+        chat_id = data.get("chat_id")
+
+        try:
+            # Obtener el token desde las variables de entorno
+            token = get("TELEGRAM_TOKEN")
+            if not token:
+                log.error("Token de Telegram no configurado")
+                return responseError("TOKEN_NO_CONFIGURADO", "Token de Telegram no configurado", 500)
+
+            # Si no se proporciona chat_id, usar el configurado como fallback
+            if not chat_id:
+                chat_id = get("TELEGRAM_DEFAULT_CHAT_ID")
+                if not chat_id:
+                    log.error("No se proporcionó chat_id y no se configuró TELEGRAM_DEFAULT_CHAT_ID")
+                    return responseError("CHAT_ID_NO_CONFIGURADO", "No se proporcionó chat_id y no se configuró TELEGRAM_DEFAULT_CHAT_ID", 400)
+                log.info(f"No se proporcionó chat_id, usando configurado: {chat_id}")
+
+            # Crear el bot
+            bot = Bot(token=token)
+            
+            # Enviar mensaje via Telegram con formato HTML (usando asyncio para manejar la función async)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(bot.send_message(chat_id=chat_id, text=mensaje, parse_mode="HTML"))
+            loop.close()
+            
+            log.info(f"Mensaje HTML de Telegram enviado a {chat_id}")
+            
+            return jsonify({
+                "mensaje": "Mensaje HTML enviado correctamente via Telegram",
+                "chat_id": chat_id,
+                "contenido": mensaje
+            }), 201
+
+        except Exception as e:
+            error_msg = f"Error al enviar mensaje HTML via Telegram: {str(e)}"
+            log.error(error_msg)
+            return responseError("ERROR_TELEGRAM", error_msg, 500)
+
 
 # Instancia global del bot
 telegram_bot = TelegramController()
