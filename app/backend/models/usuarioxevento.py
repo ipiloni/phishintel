@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, Enum as SQLEnum
+from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, Enum as SQLEnum, DateTime
 from sqlalchemy.orm import relationship
 from app.config.db_config import Base
 from app.backend.models.resultadoEvento import ResultadoEvento
@@ -10,6 +10,8 @@ class UsuarioxEvento(Base):
     idEvento = Column(Integer, ForeignKey('eventos.idEvento'), primary_key=True)
 
     resultado = Column(SQLEnum(ResultadoEvento), nullable=False)
+    fecha_reporte = Column(DateTime, nullable=True)
+    fecha_falla = Column(DateTime, nullable=True)
 
     # Relaciones hacia Usuario y Evento
     usuario = relationship("Usuario", back_populates="eventosAsociados")

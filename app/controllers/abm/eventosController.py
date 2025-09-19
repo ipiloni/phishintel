@@ -22,11 +22,18 @@ class EventosController:
             for evento in eventos:
                 usuarios_info = []
                 for ux in evento.usuariosAsociados:
-                    usuarios_info.append({
+                    usuario_data = {
                         "idUsuario": ux.usuario.idUsuario,
                         "nombreUsuario": ux.usuario.nombreUsuario,
                         "resultado": ux.resultado.value
-                    })
+                    }
+                    # Agregar fechas si existen
+                    if ux.fecha_reporte:
+                        usuario_data["fecha_reporte"] = ux.fecha_reporte.isoformat()
+                    if ux.fecha_falla:
+                        usuario_data["fecha_falla"] = ux.fecha_falla.isoformat()
+                    
+                    usuarios_info.append(usuario_data)
 
                 eventos_a_retornar.append({
                     "idEvento": evento.idEvento,
@@ -59,11 +66,18 @@ class EventosController:
 
             usuarios_info = []
             for ux in evento.usuariosAsociados:
-                usuarios_info.append({
+                usuario_data = {
                     "idUsuario": ux.usuario.idUsuario,
                     "nombreUsuario": ux.usuario.nombreUsuario,
                     "resultado": ux.resultado.value
-                })
+                }
+                # Agregar fechas si existen
+                if ux.fecha_reporte:
+                    usuario_data["fecha_reporte"] = ux.fecha_reporte.isoformat()
+                if ux.fecha_falla:
+                    usuario_data["fecha_falla"] = ux.fecha_falla.isoformat()
+                
+                usuarios_info.append(usuario_data)
 
             evento_info = {
                 "idEvento": evento.idEvento,
@@ -98,10 +112,6 @@ class EventosController:
             except ValueError:
                 return responseError("FECHA_INVALIDA", "El formato de la fecha no es válido", 400)
 
-            resultado_val = data.get("resultado")
-            if resultado_val:
-                if resultado_val not in [r.value for r in ResultadoEvento]:
-                    return responseError("RESULTADO_INVALIDO", "El resultado del evento no es válido", 400)
 
             session = SessionLocal()
 
@@ -122,23 +132,6 @@ class EventosController:
             session.add(nuevo_evento)
             session.commit()
             session.refresh(nuevo_evento)
-
-            # Si se pasa resultado y idUsuario para asociar, creamos esa relación
-            if resultado_val and "idUsuario" in data:
-                id_usuario = data["idUsuario"]
-                usuario = session.query(Usuario).filter_by(idUsuario=id_usuario).first()
-                if not usuario:
-                    session.rollback()
-                    session.close()
-                    return responseError("USUARIO_NO_ENCONTRADO", "No se encontró el usuario para asociar", 404)
-
-                usuario_evento = UsuarioxEvento(
-                    idUsuario=id_usuario,
-                    idEvento=nuevo_evento.idEvento,
-                    resultado=ResultadoEvento(resultado_val)
-                )
-                session.add(usuario_evento)
-                session.commit()
 
             idevento = nuevo_evento.idEvento
             session.close()
@@ -172,11 +165,6 @@ class EventosController:
                 except ValueError:
                     return responseError("FECHA_INVALIDA", "El formato de la fecha no es válido", 400)
 
-            if "resultado" in data:
-                resultado_val = data["resultado"]
-                if resultado_val not in [r.value for r in ResultadoEvento]:
-                    return responseError("RESULTADO_INVALIDO", "El resultado del evento no es válido", 400)
-                evento.resultado = resultado_val
 
             if "registroEvento" in data:
                 registro_evento_data = data["registroEvento"]
@@ -197,7 +185,7 @@ class EventosController:
 
 
     @staticmethod
-    def asociarUsuarioEvento(idEvento, idUsuario, resultado_val):
+    def asociarUsuarioEvento(idEvento, idUsuario, resultado_val, fecha_reporte=None, fecha_falla=None):
         if resultado_val not in [r.value for r in ResultadoEvento]:
             return responseError("RESULTADO_INVALIDO", "El resultado del evento no es válido", 400)
 
@@ -219,11 +207,17 @@ class EventosController:
 
             if usuario_evento:
                 usuario_evento.resultado = ResultadoEvento(resultado_val)
+                if fecha_reporte:
+                    usuario_evento.fecha_reporte = fecha_reporte
+                if fecha_falla:
+                    usuario_evento.fecha_falla = fecha_falla
             else:
                 usuario_evento = UsuarioxEvento(
                     idEvento=idEvento,
                     idUsuario=idUsuario,
-                    resultado=ResultadoEvento(resultado_val)
+                    resultado=ResultadoEvento(resultado_val),
+                    fecha_reporte=fecha_reporte,
+                    fecha_falla=fecha_falla
                 )
                 session.add(usuario_evento)
 

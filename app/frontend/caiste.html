@@ -149,11 +149,15 @@
       
       if (params.idUsuario && params.idEvento) {
         // Hacer llamada AJAX a sumar-falla
-        fetch(`/api/sumar-falla?idUsuario=${params.idUsuario}&idEvento=${params.idEvento}`, {
-          method: 'GET',
+        fetch('/api/sumar-falla', {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-          }
+          },
+          body: JSON.stringify({
+            idUsuario: parseInt(params.idUsuario),
+            idEvento: parseInt(params.idEvento)
+          })
         })
         .then(response => response.json())
         .then(data => {

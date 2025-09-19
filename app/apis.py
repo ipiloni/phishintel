@@ -1,4 +1,5 @@
 from flask import request, Blueprint, send_file, jsonify
+from datetime import datetime
 
 from app.backend.models.error import responseError
 from app.controllers.abm.areasController import AreasController
@@ -9,7 +10,7 @@ from app.controllers.emails.emailController import EmailController
 from app.controllers.abm.eventosController import EventosController
 from app.controllers.llamadas.llamadasController import LlamadasController
 from app.controllers.abm.usuariosController import UsuariosController
-from app.controllers.fallaController import FallaController
+from app.controllers.resultadoEventoController import ResultadoEventoController
 from app.controllers.mensajes.msjController import MsjController
 from app.controllers.mensajes.telegram import telegram_bot
 from app.controllers.mensajes.whatsapp import WhatsAppController
@@ -118,14 +119,46 @@ def enviarMensajeWhatsappGrupoWhapi():
 
 
 # ------ # REGISTROS DE EVENTOS +  # ------ #
-@apis.route("/api/sumar-falla", methods=["GET"])
+@apis.route("/api/sumar-falla", methods=["POST"])
 def sumarFalla():
-    idUsuario = request.args.get("idUsuario", type=int)
-    idEvento = request.args.get("idEvento", type=int)
+    data = request.get_json()
+    idUsuario = data.get("idUsuario")
+    idEvento = data.get("idEvento")
+    fecha_falla = data.get("fecha_falla")
+    
     if not idUsuario or not idEvento:
         return responseError("CAMPOS_OBLIGATORIOS", "Faltan parámetros 'idUsuario' o 'idEvento'", 400)
+    
+    # Convertir fecha_falla a datetime si se proporciona
+    if fecha_falla:
+        try:
+            fecha_falla = datetime.fromisoformat(fecha_falla.replace('Z', '+00:00'))
+        except ValueError:
+            return responseError("FECHA_INVALIDA", "Formato de fecha inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
+    
     log.info(f"se sumará una falla al usuario '{str(idUsuario)}' del evento '{str(idEvento)}'")
-    return FallaController.sumarFalla(idUsuario, idEvento)
+    return ResultadoEventoController.sumarFalla(idUsuario, idEvento, fecha_falla)
+
+
+@apis.route("/api/sumar-reportado", methods=["POST"])
+def sumarReportado():
+    data = request.get_json()
+    idUsuario = data.get("idUsuario")
+    idEvento = data.get("idEvento")
+    fecha_reporte = data.get("fecha_reporte")
+    
+    if not idUsuario or not idEvento:
+        return responseError("CAMPOS_OBLIGATORIOS", "Faltan parámetros 'idUsuario' o 'idEvento'", 400)
+    
+    # Convertir fecha_reporte a datetime si se proporciona
+    if fecha_reporte:
+        try:
+            fecha_reporte = datetime.fromisoformat(fecha_reporte.replace('Z', '+00:00'))
+        except ValueError:
+            return responseError("FECHA_INVALIDA", "Formato de fecha inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
+    
+    log.info(f"se sumará un reporte al usuario '{str(idUsuario)}' del evento '{str(idEvento)}'")
+    return ResultadoEventoController.sumarReportado(idUsuario, idEvento, fecha_reporte)
 
 
 @apis.route("/api/eventos", methods=["GET"])
@@ -154,9 +187,26 @@ def editarEvento(idEvento):
 def asociarUsuarioEvento(idEvento, idUsuario):
     data = request.get_json()
     resultado_val = data.get("resultado")
+    fecha_reporte = data.get("fecha_reporte")
+    fecha_falla = data.get("fecha_falla")
+    
     if not resultado_val:
         return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo 'resultado'", 400)
-    return EventosController.asociarUsuarioEvento(idEvento, idUsuario, resultado_val)
+    
+    # Convertir fechas a datetime si se proporcionan
+    if fecha_reporte:
+        try:
+            fecha_reporte = datetime.fromisoformat(fecha_reporte.replace('Z', '+00:00'))
+        except ValueError:
+            return responseError("FECHA_INVALIDA", "Formato de fecha_reporte inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
+    
+    if fecha_falla:
+        try:
+            fecha_falla = datetime.fromisoformat(fecha_falla.replace('Z', '+00:00'))
+        except ValueError:
+            return responseError("FECHA_INVALIDA", "Formato de fecha_falla inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
+    
+    return EventosController.asociarUsuarioEvento(idEvento, idUsuario, resultado_val, fecha_reporte, fecha_falla)
 
 
 @apis.route("/api/eventos/<int:idEvento>", methods=["DELETE"])
@@ -208,7 +258,6 @@ def enviarMensajePorID():
     return MsjController.enviarMensajePorID(data)
 
 
-# ------ # TELEGRAM BOT # ------ #
 # ------ # TELEGRAM BOT # ------ #
 @apis.route("/api/telegram/start", methods=["POST"])  # Inicia el bot de Telegram
 def iniciarBotTelegram():

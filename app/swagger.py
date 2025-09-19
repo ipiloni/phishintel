@@ -359,7 +359,6 @@ def openapi_spec():
                                 "example": {
                                     "tipoEvento": "CORREO",
                                     "fechaEvento": "2025-08-11T10:30:00",
-                                    "resultado": "PENDIENTE",
                                     "registroEvento": {
                                         "asunto": "Prueba de asunto del evento",
                                         "cuerpo": "<p>Este es el cuerpo del evento en HTML o texto</p>"
@@ -394,14 +393,155 @@ def openapi_spec():
             },
             "/api/eventos/{idEvento}/usuarios/{idUsuario}": {
                 "post": {
-                    "summary": "Asociar usuario a evento con resultado",
+                    "summary": "Asociar usuario a evento con resultado y fechas",
                     "tags": ["📅 Eventos"],
                     "parameters": [
                         {"name": "idEvento", "in": "path", "required": True, "schema": {"type": "integer"}},
                         {"name": "idUsuario", "in": "path", "required": True, "schema": {"type": "integer"}}
                     ],
-                    "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["resultado"], "properties": {"resultado": {"$ref": "#/components/schemas/ResultadoEvento"}}}}}},
-                    "responses": {"200": {"description": "Asociado"}, "400": {"description": "Solicitud inválida"}, "404": {"description": "No encontrado"}}
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/AsociarUsuarioEvento"},
+                                "examples": {
+                                    "01_solo_resultado": {
+                                        "summary": "Solo resultado (sin fechas)",
+                                        "value": {
+                                            "resultado": "PENDIENTE"
+                                        }
+                                    },
+                                    "02_con_fechas": {
+                                        "summary": "Con fechas específicas",
+                                        "value": {
+                                            "resultado": "FALLA",
+                                            "fecha_falla": "2025-01-15T10:30:00",
+                                            "fecha_reporte": "2025-01-15T11:00:00"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Usuario asociado correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Solicitud inválida - Faltan parámetros o fechas inválidas"},
+                        "404": {"description": "Evento o usuario no encontrado"}
+                    }
+                }
+            },
+            "/api/sumar-falla": {
+                "post": {
+                    "summary": "Marcar evento como falla (usa fecha actual por defecto)",
+                    "tags": ["📅 Eventos"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/SumarFalla"},
+                                "examples": {
+                                    "01_sin_fecha": {
+                                        "summary": "Sin fecha (usa fecha actual)",
+                                        "value": {
+                                            "idUsuario": 1,
+                                            "idEvento": 1
+                                        }
+                                    },
+                                    "02_con_fecha": {
+                                        "summary": "Con fecha específica",
+                                        "value": {
+                                            "idUsuario": 1,
+                                            "idEvento": 1,
+                                            "fecha_falla": "2025-01-15T10:30:00"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Falla registrada correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "idUsuario": {"type": "integer"},
+                                            "idEvento": {"type": "integer"},
+                                            "fecha_falla": {"type": "string", "format": "date-time"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Solicitud inválida - Faltan parámetros o fecha inválida"},
+                        "404": {"description": "No existe relación entre el usuario y el evento"}
+                    }
+                }
+            },
+            "/api/sumar-reportado": {
+                "post": {
+                    "summary": "Marcar evento como reportado (usa fecha actual por defecto)",
+                    "tags": ["📅 Eventos"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/SumarReportado"},
+                                "examples": {
+                                    "01_sin_fecha": {
+                                        "summary": "Sin fecha (usa fecha actual)",
+                                        "value": {
+                                            "idUsuario": 1,
+                                            "idEvento": 1
+                                        }
+                                    },
+                                    "02_con_fecha": {
+                                        "summary": "Con fecha específica",
+                                        "value": {
+                                            "idUsuario": 1,
+                                            "idEvento": 1,
+                                            "fecha_reporte": "2025-01-15T10:30:00"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Reporte registrado correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "idUsuario": {"type": "integer"},
+                                            "idEvento": {"type": "integer"},
+                                            "fecha_reporte": {"type": "string", "format": "date-time"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Solicitud inválida - Faltan parámetros o fecha inválida"},
+                        "404": {"description": "No existe relación entre el usuario y el evento"}
+                    }
                 }
             },
             "/api/email/enviar-id": {
@@ -981,7 +1121,9 @@ def openapi_spec():
                                 "properties": {
                                     "idUsuario": {"type": "integer"},
                                     "nombreUsuario": {"type": "string"},
-                                    "resultado": {"$ref": "#/components/schemas/ResultadoEvento"}
+                                    "resultado": {"$ref": "#/components/schemas/ResultadoEvento"},
+                                    "fecha_reporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (si existe)"},
+                                    "fecha_falla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (si existe)"}
                                 }
                             }
                         }
@@ -993,9 +1135,7 @@ def openapi_spec():
                     "properties": {
                         "tipoEvento": {"$ref": "#/components/schemas/TipoEvento"},
                         "fechaEvento": {"type": "string", "format": "date-time"},
-                        "registroEvento": {"type": "object", "properties": {"asunto": {"type": "string"}, "cuerpo": {"type": "string"}}},
-                        "idUsuario": {"type": "integer"},
-                        "resultado": {"$ref": "#/components/schemas/ResultadoEvento"}
+                        "registroEvento": {"type": "object", "properties": {"asunto": {"type": "string"}, "cuerpo": {"type": "string"}}}
                     }
                 },
                 "EventoUpdate": {
@@ -1003,7 +1143,6 @@ def openapi_spec():
                     "properties": {
                         "tipoEvento": {"$ref": "#/components/schemas/TipoEvento"},
                         "fechaEvento": {"type": "string", "format": "date-time"},
-                        "resultado": {"$ref": "#/components/schemas/ResultadoEvento"},
                         "registroEvento": {"type": "object", "properties": {"asunto": {"type": "string"}, "cuerpo": {"type": "string"}}}
                     }
                 },
@@ -1191,6 +1330,33 @@ def openapi_spec():
                     "type": "object",
                     "properties": {
                         "puerto": {"type": "integer", "description": "Puerto local al que hacer túnel (por defecto 8080)", "default": 8080, "minimum": 1, "maximum": 65535}
+                    }
+                },
+                "SumarFalla": {
+                    "type": "object",
+                    "required": ["idUsuario", "idEvento"],
+                    "properties": {
+                        "idUsuario": {"type": "integer", "description": "ID del usuario"},
+                        "idEvento": {"type": "integer", "description": "ID del evento"},
+                        "fecha_falla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (OPCIONAL - si no se proporciona se usa la fecha y hora actual automáticamente)"}
+                    }
+                },
+                "SumarReportado": {
+                    "type": "object",
+                    "required": ["idUsuario", "idEvento"],
+                    "properties": {
+                        "idUsuario": {"type": "integer", "description": "ID del usuario"},
+                        "idEvento": {"type": "integer", "description": "ID del evento"},
+                        "fecha_reporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (OPCIONAL - si no se proporciona se usa la fecha y hora actual automáticamente)"}
+                    }
+                },
+                "AsociarUsuarioEvento": {
+                    "type": "object",
+                    "required": ["resultado"],
+                    "properties": {
+                        "resultado": {"$ref": "#/components/schemas/ResultadoEvento", "description": "Estado actual del evento para este usuario"},
+                        "fecha_reporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (OPCIONAL)"},
+                        "fecha_falla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (OPCIONAL)"}
                     }
                 }
             }
