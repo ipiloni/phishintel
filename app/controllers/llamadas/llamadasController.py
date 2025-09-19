@@ -53,7 +53,7 @@ class LlamadasController:
                     - Mantén la coherencia del rol de “jefe de área”.
                     - Solamente responde lo que el jefe debe decir.
                     - Eres de Buenos Aires, Argentina. Por lo que el dialecto es muy importante que lo mantengas.
-                    - El empleado se llama Mora Rodriguez, trabaja en 'Accenture' en el area de Ciberseguridad
+                    - El empleado se llama Marcos Gurruchaga, trabaja en 'Accenture' en el area de Ciberseguridad
                 """
             else:
                 conversacion.objetivoActual = data["objetivo"]
@@ -82,12 +82,12 @@ class LlamadasController:
             if destinatario == remitente:
                 return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
 
-            url = "https://demanding-messenger-microwave-pattern.trycloudflare.com"  # localhost, ngrok o cuando se despliegue
+            url = "https://veterinary-useful-attributes-dam.trycloudflare.com"  # localhost, ngrok o cuando se despliegue
             conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
 
             log.info(f"La URL del audio actual es: {conversacion.urlAudioActual}")
 
-            return twilio.llamar(destinatario, remitente, "https://demanding-messenger-microwave-pattern.trycloudflare.com/api/twilio/accion")
+            return twilio.llamar(destinatario, remitente, "https://veterinary-useful-attributes-dam.trycloudflare.com/api/twilio/accion")
 
         except Exception as e:
             log.error(e)
@@ -118,7 +118,7 @@ class LlamadasController:
 
             log.info("Se expone el audio para que Twilio lo reproduzca")
 
-            url = "https://demanding-messenger-microwave-pattern.trycloudflare.com"  # localhost, ngrok o cuando se despliegue
+            url = "https://veterinary-useful-attributes-dam.trycloudflare.com"  # localhost, ngrok o cuando se despliegue
             conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
 
             log.info(f"URL audio actual: {conversacion.urlAudioActual}")
@@ -130,7 +130,7 @@ class LlamadasController:
             gather = Gather(
                 input='speech',
                 language="es-MX",
-                action='https://demanding-messenger-microwave-pattern.trycloudflare.com/api/twilio/respuesta',
+                action='https://veterinary-useful-attributes-dam.trycloudflare.com/api/twilio/respuesta',
                 method='POST',
                 speech_timeout='auto',
                 timeout=3
@@ -158,7 +158,7 @@ class LlamadasController:
         gather = Gather(
             input='speech',
             language="es-MX",
-            action='https://demanding-messenger-microwave-pattern.trycloudflare.com/api/twilio/respuesta',
+            action='https://veterinary-useful-attributes-dam.trycloudflare.com/api/twilio/respuesta',
             method='POST',
             speech_timeout='auto',
             timeout=3
