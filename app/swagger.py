@@ -15,6 +15,7 @@ def openapi_spec():
         "tags": [
             {"name": "👥 Usuarios", "description": "Gestión de usuarios"},
             {"name": "🏢 Áreas", "description": "Gestión de áreas"},
+            {"name": "📊 Reportes de Áreas", "description": "Reportes y métricas de fallas por área"},
             {"name": "📅 Eventos", "description": "Gestión de eventos"},
             {"name": "📧 Emails", "description": "Envío de emails y notificaciones"},
             {"name": "💬 Mensajes", "description": "Envío de mensajes WhatsApp y SMS"},
@@ -313,11 +314,128 @@ def openapi_spec():
             ,
             "/api/areas/fallas": {
                 "get": {
-                    "summary": "Obtener fallas por área (agregado por empleados)",
-                    "tags": ["🏢 Áreas"],
+                    "summary": "Obtener fallas por área",
+                    "description": "Obtiene un listado de todas las áreas con métricas de fallas agregadas por empleados. Permite filtrar por tipos de evento específicos.",
+                    "tags": ["📊 Reportes de Áreas"],
+                    "parameters": [
+                        {
+                            "name": "tipo_evento",
+                            "in": "query",
+                            "description": "Filtrar por tipos de evento (puede especificar múltiples valores)",
+                            "required": False,
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"]
+                                }
+                            },
+                            "style": "form",
+                            "explode": True
+                        }
+                    ],
                     "responses": {
                         "200": {
                             "description": "Listado de áreas con métricas de fallas",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "areas": {
+                                                "type": "array",
+                                                "items": {"$ref": "#/components/schemas/AreaFallas"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {"description": "Error del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
+            },
+            "/api/areas/fallas-fecha": {
+                "get": {
+                    "summary": "Obtener fallas por área y fecha",
+                    "description": "Obtiene métricas de fallas por área agrupadas por períodos de tiempo. Permite filtrar por tipos de evento y períodos específicos.",
+                    "tags": ["📊 Reportes de Áreas"],
+                    "parameters": [
+                        {
+                            "name": "tipo_evento",
+                            "in": "query",
+                            "description": "Filtrar por tipos de evento (puede especificar múltiples valores)",
+                            "required": False,
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"]
+                                }
+                            },
+                            "style": "form",
+                            "explode": True
+                        },
+                        {
+                            "name": "periodo",
+                            "in": "query",
+                            "description": "Filtrar por períodos de tiempo (puede especificar múltiples valores)",
+                            "required": False,
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "style": "form",
+                            "explode": True
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Métricas de fallas por área y fecha",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "areas": {
+                                                "type": "array",
+                                                "items": {"$ref": "#/components/schemas/AreaFallas"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {"description": "Error del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
+            },
+            "/api/areas/fallas-campania": {
+                "get": {
+                    "summary": "Obtener fallas por área y campaña",
+                    "description": "Obtiene métricas de fallas por área agrupadas por campañas específicas. Permite filtrar por áreas particulares.",
+                    "tags": ["📊 Reportes de Áreas"],
+                    "parameters": [
+                        {
+                            "name": "area",
+                            "in": "query",
+                            "description": "Filtrar por áreas específicas (puede especificar múltiples valores)",
+                            "required": False,
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "style": "form",
+                            "explode": True
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Métricas de fallas por área y campaña",
                             "content": {
                                 "application/json": {
                                     "schema": {
