@@ -430,7 +430,7 @@ def obtenerFallasPorCampania():
     return AreasController.obtenerFallasPorCampania(areas if areas else None)
 
 
-@apis.route("/api/areas/fallas-empleado", methods=["GET"])
+@apis.route("/api/areas/fallas-empleados", methods=["GET"])
 def obtenerFallasPorEmpleado():
     from app.backend.models.tipoEvento import TipoEvento
 

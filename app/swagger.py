@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, send_file
+import os
 
 swagger = Blueprint("swagger", __name__)
 
@@ -15,8 +16,8 @@ def openapi_spec():
         "tags": [
             {"name": "👥 Usuarios", "description": "Gestión de usuarios"},
             {"name": "🏢 Áreas", "description": "Gestión de áreas"},
-            {"name": "📊 Reportes de Áreas", "description": "Reportes y métricas de fallas por área"},
             {"name": "📅 Eventos", "description": "Gestión de eventos"},
+            {"name": "📊 Reportes", "description": "Reportes y métricas de fallas por área y empleado"},
             {"name": "📧 Emails", "description": "Envío de emails y notificaciones"},
             {"name": "💬 Mensajes", "description": "Envío de mensajes WhatsApp y SMS"},
             {"name": "🤖 Telegram Bot", "description": "Gestión del bot de Telegram"},
@@ -316,7 +317,7 @@ def openapi_spec():
                 "get": {
                     "summary": "Obtener fallas por área",
                     "description": "Obtiene un listado de todas las áreas con métricas de fallas agregadas por empleados. Permite filtrar por tipos de evento específicos.",
-                    "tags": ["📊 Reportes de Áreas"],
+                    "tags": ["📊 Reportes"],
                     "parameters": [
                         {
                             "name": "tipo_evento",
@@ -359,7 +360,7 @@ def openapi_spec():
                 "get": {
                     "summary": "Obtener fallas por área y fecha",
                     "description": "Obtiene métricas de fallas por área agrupadas por períodos de tiempo. Permite filtrar por tipos de evento y períodos específicos.",
-                    "tags": ["📊 Reportes de Áreas"],
+                    "tags": ["📊 Reportes"],
                     "parameters": [
                         {
                             "name": "tipo_evento",
@@ -416,7 +417,7 @@ def openapi_spec():
                 "get": {
                     "summary": "Obtener fallas por área y campaña",
                     "description": "Obtiene métricas de fallas por área agrupadas por campañas específicas. Permite filtrar por áreas particulares.",
-                    "tags": ["📊 Reportes de Áreas"],
+                    "tags": ["📊 Reportes"],
                     "parameters": [
                         {
                             "name": "area",
@@ -444,6 +445,63 @@ def openapi_spec():
                                             "areas": {
                                                 "type": "array",
                                                 "items": {"$ref": "#/components/schemas/AreaFallas"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {"description": "Error del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
+            },
+            "/api/areas/fallas-empleados": {
+                "get": {
+                    "summary": "Obtener fallas por empleado",
+                    "description": "Obtiene un listado de todos los empleados con métricas de fallas individuales. Permite filtrar por tipos de evento específicos y áreas.",
+                    "tags": ["📊 Reportes"],
+                    "parameters": [
+                        {
+                            "name": "tipo_evento",
+                            "in": "query",
+                            "description": "Filtrar por tipos de evento (puede especificar múltiples valores)",
+                            "required": False,
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"]
+                                }
+                            },
+                            "style": "form",
+                            "explode": True
+                        },
+                        {
+                            "name": "area",
+                            "in": "query",
+                            "description": "Filtrar por áreas específicas (puede especificar múltiples valores)",
+                            "required": False,
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "style": "form",
+                            "explode": True
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Listado de empleados con métricas de fallas",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "empleados": {
+                                                "type": "array",
+                                                "items": {"$ref": "#/components/schemas/EmpleadoFalla"}
                                             }
                                         }
                                     }
@@ -1483,7 +1541,7 @@ def openapi_spec():
     return jsonify(spec)
 
 
-@swagger.route("/apis/swagger", methods=["GET"])
+@swagger.route("/api/swagger", methods=["GET"])
 def swagger_ui():
     html = """
 <!DOCTYPE html>
@@ -1493,7 +1551,18 @@ def swagger_ui():
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
     <title>PhishIntel Swagger</title>
     <link rel=\"stylesheet\" href=\"https://unpkg.com/swagger-ui-dist@5/swagger-ui.css\" />
-    <style>body { margin: 0; padding: 0; } #swagger-ui { width: 100%; }</style>
+    <link rel=\"stylesheet\" href=\"/api/swagger-styles\" />
+    <style>
+      body { 
+        margin: 0; 
+        padding: 0; 
+        background-color: #1a1a1a;
+        color: #ffffff;
+      } 
+      #swagger-ui { 
+        width: 100%; 
+      }
+    </style>
   </head>
   <body>
     <div id=\"swagger-ui\"></div>
@@ -1505,12 +1574,50 @@ def swagger_ui():
         presets: [SwaggerUIBundle.presets.apis],
         layout: 'BaseLayout',
         tagsSorter: function(a, b) { return 0; },
-        operationsSorter: 'alpha'
+        operationsSorter: 'alpha',
+        defaultModelsExpandDepth: -1,
+        defaultModelExpandDepth: -1,
+        docExpansion: 'none',
+        tryItOutEnabled: true,
+        requestInterceptor: function(request) {
+          return request;
+        },
+        responseInterceptor: function(response) {
+          return response;
+        },
+        onComplete: function() {
+          // Activar "Try it out" automáticamente
+          setTimeout(function() {
+            // Hacer clic automáticamente en todos los botones "Try it out"
+            const tryItOutButtons = document.querySelectorAll('.try-out__btn');
+            tryItOutButtons.forEach(function(btn) {
+              if (!btn.classList.contains('cancel')) {
+                btn.click();
+              }
+            });
+            
+            // Ocultar los botones "Try it out" después de activarlos
+            setTimeout(function() {
+              const tryItOutButtons = document.querySelectorAll('.try-out__btn');
+              tryItOutButtons.forEach(function(btn) {
+                if (!btn.classList.contains('cancel')) {
+                  btn.style.display = 'none';
+                }
+              });
+            }, 200);
+          }, 500);
+        }
       });
     </script>
   </body>
 </html>
 """
     return html
+
+
+@swagger.route("/api/swagger-styles", methods=["GET"])
+def swagger_styles():
+    css_path = os.path.join(os.path.dirname(__file__), "frontend", "assets", "css", "estilosSwagger.css")
+    return send_file(css_path, mimetype="text/css")
 
 

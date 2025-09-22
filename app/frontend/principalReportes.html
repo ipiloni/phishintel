@@ -1134,7 +1134,7 @@
      // Función para cargar fallas por empleado
      async function cargarFallasPorEmpleado(tiposEvento = []) {
        try {
-         let url = '/api/areas/fallas-empleado';
+         let url = '/api/areas/fallas-empleados';
          if (tiposEvento.length > 0) {
            const params = new URLSearchParams();
            tiposEvento.forEach(tipo => params.append('tipo_evento', tipo));
