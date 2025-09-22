@@ -74,18 +74,14 @@
   <div class="my-3">
     <div class="error-message" style="display:none; color:white; text-align:center;"></div>
 
-    <div class="sent-message text-success" style="display:none"> <p style="color: white;">¡Login Exitoso!</p></div>
 
   </div>
 
   <button type="submit" id="loginButton" class="submit-btn">
-    <span>Ingresar</span>
-    <i class="bi bi-arrow-right"></i>
+    <span id="loginButtonText">Ingresar</span>
+    <i id="loginButtonIcon" class="bi bi-arrow-right"></i>
+    <span id="loginButtonSpinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
   </button>
-
-  <div id="loadingIndicator" style="display:none; font-weight:bold; text-align:center; margin-top:10px;">
-    Cargando...
-  </div>
 </form>
 
 
@@ -111,15 +107,17 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
   e.preventDefault();
 
   const loginButton = document.getElementById("loginButton");
-  const loadingIndicator = document.getElementById("loadingIndicator");
+  const loginButtonText = document.getElementById("loginButtonText");
+  const loginButtonIcon = document.getElementById("loginButtonIcon");
+  const loginButtonSpinner = document.getElementById("loginButtonSpinner");
   const errorMessage = document.querySelector(".error-message");
-  const sentMessage = document.querySelector(".sent-message");
 
-  // mostrar "Cargando..." en vez del botón
-  loginButton.style.display = "none";
-  loadingIndicator.style.display = "block";
+  // Mostrar estado de carga en el botón
+  loginButton.disabled = true;
+  loginButtonText.textContent = "Ingresando...";
+  loginButtonIcon.style.display = "none";
+  loginButtonSpinner.style.display = "inline-block";
   errorMessage.style.display = "none";
-  sentMessage.style.display = "none";
 
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
@@ -134,22 +132,78 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
     const data = await res.json();
 
     if (res.ok) {
-      sentMessage.style.display = "block";
-      setTimeout(() => { window.location.href = data.redirect; }, 1200);
+      // Mostrar toast de éxito
+      mostrarToastExito();
+      setTimeout(() => { window.location.href = data.redirect; }, 1500);
     } else {
-      errorMessage.style.display = "block";
-      errorMessage.innerText = data.error || "Error al iniciar sesión";
-      loginButton.style.display = "block";
-      loadingIndicator.style.display = "none";
+      // Mostrar toast de error
+      mostrarToastError(data.error || "Error al iniciar sesión");
+      resetearBoton();
     }
   } catch (err) {
-    errorMessage.style.display = "block";
-    errorMessage.innerText = "Error de conexión con el servidor";
-    loginButton.style.display = "block";
-    loadingIndicator.style.display = "none";
+    // Mostrar toast de error
+    mostrarToastError("Error de conexión con el servidor");
+    resetearBoton();
   }
 });
+
+function mostrarToastExito() {
+  const toastElement = document.getElementById('successToast');
+  const toast = new bootstrap.Toast(toastElement, {
+    autohide: true,
+    delay: 3000
+  });
+  toast.show();
+}
+
+function mostrarToastError(mensaje) {
+  const toastElement = document.getElementById('errorToast');
+  const toastBody = toastElement.querySelector('.toast-body');
+  toastBody.textContent = mensaje + " ❌";
+  const toast = new bootstrap.Toast(toastElement, {
+    autohide: true,
+    delay: 5000
+  });
+  toast.show();
+}
+
+function resetearBoton() {
+  const loginButton = document.getElementById("loginButton");
+  const loginButtonText = document.getElementById("loginButtonText");
+  const loginButtonIcon = document.getElementById("loginButtonIcon");
+  const loginButtonSpinner = document.getElementById("loginButtonSpinner");
+  
+  loginButton.disabled = false;
+  loginButtonText.textContent = "Ingresar";
+  loginButtonIcon.style.display = "inline-block";
+  loginButtonSpinner.style.display = "none";
+}
 </script>
+
+  <!-- Toast de notificación -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #da02e5;">
+      <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #da02e5;">
+        <i class="bi bi-check-circle-fill me-2" style="color: #da02e5;"></i>
+        <strong class="me-auto">Éxito</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+        Login exitoso ✅
+      </div>
+    </div>
+    
+    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #da02e5;">
+      <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #da02e5;">
+        <i class="bi bi-exclamation-triangle-fill me-2" style="color: #da02e5;"></i>
+        <strong class="me-auto">Error</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+        Error al iniciar sesión ❌
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>

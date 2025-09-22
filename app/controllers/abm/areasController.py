@@ -59,7 +59,7 @@ class AreasController:
             # Crear nueva área
             nuevaArea = Area(
                 nombreArea=data["nombreArea"],
-                datosDelArea=data.get("datosArea"),
+                datosDelArea=data.get("datosDelArea", []),
                 usuarios=usuarios  # <- relaciona los usuarios con el área
             )
 

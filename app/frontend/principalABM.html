@@ -30,7 +30,16 @@
   border-color: #495057;
 }
 .form-control::placeholder { color: #adb5bd; }
-.form-control:focus, .form-select:focus { box-shadow: none; border-color: #6c757d; }
+.form-control:focus, .form-select:focus { 
+  box-shadow: none; 
+  border-color: #6c757d; 
+  background-color: #212529;
+  color: #f8f9fa;
+}
+.form-control:focus-visible {
+  background-color: #212529 !important;
+  color: #f8f9fa !important;
+}
 
 /* Dual list labels */
 .small.text-muted { color: #b0b0b0 !important; }
@@ -139,68 +148,17 @@
         <!-- ÁREAS -->
         <div v-show="activeTab==='areas'">
           <div class="row g-4">
-            <!-- Form crear/editar Área -->
-            <div class="col-lg-7">
-              <div class="card h-100 bg-dark text-white">
-                <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
-                  <h5 class="mb-0">{{ areaForm.idArea ? 'Editar Área' : 'Crear Área' }}</h5>
-                </div>
-                <div class="card-body">
-                  <form @submit.prevent="submitArea" class="php-email-form">
-                    <div class="mb-3">
-                      <label class="form-label">Nombre del Área</label>
-                      <input class="form-control" v-model="areaForm.nombreArea" placeholder="Ej: Ventas" required>
-                    </div>
-
-                    <div class="mb-2 d-flex justify-content-between align-items-center">
-                      <label class="form-label mb-0">Asignación de usuarios</label>
-                      <small class="text-muted" v-if="!areaForm.idArea">Se asignarán al crear el área</small>
-                      <small class="text-muted" v-else>Se actualizarán asignaciones al guardar</small>
-                    </div>
-
-                    <div class="row g-2 align-items-center">
-                      <div class="col-5">
-                        <div class="small text-muted mb-1">Disponibles</div>
-                        <select class="form-select" size="8" multiple v-model="seleccionDisponibles">
-                          <option v-for="u in usuariosDisponibles" :key="u.idUsuario" :value="u.idUsuario">
-                            {{ u.nombre }} {{ u.apellido }} — de: {{ nombreArea(u.idArea) }}
-                          </option>
-                        </select>
-                      </div>
-                      <div class="col-2 d-flex flex-column align-items-center gap-2">
-                        <button type="button" class="btn btn-outline-primary btn-sm" @click="agregarSeleccion"><i class="bi bi-chevron-right"></i></button>
-                        <button type="button" class="btn btn-outline-primary btn-sm" @click="quitarSeleccion"><i class="bi bi-chevron-left"></i></button>
-                      </div>
-                      <div class="col-5">
-                        <div class="small text-muted mb-1">Asignados</div>
-                        <select class="form-select" size="8" multiple v-model="seleccionAsignados">
-                          <option v-for="u in usuariosAsignados" :key="u.idUsuario" :value="u.idUsuario">
-                            {{ u.nombre }} {{ u.apellido }} — de: {{ nombreArea(u.idArea) }}
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div class="d-flex gap-2 mt-3">
-                      <button type="submit" class="btn btn-primary">
-                        <i class="bi" :class="areaForm.idArea ? 'bi-save' : 'bi-plus-circle' "></i>
-                        {{ areaForm.idArea ? 'Guardar cambios' : 'Crear Área' }}
-                      </button>
-                      <button v-if="areaForm.idArea" type="button" class="btn btn-secondary" @click="resetAreaForm">
-                        Cancelar
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-
             <!-- Lista de Áreas -->
-            <div class="col-lg-5">
+            <div class="col-12">
               <div class="card h-100 bg-dark text-white">
                 <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
                   <h5 class="mb-0">Áreas</h5>
-                  <button class="btn btn-outline-primary btn-sm" @click="cargarAreas"><i class="bi bi-arrow-clockwise"></i></button>
+                  <div>
+                    <button class="btn btn-outline-primary btn-sm me-2" @click="abrirModalArea()">
+                      <i class="bi bi-plus-circle"></i> Crear Área
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" @click="cargarAreas"><i class="bi bi-arrow-clockwise"></i></button>
+                  </div>
                 </div>
                 <div class="table-responsive">
                   <table class="table table-hover table-dark mb-0">
@@ -208,6 +166,7 @@
                       <tr>
                         <th>#</th>
                         <th>Nombre</th>
+                        <th>Datos</th>
                         <th>Usuarios</th>
                         <th class="text-end">Acciones</th>
                       </tr>
@@ -216,6 +175,12 @@
                       <tr v-for="a in areas" :key="a.idArea">
                         <td>{{ a.idArea }}</td>
                         <td>{{ a.nombreArea }}</td>
+                        <td>
+                          <span v-if="a.datosDelArea && a.datosDelArea.length > 0" class="badge bg-secondary me-1" v-for="dato in a.datosDelArea" :key="dato">
+                            {{ dato }}
+                          </span>
+                          <span v-else class="text-light">Sin datos</span>
+                        </td>
                         <td>{{ (a.usuarios||[]).length }}</td>
                         <td class="text-end">
                           <button class="btn btn-sm btn-outline-secondary me-2" @click="editarArea(a)"><i class="bi bi-pencil"></i></button>
@@ -223,7 +188,7 @@
                         </td>
                       </tr>
                       <tr v-if="areas.length===0">
-                        <td colspan="4" class="text-center text-muted">Sin áreas</td>
+                        <td colspan="5" class="text-center text-muted">Sin áreas</td>
                       </tr>
                     </tbody>
                   </table>
@@ -236,64 +201,17 @@
         <!-- USUARIOS -->
         <div v-show="activeTab==='usuarios'">
           <div class="row g-4">
-            <!-- Form crear/editar Usuario -->
-            <div class="col-lg-5">
-              <div class="card h-100 bg-dark text-white">
-                <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
-                  <h5 class="mb-0">{{ usuarioForm.idUsuario ? 'Editar Usuario' : 'Crear Usuario' }}</h5>
-                </div>
-                <div class="card-body">
-                  <form @submit.prevent="submitUsuario" class="php-email-form">
-                    <div class="mb-3">
-                      <label class="form-label">Nombre de usuario</label>
-                      <input class="form-control" v-model="usuarioForm.nombreUsuario" :required="!usuarioForm.idUsuario">
-                    </div>
-                    <div class="mb-3" v-if="!usuarioForm.idUsuario">
-                      <label class="form-label">Password</label>
-                      <input type="password" class="form-control" v-model="usuarioForm.password" :required="!usuarioForm.idUsuario">
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label">Nombre</label>
-                      <input class="form-control" v-model="usuarioForm.nombre" required>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label">Apellido</label>
-                      <input class="form-control" v-model="usuarioForm.apellido" required>
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label">Correo</label>
-                      <input type="email" class="form-control" v-model="usuarioForm.correo">
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label">Teléfono</label>
-                      <input class="form-control" v-model="usuarioForm.telefono">
-                    </div>
-                    <div class="mb-3">
-                      <label class="form-label">Área</label>
-                      <select class="form-select" v-model.number="usuarioForm.idArea">
-                        <option :value="null">Sin área</option>
-                        <option v-for="a in areas" :key="a.idArea" :value="a.idArea">{{ a.nombreArea }}</option>
-                      </select>
-                      <small class="text-muted">Para crear, el área se asignará luego de la creación.</small>
-                    </div>
-                    <div class="d-flex gap-2">
-                      <button type="submit" class="btn btn-primary">
-                        <i class="bi" :class="usuarioForm.idUsuario ? 'bi-save' : 'bi-plus-circle' "></i>
-                        {{ usuarioForm.idUsuario ? 'Guardar cambios' : 'Crear Usuario' }}
-                      </button>
-                      <button v-if="usuarioForm.idUsuario" type="button" class="btn btn-secondary" @click="resetUsuarioForm">Cancelar</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-
             <!-- Lista de Usuarios -->
-            <div class="col-lg-7">
+            <div class="col-12">
               <div class="card h-100 bg-dark text-white">
                 <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
                   <h5 class="mb-0">Usuarios</h5>
-                  <button class="btn btn-outline-primary btn-sm" @click="cargarUsuarios"><i class="bi bi-arrow-clockwise"></i></button>
+                  <div>
+                    <button class="btn btn-outline-primary btn-sm me-2" @click="abrirModalUsuario()">
+                      <i class="bi bi-plus-circle"></i> Crear Usuario
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" @click="cargarUsuarios"><i class="bi bi-arrow-clockwise"></i></button>
+                  </div>
                 </div>
                 <div class="table-responsive">
                   <table class="table table-hover table-dark mb-0">
@@ -330,6 +248,156 @@
           </div>
         </div>
 
+        <!-- Modal para Áreas -->
+        <div class="modal fade" id="modalArea" tabindex="-1" aria-labelledby="modalAreaLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-white">
+              <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="modalAreaLabel">{{ areaForm.idArea ? 'Editar Área' : 'Crear Área' }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form @submit.prevent="submitArea" class="php-email-form">
+                  <div class="mb-3">
+                    <label class="form-label">Nombre del Área</label>
+                    <input class="form-control" v-model="areaForm.nombreArea" placeholder="Ej: Ventas" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Datos del Área</label>
+                    <textarea class="form-control" v-model="datosDelAreaTexto" rows="3" placeholder="Ingrese los datos del área, uno por línea o separados por comas"></textarea>
+                    <small class="text-muted">Cada línea o elemento separado por coma será un dato del área</small>
+                  </div>
+
+                  <div class="mb-2 d-flex justify-content-between align-items-center">
+                    <label class="form-label mb-0">Asignación de usuarios</label>
+                    <small class="text-muted" v-if="!areaForm.idArea">Se asignarán al crear el área</small>
+                    <small class="text-muted" v-else>Se actualizarán asignaciones al guardar</small>
+                  </div>
+
+                  <div class="row g-2 align-items-center">
+                    <div class="col-5">
+                      <div class="small text-muted mb-1">Disponibles</div>
+                      <select class="form-select" size="8" multiple v-model="seleccionDisponibles">
+                        <option v-for="u in usuariosDisponibles" :key="u.idUsuario" :value="u.idUsuario">
+                          {{ u.nombre }} {{ u.apellido }} — de: {{ nombreArea(u.idArea) }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="col-2 d-flex flex-column align-items-center gap-2">
+                      <button type="button" class="btn btn-outline-primary btn-sm" @click="agregarSeleccion"><i class="bi bi-chevron-right"></i></button>
+                      <button type="button" class="btn btn-outline-primary btn-sm" @click="quitarSeleccion"><i class="bi bi-chevron-left"></i></button>
+                    </div>
+                    <div class="col-5">
+                      <div class="small text-muted mb-1">Asignados</div>
+                      <select class="form-select" size="8" multiple v-model="seleccionAsignados">
+                        <option v-for="u in usuariosAsignados" :key="u.idUsuario" :value="u.idUsuario">
+                          {{ u.nombre }} {{ u.apellido }} — de: {{ nombreArea(u.idArea) }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="loadingArea">Cancelar</button>
+                <button type="button" class="btn btn-primary" @click="submitArea" :disabled="loadingArea">
+                  <span v-if="loadingArea" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <i v-else class="bi" :class="areaForm.idArea ? 'bi-save' : 'bi-plus-circle' "></i>
+                  {{ loadingArea ? 'Procesando...' : (areaForm.idArea ? 'Guardar cambios' : 'Crear Área') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal para Usuarios -->
+        <div class="modal fade" id="modalUsuario" tabindex="-1" aria-labelledby="modalUsuarioLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-white">
+              <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="modalUsuarioLabel">{{ usuarioForm.idUsuario ? 'Editar Usuario' : 'Crear Usuario' }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form @submit.prevent="submitUsuario" class="php-email-form">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label">Nombre de usuario</label>
+                        <input class="form-control" v-model="usuarioForm.nombreUsuario" :required="!usuarioForm.idUsuario">
+                      </div>
+                      <div class="mb-3" v-if="!usuarioForm.idUsuario">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" v-model="usuarioForm.password" :required="!usuarioForm.idUsuario">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input class="form-control" v-model="usuarioForm.nombre" required>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Apellido</label>
+                        <input class="form-control" v-model="usuarioForm.apellido" required>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label">Correo</label>
+                        <input type="email" class="form-control" v-model="usuarioForm.correo">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Teléfono</label>
+                        <input class="form-control" v-model="usuarioForm.telefono">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Área</label>
+                        <select class="form-select" v-model.number="usuarioForm.idArea">
+                          <option :value="null">Sin área</option>
+                          <option v-for="a in areas" :key="a.idArea" :value="a.idArea">{{ a.nombreArea }}</option>
+                        </select>
+                        <small class="text-muted">Para crear, el área se asignará luego de la creación.</small>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="loadingUsuario">Cancelar</button>
+                <button type="button" class="btn btn-primary" @click="submitUsuario" :disabled="loadingUsuario">
+                  <span v-if="loadingUsuario" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <i v-else class="bi" :class="usuarioForm.idUsuario ? 'bi-save' : 'bi-plus-circle' "></i>
+                  {{ loadingUsuario ? 'Procesando...' : (usuarioForm.idUsuario ? 'Guardar cambios' : 'Crear Usuario') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toast de notificación -->
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+          <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #da02e5;">
+            <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #da02e5;">
+              <i class="bi bi-check-circle-fill me-2" style="color: #da02e5;"></i>
+              <strong class="me-auto">Éxito</strong>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+              <span id="successMessage">Operación completada correctamente ✅</span>
+            </div>
+          </div>
+          
+          <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #dc3545;">
+            <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #dc3545;">
+              <i class="bi bi-exclamation-triangle-fill me-2" style="color: #dc3545;"></i>
+              <strong class="me-auto">Error</strong>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+              <span id="errorMessage">No se pudo completar la operación</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
   </main>
@@ -354,9 +422,12 @@
           usuarios: [],
           seleccionDisponibles: [],
           seleccionAsignados: [],
+          loadingArea: false,
+          loadingUsuario: false,
           areaForm: {
             idArea: null,
             nombreArea: '',
+            datosDelArea: [],
             usuariosSeleccionados: []
           },
           usuarioForm: {
@@ -382,9 +453,36 @@
         },
         destinoAreaNombre() {
           return this.areaForm.idArea ? this.nombreArea(this.areaForm.idArea) : '(nueva área)';
+        },
+        datosDelAreaTexto: {
+          get() {
+            return this.areaForm.datosDelArea ? this.areaForm.datosDelArea.join('\n') : '';
+          },
+          set(value) {
+            if (!value || value.trim() === '') {
+              this.areaForm.datosDelArea = [];
+            } else {
+              // Dividir por líneas o comas y limpiar espacios
+              this.areaForm.datosDelArea = value
+                .split(/[\n,]/)
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
+            }
+          }
         }
       },
       methods: {
+        showToast(type, message) {
+          if (type === 'success') {
+            document.getElementById('successMessage').textContent = message;
+            const toast = new bootstrap.Toast(document.getElementById('successToast'));
+            toast.show();
+          } else {
+            document.getElementById('errorMessage').textContent = message;
+            const toast = new bootstrap.Toast(document.getElementById('errorToast'));
+            toast.show();
+          }
+        },
         nombreArea(idArea) {
           const a = this.areas.find(x => x.idArea === idArea);
           return a ? a.nombreArea : '—';
@@ -417,25 +515,35 @@
             this.areaForm.usuariosSeleccionados = this.usuarios.filter(u => u.idArea === idArea).map(u => u.idUsuario);
           }
         },
+        abrirModalArea() {
+          this.resetAreaForm();
+          const modal = new bootstrap.Modal(document.getElementById('modalArea'));
+          modal.show();
+        },
         editarArea(area) {
           this.areaForm.idArea = area.idArea;
           this.areaForm.nombreArea = area.nombreArea;
+          this.areaForm.datosDelArea = area.datosDelArea || [];
           // Pre-cargar asignados actuales
           this.areaForm.usuariosSeleccionados = this.usuarios.filter(u => u.idArea === area.idArea).map(u => u.idUsuario);
           this.seleccionDisponibles = [];
           this.seleccionAsignados = [];
+          const modal = new bootstrap.Modal(document.getElementById('modalArea'));
+          modal.show();
         },
         resetAreaForm() {
-          this.areaForm = { idArea: null, nombreArea: '', usuariosSeleccionados: [] };
+          this.areaForm = { idArea: null, nombreArea: '', datosDelArea: [], usuariosSeleccionados: [] };
           this.seleccionDisponibles = [];
           this.seleccionAsignados = [];
         },
         async submitArea() {
+          this.loadingArea = true;
           try {
             if (!this.areaForm.idArea) {
               // Crear área (permite asignar usuarios en payload)
               const payload = {
                 nombreArea: this.areaForm.nombreArea,
+                datosDelArea: this.areaForm.datosDelArea,
                 usuarios: this.areaForm.usuariosSeleccionados
               };
               const resp = await fetch(`${API}/api/areas`, {
@@ -444,12 +552,16 @@
                 body: JSON.stringify(payload)
               });
               if (!resp.ok) throw new Error('Error creando área');
+              this.showToast('success', 'Área creada correctamente ✅');
             } else {
-              // Editar nombre de área
+              // Editar área
               const resp = await fetch(`${API}/api/areas/${this.areaForm.idArea}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombreArea: this.areaForm.nombreArea })
+                body: JSON.stringify({ 
+                  nombreArea: this.areaForm.nombreArea,
+                  datosDelArea: this.areaForm.datosDelArea
+                })
               });
               if (!resp.ok) throw new Error('Error editando área');
 
@@ -478,12 +590,18 @@
                   body: JSON.stringify({ idArea: null })
                 });
               }
+              this.showToast('success', 'Área editada correctamente ✅');
             }
             await this.cargarAreas();
             await this.cargarUsuarios();
             this.resetAreaForm();
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalArea'));
+            if (modal) modal.hide();
           } catch (e) {
-            alert(e.message || 'Error en operación de área');
+            this.showToast('error', e.message || 'Error en operación de área');
+          } finally {
+            this.loadingArea = false;
           }
         },
         async eliminarArea(area) {
@@ -500,6 +618,11 @@
           const data = await resp.json();
           this.usuarios = data.usuarios || [];
         },
+        abrirModalUsuario() {
+          this.resetUsuarioForm();
+          const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
+          modal.show();
+        },
         editarUsuario(usuario) {
           this.usuarioForm = {
             idUsuario: usuario.idUsuario,
@@ -512,11 +635,14 @@
             idArea: usuario.idArea
           };
           this.activeTab = 'usuarios';
+          const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
+          modal.show();
         },
         resetUsuarioForm() {
           this.usuarioForm = { idUsuario: null, nombreUsuario: '', password: '', nombre: '', apellido: '', correo: '', telefono: '', idArea: null };
         },
         async submitUsuario() {
+          this.loadingUsuario = true;
           try {
             if (!this.usuarioForm.idUsuario) {
               // Crear usuario (sin área — se asigna luego si corresponde)
@@ -547,6 +673,7 @@
                   });
                 }
               }
+              this.showToast('success', 'Usuario creado correctamente ✅');
             } else {
               // Editar usuario (incluye reasignar área)
               const payload = {
@@ -563,12 +690,18 @@
                 body: JSON.stringify(payload)
               });
               if (!resp.ok) throw new Error('Error editando usuario');
+              this.showToast('success', 'Usuario editado correctamente ✅');
             }
             await this.cargarUsuarios();
             await this.cargarAreas();
             this.resetUsuarioForm();
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalUsuario'));
+            if (modal) modal.hide();
           } catch (e) {
-            alert(e.message || 'Error en operación de usuario');
+            this.showToast('error', e.message || 'Error en operación de usuario');
+          } finally {
+            this.loadingUsuario = false;
           }
         },
         async eliminarUsuario(usuario) {
