@@ -1,5 +1,5 @@
 from flask import jsonify
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from app.backend.models import Usuario
 from app.backend.models.usuarioxevento import UsuarioxEvento
 from app.backend.models.resultadoEvento import ResultadoEvento
@@ -501,5 +501,102 @@ class AreasController:
         except Exception as e:
             session.rollback()
             return responseError("ERROR", f"No se pudo obtener el reporte por fecha: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def obtenerFallasPorEmpleado(tipos_evento=None):
+        from app.backend.models.evento import Evento
+        from app.backend.models.tipoEvento import TipoEvento
+        
+        session = SessionLocal()
+        try:
+            # Traer todas las áreas para garantizar inclusión aunque no tengan fallas
+            todas_las_areas = session.query(Area.idArea, Area.nombreArea).all()
+
+            # Inicializar el diccionario con todas las áreas
+            areas_dict = {
+                a.idArea: {
+                    "idArea": a.idArea,
+                    "nombreArea": a.nombreArea,
+                    "totalFallas": 0,
+                    "totalEmpleados": 0,
+                    "empleadosConFalla": 0,
+                    "empleados": []
+                }
+                for a in todas_las_areas
+            }
+
+            # Query para obtener todos los empleados por área (con y sin fallas)
+            query_empleados = (
+                session.query(
+                    Area.idArea,
+                    Area.nombreArea,
+                    Usuario.idUsuario,
+                    Usuario.nombre,
+                    Usuario.apellido,
+                    func.count(UsuarioxEvento.idEvento).label("cantidadFallas")
+                )
+                .join(Usuario, Usuario.idArea == Area.idArea)
+                .outerjoin(UsuarioxEvento, 
+                          and_(UsuarioxEvento.idUsuario == Usuario.idUsuario,
+                               UsuarioxEvento.resultado == ResultadoEvento.FALLA))
+                .outerjoin(Evento, Evento.idEvento == UsuarioxEvento.idEvento)
+            )
+            
+            # Aplicar filtro por tipos de evento si se especifica
+            if tipos_evento and len(tipos_evento) > 0:
+                query_empleados = query_empleados.filter(Evento.tipoEvento.in_(tipos_evento))
+            
+            resultados_empleados = (
+                query_empleados.group_by(
+                    Area.idArea,
+                    Area.nombreArea,
+                    Usuario.idUsuario,
+                    Usuario.nombre,
+                    Usuario.apellido
+                )
+                .all()
+            )
+
+            # Completar datos con los resultados
+            for r in resultados_empleados:
+                area_info = areas_dict.get(r.idArea)
+                if not area_info:
+                    # Por seguridad, aunque no debería pasar
+                    areas_dict[r.idArea] = {
+                        "idArea": r.idArea,
+                        "nombreArea": r.nombreArea,
+                        "totalFallas": 0,
+                        "totalEmpleados": 0,
+                        "empleadosConFalla": 0,
+                        "empleados": []
+                    }
+                    area_info = areas_dict[r.idArea]
+
+                cantidad_fallas = int(r.cantidadFallas) if r.cantidadFallas else 0
+                
+                area_info["empleados"].append({
+                    "idUsuario": r.idUsuario,
+                    "nombre": r.nombre,
+                    "apellido": r.apellido,
+                    "cantidadFallas": cantidad_fallas,
+                    "tieneFallas": cantidad_fallas > 0
+                })
+                
+                area_info["totalEmpleados"] += 1
+                area_info["totalFallas"] += cantidad_fallas
+                
+                if cantidad_fallas > 0:
+                    area_info["empleadosConFalla"] += 1
+
+            # Ordenar empleados por cantidad de fallas (descendente)
+            for area in areas_dict.values():
+                area["empleados"].sort(key=lambda x: x["cantidadFallas"], reverse=True)
+
+            return jsonify({"areas": list(areas_dict.values())}), 200
+        except Exception as e:
+            session.rollback()
+            return responseError("ERROR", f"No se pudo obtener el reporte de fallas por empleado: {str(e)}", 500)
         finally:
             session.close()

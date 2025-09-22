@@ -430,6 +430,28 @@ def obtenerFallasPorCampania():
     return AreasController.obtenerFallasPorCampania(areas if areas else None)
 
 
+@apis.route("/api/areas/fallas-empleado", methods=["GET"])
+def obtenerFallasPorEmpleado():
+    from app.backend.models.tipoEvento import TipoEvento
+
+    # Obtener parámetros de filtro por tipos de evento (múltiples)
+    tipos_evento_params = request.args.getlist('tipo_evento')
+    tipos_evento = []
+
+    if tipos_evento_params:
+        # Mapear los valores del frontend a los enums
+        tipo_mapping = {
+            'CORREO': TipoEvento.CORREO,
+            'MENSAJE': TipoEvento.MENSAJE,
+            'LLAMADA': TipoEvento.LLAMADA,
+            'VIDEOLLAMADA': TipoEvento.VIDEOLLAMADA
+        }
+        tipos_evento = [tipo_mapping.get(tipo.upper()) for tipo in tipos_evento_params if
+                        tipo_mapping.get(tipo.upper())]
+
+    return AreasController.obtenerFallasPorEmpleado(tipos_evento if tipos_evento else None)
+
+
 # ------ # NGROK # ------ #
 @apis.route("/api/ngrok/crear-tunel", methods=["POST"])
 def crear_tunel_ngrok():
