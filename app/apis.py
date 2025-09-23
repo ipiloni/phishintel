@@ -11,6 +11,7 @@ from app.controllers.abm.eventosController import EventosController
 from app.controllers.llamadas.llamadasController import LlamadasController
 from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.resultadoEventoController import ResultadoEventoController
+from app.controllers.controllerKpis import ControllerKpis
 from app.controllers.mensajes.msjController import MsjController
 from app.controllers.mensajes.telegram import telegram_bot
 from app.controllers.mensajes.whatsapp import WhatsAppController
@@ -116,20 +117,20 @@ def sumarFalla():
     data = request.get_json()
     idUsuario = data.get("idUsuario")
     idEvento = data.get("idEvento")
-    fecha_falla = data.get("fecha_falla")
+    fechaFalla = data.get("fechaFalla")
     
     if not idUsuario or not idEvento:
         return responseError("CAMPOS_OBLIGATORIOS", "Faltan parámetros 'idUsuario' o 'idEvento'", 400)
     
-    # Convertir fecha_falla a datetime si se proporciona
-    if fecha_falla:
+    # Convertir fechaFalla a datetime si se proporciona
+    if fechaFalla:
         try:
-            fecha_falla = datetime.fromisoformat(fecha_falla.replace('Z', '+00:00'))
+            fechaFalla = datetime.fromisoformat(fechaFalla.replace('Z', '+00:00'))
         except ValueError:
             return responseError("FECHA_INVALIDA", "Formato de fecha inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
     
     log.info(f"se sumará una falla al usuario '{str(idUsuario)}' del evento '{str(idEvento)}'")
-    return ResultadoEventoController.sumarFalla(idUsuario, idEvento, fecha_falla)
+    return ResultadoEventoController.sumarFalla(idUsuario, idEvento, fechaFalla)
 
 
 @apis.route("/api/sumar-reportado", methods=["POST"])
@@ -137,20 +138,20 @@ def sumarReportado():
     data = request.get_json()
     idUsuario = data.get("idUsuario")
     idEvento = data.get("idEvento")
-    fecha_reporte = data.get("fecha_reporte")
+    fechaReporte = data.get("fechaReporte")
     
     if not idUsuario or not idEvento:
         return responseError("CAMPOS_OBLIGATORIOS", "Faltan parámetros 'idUsuario' o 'idEvento'", 400)
     
-    # Convertir fecha_reporte a datetime si se proporciona
-    if fecha_reporte:
+    # Convertir fechaReporte a datetime si se proporciona
+    if fechaReporte:
         try:
-            fecha_reporte = datetime.fromisoformat(fecha_reporte.replace('Z', '+00:00'))
+            fechaReporte = datetime.fromisoformat(fechaReporte.replace('Z', '+00:00'))
         except ValueError:
             return responseError("FECHA_INVALIDA", "Formato de fecha inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
     
     log.info(f"se sumará un reporte al usuario '{str(idUsuario)}' del evento '{str(idEvento)}'")
-    return ResultadoEventoController.sumarReportado(idUsuario, idEvento, fecha_reporte)
+    return ResultadoEventoController.sumarReportado(idUsuario, idEvento, fechaReporte)
 
 
 @apis.route("/api/eventos", methods=["GET"])
@@ -179,26 +180,26 @@ def editarEvento(idEvento):
 def asociarUsuarioEvento(idEvento, idUsuario):
     data = request.get_json()
     resultado_val = data.get("resultado")
-    fecha_reporte = data.get("fecha_reporte")
-    fecha_falla = data.get("fecha_falla")
+    fechaReporte = data.get("fechaReporte")
+    fechaFalla = data.get("fechaFalla")
     
     if not resultado_val:
         return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo 'resultado'", 400)
     
     # Convertir fechas a datetime si se proporcionan
-    if fecha_reporte:
+    if fechaReporte:
         try:
-            fecha_reporte = datetime.fromisoformat(fecha_reporte.replace('Z', '+00:00'))
+            fechaReporte = datetime.fromisoformat(fechaReporte.replace('Z', '+00:00'))
         except ValueError:
-            return responseError("FECHA_INVALIDA", "Formato de fecha_reporte inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
+            return responseError("FECHA_INVALIDA", "Formato de fechaReporte inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
     
-    if fecha_falla:
+    if fechaFalla:
         try:
-            fecha_falla = datetime.fromisoformat(fecha_falla.replace('Z', '+00:00'))
+            fechaFalla = datetime.fromisoformat(fechaFalla.replace('Z', '+00:00'))
         except ValueError:
-            return responseError("FECHA_INVALIDA", "Formato de fecha_falla inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
+            return responseError("FECHA_INVALIDA", "Formato de fechaFalla inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
     
-    return EventosController.asociarUsuarioEvento(idEvento, idUsuario, resultado_val, fecha_reporte, fecha_falla)
+    return EventosController.asociarUsuarioEvento(idEvento, idUsuario, resultado_val, fechaReporte, fechaFalla)
 
 
 @apis.route("/api/eventos/<int:idEvento>", methods=["DELETE"])
@@ -442,6 +443,15 @@ def obtenerFallasPorEmpleado():
                         tipo_mapping.get(tipo.upper())]
 
     return AreasController.obtenerFallasPorEmpleado(tipos_evento if tipos_evento else None)
+
+
+@apis.route("/api/kpis/tiempo-respuesta", methods=["GET"])
+def obtenerTiempoRespuestaKPI():
+    """
+    Endpoint para obtener el KPI de tiempo de respuesta promedio.
+    Calcula la diferencia en horas entre fechaReporte y fechaEvento para eventos reportados.
+    """
+    return ControllerKpis.obtenerTiempoRespuestaPromedio()
 
 
 # ------ # NGROK # ------ #

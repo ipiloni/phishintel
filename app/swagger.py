@@ -511,6 +511,84 @@ def openapi_spec():
                         "500": {"description": "Error del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
                     }
                 }
+            },
+            "/api/kpis/tiempo-respuesta": {
+                "get": {
+                    "summary": "📊 Obtener KPI de Tiempo de Respuesta Promedio",
+                    "description": "Calcula el tiempo de respuesta promedio para eventos reportados por usuarios. Mide la diferencia en horas entre la fecha de reporte (usuarioxevento.fechaReporte) y la fecha de creación del evento (evento.fechaEvento). Incluye clasificación automática basada en objetivos de madurez organizacional. Implementado en ControllerKpis.",
+                    "tags": ["📊 Reportes"],
+                    "responses": {
+                        "200": {
+                            "description": "KPI de tiempo de respuesta calculado exitosamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "tiempoRespuestaPromedio": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "description": "Tiempo promedio de respuesta en horas",
+                                                "example": 2.5
+                                            },
+                                            "tiempoRespuestaMediana": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "description": "Mediana del tiempo de respuesta en horas",
+                                                "example": 1.8
+                                            },
+                                            "tiempoRespuestaP90": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "description": "Percentil 90 del tiempo de respuesta en horas",
+                                                "example": 8.5
+                                            },
+                                            "totalEventosReportados": {
+                                                "type": "integer",
+                                                "description": "Número total de eventos reportados analizados",
+                                                "example": 45
+                                            },
+                                            "clasificacion": {
+                                                "type": "string",
+                                                "description": "Clasificación de madurez organizacional basada en los tiempos de respuesta",
+                                                "enum": [
+                                                    "Vigilantes del Ciberespacio",
+                                                    "Guardianes Anti-Phishing", 
+                                                    "Defensores Digitales",
+                                                    "Aprendices de Seguridad",
+                                                    "Presas del Phishing",
+                                                    "Crítico",
+                                                    "Sin datos"
+                                                ],
+                                                "example": "Defensores Digitales"
+                                            },
+                                            "nivel": {
+                                                "type": "integer",
+                                                "description": "Nivel de madurez (0-5, donde 5 es el más alto)",
+                                                "minimum": 0,
+                                                "maximum": 5,
+                                                "example": 3
+                                            },
+                                            "descripcion": {
+                                                "type": "string",
+                                                "description": "Descripción detallada de la clasificación y criterios utilizados",
+                                                "example": "Respuesta estándar con procesos establecidos. Mediana ≤ 4h, P90 ≤ 48h"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {
+                            "description": "Error del servidor al calcular el KPI",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/Error"}
+                                }
+                            }
+                        }
+                    }
+                }
             }
             ,
             "/api/eventos": {
@@ -591,8 +669,8 @@ def openapi_spec():
                                         "summary": "Con fechas específicas",
                                         "value": {
                                             "resultado": "FALLA",
-                                            "fecha_falla": "2025-01-15T10:30:00",
-                                            "fecha_reporte": "2025-01-15T11:00:00"
+                                            "fechaFalla": "2025-01-15T10:30:00",
+                                            "fechaReporte": "2025-01-15T11:00:00"
                                         }
                                     }
                                 }
@@ -640,7 +718,7 @@ def openapi_spec():
                                         "value": {
                                             "idUsuario": 1,
                                             "idEvento": 1,
-                                            "fecha_falla": "2025-01-15T10:30:00"
+                                            "fechaFalla": "2025-01-15T10:30:00"
                                         }
                                     }
                                 }
@@ -658,7 +736,7 @@ def openapi_spec():
                                             "mensaje": {"type": "string"},
                                             "idUsuario": {"type": "integer"},
                                             "idEvento": {"type": "integer"},
-                                            "fecha_falla": {"type": "string", "format": "date-time"}
+                                            "fechaFalla": {"type": "string", "format": "date-time"}
                                         }
                                     }
                                 }
@@ -691,7 +769,7 @@ def openapi_spec():
                                         "value": {
                                             "idUsuario": 1,
                                             "idEvento": 1,
-                                            "fecha_reporte": "2025-01-15T10:30:00"
+                                            "fechaReporte": "2025-01-15T10:30:00"
                                         }
                                     }
                                 }
@@ -709,7 +787,7 @@ def openapi_spec():
                                             "mensaje": {"type": "string"},
                                             "idUsuario": {"type": "integer"},
                                             "idEvento": {"type": "integer"},
-                                            "fecha_reporte": {"type": "string", "format": "date-time"}
+                                            "fechaReporte": {"type": "string", "format": "date-time"}
                                         }
                                     }
                                 }
@@ -1298,8 +1376,8 @@ def openapi_spec():
                                     "idUsuario": {"type": "integer"},
                                     "nombreUsuario": {"type": "string"},
                                     "resultado": {"$ref": "#/components/schemas/ResultadoEvento"},
-                                    "fecha_reporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (si existe)"},
-                                    "fecha_falla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (si existe)"}
+                                    "fechaReporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (si existe)"},
+                                    "fechaFalla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (si existe)"}
                                 }
                             }
                         }
@@ -1514,7 +1592,7 @@ def openapi_spec():
                     "properties": {
                         "idUsuario": {"type": "integer", "description": "ID del usuario"},
                         "idEvento": {"type": "integer", "description": "ID del evento"},
-                        "fecha_falla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (OPCIONAL - si no se proporciona se usa la fecha y hora actual automáticamente)"}
+                        "fechaFalla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (OPCIONAL - si no se proporciona se usa la fecha y hora actual automáticamente)"}
                     }
                 },
                 "SumarReportado": {
@@ -1523,7 +1601,7 @@ def openapi_spec():
                     "properties": {
                         "idUsuario": {"type": "integer", "description": "ID del usuario"},
                         "idEvento": {"type": "integer", "description": "ID del evento"},
-                        "fecha_reporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (OPCIONAL - si no se proporciona se usa la fecha y hora actual automáticamente)"}
+                        "fechaReporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (OPCIONAL - si no se proporciona se usa la fecha y hora actual automáticamente)"}
                     }
                 },
                 "AsociarUsuarioEvento": {
@@ -1531,8 +1609,8 @@ def openapi_spec():
                     "required": ["resultado"],
                     "properties": {
                         "resultado": {"$ref": "#/components/schemas/ResultadoEvento", "description": "Estado actual del evento para este usuario"},
-                        "fecha_reporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (OPCIONAL)"},
-                        "fecha_falla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (OPCIONAL)"}
+                        "fechaReporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (OPCIONAL)"},
+                        "fechaFalla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (OPCIONAL)"}
                     }
                 }
             }

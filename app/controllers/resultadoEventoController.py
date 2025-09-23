@@ -12,7 +12,7 @@ conteo_fallas = {"total": 0}
 class ResultadoEventoController:
 
     @staticmethod
-    def sumarFalla(idUsuario, idEvento, fecha_falla=None):
+    def sumarFalla(idUsuario, idEvento, fechaFalla=None):
         session = SessionLocal()
         try:
             # Buscar relación usuario-evento
@@ -28,16 +28,16 @@ class ResultadoEventoController:
             # Actualizar a FALLA
             usuario_evento.resultado = ResultadoEvento.FALLA
             # Si no se proporciona fecha, usar la fecha actual
-            if fecha_falla is None:
-                fecha_falla = datetime.now()
-            usuario_evento.fecha_falla = fecha_falla
+            if fechaFalla is None:
+                fechaFalla = datetime.now()
+            usuario_evento.fechaFalla = fechaFalla
             session.commit()
 
             return jsonify({
                 "mensaje": "Falla registrada", 
                 "idUsuario": idUsuario, 
                 "idEvento": idEvento,
-                "fecha_falla": fecha_falla.isoformat()
+                "fechaFalla": fechaFalla.isoformat()
             }), 200
 
         except Exception as e:
@@ -48,7 +48,7 @@ class ResultadoEventoController:
             session.close()
 
     @staticmethod
-    def sumarReportado(idUsuario, idEvento, fecha_reporte=None):
+    def sumarReportado(idUsuario, idEvento, fechaReporte=None):
         session = SessionLocal()
         try:
             # Buscar relación usuario-evento
@@ -64,16 +64,16 @@ class ResultadoEventoController:
             # Actualizar a REPORTADO
             usuario_evento.resultado = ResultadoEvento.REPORTADO
             # Si no se proporciona fecha, usar la fecha actual
-            if fecha_reporte is None:
-                fecha_reporte = datetime.now()
-            usuario_evento.fecha_reporte = fecha_reporte
+            if fechaReporte is None:
+                fechaReporte = datetime.now()
+            usuario_evento.fechaReporte = fechaReporte
             session.commit()
 
             return jsonify({
                 "mensaje": "Reporte registrado", 
                 "idUsuario": idUsuario, 
                 "idEvento": idEvento,
-                "fecha_reporte": fecha_reporte.isoformat()
+                "fechaReporte": fechaReporte.isoformat()
             }), 200
 
         except Exception as e:
