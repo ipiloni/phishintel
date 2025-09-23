@@ -1,18 +1,35 @@
-from flask import Response, jsonify
-from twilio.twiml.voice_response import Gather, VoiceResponse, Play
+from flask import Response
+from twilio.twiml.voice_response import Gather, VoiceResponse
 
 from app.backend.apis.elevenLabs import elevenLabs
 from app.backend.apis.twilio import twilio
 from app.backend.models.error import responseError
 from app.controllers.aiController import AIController
-from app.controllers.webScrappingController import WebScrappingController
 from app.utils.config import get
 from app.utils import conversacion
 from app.utils.logger import log
 
 password = get("LLAMAR_PASSWORD")
+host = get("URL_APP")
 
 class LlamadasController:
+
+    # @staticmethod
+    # def generarLlamada(data):
+    #
+    #     response = LlamadasController.validarRequestLlamada(data)
+    #
+    #     if response is not None:
+    #         return response
+    #
+    #     1. Revisar a quien estamos llamando, debe ser un usuario de la base.
+    #     2. Crear el evento llamada
+    #     3. Asociarlo al usuario
+    #     4. Generar la conversacion
+    #     5. Guardar en la base el evento
+    #     6. Llamar usuario
+    #     7. Luego en otro metodo (al obtener la respuesta del usuario), guardar nuevamente en el evento la conversacion (actualizarla) 
+    #     (deberiamos crear un hilo para no aumentar el tiempo de procesamiento)
 
     @staticmethod
     def llamar(data):
@@ -83,12 +100,12 @@ class LlamadasController:
             if destinatario == remitente:
                 return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
 
-            url = "https://veterinary-useful-attributes-dam.trycloudflare.com"  # localhost, ngrok o cuando se despliegue
+            url = host
             conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
 
             log.info(f"La URL del audio actual es: {conversacion.urlAudioActual}")
 
-            return twilio.llamar(destinatario, remitente, "https://veterinary-useful-attributes-dam.trycloudflare.com/api/twilio/accion")
+            return twilio.llamar(destinatario, remitente, host + "/api/twilio/accion")
 
         except Exception as e:
             log.error(e)
@@ -119,29 +136,12 @@ class LlamadasController:
 
             log.info("Se expone el audio para que Twilio lo reproduzca")
 
-            url = "https://veterinary-useful-attributes-dam.trycloudflare.com"  # localhost, ngrok o cuando se despliegue
+            url = host  # localhost, ngrok o cuando se despliegue
             conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
 
             log.info(f"URL audio actual: {conversacion.urlAudioActual}")
 
-            response = VoiceResponse()
-
-            response.play(conversacion.urlAudioActual)
-
-            gather = Gather(
-                input='speech',
-                language="es-MX",
-                action='https://veterinary-useful-attributes-dam.trycloudflare.com/api/twilio/respuesta',
-                method='POST',
-                speech_timeout='auto',
-                timeout=3
-            )
-
-            response.append(gather)
-
-            log.info(f"Lo que le mandamos a twilio es: {str(response)}")
-
-            return Response(str(response), mimetype="application/xml")
+            return LlamadasController.generarAccionesEnLlamada()
 
         except Exception as e:
             log.error(f"Hubo un error en el procesamiento de la respuesta de la llamada: {str(e)}")
@@ -149,17 +149,15 @@ class LlamadasController:
 
     @staticmethod
     def generarAccionesEnLlamada():
-        log.info("Reproduciendo audio...")
-        response = VoiceResponse()
 
-        log.info(f"URL actual de audio: {conversacion.urlAudioActual}")
+        response = VoiceResponse()
 
         response.play(conversacion.urlAudioActual)
 
         gather = Gather(
             input='speech',
             language="es-MX",
-            action='https://veterinary-useful-attributes-dam.trycloudflare.com/api/twilio/respuesta',
+            action=host + '/api/twilio/respuesta',
             method='POST',
             speech_timeout='auto',
             timeout=3
@@ -170,3 +168,18 @@ class LlamadasController:
         log.info(f"Lo que le mandamos a twilio es: {str(response)}")
 
         return Response(str(response), mimetype="application/xml")
+
+
+    @staticmethod
+    def validarRequestLlamada(data):
+        if not data or "password" not in data:
+            return responseError("CREDENCIAL_INCORRECTA", "Credencial incorrecta", 401)
+
+        if data["password"] != password:
+            return responseError("CREDENCIAL_INCORRECTA", "Credencial incorrecta", 401)
+
+        if "destinatario" not in data or "remitente" not in data:
+            return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'destinatario', o 'remitente'",400)
+
+        return None
+        # validar usuario a llamar, demas cosas
