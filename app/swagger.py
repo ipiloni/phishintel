@@ -554,13 +554,13 @@ def openapi_spec():
                                                 "enum": [
                                                     "Vigilantes del Ciberespacio",
                                                     "Guardianes Anti-Phishing", 
-                                                    "Escudos digitales",
+                                                    "Defensores Digitales",
                                                     "Aprendices de Seguridad",
                                                     "Presas del Phishing",
                                                     "Crítico",
                                                     "Sin datos"
                                                 ],
-                                                "example": "Escudos digitales"
+                                                "example": "Defensores Digitales"
                                             },
                                             "nivel": {
                                                 "type": "integer",

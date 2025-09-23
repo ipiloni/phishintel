@@ -100,15 +100,15 @@ class ControllerKpis:
         
         # Vigilantes del Ciberespacio (Nivel 5) - Objetivo ideal
         if mediana <= 1 and p90 <= 24:
-            return "Vigilantes del Ciberespacio", 5, "Responden rápido, con coordinación y apoyo tecnológico avanzado. Mediana ≤ 1h, P90 ≤ 24h"
+            return "Vigilantes del Ciberespacio", 5, "Excelencia en ciberseguridad con respuesta ultrarrápida y tecnología de vanguardia. Mediana ≤ 1h, P90 ≤ 24h"
         
         # Guardianes Anti-Phishing (Nivel 4) - Objetivo ideal con pequeñas desviaciones
         elif mediana <= 2 and p90 <= 36:
             return "Guardianes Anti-Phishing", 4, "Responden rápido, con coordinación y apoyo tecnológico avanzado. Mediana ≤ 2h, P90 ≤ 36h"
         
-        # Escudos digitales (Nivel 3) - Objetivo práctico
+        # Defensores Digitales (Nivel 3) - Objetivo práctico
         elif mediana <= 4 and p90 <= 48:
-            return "Escudos digitales", 3, "Respuesta estándar con procesos establecidos. Mediana ≤ 4h, P90 ≤ 48h"
+            return "Defensores Digitales", 3, "Respuesta estándar con procesos establecidos. Mediana ≤ 4h, P90 ≤ 48h"
         
         # Aprendices de Seguridad (Nivel 2) - Objetivo práctico con desviaciones
         elif mediana <= 12 and p90 <= 60:
