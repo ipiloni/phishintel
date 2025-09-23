@@ -4,7 +4,7 @@ from datetime import datetime
 from app.backend.models.error import responseError
 from app.controllers.abm.areasController import AreasController
 from app.controllers.aiController import AIController
-from app.controllers.geminiController import GeminiController
+from app.controllers.webScrappingController import WebScrappingController
 from app.controllers.llamadas.elevenLabsController import ElevenLabsController
 from app.controllers.emails.emailController import EmailController
 from app.controllers.abm.eventosController import EventosController
@@ -35,10 +35,8 @@ def enviarPromptGemini():
     data = request.get_json()
     objetivo = data["objetivo"]
     conversacion = data["conversacion"]
-    return GeminiController.generarTexto(objetivo, conversacion)
+    return AIController.armarMensajeLlamada(objetivo, conversacion)
 
-
-# ------ # LLAMADAS TWILIO # ------ #
 @apis.route("/api/audios/<nombreAudio>", methods=["GET"])
 def enviarAudio(nombreAudio):
     return exponerAudio(nombreAudio)
@@ -47,7 +45,6 @@ def enviarAudio(nombreAudio):
 def exponerAudio(nombreAudio):  # es una funcion que nos permite reutilizarla internamente
     return send_file(f"./audios/{nombreAudio}", mimetype="audio/mpeg")
 
-
 @apis.route("/api/twilio/respuesta", methods=["POST"])
 def procesarRespuestaLlamada():
     log.info("Entre a /api/twilio/respuesta")
@@ -55,12 +52,10 @@ def procesarRespuestaLlamada():
     confidence = request.form.get("Confidence")
     return LlamadasController.procesarRespuesta(speech, confidence)
 
-
 @apis.route("/api/llamadas", methods=["POST"])
 def generarLlamada():
     data = request.get_json()
     return LlamadasController.llamar(data)
-
 
 @apis.route("/api/twilio/accion", methods=["POST"])
 def generarAccionesEnLlamada():
@@ -72,7 +67,6 @@ def generarAccionesEnLlamada():
 def generarTTS():
     data = request.get_json()
     return ElevenLabsController().generarTTS(data)
-
 
 @apis.route("/api/stt", methods=["POST"])
 def generarSTT():
@@ -87,12 +81,10 @@ def enviarMensajeWhatsappTwilio():
     data = request.get_json()
     return WhatsAppController.enviarMensajeTwilio(data)
 
-
 @apis.route("/api/mensajes/sms", methods=["POST"])
 def enviarMensajeSMS():
     data = request.get_json()
     return SMSController.enviarMensajeTwilio(data)
-
 
 @apis.route("/api/mensajes/whatsapp-selenium", methods=["POST"])
 def enviarMensajeWhatsappSelenium():

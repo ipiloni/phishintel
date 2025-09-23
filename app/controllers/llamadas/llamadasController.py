@@ -4,7 +4,8 @@ from twilio.twiml.voice_response import Gather, VoiceResponse, Play
 from app.backend.apis.elevenLabs import elevenLabs
 from app.backend.apis.twilio import twilio
 from app.backend.models.error import responseError
-from app.controllers.geminiController import GeminiController
+from app.controllers.aiController import AIController
+from app.controllers.webScrappingController import WebScrappingController
 from app.utils.config import get
 from app.utils import conversacion
 from app.utils.logger import log
@@ -60,7 +61,7 @@ class LlamadasController:
 
             log.info(f"La Conversacion actual es la siguiente: {conversacion.conversacionActual}")
 
-            texto = GeminiController.generarTexto(conversacion.objetivoActual, conversacion.conversacionActual)
+            texto = AIController.armarMensajeLlamada(conversacion.objetivoActual, conversacion.conversacionActual)
 
             log.info(f"La IA genero el texto: {texto}")
 
@@ -103,7 +104,7 @@ class LlamadasController:
 
             conversacion.conversacionActual.append({"rol": "destinatario", "mensaje": speech})
 
-            texto = GeminiController.generarTexto(conversacion.objetivoActual, conversacion.conversacionActual)
+            texto = AIController.armarMensajeLlamada(conversacion.objetivoActual, conversacion.conversacionActual)
 
             conversacion.conversacionActual.append({"rol": "IA", "mensaje": texto})
 

@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 from flask import jsonify
 
-from app.backend.apis.ai.gemini import Gemini
 from app.backend.models.error import responseError
 from app.utils.config import get
 from app.utils.logger import log
@@ -10,16 +9,16 @@ import requests
 API_KEY = get("API_KEY_WEB_SCRAPPING_IGNA")
 CX = get("CX_WEB_SCRAPPING_IGNA")
 
-class GeminiController:
+class WebScrappingController:
 
     @staticmethod
     def generarWebScrapping(idLinkedin):
-        perfil_url = GeminiController.buscarPerfilLinkedin(idLinkedin)
+        perfil_url = WebScrappingController.buscarPerfilLinkedin(idLinkedin)
         if not perfil_url:
             log.error(f"No se encontro el perfil: {idLinkedin}")
             return responseError("ERROR_API", "No se encontro el perfil del Linkedin con la API de Google", 404)
 
-        info = GeminiController.extraerInfoPublica(perfil_url)
+        info = WebScrappingController.extraerInfoPublica(perfil_url)
         return jsonify({
             "perfil_url": perfil_url,
             "educacion": info.get("educacion", []),
@@ -75,7 +74,3 @@ class GeminiController:
         else:
             log.error(f"No se pudo acceder al perfil: {resp.status_code}")
             return {}
-
-    @staticmethod
-    def generarTexto(objetivo, conversacion):
-        return Gemini.generarRespuesta(objetivo, conversacion)

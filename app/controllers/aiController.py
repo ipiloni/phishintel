@@ -1,15 +1,16 @@
 import re
-
 import google.generativeai as genai
 from app.utils.config import get
 from app.backend.models.error import responseError
+from app.utils.logger import log
 
-api_key = get("GEMINI_API_KEY_IGNA")
+api_key_igna = get("GEMINI_API_KEY_IGNA")
+api_key_marcos = get("GEMINI_API_KEY_MARCOS")
+
+modelAI = "gemini-2.5-flash"
 
 # Configurar la API key una sola vez al inicio
-genai.configure(api_key=api_key)
-
-# GEMINI 1.5 FLASH es la MAS RAPIDA. Nos va a servir para las cosas en vivo. Quizas para emails y demas podemos usar una mas eficaz.
+genai.configure(api_key=api_key_igna)
 
 class AIController:
 
@@ -33,12 +34,9 @@ class AIController:
             else:
                 return responseError("CAMPOS_OBLIGATORIOS", "El campo 'nivel' solo puede tener los valores 1, 2 o 3", 400)
 
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-        
         try:
-            response = model.generate_content(
-                contexto + ". " + formato,
-            )
+            response = AIController.enviarPrompt(contexto + ". " + formato, modelAI)
+
             return re.sub(r"```(?:json)?", "", response.text).strip(), 201
     
         except Exception as e:
@@ -66,10 +64,10 @@ class AIController:
         - Sin enlaces obvios o sospechosos
         - Con un tono natural y conversacional"""
 
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-        
         try:
-            response = model.generate_content(prompt)
+
+            response = AIController.enviarPrompt(prompt, modelAI)
+
             mensaje_texto = response.text.strip()
             
             # Limpiar cualquier formato que pueda haber agregado
@@ -81,3 +79,67 @@ class AIController:
         except Exception as e:
             return responseError("ERROR_API", str(e), 500)
 
+
+    @staticmethod
+    def armarMensajeLlamada(objetivo, conversacion):
+        """ Esta accion vamos a utilizarla para generar textos de una llamada en tiempo real, debido a que utiliza un modelo de procesamiento rapido """
+        try:
+
+            log.info("Se llama a Gemini para generar respuesta")
+
+            # Convertir la conversación a texto
+            prompt = ""
+            for msg in conversacion:
+                rol = msg.get("rol", "").lower()
+                contenido = msg.get("mensaje", "").strip()
+
+                if rol == "ia":
+                    prompt += f"IA: {contenido}\n"
+                elif rol == "destinatario":
+                    prompt += f"Usuario: {contenido}\n"
+
+            log.info(f"Conversacion que le enviamos a Gemini: {prompt}")
+
+            # Concatenar con el prompt
+            prompt_final = objetivo + "\n" + prompt
+
+            response = AIController.enviarPrompt(prompt_final, "gemini-2.5-flash-lite")
+
+            textoGenerado = response.candidates[0].content.parts[0].text
+            return textoGenerado
+
+        except Exception as ex:
+            log.error(f"Hubo un error al llamar a Gemini: {str(ex)}")
+            return None
+
+    @staticmethod
+    def enviarAGemini(prompt, modeloIA):
+        try:
+
+            if modeloIA is None:
+                log.info("No se especifico modelo de IA, utilizando predeterminado...")
+                modeloIA = "gemini-2.0-flash-lite"
+
+            log.info("Se llama a Gemini...")
+
+            response = AIController.enviarPrompt(prompt, modeloIA)
+
+            textoGenerado = response.candidates[0].content.parts[0].text
+            return textoGenerado
+
+        except Exception as e:
+            log.error(e)
+            return None
+
+
+    @staticmethod
+    def enviarPrompt(prompt, modelo):
+        model = genai.GenerativeModel(model_name=modelo)
+
+        try:
+            return model.generate_content(prompt)
+        except Exception as ex:
+            log.warning(
+                f"Hubo un error al intentar obtener la respuesta: {str(ex)}, posiblemente no hay mas creditos de Google, cambiando el API_KEY...")
+            genai.configure(api_key=api_key_marcos)
+            return model.generate_content(prompt)

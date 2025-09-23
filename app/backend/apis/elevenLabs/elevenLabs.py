@@ -32,6 +32,8 @@ def generarVoz(texto):
     play(audio)
 
 def stt(ubicacion):
+    # TODO: este metodo no lo estamos usando porque Twilio nos esta brindando la respuesta en texto, lo dejamos por las dudas...
+
     elevenlabs = ElevenLabs(
         api_key=api_key,
     )
