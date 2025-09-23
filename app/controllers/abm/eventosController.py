@@ -28,10 +28,10 @@ class EventosController:
                         "resultado": ux.resultado.value
                     }
                     # Agregar fechas si existen
-                    if ux.fecha_reporte:
-                        usuario_data["fecha_reporte"] = ux.fecha_reporte.isoformat()
-                    if ux.fecha_falla:
-                        usuario_data["fecha_falla"] = ux.fecha_falla.isoformat()
+                    if ux.fechaReporte:
+                        usuario_data["fechaReporte"] = ux.fechaReporte.isoformat()
+                    if ux.fechaFalla:
+                        usuario_data["fechaFalla"] = ux.fechaFalla.isoformat()
                     
                     usuarios_info.append(usuario_data)
 
@@ -72,10 +72,10 @@ class EventosController:
                     "resultado": ux.resultado.value
                 }
                 # Agregar fechas si existen
-                if ux.fecha_reporte:
-                    usuario_data["fecha_reporte"] = ux.fecha_reporte.isoformat()
-                if ux.fecha_falla:
-                    usuario_data["fecha_falla"] = ux.fecha_falla.isoformat()
+                if ux.fechaReporte:
+                    usuario_data["fechaReporte"] = ux.fechaReporte.isoformat()
+                if ux.fechaFalla:
+                    usuario_data["fechaFalla"] = ux.fechaFalla.isoformat()
                 
                 usuarios_info.append(usuario_data)
 
@@ -185,7 +185,7 @@ class EventosController:
 
 
     @staticmethod
-    def asociarUsuarioEvento(idEvento, idUsuario, resultado_val, fecha_reporte=None, fecha_falla=None):
+    def asociarUsuarioEvento(idEvento, idUsuario, resultado_val, fechaReporte=None, fechaFalla=None):
         if resultado_val not in [r.value for r in ResultadoEvento]:
             return responseError("RESULTADO_INVALIDO", "El resultado del evento no es válido", 400)
 
@@ -207,17 +207,17 @@ class EventosController:
 
             if usuario_evento:
                 usuario_evento.resultado = ResultadoEvento(resultado_val)
-                if fecha_reporte:
-                    usuario_evento.fecha_reporte = fecha_reporte
-                if fecha_falla:
-                    usuario_evento.fecha_falla = fecha_falla
+                if fechaReporte:
+                    usuario_evento.fechaReporte = fechaReporte
+                if fechaFalla:
+                    usuario_evento.fechaFalla = fechaFalla
             else:
                 usuario_evento = UsuarioxEvento(
                     idEvento=idEvento,
                     idUsuario=idUsuario,
                     resultado=ResultadoEvento(resultado_val),
-                    fecha_reporte=fecha_reporte,
-                    fecha_falla=fecha_falla
+                    fechaReporte=fechaReporte,
+                    fechaFalla=fechaFalla
                 )
                 session.add(usuario_evento)
 

@@ -263,6 +263,173 @@
       .badge:hover {
         transform: scale(1.05);
       }
+      
+      /* Estilos para el indicador de KPI */
+      .kpi-indicator {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      
+      .kpi-level {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #333;
+        border: 2px solid #555;
+        transition: all 0.5s ease;
+        position: relative;
+      }
+      
+      .kpi-level.active {
+        background-color: #da02e5;
+        border-color: #da02e5;
+        box-shadow: 0 0 10px rgba(218, 2, 229, 0.5);
+        transform: scale(1.1);
+      }
+      
+      .kpi-level.active::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 50%;
+        border: 2px solid #da02e5;
+        animation: pulse 2s infinite;
+      }
+      
+      /* Estilos para nivel crítico (nivel 0) */
+      .kpi-level.critical {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+        transform: scale(1.1);
+      }
+      
+      .kpi-level.critical::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 50%;
+        border: 2px solid #dc3545;
+        animation: pulse 2s infinite;
+      }
+      
+      /* Estilos para la barra de progreso crítica */
+      .progress-bar.critical {
+        background: linear-gradient(90deg, #dc3545, #ff6b7a);
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
+      }
+      
+      /* Estilos para el estado del nivel */
+      #kpiEstadoNivel {
+        transition: all 0.3s ease;
+      }
+      
+      /* Estilos para nivel 1 (Presas del Phishing) */
+      #kpiEstadoNivel.nivel1 {
+        animation: pulse-nivel1 2s infinite;
+      }
+      
+      #kpiEstadoNivel.nivel1 .badge {
+        background-color: #dc3545 !important;
+        color: white;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+      }
+      
+      /* Estilos para niveles normales (2-3) */
+      #kpiEstadoNivel.normal .badge {
+        background-color: #6c757d;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(108, 117, 125, 0.3);
+      }
+      
+      /* Estilos para nivel alto (4-5) */
+      #kpiEstadoNivel.alto .badge {
+        background-color: #28a745;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 1px 4px rgba(40, 167, 69, 0.3);
+        border: 1px solid rgba(40, 167, 69, 0.3);
+      }
+      
+      @keyframes pulse-nivel1 {
+        0% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.05);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1.3);
+          opacity: 0;
+        }
+      }
+      
+      /* Colores para diferentes niveles */
+      .kpi-level[data-level="0"].active { background-color: #dc3545; border-color: #dc3545; }
+      .kpi-level[data-level="1"].active { background-color: #fd7e14; border-color: #fd7e14; }
+      .kpi-level[data-level="2"].active { background-color: #ffc107; border-color: #ffc107; }
+      .kpi-level[data-level="3"].active { background-color: #20c997; border-color: #20c997; }
+      .kpi-level[data-level="4"].active { background-color: #0d6efd; border-color: #0d6efd; }
+      .kpi-level[data-level="5"].active { background-color: #6f42c1; border-color: #6f42c1; }
+      
+      /* Animación del contador */
+      .counter-animate {
+        animation: countUp 2s ease-out;
+      }
+      
+      @keyframes countUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      /* Estilos para la barra de progreso */
+      .progress-bar {
+        background: linear-gradient(90deg, #da02e5, #e533f0);
+        transition: width 2s ease-in-out;
+      }
+      
+      /* Tooltip personalizado */
+      .tooltip-inner {
+        background-color: #1a1a1a;
+        color: #f1f1f1;
+        border: 1px solid #da02e5;
+        max-width: 300px;
+      }
+      
+      .tooltip.bs-tooltip-top .tooltip-arrow::before {
+        border-top-color: #da02e5;
+      }
     </style>
 </head>
 <body class="index-page">
@@ -479,57 +646,140 @@
             <div class="row g-4">
               <div class="col-12">
                 <div class="card p-4 bg-dark text-white">
-                  <div class="text-center">
-                    <div class="mb-4">
-                      <i class="bi bi-speedometer2" style="font-size: 4rem; color: #da02e5;"></i>
+                  <div class="text-center mb-4">
+                    <h3 class="mb-3">
+                      <i class="bi bi-speedometer2 me-2" style="color: #da02e5;"></i>
+                      KPIs de Seguridad
+                    </h3>
+                  </div>
+                  
+                  <!-- KPI de Tiempo de Respuesta -->
+                  <div class="row g-4">
+                    <div class="col-lg-8">
+                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
+                        <div class="card-body p-4">
+                          <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">
+                              <i class="bi bi-clock-history me-2" style="color: #da02e5;"></i>
+                              Tiempo de Respuesta Promedio
+                            </h5>
+                            <div class="d-flex align-items-center">
+                              <i class="bi bi-info-circle me-2" style="color: #da02e5; cursor: pointer;" 
+                                 data-bs-toggle="tooltip" data-bs-placement="top" 
+                                 title="Tiempo promedio entre la creación del evento y su reporte por parte de los usuarios"></i>
+                              <span id="kpiTiempoRespuesta" class="display-4 fw-bold" style="color: #da02e5;">0</span>
+                              <span class="ms-2 fs-5 text-white">horas</span>
+                            </div>
+                          </div>
+                          
+                          <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">Mediana</div>
+                                <div id="kpiMediana" class="fs-4 fw-bold" style="color: #00d4aa;">0h</div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">P90</div>
+                                <div id="kpiP90" class="fs-4 fw-bold" style="color: #ff6b6b;">0h</div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">Eventos</div>
+                                <div id="kpiTotalEventos" class="fs-4 fw-bold" style="color: #feca57;">0</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Barra de progreso del nivel -->
+                          <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                              <span class="fs-6 text-white">Nivel de Madurez</span>
+                              <span id="kpiNivel" class="badge fs-6 px-3 py-2">0/5</span>
+                            </div>
+                            <div class="progress" style="height: 12px; background-color: #333;">
+                              <div id="kpiProgreso" class="progress-bar" role="progressbar" style="width: 0%; transition: width 2s ease-in-out;"></div>
+                            </div>
+                            <!-- Estado del nivel debajo de la barra -->
+                            <div id="kpiEstadoNivel" class="text-center mt-2" style="display: none;">
+                              <span id="kpiBadgeNivel" class="badge fs-6 px-3 py-2">
+                                <i id="kpiIconoNivel" class="bi me-1"></i>
+                                <span id="kpiTextoNivel">Nivel 1</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <h3 class="mb-3">KPIs en Construcción</h3>
-                    <p class="mb-4 text-muted fs-5">
-                      Estamos trabajando en una sección completa de KPIs que incluirá:
-                    </p>
-                    <div class="row g-3">
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card bg-secondary p-3 h-100">
-                          <div class="text-center">
-                            <i class="bi bi-people-fill mb-2" style="font-size: 2rem; color: #00d4aa;"></i>
-                            <h6>Efectividad por Usuario</h6>
-                            <small class="text-muted">Métricas individuales de rendimiento</small>
+                    
+                    <div class="col-lg-4">
+                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
+                        <div class="card-body p-4">
+                          <h6 class="mb-3">
+                            <i class="bi bi-shield-check me-2" style="color: #da02e5;"></i>
+                            Clasificación Actual
+                          </h6>
+                          
+                          <div class="text-center mb-3">
+                            <div id="kpiClasificacion" class="fs-4 fw-bold mb-2" style="color: #da02e5;">Cargando...</div>
+                            <div id="kpiDescripcion" class="text-white small">Obteniendo datos...</div>
                           </div>
-                        </div>
-                      </div>
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card bg-secondary p-3 h-100">
-                          <div class="text-center">
-                            <i class="bi bi-clock-history mb-2" style="font-size: 2rem; color: #ff6b6b;"></i>
-                            <h6>Tiempo de Respuesta</h6>
-                            <small class="text-muted">Análisis de tiempos de reacción</small>
+                          
+                          <!-- Indicador visual del nivel -->
+                          <div class="d-flex justify-content-center mb-3">
+                            <div id="kpiIndicador" class="kpi-indicator">
+                              <div class="kpi-level" data-level="0"></div>
+                              <div class="kpi-level" data-level="1"></div>
+                              <div class="kpi-level" data-level="2"></div>
+                              <div class="kpi-level" data-level="3"></div>
+                              <div class="kpi-level" data-level="4"></div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card bg-secondary p-3 h-100">
+                          
                           <div class="text-center">
-                            <i class="bi bi-trophy-fill mb-2" style="font-size: 2rem; color: #feca57;"></i>
-                            <h6>Rankings y Comparativas</h6>
-                            <small class="text-muted">Comparaciones entre áreas y usuarios</small>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-md-6 col-lg-3">
-                        <div class="card bg-secondary p-3 h-100">
-                          <div class="text-center">
-                            <i class="bi bi-graph-up-arrow mb-2" style="font-size: 2rem; color: #4ecdc4;"></i>
-                            <h6>Tendencias y Proyecciones</h6>
-                            <small class="text-muted">Análisis predictivo y tendencias</small>
+                            <button id="btnActualizarKPI" class="btn btn-outline-primary btn-sm">
+                              <i class="bi bi-arrow-clockwise me-1"></i>
+                              Actualizar
+                            </button>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div class="mt-4">
-                      <p class="text-muted">
-                        <i class="bi bi-info-circle me-2"></i>
-                        Esta funcionalidad estará disponible próximamente
-                      </p>
+                  </div>
+                  
+                  <!-- Información adicional -->
+                  <div class="row g-4 mt-3">
+                    <div class="col-12">
+                      <div class="card bg-secondary">
+                        <div class="card-body p-3">
+                          <h6 class="mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Información sobre el KPI
+                          </h6>
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <div class="d-flex align-items-center">
+                                <i class="bi bi-calculator me-2" style="color: #da02e5;"></i>
+                                <div>
+                                  <div class="fw-bold">Cálculo</div>
+                                  <small class="text-white">Diferencia entre fecha de reporte y fecha de creación del evento</small>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="d-flex align-items-center">
+                                <i class="bi bi-target me-2" style="color: #00d4aa;"></i>
+                                <div>
+                                  <div class="fw-bold">Objetivo Ideal</div>
+                                  <small class="text-white">Mediana ≤ 1h, P90 ≤ 24h</small>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1312,6 +1562,195 @@
        cargarFallasPorArea(); // Cargar también el reporte por área
        cargarFallasPorCampania(); // Cargar también el reporte por campaña
        cargarFallasPorEmpleado(); // Cargar también el reporte por empleado
+       cargarKPITiempoRespuesta(); // Cargar KPI de tiempo de respuesta
+       
+       // Inicializar tooltips
+       var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+       var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+         return new bootstrap.Tooltip(tooltipTriggerEl);
+       });
+     });
+
+     // Función para cargar el KPI de tiempo de respuesta
+     async function cargarKPITiempoRespuesta() {
+       try {
+         const resp = await fetch('/api/kpis/tiempo-respuesta');
+         if (!resp.ok) throw new Error('Error al obtener datos del KPI');
+         const data = await resp.json();
+
+         // Animar el contador principal (más lento)
+         animarContador('kpiTiempoRespuesta', data.tiempoRespuestaPromedio, 4);
+         
+         // Animar métricas secundarias con delay escalonado
+         setTimeout(() => {
+           animarContador('kpiMediana', data.tiempoRespuestaMediana, 3, 'h');
+         }, 500);
+         
+         setTimeout(() => {
+           animarContador('kpiP90', data.tiempoRespuestaP90, 3, 'h');
+         }, 1000);
+         
+         setTimeout(() => {
+           animarContador('kpiTotalEventos', data.totalEventosReportados, 2, '');
+         }, 1500);
+         
+         // Actualizar clasificación con animación
+         setTimeout(() => {
+           document.getElementById('kpiClasificacion').textContent = data.clasificacion;
+           document.getElementById('kpiDescripcion').textContent = data.descripcion;
+           document.getElementById('kpiClasificacion').style.opacity = '0';
+           document.getElementById('kpiDescripcion').style.opacity = '0';
+           document.getElementById('kpiClasificacion').style.transition = 'opacity 1s ease-in-out';
+           document.getElementById('kpiDescripcion').style.transition = 'opacity 1s ease-in-out';
+           
+           setTimeout(() => {
+             document.getElementById('kpiClasificacion').style.opacity = '1';
+             document.getElementById('kpiDescripcion').style.opacity = '1';
+           }, 100);
+         }, 3000);
+         
+         // Actualizar nivel y progreso
+         const nivel = data.nivel;
+         let porcentaje;
+         
+         // Configurar barra de progreso y estado del nivel
+         porcentaje = (nivel / 5) * 100;
+         document.getElementById('kpiProgreso').className = 'progress-bar';
+         
+         // Determinar clase y texto según el nivel
+         let claseNivel, icono, texto;
+         if (nivel === 1) {
+           claseNivel = 'nivel1';
+           icono = 'bi-exclamation-triangle';
+           texto = 'Presas del Phishing';
+         } else if (nivel === 2) {
+           claseNivel = 'normal';
+           icono = 'bi-info-circle';
+           texto = 'Aprendices de Seguridad';
+         } else if (nivel === 3) {
+           claseNivel = 'normal';
+           icono = 'bi-shield-check';
+           texto = 'Escudos digitales';
+         } else if (nivel === 4) {
+           claseNivel = 'alto';
+           icono = 'bi-shield-fill-check';
+           texto = 'Guardianes Anti-Phishing';
+         } else if (nivel === 5) {
+           claseNivel = 'alto';
+           icono = 'bi-award';
+           texto = 'Vigilantes del Ciberespacio';
+         } else {
+           claseNivel = 'normal';
+           icono = 'bi-question-circle';
+           texto = 'Nivel Desconocido';
+         }
+         
+         actualizarEstadoNivel(nivel, claseNivel, icono, texto);
+         
+         // Animar la barra de progreso
+         setTimeout(() => {
+           document.getElementById('kpiProgreso').style.width = `${porcentaje}%`;
+         }, 2000);
+         
+         document.getElementById('kpiNivel').textContent = `${nivel}/5`;
+         
+         // Actualizar indicador visual con delay
+         setTimeout(() => {
+           actualizarIndicadorNivel(nivel);
+         }, 2500);
+         
+         // Aplicar animaciones
+         document.getElementById('kpiMediana').classList.add('counter-animate');
+         document.getElementById('kpiP90').classList.add('counter-animate');
+         document.getElementById('kpiTotalEventos').classList.add('counter-animate');
+         document.getElementById('kpiClasificacion').classList.add('counter-animate');
+         
+       } catch (e) {
+         console.error('Error cargando KPI:', e);
+         document.getElementById('kpiTiempoRespuesta').textContent = 'Error';
+         document.getElementById('kpiClasificacion').textContent = 'Error al cargar';
+         document.getElementById('kpiDescripcion').textContent = 'No se pudieron obtener los datos del KPI';
+       }
+     }
+
+     // Función para animar contadores con efecto de desaceleración
+     function animarContador(elementId, valorFinal, duracion = 4, sufijo = '') {
+       const elemento = document.getElementById(elementId);
+       const valorInicial = 0;
+       const startTime = Date.now();
+       
+       function animar() {
+         const elapsed = (Date.now() - startTime) / 1000; // tiempo transcurrido en segundos
+         const progress = Math.min(elapsed / duracion, 1); // progreso de 0 a 1
+         
+         // Función de easing para desaceleración suave (ease-out)
+         const easeOut = 1 - Math.pow(1 - progress, 3);
+         
+         const valorActual = valorInicial + (valorFinal - valorInicial) * easeOut;
+         
+         elemento.textContent = valorActual.toFixed(2) + sufijo;
+         
+         if (progress < 1) {
+           requestAnimationFrame(animar);
+         } else {
+           // Asegurar que termine exactamente en el valor final
+           elemento.textContent = valorFinal.toFixed(2) + sufijo;
+         }
+       }
+       
+       requestAnimationFrame(animar);
+     }
+
+     // Función para actualizar el estado del nivel
+     function actualizarEstadoNivel(nivel, claseNivel, icono, texto) {
+       const estadoNivel = document.getElementById('kpiEstadoNivel');
+       const badgeNivel = document.getElementById('kpiBadgeNivel');
+       const iconoNivel = document.getElementById('kpiIconoNivel');
+       const textoNivel = document.getElementById('kpiTextoNivel');
+       
+       // Limpiar clases anteriores
+       estadoNivel.className = 'text-center mt-2';
+       badgeNivel.className = 'badge fs-6 px-3 py-2';
+       
+       // Aplicar nueva clase
+       estadoNivel.classList.add(claseNivel);
+       
+       // Actualizar contenido
+       iconoNivel.className = `bi ${icono} me-1`;
+       textoNivel.textContent = texto;
+       
+       // Mostrar con animación
+       estadoNivel.style.display = 'block';
+       estadoNivel.style.opacity = '0';
+       estadoNivel.style.transition = 'opacity 0.5s ease-in-out';
+       
+       setTimeout(() => {
+         estadoNivel.style.opacity = '1';
+       }, 100);
+     }
+
+     // Función para actualizar el indicador visual de nivel
+     function actualizarIndicadorNivel(nivel) {
+       const niveles = document.querySelectorAll('.kpi-level');
+       niveles.forEach((nivelElemento, index) => {
+         nivelElemento.classList.remove('active', 'critical');
+         
+         if (index < nivel) {
+           nivelElemento.classList.add('active');
+         }
+       });
+     }
+
+     // Event listener para el botón de actualizar
+     document.getElementById('btnActualizarKPI').addEventListener('click', () => {
+       // Remover animaciones previas
+       document.getElementById('kpiMediana').classList.remove('counter-animate');
+       document.getElementById('kpiP90').classList.remove('counter-animate');
+       document.getElementById('kpiTotalEventos').classList.remove('counter-animate');
+       document.getElementById('kpiClasificacion').classList.remove('counter-animate');
+       
+       // Recargar datos
+       cargarKPITiempoRespuesta();
      });
   </script>
 
