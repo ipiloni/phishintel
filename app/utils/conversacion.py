@@ -4,3 +4,4 @@ conversacionActual = []
 objetivoActual = ""
 idVozActual = ""
 urlAudioActual = ""
+idEvento = ""

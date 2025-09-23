@@ -7,6 +7,9 @@ from app.backend.models.tipoEvento import TipoEvento
 from app.config.db_config import SessionLocal
 from datetime import datetime
 
+from app.utils.logger import log
+
+
 class EventosController:
 
     @staticmethod
@@ -135,6 +138,7 @@ class EventosController:
 
             idevento = nuevo_evento.idEvento
             session.close()
+            log.info(f"Evento creado correctamente con el ID: {idevento}")
             return jsonify({"mensaje": "Evento creado correctamente", "idEvento": idevento}), 201
 
         except Exception as e:
