@@ -454,6 +454,15 @@ def obtenerTiempoRespuestaKPI():
     return ControllerKpis.obtenerTiempoRespuestaPromedio()
 
 
+@apis.route("/api/kpis/tasa-fallas", methods=["GET"])
+def obtenerTasaFallasKPI():
+    """
+    Endpoint para obtener el KPI de tasa de fallas.
+    Calcula el porcentaje de eventos que tienen resultado FALLA en usuarioxevento.
+    """
+    return ControllerKpis.obtenerTasaFallas()
+
+
 # ------ # NGROK # ------ #
 @apis.route("/api/ngrok/crear-tunel", methods=["POST"])
 def crear_tunel_ngrok():

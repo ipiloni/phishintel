@@ -90,13 +90,6 @@ class ControllerKpis:
 
     @staticmethod
     def _determinarClasificacionTiempoRespuesta(mediana, p90):
-        """
-        Determina la clasificación del tiempo de respuesta basada en los objetivos establecidos.
-        
-        Objetivo ideal (org madura): mediana ≤ 1 hora; P90 ≤ 24 horas.
-        Objetivo práctico (estándar): mediana ≤ 4 horas; P90 ≤ 48 horas.
-        Línea base (organizaciones en adopción): mediana ≤ 24 horas; P90 ≤ 72 horas.
-        """
         
         # Vigilantes del Ciberespacio (Nivel 5) - Objetivo ideal
         if mediana <= 1 and p90 <= 24:
@@ -117,3 +110,84 @@ class ControllerKpis:
         # Presas del Phishing (Nivel 1) - Línea base o peor
         else:
             return "Presas del Phishing", 1, "Necesitan mejorar significativamente sus tiempos de respuesta. Mediana > 12h o P90 > 60h"
+
+    @staticmethod
+    def obtenerTasaFallas():
+        """
+        Calcula la tasa de fallas basada en los intentos de phishing (usuarios asignados a eventos).
+        Cada usuario asignado a un evento representa un intento de phishing individual.
+        Calcula el porcentaje de intentos que resultaron en FALLA.
+        """
+        session = SessionLocal()
+        try:
+            # Obtener todas las relaciones usuarioxevento (intentos de phishing)
+            intentos_phishing = session.query(UsuarioxEvento).all()
+            
+            total_intentos = len(intentos_phishing)
+            intentos_con_falla = 0
+            
+            for intento in intentos_phishing:
+                # Verificar si el resultado del intento es FALLA
+                if intento.resultado.value == "FALLA":
+                    intentos_con_falla += 1
+            
+            # Validar si hay suficientes intentos de phishing para mostrar el KPI
+            if total_intentos < 5:
+                return jsonify({
+                    "tasaFallas": 0,
+                    "totalIntentos": total_intentos,
+                    "intentosConFalla": intentos_con_falla,
+                    "intentosSinFalla": total_intentos - intentos_con_falla,
+                    "clasificacion": "Datos Insuficientes",
+                    "nivel": 0,
+                    "descripcion": f"Acumule más intentos de phishing para ver el KPI. Actualmente tiene {total_intentos} intentos, se requieren al menos 5.",
+                    "insuficienteDatos": True
+                }), 200
+            
+            # Calcular tasa de fallas
+            tasa_fallas = (intentos_con_falla / total_intentos) * 100
+            
+            # Determinar clasificación basada en la tasa de fallas
+            clasificacion, nivel, descripcion = ControllerKpis._determinarClasificacionTasaFallas(tasa_fallas)
+            
+            return jsonify({
+                "tasaFallas": round(tasa_fallas, 2),
+                "totalIntentos": total_intentos,
+                "intentosConFalla": intentos_con_falla,
+                "intentosSinFalla": total_intentos - intentos_con_falla,
+                "clasificacion": clasificacion,
+                "nivel": nivel,
+                "descripcion": descripcion,
+                "insuficienteDatos": False
+            }), 200
+            
+        except Exception as e:
+            session.rollback()
+            return responseError("ERROR", f"No se pudo calcular la tasa de fallas: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def _determinarClasificacionTasaFallas(tasa_fallas):
+        """
+        Determina la clasificación basada en la tasa de fallas según los criterios definidos.
+        """
+        # Vigilantes del Ciberespacio (Nivel 5) – Excelencia en ciberseguridad
+        if tasa_fallas <= 2:
+            return "Vigilantes del Ciberespacio", 5, "Operación prácticamente sin fallas, con control casi perfecto. Failure Rate ≤ 2%"
+        
+        # Guardianes Anti-Phishing (Nivel 4) – Alto rendimiento con pequeñas desviaciones
+        elif tasa_fallas <= 5:
+            return "Guardianes Anti-Phishing", 4, "Fallas puntuales, dentro de lo aceptable en un entorno exigente. Failure Rate > 2% y ≤ 5%"
+        
+        # Defensores Digitales (Nivel 3) – Objetivo práctico
+        elif tasa_fallas <= 10:
+            return "Defensores Digitales", 3, "Rendimiento estándar, fallas presentes pero controlables. Failure Rate > 5% y ≤ 10%"
+        
+        # Aprendices de Seguridad (Nivel 2) – En proceso de mejora
+        elif tasa_fallas <= 20:
+            return "Aprendices de Seguridad", 2, "Fallas frecuentes, requieren refuerzo de procesos y controles. Failure Rate > 10% y ≤ 20%"
+        
+        # Presas del Phishing (Nivel 1) – Necesitan mejorar significativamente
+        else:
+            return "Presas del Phishing", 1, "Nivel crítico de fallas, con alto riesgo operativo y reputacional. Failure Rate > 20%"

@@ -326,6 +326,18 @@
         box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
       }
       
+      /* Estilos para la barra de progreso de tasa de fallas */
+      #kpiProgresoFallas {
+        background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
+        transition: width 2s ease-in-out;
+      }
+      
+      /* Estilos para datos insuficientes */
+      .insuficiente-datos {
+        opacity: 0.6;
+        filter: grayscale(50%);
+      }
+      
       /* Estilos para el estado del nivel */
       #kpiEstadoNivel {
         transition: all 0.3s ease;
@@ -344,6 +356,20 @@
         box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
         border: 1px solid rgba(220, 53, 69, 0.3);
       }
+
+      /* Estilos para nivel 1 (Presas del Phishing) - KPI de Fallas */
+      #kpiEstadoNivelFallas.nivel1 {
+        animation: pulse-nivel1 2s infinite;
+      }
+      
+      #kpiEstadoNivelFallas.nivel1 .badge {
+        background-color: #dc3545 !important;
+        color: white;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+      }
       
       /* Estilos para niveles normales (2-3) */
       #kpiEstadoNivel.normal .badge {
@@ -353,9 +379,27 @@
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         border: 1px solid rgba(108, 117, 125, 0.3);
       }
+
+      /* Estilos para niveles normales (2-3) - KPI de Fallas */
+      #kpiEstadoNivelFallas.normal .badge {
+        background-color: #6c757d;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(108, 117, 125, 0.3);
+      }
       
       /* Estilos para nivel alto (4-5) */
       #kpiEstadoNivel.alto .badge {
+        background-color: #28a745;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 1px 4px rgba(40, 167, 69, 0.3);
+        border: 1px solid rgba(40, 167, 69, 0.3);
+      }
+
+      /* Estilos para nivel alto (4-5) - KPI de Fallas */
+      #kpiEstadoNivelFallas.alto .badge {
         background-color: #28a745;
         color: white;
         font-weight: 500;
@@ -396,6 +440,24 @@
       .kpi-level[data-level="3"].active { background-color: #20c997; border-color: #20c997; }
       .kpi-level[data-level="4"].active { background-color: #0d6efd; border-color: #0d6efd; }
       .kpi-level[data-level="5"].active { background-color: #6f42c1; border-color: #6f42c1; }
+      
+       /* Colores específicos para KPI de fallas */
+       #kpiIndicadorFallas .kpi-level[data-level="0"].active { background-color: #dc3545 !important; border-color: #dc3545 !important; }
+       #kpiIndicadorFallas .kpi-level[data-level="1"].active { background-color: #dc3545 !important; border-color: #dc3545 !important; }
+       #kpiIndicadorFallas .kpi-level[data-level="2"].active { background-color: #ffc107 !important; border-color: #ffc107 !important; }
+       #kpiIndicadorFallas .kpi-level[data-level="3"].active { background-color: #20c997 !important; border-color: #20c997 !important; }
+       #kpiIndicadorFallas .kpi-level[data-level="4"].active { background-color: #0d6efd !important; border-color: #0d6efd !important; }
+       #kpiIndicadorFallas .kpi-level[data-level="5"].active { background-color: #6f42c1 !important; border-color: #6f42c1 !important; }
+
+       /* Botón de actualizar del KPI de tiempo de respuesta en rosa */
+       #btnActualizarKPITiempo {
+         border-color: rgb(218, 2, 229) !important;
+         color: rgb(218, 2, 229) !important;
+       }
+       #btnActualizarKPITiempo:hover {
+         background-color: rgb(218, 2, 229) !important;
+         color: white !important;
+       }
       
       /* Animación del contador */
       .counter-animate {
@@ -455,7 +517,12 @@
         <div class="mb-3">
            <ul class="nav nav-tabs" role="tablist">
              <li class="nav-item" role="presentation">
-               <button class="nav-link active" id="tab-fecha" data-bs-toggle="tab" data-bs-target="#panel-fecha" type="button" role="tab">
+               <button class="nav-link active" id="tab-kpis" data-bs-toggle="tab" data-bs-target="#panel-kpis" type="button" role="tab">
+                 <i class="bi bi-speedometer2"></i> KPIs
+               </button>
+             </li>
+             <li class="nav-item" role="presentation">
+               <button class="nav-link" id="tab-fecha" data-bs-toggle="tab" data-bs-target="#panel-fecha" type="button" role="tab">
                  <i class="bi bi-calendar3"></i> Fallas por Fecha
                </button>
              </li>
@@ -474,16 +541,219 @@
                  <i class="bi bi-people-fill"></i> Fallas por Empleado
                </button>
              </li>
-             <li class="nav-item" role="presentation">
-               <button class="nav-link" id="tab-kpis" data-bs-toggle="tab" data-bs-target="#panel-kpis" type="button" role="tab">
-                 <i class="bi bi-speedometer2"></i> KPIs
-               </button>
-             </li>
            </ul>
         </div>
 
         <div class="tab-content">
-          <div class="tab-pane fade show active" id="panel-fecha" role="tabpanel" aria-labelledby="tab-fecha">
+          <div class="tab-pane fade show active" id="panel-kpis" role="tabpanel" aria-labelledby="tab-kpis">
+            <div class="row g-4">
+              <div class="col-12">
+                <div class="card p-4 bg-dark text-white">
+                  <div class="text-center mb-4">
+                    <h3 class="mb-3">
+                      <i class="bi bi-speedometer2 me-2" style="color: #da02e5;"></i>
+                      KPIs de Seguridad
+                    </h3>
+                  </div>
+                  
+                  <!-- KPI de Tiempo de Respuesta -->
+                  <div class="row g-4">
+                    <div class="col-lg-8">
+                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
+                        <div class="card-body p-4">
+                          <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">
+                              <i class="bi bi-clock-history me-2" style="color: #da02e5;"></i>
+                              Tiempo de Respuesta Promedio
+                            </h5>
+                            <div class="d-flex align-items-center">
+                              <i class="bi bi-info-circle me-2" style="color: #da02e5; cursor: pointer;" 
+                                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                                 title="<strong>Tiempo de Respuesta Promedio</strong><br/>Tiempo promedio que tardan los usuarios en reportar un evento de phishing simulado, contado desde que se generó el evento hasta que el sistema lo registra como reportado.<br/>Mide qué tan rápido los usuarios detectan y reportan los intentos de phishing."></i>
+                              <span id="kpiTiempoRespuesta" class="display-4 fw-bold" style="color: #da02e5;">0</span>
+                              <span class="ms-2 fs-5 text-white">horas</span>
+                            </div>
+                          </div>
+                          
+                          <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">Mediana</div>
+                                <div id="kpiMediana" class="fs-4 fw-bold" style="color: #00d4aa;">0h</div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">P90</div>
+                                <div id="kpiP90" class="fs-4 fw-bold" style="color: #ff6b6b;">0h</div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">Eventos</div>
+                                <div id="kpiTotalEventos" class="fs-4 fw-bold" style="color: #feca57;">0</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Barra de progreso del nivel -->
+                          <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                              <span class="fs-6 text-white">Nivel de Madurez</span>
+                              <span id="kpiNivel" class="badge fs-6 px-3 py-2">0/5</span>
+                            </div>
+                            <div class="progress" style="height: 12px; background-color: #333;">
+                              <div id="kpiProgreso" class="progress-bar" role="progressbar" style="width: 0%; transition: width 2s ease-in-out;"></div>
+                            </div>
+                            <!-- Estado del nivel debajo de la barra -->
+                            <div id="kpiEstadoNivel" class="text-center mt-2" style="display: none;">
+                              <span id="kpiBadgeNivel" class="badge fs-6 px-3 py-2">
+                                <i id="kpiIconoNivel" class="bi me-1"></i>
+                                <span id="kpiTextoNivel">Nivel 1</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
+                        <div class="card-body p-4">
+                          <h6 class="mb-3">
+                            <i class="bi bi-shield-check me-2" style="color: #da02e5;"></i>
+                            Clasificación Actual
+                          </h6>
+                          
+                          <div class="text-center mb-3">
+                            <div id="kpiClasificacion" class="fs-4 fw-bold mb-2" style="color: #da02e5;">Cargando...</div>
+                            <div id="kpiDescripcion" class="text-white small">Obteniendo datos...</div>
+                          </div>
+                          
+                          <!-- Indicador visual del nivel -->
+                          <div class="d-flex justify-content-center mb-3">
+                            <div id="kpiIndicador" class="kpi-indicator">
+                              <div class="kpi-level" data-level="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 1: Presas del Phishing</strong><br/>Mediana > 12h o P90 > 60h<br/>Necesitan mejorar significativamente"></div>
+                              <div class="kpi-level" data-level="1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 2: Aprendices de Seguridad</strong><br/>Mediana ≤ 12h, P90 ≤ 60h<br/>En proceso de mejora"></div>
+                              <div class="kpi-level" data-level="2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 3: Defensores Digitales</strong><br/>Mediana ≤ 4h, P90 ≤ 48h<br/>Respuesta estándar"></div>
+                              <div class="kpi-level" data-level="3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 4: Guardianes Anti-Phishing</strong><br/>Mediana ≤ 2h, P90 ≤ 36h<br/>Responden rápido"></div>
+                              <div class="kpi-level" data-level="4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 5: Vigilantes del Ciberespacio</strong><br/>Mediana ≤ 1h, P90 ≤ 24h<br/>Excelencia en ciberseguridad"></div>
+                            </div>
+                          </div>
+                          
+                          <div class="text-center">
+                            <button id="btnActualizarKPITiempo" class="btn btn-outline-primary btn-sm">
+                              <i class="bi bi-arrow-clockwise me-1"></i>
+                              Actualizar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- KPI de Tasa de Fallas -->
+                  <div class="row g-4 mt-4">
+                    <div class="col-lg-8">
+                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
+                        <div class="card-body p-4">
+                          <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">
+                              <i class="bi bi-exclamation-triangle me-2" style="color: #ff6b6b;"></i>
+                              Tasa de Fallas
+                            </h5>
+                            <div class="d-flex align-items-center">
+                              <i class="bi bi-info-circle me-2" style="color: #ff6b6b; cursor: pointer;" 
+                                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                                 title="<strong>Tasa de Fallas</strong><br/>Porcentaje de usuarios que interactuaron de forma riesgosa con el intento de phishing (por ejemplo, haciendo clic o entregando credenciales), en relación al total de usuarios expuestos en la campaña"></i>
+                              <span id="kpiTasaFallas" class="display-4 fw-bold" style="color: #ff6b6b;">0</span>
+                              <span class="ms-2 fs-5 text-white">%</span>
+                            </div>
+                          </div>
+                          
+                          <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">Total Intentos</div>
+                                <div id="kpiTotalIntentosFallas" class="fs-4 fw-bold" style="color: #feca57;">0</div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">Con Fallas</div>
+                                <div id="kpiIntentosConFallas" class="fs-4 fw-bold" style="color: #ff6b6b;">0</div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">Sin Fallas</div>
+                                <div id="kpiIntentosSinFallas" class="fs-4 fw-bold" style="color: #00d4aa;">0</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Barra de progreso del nivel -->
+                          <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                              <span class="fs-6 text-white">Nivel de Madurez</span>
+                              <span id="kpiNivelFallas" class="badge fs-6 px-3 py-2">0/5</span>
+                            </div>
+                            <div class="progress" style="height: 12px; background-color: #333;">
+                              <div id="kpiProgresoFallas" class="progress-bar" role="progressbar" style="width: 0%; transition: width 2s ease-in-out;"></div>
+                            </div>
+                            <!-- Estado del nivel debajo de la barra -->
+                            <div id="kpiEstadoNivelFallas" class="text-center mt-2" style="display: none;">
+                              <span id="kpiBadgeNivelFallas" class="badge fs-6 px-3 py-2">
+                                <i id="kpiIconoNivelFallas" class="bi me-1"></i>
+                                <span id="kpiTextoNivelFallas">Nivel 1</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
+                        <div class="card-body p-4">
+                          <h6 class="mb-3">
+                            <i class="bi bi-shield-exclamation me-2" style="color: #ff6b6b;"></i>
+                            Clasificación Actual
+                          </h6>
+                          
+                          <div class="text-center mb-3">
+                            <div id="kpiClasificacionFallas" class="fs-4 fw-bold mb-2" style="color: #ff6b6b;">Cargando...</div>
+                            <div id="kpiDescripcionFallas" class="text-white small">Obteniendo datos...</div>
+                          </div>
+                          
+                          <!-- Indicador visual del nivel -->
+                          <div class="d-flex justify-content-center mb-3">
+                            <div id="kpiIndicadorFallas" class="kpi-indicator">
+                              <div class="kpi-level" data-level="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 1: Presas del Phishing</strong><br/>Failure Rate > 20%<br/>Nivel crítico de fallas"></div>
+                              <div class="kpi-level" data-level="1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 2: Aprendices de Seguridad</strong><br/>Failure Rate > 10% y ≤ 20%<br/>Fallas frecuentes"></div>
+                              <div class="kpi-level" data-level="2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 3: Defensores Digitales</strong><br/>Failure Rate > 5% y ≤ 10%<br/>Rendimiento estándar"></div>
+                              <div class="kpi-level" data-level="3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 4: Guardianes Anti-Phishing</strong><br/>Failure Rate > 2% y ≤ 5%<br/>Fallas puntuales"></div>
+                              <div class="kpi-level" data-level="4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 5: Vigilantes del Ciberespacio</strong><br/>Failure Rate ≤ 2%<br/>Operación prácticamente sin fallas"></div>
+                            </div>
+                          </div>
+                          
+                          <div class="text-center">
+                            <button id="btnActualizarKPIFallas" class="btn btn-outline-danger btn-sm">
+                              <i class="bi bi-arrow-clockwise me-1"></i>
+                              Actualizar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="panel-fecha" role="tabpanel" aria-labelledby="tab-fecha">
             <div class="row g-4">
               <div class="col-lg-9">
                 <div class="card p-3 bg-dark text-white">
@@ -665,8 +935,8 @@
                             </h5>
                             <div class="d-flex align-items-center">
                               <i class="bi bi-info-circle me-2" style="color: #da02e5; cursor: pointer;" 
-                                 data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="Tiempo promedio entre la creación del evento y su reporte por parte de los usuarios"></i>
+                                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                                 title="<strong>Tiempo de Respuesta Promedio</strong><br/>Tiempo promedio que tardan los usuarios en reportar un evento de phishing simulado, contado desde que se generó el evento hasta que el sistema lo registra como reportado.<br/>Mide qué tan rápido los usuarios detectan y reportan los intentos de phishing."></i>
                               <span id="kpiTiempoRespuesta" class="display-4 fw-bold" style="color: #da02e5;">0</span>
                               <span class="ms-2 fs-5 text-white">horas</span>
                             </div>
@@ -730,11 +1000,11 @@
                           <!-- Indicador visual del nivel -->
                           <div class="d-flex justify-content-center mb-3">
                             <div id="kpiIndicador" class="kpi-indicator">
-                              <div class="kpi-level" data-level="0"></div>
-                              <div class="kpi-level" data-level="1"></div>
-                              <div class="kpi-level" data-level="2"></div>
-                              <div class="kpi-level" data-level="3"></div>
-                              <div class="kpi-level" data-level="4"></div>
+                              <div class="kpi-level" data-level="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 1: Presas del Phishing</strong><br/>Mediana > 12h o P90 > 60h<br/>Necesitan mejorar significativamente"></div>
+                              <div class="kpi-level" data-level="1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 2: Aprendices de Seguridad</strong><br/>Mediana ≤ 12h, P90 ≤ 60h<br/>En proceso de mejora"></div>
+                              <div class="kpi-level" data-level="2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 3: Defensores Digitales</strong><br/>Mediana ≤ 4h, P90 ≤ 48h<br/>Respuesta estándar"></div>
+                              <div class="kpi-level" data-level="3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 4: Guardianes Anti-Phishing</strong><br/>Mediana ≤ 2h, P90 ≤ 36h<br/>Responden rápido"></div>
+                              <div class="kpi-level" data-level="4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 5: Vigilantes del Ciberespacio</strong><br/>Mediana ≤ 1h, P90 ≤ 24h<br/>Excelencia en ciberseguridad"></div>
                             </div>
                           </div>
                           
@@ -1563,6 +1833,7 @@
        cargarFallasPorCampania(); // Cargar también el reporte por campaña
        cargarFallasPorEmpleado(); // Cargar también el reporte por empleado
        cargarKPITiempoRespuesta(); // Cargar KPI de tiempo de respuesta
+       cargarKPITasaFallas(); // Cargar KPI de tasa de fallas
        
        // Inicializar tooltips
        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -1591,7 +1862,7 @@
          }, 1000);
          
          setTimeout(() => {
-           animarContador('kpiTotalEventos', data.totalEventosReportados, 2, '');
+           animarContadorEntero('kpiTotalEventos', data.totalEventosReportados, 2, '');
          }, 1500);
          
          // Actualizar clasificación con animación
@@ -1701,6 +1972,34 @@
        requestAnimationFrame(animar);
      }
 
+     // Función para animar contadores enteros (sin decimales)
+     function animarContadorEntero(elementId, valorFinal, duracion = 4, sufijo = '') {
+       const elemento = document.getElementById(elementId);
+       const valorInicial = 0;
+       const startTime = Date.now();
+       
+       function animar() {
+         const elapsed = (Date.now() - startTime) / 1000; // tiempo transcurrido en segundos
+         const progress = Math.min(elapsed / duracion, 1); // progreso de 0 a 1
+         
+         // Función de easing para desaceleración suave (ease-out)
+         const easeOut = 1 - Math.pow(1 - progress, 3);
+         
+         const valorActual = valorInicial + (valorFinal - valorInicial) * easeOut;
+         
+         elemento.textContent = Math.round(valorActual) + sufijo;
+         
+         if (progress < 1) {
+           requestAnimationFrame(animar);
+         } else {
+           // Asegurar que termine exactamente en el valor final
+           elemento.textContent = Math.round(valorFinal) + sufijo;
+         }
+       }
+       
+       requestAnimationFrame(animar);
+     }
+
      // Función para actualizar el estado del nivel
      function actualizarEstadoNivel(nivel, claseNivel, icono, texto) {
        const estadoNivel = document.getElementById('kpiEstadoNivel');
@@ -1742,7 +2041,7 @@
      }
 
      // Event listener para el botón de actualizar
-     document.getElementById('btnActualizarKPI').addEventListener('click', () => {
+     document.getElementById('btnActualizarKPITiempo').addEventListener('click', () => {
        // Remover animaciones previas
        document.getElementById('kpiMediana').classList.remove('counter-animate');
        document.getElementById('kpiP90').classList.remove('counter-animate');
@@ -1751,6 +2050,198 @@
        
        // Recargar datos
        cargarKPITiempoRespuesta();
+     });
+
+     // Función para cargar el KPI de tasa de fallas
+     async function cargarKPITasaFallas() {
+       try {
+         const resp = await fetch('/api/kpis/tasa-fallas');
+         if (!resp.ok) throw new Error('Error al obtener datos del KPI');
+         const data = await resp.json();
+
+         // Verificar si hay datos insuficientes
+         if (data.insuficienteDatos) {
+           // Mostrar mensaje de datos insuficientes
+           document.getElementById('kpiTasaFallas').textContent = 'N/A';
+           document.getElementById('kpiTotalIntentosFallas').textContent = Math.round(data.totalIntentos);
+           document.getElementById('kpiIntentosConFallas').textContent = Math.round(data.intentosConFalla);
+           document.getElementById('kpiIntentosSinFallas').textContent = Math.round(data.intentosSinFalla);
+           document.getElementById('kpiClasificacionFallas').textContent = data.clasificacion;
+           document.getElementById('kpiDescripcionFallas').textContent = data.descripcion;
+           document.getElementById('kpiNivelFallas').textContent = '0/5';
+           document.getElementById('kpiProgresoFallas').style.width = '0%';
+           
+           // Aplicar estilo de datos insuficientes
+           const kpiCard = document.querySelector('#panel-kpis .row:nth-child(3) .card');
+           if (kpiCard) {
+             kpiCard.classList.add('insuficiente-datos');
+           }
+           
+           // Ocultar indicador visual y estado del nivel
+           document.getElementById('kpiIndicadorFallas').style.display = 'none';
+           document.getElementById('kpiEstadoNivelFallas').style.display = 'none';
+           
+           return;
+         }
+
+         // Remover estilo de datos insuficientes si existe
+         const kpiCard = document.querySelector('#panel-kpis .row:nth-child(3) .card');
+         if (kpiCard) {
+           kpiCard.classList.remove('insuficiente-datos');
+         }
+
+         // Animar el contador principal (más lento)
+         animarContador('kpiTasaFallas', data.tasaFallas, 4);
+         
+         // Animar métricas secundarias con delay escalonado
+         setTimeout(() => {
+           animarContadorEntero('kpiTotalIntentosFallas', data.totalIntentos, 3, '');
+         }, 500);
+         
+         setTimeout(() => {
+           animarContadorEntero('kpiIntentosConFallas', data.intentosConFalla, 3, '');
+         }, 1000);
+         
+         setTimeout(() => {
+           animarContadorEntero('kpiIntentosSinFallas', data.intentosSinFalla, 3, '');
+         }, 1500);
+         
+         // Actualizar clasificación con animación
+         setTimeout(() => {
+           document.getElementById('kpiClasificacionFallas').textContent = data.clasificacion;
+           document.getElementById('kpiDescripcionFallas').textContent = data.descripcion;
+           document.getElementById('kpiClasificacionFallas').style.opacity = '0';
+           document.getElementById('kpiDescripcionFallas').style.opacity = '0';
+           document.getElementById('kpiClasificacionFallas').style.transition = 'opacity 1s ease-in-out';
+           document.getElementById('kpiDescripcionFallas').style.transition = 'opacity 1s ease-in-out';
+           
+           setTimeout(() => {
+             document.getElementById('kpiClasificacionFallas').style.opacity = '1';
+             document.getElementById('kpiDescripcionFallas').style.opacity = '1';
+           }, 100);
+         }, 3000);
+         
+         // Actualizar nivel y progreso
+         const nivel = data.nivel;
+         let porcentaje;
+         
+         // Configurar barra de progreso y estado del nivel
+         porcentaje = (nivel / 5) * 100;
+         document.getElementById('kpiProgresoFallas').className = 'progress-bar';
+         
+         // Determinar clase y texto según el nivel
+         let claseNivel, icono, texto;
+         if (nivel === 1) {
+           claseNivel = 'nivel1';
+           icono = 'bi-exclamation-triangle';
+           texto = 'Presas del Phishing';
+         } else if (nivel === 2) {
+           claseNivel = 'normal';
+           icono = 'bi-info-circle';
+           texto = 'Aprendices de Seguridad';
+         } else if (nivel === 3) {
+           claseNivel = 'normal';
+           icono = 'bi-shield-check';
+           texto = 'Defensores Digitales';
+         } else if (nivel === 4) {
+           claseNivel = 'alto';
+           icono = 'bi-shield-fill-check';
+           texto = 'Guardianes Anti-Phishing';
+         } else if (nivel === 5) {
+           claseNivel = 'alto';
+           icono = 'bi-award';
+           texto = 'Vigilantes del Ciberespacio';
+         } else {
+           claseNivel = 'normal';
+           icono = 'bi-question-circle';
+           texto = 'Nivel Desconocido';
+         }
+         
+         actualizarEstadoNivelFallas(nivel, claseNivel, icono, texto);
+         
+         // Animar la barra de progreso
+         setTimeout(() => {
+           document.getElementById('kpiProgresoFallas').style.width = `${porcentaje}%`;
+         }, 2000);
+         
+         document.getElementById('kpiNivelFallas').textContent = `${nivel}/5`;
+         
+         // Mostrar indicador visual
+         document.getElementById('kpiIndicadorFallas').style.display = 'flex';
+         
+         // Actualizar indicador visual con delay
+         setTimeout(() => {
+           console.log('Llamando actualizarIndicadorNivelFallas con nivel:', nivel);
+           actualizarIndicadorNivelFallas(nivel);
+         }, 2500);
+         
+         // Aplicar animaciones
+         document.getElementById('kpiTotalIntentosFallas').classList.add('counter-animate');
+         document.getElementById('kpiIntentosConFallas').classList.add('counter-animate');
+         document.getElementById('kpiIntentosSinFallas').classList.add('counter-animate');
+         document.getElementById('kpiClasificacionFallas').classList.add('counter-animate');
+         
+       } catch (e) {
+         console.error('Error cargando KPI de tasa de fallas:', e);
+         document.getElementById('kpiTasaFallas').textContent = 'Error';
+         document.getElementById('kpiClasificacionFallas').textContent = 'Error al cargar';
+         document.getElementById('kpiDescripcionFallas').textContent = 'No se pudieron obtener los datos del KPI';
+       }
+     }
+
+     // Función para actualizar el estado del nivel de tasa de fallas
+     function actualizarEstadoNivelFallas(nivel, claseNivel, icono, texto) {
+       const estadoNivel = document.getElementById('kpiEstadoNivelFallas');
+       const badgeNivel = document.getElementById('kpiBadgeNivelFallas');
+       const iconoNivel = document.getElementById('kpiIconoNivelFallas');
+       const textoNivel = document.getElementById('kpiTextoNivelFallas');
+       
+       // Limpiar clases anteriores
+       estadoNivel.className = 'text-center mt-2';
+       badgeNivel.className = 'badge fs-6 px-3 py-2';
+       
+       // Aplicar nueva clase
+       estadoNivel.classList.add(claseNivel);
+       
+       // Actualizar contenido
+       iconoNivel.className = `bi ${icono} me-1`;
+       textoNivel.textContent = texto;
+       
+       // Mostrar con animación
+       estadoNivel.style.display = 'block';
+       estadoNivel.style.opacity = '0';
+       estadoNivel.style.transition = 'opacity 0.5s ease-in-out';
+       
+       setTimeout(() => {
+         estadoNivel.style.opacity = '1';
+       }, 100);
+     }
+
+     // Función para actualizar el indicador visual de nivel de tasa de fallas
+     function actualizarIndicadorNivelFallas(nivel) {
+       const niveles = document.querySelectorAll('#kpiIndicadorFallas .kpi-level');
+       console.log('Actualizando indicador de tasa de fallas, nivel:', nivel, 'elementos encontrados:', niveles.length);
+       
+       niveles.forEach((nivelElemento, index) => {
+         nivelElemento.classList.remove('active', 'critical');
+         
+         if (index < nivel) {
+           nivelElemento.classList.add('active');
+           console.log('Activando nivel', index + 1, 'para nivel', nivel);
+         }
+       });
+     }
+
+     // Event listener para el botón de actualizar tasa de fallas
+     document.getElementById('btnActualizarKPIFallas').addEventListener('click', () => {
+       // Remover animaciones previas
+       document.getElementById('kpiTotalIntentosFallas').classList.remove('counter-animate');
+       document.getElementById('kpiIntentosConFallas').classList.remove('counter-animate');
+       document.getElementById('kpiIntentosSinFallas').classList.remove('counter-animate');
+       document.getElementById('kpiClasificacionFallas').classList.remove('counter-animate');
+       
+       // Recargar datos
+       cargarKPITasaFallas();
      });
   </script>
 
