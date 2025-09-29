@@ -492,6 +492,91 @@
       .tooltip.bs-tooltip-top .tooltip-arrow::before {
         border-top-color: #da02e5;
       }
+      
+      /* Estilos para el dropdown de navegación */
+      .nav-item.dropdown .nav-link.dropdown-toggle {
+        color: #dddddd;
+        border: none;
+        background: transparent;
+        transition: all 0.3s ease;
+      }
+      
+      .nav-item.dropdown .nav-link.dropdown-toggle:hover {
+        color: #ffffff;
+        background: rgba(218, 2, 229, 0.1);
+      }
+      
+      .nav-item.dropdown .nav-link.dropdown-toggle:focus {
+        color: #ffffff;
+        background: rgba(218, 2, 229, 0.2);
+        box-shadow: 0 0 0 2px rgba(218, 2, 229, 0.3);
+      }
+      
+      .nav-item.dropdown .nav-link.dropdown-toggle[aria-expanded="true"] {
+        color: #ffffff;
+        background: rgba(218, 2, 229, 0.2);
+      }
+      
+      .nav-item.dropdown .nav-link.dropdown-toggle .bi-chevron-down {
+        transition: transform 0.3s ease;
+      }
+      
+      .nav-item.dropdown .nav-link.dropdown-toggle[aria-expanded="true"] .bi-chevron-down {
+        transform: rotate(180deg);
+      }
+      
+      .nav-item.dropdown .dropdown-menu {
+        background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+        border: 1px solid #444;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        padding: 8px 0;
+        margin-top: 4px;
+      }
+      
+      .nav-item.dropdown .dropdown-menu .dropdown-item {
+        color: #f1f1f1;
+        padding: 10px 16px;
+        transition: all 0.3s ease;
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: left;
+        font-size: 0.9rem;
+      }
+      
+      .nav-item.dropdown .dropdown-menu .dropdown-item:hover {
+        background: rgba(218, 2, 229, 0.2);
+        color: #ffffff;
+        transform: translateX(4px);
+      }
+      
+      .nav-item.dropdown .dropdown-menu .dropdown-item:focus {
+        background: rgba(218, 2, 229, 0.3);
+        color: #ffffff;
+        box-shadow: none;
+        outline: none;
+      }
+      
+      .nav-item.dropdown .dropdown-menu .dropdown-item.active {
+        background: linear-gradient(135deg, #da02e5, #e533f0);
+        color: #ffffff;
+        font-weight: 600;
+      }
+      
+      .nav-item.dropdown .dropdown-menu .dropdown-item i {
+        color: #da02e5;
+        transition: color 0.3s ease;
+      }
+      
+      .nav-item.dropdown .dropdown-menu .dropdown-item:hover i {
+        color: #ffffff;
+      }
+      
+      .nav-item.dropdown .dropdown-menu .dropdown-item.active i {
+        color: #ffffff;
+      }
     </style>
 </head>
 <body class="index-page">
@@ -521,25 +606,33 @@
                  <i class="bi bi-speedometer2"></i> KPIs
                </button>
              </li>
-             <li class="nav-item" role="presentation">
-               <button class="nav-link" id="tab-fecha" data-bs-toggle="tab" data-bs-target="#panel-fecha" type="button" role="tab">
-                 <i class="bi bi-calendar3"></i> Fallas por Fecha
+             <li class="nav-item dropdown" role="presentation">
+               <button class="nav-link dropdown-toggle" id="dropdown-estadisticas" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+                 <i class="bi bi-bar-chart"></i> Estadísticas Fallas
+                 <i class="bi bi-chevron-down ms-1"></i>
                </button>
-             </li>
-             <li class="nav-item" role="presentation">
-               <button class="nav-link" id="tab-area" data-bs-toggle="tab" data-bs-target="#panel-area" type="button" role="tab">
-                 <i class="bi bi-pie-chart"></i> Fallas por Área
-               </button>
-             </li>
-             <li class="nav-item" role="presentation">
-               <button class="nav-link" id="tab-campania" data-bs-toggle="tab" data-bs-target="#panel-campania" type="button" role="tab">
-                 <i class="bi bi-graph-up"></i> Fallas por Tipo de Campaña
-               </button>
-             </li>
-             <li class="nav-item" role="presentation">
-               <button class="nav-link" id="tab-empleado" data-bs-toggle="tab" data-bs-target="#panel-empleado" type="button" role="tab">
-                 <i class="bi bi-people-fill"></i> Fallas por Empleado
-               </button>
+               <ul class="dropdown-menu" aria-labelledby="dropdown-estadisticas">
+                 <li>
+                   <button class="dropdown-item" id="tab-fecha" data-bs-toggle="tab" data-bs-target="#panel-fecha" type="button" role="tab">
+                     <i class="bi bi-calendar3 me-2"></i> Fallas por Fecha
+                   </button>
+                 </li>
+                 <li>
+                   <button class="dropdown-item" id="tab-area" data-bs-toggle="tab" data-bs-target="#panel-area" type="button" role="tab">
+                     <i class="bi bi-pie-chart me-2"></i> Fallas por Área
+                   </button>
+                 </li>
+                 <li>
+                   <button class="dropdown-item" id="tab-campania" data-bs-toggle="tab" data-bs-target="#panel-campania" type="button" role="tab">
+                     <i class="bi bi-graph-up me-2"></i> Fallas por Tipo de Campaña
+                   </button>
+                 </li>
+                 <li>
+                   <button class="dropdown-item" id="tab-empleado" data-bs-toggle="tab" data-bs-target="#panel-empleado" type="button" role="tab">
+                     <i class="bi bi-people-fill me-2"></i> Fallas por Empleado
+                   </button>
+                 </li>
+               </ul>
              </li>
            </ul>
         </div>
@@ -1840,7 +1933,68 @@
        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
          return new bootstrap.Tooltip(tooltipTriggerEl);
        });
+       
+       // Inicializar funcionalidad del dropdown de estadísticas
+       inicializarDropdownEstadisticas();
      });
+     
+     // Función para inicializar el dropdown de estadísticas
+     function inicializarDropdownEstadisticas() {
+       const dropdownToggle = document.getElementById('dropdown-estadisticas');
+       const dropdownItems = document.querySelectorAll('.nav-item.dropdown .dropdown-item');
+       const kpisTab = document.getElementById('tab-kpis');
+       
+       // Texto original del dropdown
+       const originalDropdownText = '<i class="bi bi-bar-chart"></i> Estadísticas Fallas <i class="bi bi-chevron-down ms-1"></i>';
+       
+       // Función para resetear el dropdown a su estado original
+       function resetearDropdown() {
+         dropdownToggle.innerHTML = originalDropdownText;
+         dropdownItems.forEach(dropdownItem => {
+           dropdownItem.classList.remove('active');
+         });
+       }
+       
+       // Manejar clics en los elementos del dropdown
+       dropdownItems.forEach(item => {
+         item.addEventListener('click', function(e) {
+           e.preventDefault();
+           
+           // Remover clase active de todos los elementos del dropdown
+           dropdownItems.forEach(dropdownItem => {
+             dropdownItem.classList.remove('active');
+           });
+           
+           // Agregar clase active al elemento clickeado
+           this.classList.add('active');
+           
+           // Cerrar el dropdown
+           const dropdown = bootstrap.Dropdown.getInstance(dropdownToggle);
+           if (dropdown) {
+             dropdown.hide();
+           }
+           
+           // Actualizar el texto del botón del dropdown para mostrar la opción seleccionada
+           const icon = this.querySelector('i');
+           const text = this.textContent.trim();
+           dropdownToggle.innerHTML = `${icon.outerHTML} ${text} <i class="bi bi-chevron-down ms-1"></i>`;
+         });
+       });
+       
+       // Manejar clic en el tab de KPIs para resetear el dropdown
+       kpisTab.addEventListener('click', function() {
+         resetearDropdown();
+       });
+       
+       // Manejar el estado del dropdown cuando se abre/cierra
+       dropdownToggle.addEventListener('show.bs.dropdown', function() {
+         this.setAttribute('aria-expanded', 'true');
+       });
+       
+       dropdownToggle.addEventListener('hide.bs.dropdown', function() {
+         this.setAttribute('aria-expanded', 'false');
+       });
+     }
 
      // Función para cargar el KPI de tiempo de respuesta
      async function cargarKPITiempoRespuesta() {
