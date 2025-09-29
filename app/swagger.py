@@ -589,8 +589,87 @@ def openapi_spec():
                         }
                     }
                 }
-            }
-            ,
+            },
+            "/api/kpis/tasa-fallas": {
+                "get": {
+                    "summary": "⚠️ Obtener KPI de Tasa de Fallas",
+                    "description": "Calcula la tasa de fallas basada en los intentos de phishing (usuarios asignados a eventos). Cada usuario asignado a un evento representa un intento de phishing individual. Calcula el porcentaje de intentos que resultaron en FALLA. Incluye clasificación automática en 5 niveles de madurez organizacional. Implementado en ControllerKpis.",
+                    "tags": ["📊 Reportes"],
+                    "responses": {
+                        "200": {
+                            "description": "KPI de tasa de fallas calculado exitosamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "tasaFallas": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "description": "Porcentaje de intentos de phishing que resultaron en FALLA",
+                                                "example": 15.5
+                                            },
+                                            "totalIntentos": {
+                                                "type": "integer",
+                                                "description": "Número total de intentos de phishing (usuarios asignados a eventos)",
+                                                "example": 120
+                                            },
+                                            "intentosConFalla": {
+                                                "type": "integer",
+                                                "description": "Número de intentos que resultaron en FALLA",
+                                                "example": 18
+                                            },
+                                            "intentosSinFalla": {
+                                                "type": "integer",
+                                                "description": "Número de intentos que NO resultaron en FALLA",
+                                                "example": 102
+                                            },
+                                            "clasificacion": {
+                                                "type": "string",
+                                                "description": "Clasificación de madurez organizacional basada en la tasa de fallas",
+                                                "enum": [
+                                                    "Vigilantes del Ciberespacio",
+                                                    "Guardianes Anti-Phishing",
+                                                    "Defensores Digitales",
+                                                    "Aprendices de Seguridad",
+                                                    "Presas del Phishing",
+                                                    "Datos Insuficientes"
+                                                ],
+                                                "example": "Aprendices de Seguridad"
+                                            },
+                                            "nivel": {
+                                                "type": "integer",
+                                                "description": "Nivel de madurez (0-5, donde 5 es el más alto). Nivel 0 indica datos insuficientes",
+                                                "minimum": 0,
+                                                "maximum": 5,
+                                                "example": 2
+                                            },
+                                            "descripcion": {
+                                                "type": "string",
+                                                "description": "Descripción detallada de la clasificación y criterios utilizados",
+                                                "example": "Fallas frecuentes, requieren refuerzo de procesos y controles. Failure Rate > 10% y ≤ 20%"
+                                            },
+                                            "insuficienteDatos": {
+                                                "type": "boolean",
+                                                "description": "Indica si hay suficientes datos para mostrar el KPI (mínimo 5 intentos de phishing)",
+                                                "example": False
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {
+                            "description": "Error del servidor al calcular el KPI",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/Error"}
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "/api/eventos": {
                 "get": {
                     "summary": "Obtener todos los eventos",
