@@ -445,6 +445,77 @@ def obtenerFallasPorEmpleado():
     return AreasController.obtenerFallasPorEmpleado(tipos_evento if tipos_evento else None)
 
 
+@apis.route("/api/areas/fallas-empleados-scoring", methods=["GET"])
+def obtenerFallasPorEmpleadoConScoring():
+    from app.backend.models.tipoEvento import TipoEvento
+
+    # Obtener parámetros de filtro por tipos de evento (múltiples)
+    tipos_evento_params = request.args.getlist('tipo_evento')
+    tipos_evento = []
+
+    if tipos_evento_params:
+        # Mapear los valores del frontend a los enums
+        tipo_mapping = {
+            'CORREO': TipoEvento.CORREO,
+            'MENSAJE': TipoEvento.MENSAJE,
+            'LLAMADA': TipoEvento.LLAMADA,
+            'VIDEOLLAMADA': TipoEvento.VIDEOLLAMADA
+        }
+        tipos_evento = [tipo_mapping.get(tipo.upper()) for tipo in tipos_evento_params if
+                        tipo_mapping.get(tipo.upper())]
+
+    return ResultadoEventoController.obtenerFallasPorEmpleadoConScoring(tipos_evento if tipos_evento else None)
+
+
+@apis.route("/api/scoring/empleado/<int:idUsuario>", methods=["GET"])
+def obtenerScoringEmpleado(idUsuario):
+    """
+    Endpoint para obtener el scoring de un empleado específico.
+    """
+    return ResultadoEventoController.calcularScoringPorEmpleado(idUsuario)
+
+@apis.route("/api/debug/empleados", methods=["GET"])
+def debug_empleados():
+    """Endpoint de debug para verificar datos de empleados"""
+    from app.config.db_config import SessionLocal
+    from app.backend.models.usuario import Usuario
+    from app.backend.models.area import Area
+    
+    session = SessionLocal()
+    try:
+        # Obtener todos los empleados
+        empleados = (
+            session.query(
+                Area.idArea,
+                Area.nombreArea,
+                Usuario.idUsuario,
+                Usuario.nombre,
+                Usuario.apellido
+            )
+            .join(Usuario, Usuario.idArea == Area.idArea)
+            .all()
+        )
+        
+        return jsonify({
+            "total_empleados": len(empleados),
+            "empleados": [
+                {
+                    "idArea": emp.idArea,
+                    "nombreArea": emp.nombreArea,
+                    "idUsuario": emp.idUsuario,
+                    "nombre": emp.nombre,
+                    "apellido": emp.apellido
+                }
+                for emp in empleados
+            ]
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        session.close()
+
+
 @apis.route("/api/kpis/tiempo-respuesta", methods=["GET"])
 def obtenerTiempoRespuestaKPI():
     """

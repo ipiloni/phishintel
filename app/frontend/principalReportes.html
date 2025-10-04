@@ -606,6 +606,11 @@
                  <i class="bi bi-speedometer2"></i> KPIs
                </button>
              </li>
+             <li class="nav-item" role="presentation">
+               <button class="nav-link" id="tab-empleado" data-bs-toggle="tab" data-bs-target="#panel-empleado" type="button" role="tab">
+                 <i class="bi bi-person-badge"></i> Scoring Empleado
+               </button>
+             </li>
              <li class="nav-item dropdown" role="presentation">
                <button class="nav-link dropdown-toggle" id="dropdown-estadisticas" data-bs-toggle="dropdown" aria-expanded="false" type="button">
                  <i class="bi bi-bar-chart"></i> Estadísticas Fallas
@@ -625,11 +630,6 @@
                  <li>
                    <button class="dropdown-item" id="tab-campania" data-bs-toggle="tab" data-bs-target="#panel-campania" type="button" role="tab">
                      <i class="bi bi-graph-up me-2"></i> Fallas por Tipo de Campaña
-                   </button>
-                 </li>
-                 <li>
-                   <button class="dropdown-item" id="tab-empleado" data-bs-toggle="tab" data-bs-target="#panel-empleado" type="button" role="tab">
-                     <i class="bi bi-people-fill me-2"></i> Fallas por Empleado
                    </button>
                  </li>
                </ul>
@@ -979,176 +979,26 @@
               <div class="col-12">
                 <div class="card p-3 bg-dark text-white">
                   <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">Fallas por Empleado</h5>
-                    <div class="filters-container">
-                      <div class="filter-group">
-                        <span class="filter-label">
-                          <i class="bi bi-funnel filter-icon"></i>
-                          Tipo
-                        </span>
-                        <div style="position: relative; width: 220px;">
-                          <select id="filtroTipoEmpleado" class="form-select form-select-sm" style="width: 100%;" multiple>
-                            <option value="CORREO">📧 Correo</option>
-                            <option value="MENSAJE">💬 Mensaje</option>
-                            <option value="LLAMADA">📞 Llamada</option>
-                            <option value="VIDEOLLAMADA">📹 Videollamada</option>
-                          </select>
-                          <div class="filter-placeholder" id="filtroTipoEmpleadoPlaceholder">Seleccionar tipos...</div>
-                          <i class="bi bi-chevron-down filter-dropdown-icon"></i>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div id="contenidoEmpleados"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="tab-pane fade" id="panel-kpis" role="tabpanel" aria-labelledby="tab-kpis">
-            <div class="row g-4">
-              <div class="col-12">
-                <div class="card p-4 bg-dark text-white">
-                  <div class="text-center mb-4">
-                    <h3 class="mb-3">
-                      <i class="bi bi-speedometer2 me-2" style="color: #da02e5;"></i>
-                      KPIs de Seguridad
-                    </h3>
+                    <h5 class="mb-0">
+                      <i class="bi bi-person-badge me-2" style="color: #da02e5;"></i>
+                      Fallas por Empleado con Scoring
+                    </h5>
                   </div>
                   
-                  <!-- KPI de Tiempo de Respuesta -->
-                  <div class="row g-4">
-                    <div class="col-lg-8">
-                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
-                        <div class="card-body p-4">
-                          <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0">
-                              <i class="bi bi-clock-history me-2" style="color: #da02e5;"></i>
-                              Tiempo de Respuesta Promedio
-                            </h5>
-                            <div class="d-flex align-items-center">
-                              <i class="bi bi-info-circle me-2" style="color: #da02e5; cursor: pointer;" 
-                                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-                                 title="<strong>Tiempo de Respuesta Promedio</strong><br/>Tiempo promedio que tardan los usuarios en reportar un evento de phishing simulado, contado desde que se generó el evento hasta que el sistema lo registra como reportado.<br/>Mide qué tan rápido los usuarios detectan y reportan los intentos de phishing."></i>
-                              <span id="kpiTiempoRespuesta" class="display-4 fw-bold" style="color: #da02e5;">0</span>
-                              <span class="ms-2 fs-5 text-white">horas</span>
-                            </div>
-                          </div>
-                          
-                          <div class="row g-3 mb-3">
-                            <div class="col-md-4">
-                              <div class="text-center">
-                                <div class="fs-6 text-white">Mediana</div>
-                                <div id="kpiMediana" class="fs-4 fw-bold" style="color: #00d4aa;">0h</div>
-                              </div>
-                            </div>
-                            <div class="col-md-4">
-                              <div class="text-center">
-                                <div class="fs-6 text-white">P90</div>
-                                <div id="kpiP90" class="fs-4 fw-bold" style="color: #ff6b6b;">0h</div>
-                              </div>
-                            </div>
-                            <div class="col-md-4">
-                              <div class="text-center">
-                                <div class="fs-6 text-white">Eventos</div>
-                                <div id="kpiTotalEventos" class="fs-4 fw-bold" style="color: #feca57;">0</div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <!-- Barra de progreso del nivel -->
-                          <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                              <span class="fs-6 text-white">Nivel de Madurez</span>
-                              <span id="kpiNivel" class="badge fs-6 px-3 py-2">0/5</span>
-                            </div>
-                            <div class="progress" style="height: 12px; background-color: #333;">
-                              <div id="kpiProgreso" class="progress-bar" role="progressbar" style="width: 0%; transition: width 2s ease-in-out;"></div>
-                            </div>
-                            <!-- Estado del nivel debajo de la barra -->
-                            <div id="kpiEstadoNivel" class="text-center mt-2" style="display: none;">
-                              <span id="kpiBadgeNivel" class="badge fs-6 px-3 py-2">
-                                <i id="kpiIconoNivel" class="bi me-1"></i>
-                                <span id="kpiTextoNivel">Nivel 1</span>
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div class="col-lg-4">
-                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
-                        <div class="card-body p-4">
-                          <h6 class="mb-3">
-                            <i class="bi bi-shield-check me-2" style="color: #da02e5;"></i>
-                            Clasificación Actual
-                          </h6>
-                          
-                          <div class="text-center mb-3">
-                            <div id="kpiClasificacion" class="fs-4 fw-bold mb-2" style="color: #da02e5;">Cargando...</div>
-                            <div id="kpiDescripcion" class="text-white small">Obteniendo datos...</div>
-                          </div>
-                          
-                          <!-- Indicador visual del nivel -->
-                          <div class="d-flex justify-content-center mb-3">
-                            <div id="kpiIndicador" class="kpi-indicator">
-                              <div class="kpi-level" data-level="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 1: Presas del Phishing</strong><br/>Mediana > 12h o P90 > 60h<br/>Necesitan mejorar significativamente"></div>
-                              <div class="kpi-level" data-level="1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 2: Aprendices de Seguridad</strong><br/>Mediana ≤ 12h, P90 ≤ 60h<br/>En proceso de mejora"></div>
-                              <div class="kpi-level" data-level="2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 3: Defensores Digitales</strong><br/>Mediana ≤ 4h, P90 ≤ 48h<br/>Respuesta estándar"></div>
-                              <div class="kpi-level" data-level="3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 4: Guardianes Anti-Phishing</strong><br/>Mediana ≤ 2h, P90 ≤ 36h<br/>Responden rápido"></div>
-                              <div class="kpi-level" data-level="4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 5: Vigilantes del Ciberespacio</strong><br/>Mediana ≤ 1h, P90 ≤ 24h<br/>Excelencia en ciberseguridad"></div>
-                            </div>
-                          </div>
-                          
-                          <div class="text-center">
-                            <button id="btnActualizarKPI" class="btn btn-outline-primary btn-sm">
-                              <i class="bi bi-arrow-clockwise me-1"></i>
-                              Actualizar
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                   
-                  <!-- Información adicional -->
-                  <div class="row g-4 mt-3">
-                    <div class="col-12">
-                      <div class="card bg-secondary">
-                        <div class="card-body p-3">
-                          <h6 class="mb-3">
-                            <i class="bi bi-info-circle me-2"></i>
-                            Información sobre el KPI
-                          </h6>
-                          <div class="row g-3">
-                            <div class="col-md-6">
-                              <div class="d-flex align-items-center">
-                                <i class="bi bi-calculator me-2" style="color: #da02e5;"></i>
-                                <div>
-                                  <div class="fw-bold">Cálculo</div>
-                                  <small class="text-white">Diferencia entre fecha de reporte y fecha de creación del evento</small>
-                                </div>
-                              </div>
-                            </div>
-                            <div class="col-md-6">
-                              <div class="d-flex align-items-center">
-                                <i class="bi bi-target me-2" style="color: #00d4aa;"></i>
-                                <div>
-                                  <div class="fw-bold">Objetivo Ideal</div>
-                                  <small class="text-white">Mediana ≤ 1h, P90 ≤ 24h</small>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                  <div id="contenidoEmpleados">
+                    <div class="text-center py-5">
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
                       </div>
+                      <p class="mt-3 text-muted">Cargando datos de empleados...</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>
@@ -1744,22 +1594,38 @@
        }
      });
 
-     // Función para cargar fallas por empleado
-     async function cargarFallasPorEmpleado(tiposEvento = []) {
-       try {
-         let url = '/api/areas/fallas-empleados';
-         if (tiposEvento.length > 0) {
-           const params = new URLSearchParams();
-           tiposEvento.forEach(tipo => params.append('tipo_evento', tipo));
-           url += `?${params.toString()}`;
+
+     // Función para cargar fallas por empleado con scoring
+    async function cargarFallasPorEmpleado() {
+      console.log('🚀 Iniciando carga de fallas por empleado...');
+      
+      const contenido = document.getElementById('contenidoEmpleados');
+      
+      try {
+        // Mostrar loading
+        contenido.innerHTML = `
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-3 text-muted">Cargando datos de empleados...</p>
+          </div>
+        `;
+
+        const url = '/api/areas/fallas-empleados-scoring';
+         
+         console.log('📡 Haciendo petición a:', url);
+         const resp = await fetch(url);
+         
+         if (!resp.ok) {
+           throw new Error(`Error HTTP: ${resp.status} - ${resp.statusText}`);
          }
          
-         const resp = await fetch(url);
-         if (!resp.ok) throw new Error('Error al obtener datos');
          const data = await resp.json();
+         console.log('📊 Datos recibidos:', data);
+         console.log('📊 Primer empleado:', data.areas?.[0]?.empleados?.[0]);
 
          const areas = data.areas || [];
-         const contenido = document.getElementById('contenidoEmpleados');
          
          if (areas.length === 0) {
            contenido.innerHTML = `
@@ -1775,88 +1641,197 @@
          let html = '';
          
          areas.forEach((area, index) => {
-           if (area.totalEmpleados > 0) {
-             const areaId = `area-${index}`;
-             html += `
-               <div class="card mb-3 bg-dark border-0" style="box-shadow: 0 4px 15px rgba(218, 2, 229, 0.2);">
-                 <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #da02e5, #e533f0); border: none; cursor: pointer;" 
-                      data-bs-toggle="collapse" data-bs-target="#${areaId}" aria-expanded="false" aria-controls="${areaId}">
-                   <div class="d-flex justify-content-between align-items-center">
-                     <h6 class="mb-0 text-white">
-                       <i class="bi bi-building me-2"></i>
-                       ${area.nombreArea}
-                       <i class="bi bi-chevron-down ms-2" id="icon-${areaId}"></i>
-                     </h6>
-                     <div class="d-flex gap-2">
-                       <span class="badge" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
-                         <i class="bi bi-people-fill me-1"></i>
-                         ${area.totalEmpleados} empleados
-                       </span>
-                       <span class="badge" style="background: rgba(255,107,107,0.8); color: white;">
-                         <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                         ${area.empleadosConFalla} con fallas
-                       </span>
-                       <span class="badge" style="background: rgba(255,193,7,0.8); color: #000;">
-                         <i class="bi bi-bug-fill me-1"></i>
-                         ${area.totalFallas} fallas
-                       </span>
+           const areaId = `area-${index}`;
+           html += `
+             <div class="card mb-3 bg-dark border-0" style="border-left: 4px solid #da02e5 !important;">
+               <div class="card-header bg-dark" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#${areaId}" aria-expanded="false">
+                 <h6 class="mb-0 d-flex justify-content-between align-items-center">
+                   <span>
+                     <i class="bi bi-building me-2"></i>
+                     ${area.nombreArea || 'Área sin nombre'}
+                     <i class="bi bi-chevron-down ms-2" id="icon-${areaId}"></i>
+                   </h6>
+                   <div class="d-flex gap-2 flex-wrap mt-2">
+                     <span class="badge" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                       <i class="bi bi-people-fill me-1"></i>
+                       ${area.empleados ? area.empleados.length : 0} empleados
+                     </span>
+                     <span class="badge" style="background: rgba(255,107,107,0.8); color: white;">
+                       <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                       ${area.empleados_con_fallas || 0} con fallas
+                     </span>
+                     <span class="badge" style="background: rgba(255,193,7,0.8); color: #000;">
+                       <i class="bi bi-bug-fill me-1"></i>
+                       ${area.total_fallas || 0} fallas
+                     </span>
+                     <span class="badge" style="background: rgba(218,2,229,0.8); color: white;">
+                       <i class="bi bi-trophy-fill me-1"></i>
+                       ${area.promedio_puntos || 0} pts promedio
+                     </span>
+                     <span class="badge" style="background: rgba(0,123,255,0.8); color: white;">
+                       <i class="bi bi-calendar-event me-1"></i>
+                       ${area.total_eventos || 0} eventos
+                     </span>
+                   </div>
+                 </h6>
+               </div>
+               <div class="collapse" id="${areaId}">
+                 <div class="card-body p-3">
+                   <div class="row g-3">
+           `;
+             
+             if (area.empleados && area.empleados.length > 0) {
+               area.empleados.forEach(empleado => {
+                 // Determinar color del nivel de riesgo
+                 let riesgoColor = '#00d4aa';
+                 let riesgoIcon = 'bi-check-circle-fill';
+                 
+                 switch(empleado.nivel_riesgo) {
+                   case 'Sin riesgo':
+                     riesgoColor = '#00d4aa';
+                     riesgoIcon = 'bi-check-circle-fill';
+                     break;
+                   case 'Riesgo bajo':
+                     riesgoColor = '#ffc107';
+                     riesgoIcon = 'bi-exclamation-triangle-fill';
+                     break;
+                   case 'Riesgo medio':
+                     riesgoColor = '#fd7e14';
+                     riesgoIcon = 'bi-exclamation-triangle-fill';
+                     break;
+                   case 'Riesgo alto':
+                     riesgoColor = '#dc3545';
+                     riesgoIcon = 'bi-exclamation-triangle-fill';
+                     break;
+                   case 'Riesgo máximo':
+                     riesgoColor = '#6f42c1';
+                     riesgoIcon = 'bi-exclamation-triangle-fill';
+                     break;
+                 }
+                 
+                 const cardStyle = (empleado.total_fallas || 0) > 0 ? 
+                   `border-left: 4px solid ${riesgoColor}; box-shadow: 0 2px 8px ${riesgoColor}40;` : 
+                   'border-left: 4px solid #00d4aa; box-shadow: 0 2px 8px rgba(0,212,170,0.3);';
+                 
+                 html += `
+                   <div class="col-lg-4 col-md-6 col-sm-12">
+                     <div class="card bg-dark border-0" style="${cardStyle}">
+                       <div class="card-body p-3">
+                         <div class="d-flex justify-content-between align-items-start mb-2">
+                           <h6 class="mb-0 text-white" style="font-size: 0.9rem;">
+                             <i class="bi bi-person-fill me-2" style="color: #da02e5;"></i>
+                             ${empleado.nombre || 'N/A'} ${empleado.apellido || 'N/A'}
+                           </h6>
+                           <span class="badge" style="background: ${riesgoColor}; color: white; font-size: 0.75rem;" 
+                                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                                 title="<strong>Escala de Riesgo (100-0 puntos):</strong><br/>
+                                 • Sin riesgo: 100 puntos<br/>
+                                 • Riesgo bajo: 90-99 puntos<br/>
+                                 • Riesgo medio: 75-89 puntos<br/>
+                                 • Riesgo alto: 50-74 puntos<br/>
+                                 • Riesgo máximo: 0-49 puntos">
+                             <i class="bi ${riesgoIcon} me-1"></i>
+                             ${empleado.nivel_riesgo || 'Sin riesgo'}
+                           </span>
+                         </div>
+                         <div class="text-white small mb-2">
+                           <i class="bi bi-person-badge me-1" style="color: #da02e5;"></i>
+                           ID: ${empleado.idUsuario || 'N/A'}
+                         </div>
+                         <div class="row g-2">
+                           <div class="col-4">
+                             <div class="text-center">
+                               <div class="text-white small mb-1">
+                                 <i class="bi bi-bug-fill me-1" style="color: #ff6b6b;"></i>
+                                 Fallas
+                               </div>
+                               <div class="fw-bold" style="color: #ff6b6b; font-size: 1.1rem;">
+                                 ${empleado.total_fallas || 0}
+                               </div>
+                             </div>
+                           </div>
+                           <div class="col-4">
+                             <div class="text-center">
+                               <div class="text-white small mb-1">
+                                 <i class="bi bi-trophy-fill me-1" style="color: #da02e5;"></i>
+                                 Puntos
+                               </div>
+                               <div class="fw-bold" style="color: #da02e5; font-size: 1.1rem;">
+                                 ${empleado.puntos_restantes || 100}
+                               </div>
+                             </div>
+                           </div>
+                           <div class="col-4">
+                             <div class="text-center">
+                               <div class="text-white small mb-1">
+                                 <i class="bi bi-calendar-event me-1" style="color: #0dcaf0;"></i>
+                                 Eventos
+                               </div>
+                               <div class="fw-bold" style="color: #0dcaf0; font-size: 1.1rem;">
+                                 ${empleado.total_eventos || 0}
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+                         ${(empleado.total_fallas || 0) > 0 && empleado.fallas_por_tipo ? `
+                           <div class="mt-2">
+                             <div class="text-white small mb-1">
+                               <i class="bi bi-list-ul me-1" style="color: #da02e5;"></i>
+                               Desglose por tipo (puntos perdidos):
+                             </div>
+                             <div class="d-flex flex-wrap gap-1">
+                               ${Object.entries(empleado.fallas_por_tipo).map(([tipo, cantidad]) => {
+                                 const iconos = {
+                                   'CORREO': '📧',
+                                   'MENSAJE': '💬',
+                                   'LLAMADA': '📞',
+                                   'VIDEOLLAMADA': '📹'
+                                 };
+                                 const puntos = {
+                                   'CORREO': 10,
+                                   'MENSAJE': 15,
+                                   'LLAMADA': 20,
+                                   'VIDEOLLAMADA': 20
+                                 };
+                                 return `<span class="badge" style="background: rgba(255,107,107,0.8); color: white; font-size: 0.7rem;">
+                                   ${iconos[tipo] || '❓'} ${cantidad} (-${cantidad * (puntos[tipo] || 0)} pts)
+                                 </span>`;
+                               }).join('')}
+                             </div>
+                           </div>
+                         ` : ''}
+                       </div>
                      </div>
                    </div>
-                 </div>
-                 <div class="collapse" id="${areaId}">
-                   <div class="card-body p-3">
-                     <div class="row g-3">
-             `;
-             
-             area.empleados.forEach(empleado => {
-               const badgeClass = empleado.tieneFallas ? 'bg-danger' : 'bg-success';
-               const badgeText = empleado.tieneFallas ? `${empleado.cantidadFallas} fallas` : 'Sin fallas';
-               const iconClass = empleado.tieneFallas ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill';
-               const cardStyle = empleado.tieneFallas ? 
-                 'border-left: 4px solid #ff6b6b; box-shadow: 0 2px 8px rgba(255,107,107,0.3);' : 
-                 'border-left: 4px solid #00d4aa; box-shadow: 0 2px 8px rgba(0,212,170,0.3);';
-               
+                 `;
+               });
+             } else {
                html += `
-                 <div class="col-lg-3 col-md-6 col-sm-12">
-                   <div class="card bg-dark border-0" style="${cardStyle}">
-                     <div class="card-body p-3">
-                       <div class="d-flex justify-content-between align-items-start mb-2">
-                         <h6 class="mb-0 text-white" style="font-size: 0.9rem;">
-                           <i class="bi bi-person-fill me-2" style="color: #da02e5;"></i>
-                           ${empleado.nombre} ${empleado.apellido}
-                         </h6>
-                         <span class="badge ${badgeClass}" style="font-size: 0.75rem;">
-                           <i class="bi ${iconClass} me-1"></i>
-                           ${badgeText}
-                         </span>
-                       </div>
-                       <div class="text-white small">
-                         <i class="bi bi-person-badge me-1" style="color: #da02e5;"></i>
-                         ID: ${empleado.idUsuario}
-                       </div>
-                     </div>
+                 <div class="col-12">
+                   <div class="text-center py-3 text-muted">
+                     <i class="bi bi-info-circle me-2"></i>
+                     No hay empleados en esta área
                    </div>
                  </div>
                `;
-             });
+             }
              
              html += `
-                     </div>
                    </div>
                  </div>
                </div>
-             `;
-           }
+             </div>
+           `;
          });
-         
+
          contenido.innerHTML = html;
-         
-         // Agregar event listeners para los iconos de colapso
+         console.log('✅ HTML generado y mostrado');
+
+         // Configurar iconos de colapso
          areas.forEach((area, index) => {
            const areaId = `area-${index}`;
-           const iconId = `icon-${areaId}`;
            const collapseElement = document.getElementById(areaId);
-           const iconElement = document.getElementById(iconId);
+           const iconElement = document.getElementById(`icon-${areaId}`);
            
            if (collapseElement && iconElement) {
              collapseElement.addEventListener('show.bs.collapse', function () {
@@ -1869,58 +1844,34 @@
            }
          });
          
+         // Inicializar tooltips
+         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+         tooltipTriggerList.map(function (tooltipTriggerEl) {
+           return new bootstrap.Tooltip(tooltipTriggerEl);
+         });
+         console.log('✅ Tooltips inicializados');
+         
        } catch (e) {
-         console.error('Error cargando fallas por empleado:', e);
-         document.getElementById('contenidoEmpleados').innerHTML = `
+         console.error('❌ Error cargando fallas por empleado:', e);
+         contenido.innerHTML = `
            <div class="text-center py-5">
              <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #da02e5;"></i>
              <h5 class="mt-3 text-danger">Error al cargar datos</h5>
-             <p class="text-muted">No se pudieron cargar los datos de empleados. Intente nuevamente.</p>
+             <p class="text-muted">Error: ${e.message}</p>
+             <button class="btn btn-outline-primary btn-sm mt-2" onclick="cargarFallasPorEmpleado()">
+               <i class="bi bi-arrow-clockwise me-1"></i>
+               Reintentar
+             </button>
            </div>
          `;
        }
      }
 
-     // Event listeners para filtros de empleado
-     document.getElementById('filtroTipoEmpleado').addEventListener('change', function() {
-       const tiposSeleccionados = Array.from(this.selectedOptions).map(option => option.value);
-       actualizarPlaceholder('filtroTipoEmpleado', 'filtroTipoEmpleadoPlaceholder');
-       cargarFallasPorEmpleado(tiposSeleccionados);
-     });
-
-     // Event listeners para ocultar/mostrar placeholder - Filtro Tipo Empleado
-     document.getElementById('filtroTipoEmpleado').addEventListener('focus', function() {
-       document.getElementById('filtroTipoEmpleadoPlaceholder').style.display = 'none';
-     });
-
-     document.getElementById('filtroTipoEmpleado').addEventListener('blur', function() {
-       setTimeout(() => {
-         actualizarPlaceholder('filtroTipoEmpleado', 'filtroTipoEmpleadoPlaceholder');
-       }, 100);
-     });
-
-     // Event listener para manejar clics en opciones (deselección sin Ctrl) - Tipo Empleado
-     document.getElementById('filtroTipoEmpleado').addEventListener('mousedown', function(e) {
-       // Ocultar placeholder inmediatamente
-       document.getElementById('filtroTipoEmpleadoPlaceholder').style.display = 'none';
-       
-       // Solo permitir deselección sin Ctrl si la opción ya está seleccionada
-       if (e.target.tagName === 'OPTION' && e.target.selected) {
-         e.preventDefault();
-         e.target.selected = false;
-         
-         // Actualizar placeholder después de un pequeño delay
-         setTimeout(() => {
-           actualizarPlaceholder('filtroTipoEmpleado', 'filtroTipoEmpleadoPlaceholder');
-         }, 50);
-         
-         // Disparar evento change manualmente
-         this.dispatchEvent(new Event('change'));
-       }
-     });
 
      // Cargar datos iniciales
      document.addEventListener('DOMContentLoaded', () => {
+       console.log('🚀 DOM cargado, iniciando carga de datos...');
+       
        cargarFallasPorFecha(); // Cargar primero el reporte por fecha
        cargarFallasPorArea(); // Cargar también el reporte por área
        cargarFallasPorCampania(); // Cargar también el reporte por campaña
@@ -1985,6 +1936,20 @@
        kpisTab.addEventListener('click', function() {
          resetearDropdown();
        });
+       
+       // Manejar clic en el tab de empleado para resetear el dropdown
+       const empleadoTab = document.getElementById('tab-empleado');
+       if (empleadoTab) {
+         empleadoTab.addEventListener('click', function() {
+           console.log('🖱️ Clic en tab de empleado detectado');
+           resetearDropdown();
+           // Forzar carga de datos cuando se hace clic en el tab
+           setTimeout(() => {
+             console.log('🔄 Forzando recarga de datos de empleado...');
+             cargarFallasPorEmpleado();
+           }, 100);
+         });
+       }
        
        // Manejar el estado del dropdown cuando se abre/cierra
        dropdownToggle.addEventListener('show.bs.dropdown', function() {

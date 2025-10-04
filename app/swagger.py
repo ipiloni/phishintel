@@ -512,6 +512,154 @@ def openapi_spec():
                     }
                 }
             },
+            "/api/areas/fallas-empleados-scoring": {
+                "get": {
+                    "summary": "🎯 Obtener Fallas por Empleado con Sistema de Scoring Invertido",
+                    "description": "Obtiene un listado completo de todos los empleados con sistema de scoring invertido (100-0 puntos) y niveles de riesgo. Incluye empleados sin fallas. Los empleados empiezan con 100 puntos y van perdiendo por fallas: Correos = -10 pts, Mensajes = -15 pts, Llamadas/VideoLlamadas = -20 pts. Clasifica en niveles de riesgo: Sin riesgo (100), Bajo (90-99), Medio (75-89), Alto (50-74), Máximo (0-49). El área muestra promedio de puntos de empleados. Implementado en ResultadoEventoController.",
+                    "tags": ["📊 Reportes"],
+                    "parameters": [
+                        {
+                            "name": "tipo_evento",
+                            "in": "query",
+                            "description": "Filtrar por tipos de evento (puede especificar múltiples valores)",
+                            "required": False,
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"]
+                                }
+                            },
+                            "style": "form",
+                            "explode": True
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Listado de áreas con empleados y sistema de scoring",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "areas": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "idArea": {"type": "integer"},
+                                                        "nombreArea": {"type": "string"},
+                                                        "promedio_puntos": {"type": "number", "format": "float", "description": "Promedio de puntos restantes de empleados del área"},
+                                                        "total_fallas": {"type": "integer", "description": "Total de fallas del área"},
+                                                        "total_eventos": {"type": "integer", "description": "Total de eventos del área"},
+                                                        "empleados_con_fallas": {"type": "integer", "description": "Número de empleados con fallas"},
+                                                        "empleados": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "idUsuario": {"type": "integer"},
+                                                                    "nombre": {"type": "string"},
+                                                                    "apellido": {"type": "string"},
+                                                                    "puntos_restantes": {"type": "integer", "description": "Puntos restantes del empleado (100 - puntos perdidos)"},
+                                                                    "puntos_perdidos": {"type": "integer", "description": "Puntos perdidos por fallas del empleado"},
+                                                                    "total_fallas": {"type": "integer", "description": "Total de fallas del empleado"},
+                                                                    "total_eventos": {"type": "integer", "description": "Total de eventos del empleado"},
+                                                                    "nivel_riesgo": {"type": "string", "enum": ["Sin riesgo", "Riesgo bajo", "Riesgo medio", "Riesgo alto", "Riesgo máximo"], "description": "Nivel de riesgo basado en puntos"},
+                                                                    "fallas_por_tipo": {
+                                                                        "type": "object",
+                                                                        "description": "Desglose de fallas por tipo de evento",
+                                                                        "additionalProperties": {"type": "integer"}
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {"description": "Error del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
+            },
+            "/api/scoring/empleado/{idUsuario}": {
+                "get": {
+                    "summary": "🎯 Obtener Scoring Individual de Empleado (Sistema Invertido)",
+                    "description": "Calcula el scoring individual de un empleado específico con sistema invertido (100-0 puntos). El empleado empieza con 100 puntos y va perdiendo por fallas. Clasifica en niveles de riesgo: Sin riesgo (100), Bajo (90-99), Medio (75-89), Alto (50-74), Máximo (0-49). Incluye puntos restantes, puntos perdidos y desglose detallado por tipo de evento. Implementado en ResultadoEventoController.",
+                    "tags": ["📊 Reportes"],
+                    "parameters": [
+                        {
+                            "name": "idUsuario",
+                            "in": "path",
+                            "required": True,
+                            "schema": {"type": "integer"},
+                            "description": "ID del usuario para calcular scoring"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Scoring del empleado calculado exitosamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "idUsuario": {"type": "integer"},
+                                            "nombre": {"type": "string"},
+                                            "apellido": {"type": "string"},
+                                            "puntos_restantes": {"type": "integer", "description": "Puntos restantes del empleado (100 - puntos perdidos)"},
+                                            "puntos_perdidos": {"type": "integer", "description": "Puntos perdidos por fallas"},
+                                            "puntaje_inicial": {"type": "integer", "description": "Puntaje inicial (100 puntos)"},
+                                            "total_fallas": {"type": "integer", "description": "Total de fallas"},
+                                            "nivel_riesgo": {"type": "string", "enum": ["Sin riesgo", "Riesgo bajo", "Riesgo medio", "Riesgo alto", "Riesgo máximo"]},
+                                            "desglose_por_tipo": {
+                                                "type": "object",
+                                                "description": "Desglose detallado por tipo de evento",
+                                                "properties": {
+                                                    "CORREO": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "cantidad": {"type": "integer"},
+                                                            "puntos_perdidos": {"type": "integer", "description": "Cantidad × 10 puntos perdidos"}
+                                                        }
+                                                    },
+                                                    "MENSAJE": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "cantidad": {"type": "integer"},
+                                                            "puntos_perdidos": {"type": "integer", "description": "Cantidad × 15 puntos perdidos"}
+                                                        }
+                                                    },
+                                                    "LLAMADA": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "cantidad": {"type": "integer"},
+                                                            "puntos_perdidos": {"type": "integer", "description": "Cantidad × 20 puntos perdidos"}
+                                                        }
+                                                    },
+                                                    "VIDEOLLAMADA": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "cantidad": {"type": "integer"},
+                                                            "puntos_perdidos": {"type": "integer", "description": "Cantidad × 20 puntos perdidos"}
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "404": {"description": "Usuario no encontrado", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+                        "500": {"description": "Error del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
+            },
             "/api/kpis/tiempo-respuesta": {
                 "get": {
                     "summary": "📊 Obtener KPI de Tiempo de Respuesta Promedio",
