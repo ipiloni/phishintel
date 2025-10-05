@@ -46,6 +46,48 @@ def enviarAudio(nombreAudio):
 def exponerAudio(nombreAudio):  # es una funcion que nos permite reutilizarla internamente
     return send_file(f"./audios/{nombreAudio}", mimetype="audio/mpeg")
 
+@apis.route("/api/audio/upload", methods=["POST"])
+def subirAudio():
+    try:
+        # Verificar que se haya enviado un archivo de audio
+        if 'audio' not in request.files:
+            return jsonify({"error": "No se encontró archivo de audio"}), 400
+        
+        audio_file = request.files['audio']
+        usuario = request.form.get('usuario', 'Usuario Desconocido')
+        area = request.form.get('area', 'Área Desconocida')
+        historia = request.form.get('historia', 'Historia no especificada')
+        
+        if audio_file.filename == '':
+            return jsonify({"error": "No se seleccionó ningún archivo"}), 400
+        
+        # Generar nombre único para el archivo
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"audio_{usuario.replace(' ', '_')}_{timestamp}.webm"
+        
+        # Asegurar que la carpeta audios existe
+        audio_dir = "./app/audios"
+        os.makedirs(audio_dir, exist_ok=True)
+        
+        # Guardar el archivo
+        file_path = os.path.join(audio_dir, filename)
+        audio_file.save(file_path)
+        
+        log(f"Audio guardado: {filename} - Usuario: {usuario} - Área: {area} - Historia: {historia}")
+        
+        return jsonify({
+            "success": True,
+            "message": "Audio guardado correctamente",
+            "filename": filename,
+            "usuario": usuario,
+            "area": area,
+            "historia": historia
+        }), 200
+        
+    except Exception as e:
+        log(f"Error al subir audio: {str(e)}")
+        return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
+
 @apis.route("/api/twilio/respuesta", methods=["POST"])
 def procesarRespuestaLlamada():
     log.info("Entre a /api/twilio/respuesta")

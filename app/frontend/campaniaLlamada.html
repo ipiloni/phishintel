@@ -23,13 +23,213 @@
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
 </head>
+<style>
+/* Personalizar los radios */
 
+/* Cuando está seleccionado → círculo rosa */
+.custom-radio:checked {
+  background-color: #da02e5; /* rosa */
+  border-color: #da02e5;
+}
+
+/* Para navegadores que usan -webkit-appearance */
+.custom-radio[type="radio"] {
+  accent-color: #da02e5; /* Soporta Chrome/Edge/Firefox modernos */
+}
+
+/* Estilos para el modal de grabación */
+.recording-modal .modal-content {
+  background-color: #1a1a1a !important;
+  color: #eaeaea !important;
+  border: 1px solid #da02e5;
+}
+
+.recording-modal .modal-header {
+  background-color: #111 !important;
+  border-bottom: 1px solid #da02e5;
+}
+
+.recording-modal .modal-title {
+  color: #da02e5 !important;
+}
+
+.recording-modal .modal-body {
+  color: #e0e0e0;
+}
+
+.recording-modal .modal-footer {
+  background-color: #111 !important;
+  border-top: 1px solid #da02e5;
+}
+
+.recording-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.recording-button {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: none;
+  font-size: 24px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.recording-button.record {
+  background-color: #da02e5;
+  color: white;
+}
+
+.recording-button.stop {
+  background-color: #dc3545;
+  color: white;
+}
+
+.recording-button:hover {
+  transform: scale(1.1);
+}
+
+.recording-timer {
+  font-size: 24px;
+  font-weight: bold;
+  color: #da02e5;
+}
+
+.recording-visualizer {
+  width: 200px;
+  height: 50px;
+  background-color: #2d2d2d;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.recording-wave {
+  width: 4px;
+  height: 20px;
+  background-color: #da02e5;
+  margin: 0 2px;
+  border-radius: 2px;
+  animation: wave 1s ease-in-out infinite;
+}
+
+.recording-wave:nth-child(2) { animation-delay: 0.1s; }
+.recording-wave:nth-child(3) { animation-delay: 0.2s; }
+.recording-wave:nth-child(4) { animation-delay: 0.3s; }
+.recording-wave:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes wave {
+  0%, 100% { height: 20px; }
+  50% { height: 40px; }
+}
+
+.consent-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.consent-checkbox input[type="checkbox"] {
+  accent-color: #da02e5;
+  margin-top: 2px;
+}
+
+.consent-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #ccc;
+}
+
+.audio-preview {
+  width: 100%;
+  margin: 20px 0;
+}
+
+.audio-preview audio {
+  width: 100%;
+  background-color: #2d2d2d;
+  border-radius: 8px;
+}
+
+/* Mejorar la visualización de las historias */
+.historia-sugerida {
+  background: linear-gradient(135deg, #2d2d2d, #3d3d3d);
+  border: 2px solid #da02e5;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 15px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.historia-sugerida::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #da02e5, #ff6b9d);
+}
+
+.historia-sugerida h6 {
+  color: #da02e5 !important;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.historia-sugerida p {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  color: #e0e0e0;
+}
+
+.historia-sugerida small a {
+  color: #da02e5;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.historia-sugerida small a:hover {
+  color: #ff6b9d;
+}
+
+/* Mejorar el botón de grabación */
+.recording-button {
+  box-shadow: 0 8px 25px rgba(218, 2, 229, 0.3);
+  border: 3px solid rgba(218, 2, 229, 0.2);
+}
+
+.recording-button:hover {
+  box-shadow: 0 12px 35px rgba(218, 2, 229, 0.5);
+  border-color: rgba(218, 2, 229, 0.4);
+}
+
+.recording-button.stop {
+  box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+  border-color: rgba(220, 53, 69, 0.2);
+}
+
+.recording-button.stop:hover {
+  box-shadow: 0 12px 35px rgba(220, 53, 69, 0.5);
+  border-color: rgba(220, 53, 69, 0.4);
+}
+</style>
 <body class="index-page">
 
   <!-- ======= Header ======= -->
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container position-relative d-flex align-items-center justify-content-between">
-      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
+      <a href="/" class="logo d-flex align-items-center me-auto me-xl-0">
         <h1 class="sitename">PhishIntel</h1>
       </a>
 
@@ -49,73 +249,206 @@
     <!-- Page Title -->
     <div class="page-title py-5"></div>
 
-    <!-- Call Form Section -->
-    <section id="call" class="contact section">
+    <!-- Formulario con Vue -->
+    <section id="llamada" class="contact section">
       <div class="col-lg-8 mx-auto" data-aos="fade-left" data-aos-delay="200">
-        <div class="contact-form-wrapper">
+        <!-- Vue App -->
+        <div id="app" class="contact-form-wrapper">
           <div class="form-header">
             <h3>Generación de Simulación de Llamada</h3>
-            <p>Configura los parámetros de la llamada de simulación de phishing.</p>
+            <p>Selecciona el área, usuario y configura la voz para generar una llamada de phishing.</p>
           </div>
 
-          <form action="forms/generate-call.php" method="post" class="php-email-form">
+          <form class="php-email-form" @submit.prevent="generarPreview">
 
-            <!-- Seleccionar Área -->
+            <!-- Selector de Área -->
             <div class="mb-3">
-              <label for="area" class="form-label">Seleccionar área</label>
-              <select class="form-control" id="area" name="area" required>
-                <option value="">Elige un área</option>
-                <option>Area1</option>
-                <option>Area2</option>
-                <option>Area3</option>
+              <label for="areaSelect" class="form-label">Seleccionar Área</label>
+              <select v-model="filtroArea" class="form-control" id="areaSelect" name="area" required>
+                <option value="">-- Selecciona un área --</option>
+                <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
+                  {{ area.nombreArea }} 
+                </option>
               </select>
             </div>
 
-            <!-- Seleccionar Empleado -->
-            <div class="mb-3">
-              <label for="empleado" class="form-label">Seleccionar empleado</label>
-              <select class="form-control" id="empleado" name="empleado" required>
-                <option value="">Elige un empleado</option>
-                <option>Empleado1</option>
-                <option>Empleado2</option>
-                <option>Empleado3</option>
+            <!-- Selector de Usuario (solo visible cuando hay área seleccionada) -->
+            <div class="mb-3" v-if="filtroArea">
+              <label for="userSelect" class="form-label">Seleccionar Usuario</label>
+              <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" required>
+                <option value="">-- Selecciona un usuario --</option>
+                <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario">
+                  {{ usuario.nombre }} {{ usuario.apellido }}
+                </option>
               </select>
             </div>
 
             <!-- Contexto -->
             <div class="mb-3">
-              <label for="context" class="form-label">Contexto</label>
-              <textarea class="form-control" name="context" id="context" rows="5" placeholder="Escribe el guion de la llamada" required></textarea>
+              <label for="context" class="form-label">Contexto de la Llamada</label>
+              <textarea class="form-control" v-model="contexto" id="context" rows="5" placeholder="Escribe el guion de la llamada" required></textarea>
             </div>
 
-            <!-- Seleccionar Voz -->
-            <div class="mb-3">
-              <label for="voz" class="form-label">Seleccionar voz</label>
-              <select class="form-control" id="voz" name="voz" required>
-                <option value="">Elige una voz</option>
-                <option>Voz1</option>
-                <option>Voz2</option>
-                <option>Voz3</option>
-              </select>
+            <!-- Botón para grabar voz -->
+            <div class="mb-4">
+              <label class="form-label mb-3">Configuración de Voz</label>
+              <div class="text-center">
+                <button type="button" class="btn btn-primary px-4 py-2 rounded-pill" @click="abrirModalGrabacion">
+                  <i class="bi bi-mic"></i> Grabar Voz para Clonación
+                </button>
+                <p class="mt-2 text-muted" style="color: #ccc !important;">
+                  <small>Graba una historia de 30 segundos para clonar tu voz</small>
+                </p>
+              </div>
             </div>
 
-            <!-- Mensajes -->
-            <div class="my-3">
-              <div class="loading">Cargando</div>
-              <div class="error-message"></div>
-              <div class="sent-message">La llamada se generó correctamente.</div>
+            <!-- Botón de enviar -->
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill" :disabled="cargando">
+                <span v-if="cargando">
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Generando...
+                </span>
+                <span v-else>
+                  <i class="bi bi-telephone"></i> Generar Llamada
+                </span>
+              </button>
             </div>
-
-            <button type="submit" class="submit-btn">
-              <span>Guardar Plantilla</span>
-              <i class="bi bi-arrow-right"></i>
-            </button>
           </form>
-        </div>
-      </div>
-    </section><!-- /Call Form Section -->
 
+          <!-- Modal de Grabación de Audio -->
+          <div class="modal fade recording-modal" id="recordingModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">
+                    <i class="bi bi-mic me-2"></i>Grabación de Voz para Clonación
+                  </h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <!-- Consentimiento -->
+                  <div class="consent-checkbox">
+                    <input type="checkbox" id="consent" v-model="consentimiento" required>
+                    <label for="consent" class="consent-text">
+                      <strong>Consentimiento:</strong> Autorizo que mi voz sea grabada y utilizada para generar una voz clonada con fines de seguridad y simulación de phishing. Entiendo que esta grabación será utilizada únicamente para propósitos de entrenamiento y concienciación en seguridad.
+                    </label>
+                  </div>
+
+                   <!-- Historia sugerida -->
+                   <div class="historia-sugerida">
+                     <h6><i class="bi bi-lightbulb me-2"></i>Historia sugerida:</h6>
+                     <p class="mb-2 fw-bold">{{ historiaSeleccionada }}</p>
+                     <small class="text-muted">
+                       <i class="bi bi-arrow-clockwise me-1"></i>
+                       <a href="#" @click.prevent="seleccionarNuevaHistoria">Cambiar historia</a>
+                     </small>
+                   </div>
+
+                   <!-- Instrucciones -->
+                   <div class="alert alert-info" style="background-color: #2d2d2d; border-color: #da02e5; color: #e0e0e0;">
+                     <h6><i class="bi bi-info-circle me-2"></i>Instrucciones:</h6>
+                     <ul class="mb-0">
+                       <li>Responde a la historia sugerida de manera natural</li>
+                       <li>Habla de manera clara y con volumen normal</li>
+                       <li>El audio se graba sin procesamiento (crudo)</li>
+                       <li>Máximo 30 segundos de grabación</li>
+                       <li>La grabación se detendrá automáticamente</li>
+                     </ul>
+                   </div>
+
+                  <!-- Controles de grabación -->
+                  <div class="recording-controls" v-if="consentimiento">
+                    <!-- Timer -->
+                    <div class="recording-timer" v-if="grabando || tiempoGrabacion > 0">
+                      {{ formatearTiempo(tiempoGrabacion) }}
+                    </div>
+
+                    <!-- Visualizador de audio -->
+                    <div class="recording-visualizer" v-if="grabando">
+                      <div class="recording-wave"></div>
+                      <div class="recording-wave"></div>
+                      <div class="recording-wave"></div>
+                      <div class="recording-wave"></div>
+                      <div class="recording-wave"></div>
+                    </div>
+
+                    <!-- Botón de grabación -->
+                    <button 
+                      type="button" 
+                      class="recording-button"
+                      :class="grabando ? 'stop' : 'record'"
+                      @click="toggleGrabacion"
+                      :disabled="!consentimiento"
+                    >
+                      <i :class="grabando ? 'bi bi-stop-fill' : 'bi bi-mic-fill'"></i>
+                    </button>
+
+                    <!-- Estado de grabación -->
+                    <div v-if="grabando" class="text-center">
+                      <p class="text-danger mb-0">
+                        <i class="bi bi-record-circle me-1"></i>
+                        Grabando... Habla ahora
+                      </p>
+                    </div>
+
+                    <!-- Preview del audio -->
+                    <div v-if="audioGrabado" class="audio-preview">
+                      <h6 class="mb-2">Vista previa del audio:</h6>
+                      <audio :src="audioGrabado" controls></audio>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button 
+                    type="button" 
+                    class="btn btn-primary" 
+                    @click="guardarAudio"
+                    :disabled="!audioGrabado || cargandoAudio"
+                  >
+                    <span v-if="cargandoAudio">
+                      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Guardando...
+                    </span>
+                    <span v-else>
+                      <i class="bi bi-save me-2"></i>Guardar Audio
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- End #app -->
+      </div>
+    </section>
   </main>
+
+  <!-- Toast de notificación -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #da02e5;">
+      <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #da02e5;">
+        <i class="bi bi-check-circle-fill me-2" style="color: #da02e5;"></i>
+        <strong class="me-auto">Éxito</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+        Audio guardado correctamente ✅
+      </div>
+    </div>
+    
+    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #da02e5;">
+      <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #da02e5;">
+        <i class="bi bi-exclamation-triangle-fill me-2" style="color: #da02e5;"></i>
+        <strong class="me-auto">Error</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+        Error al procesar el audio
+      </div>
+    </div>
+  </div>
 
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -123,5 +456,243 @@
   <script>
     AOS.init();
   </script>
+
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          areas: [],
+          filtroArea: "",
+          filtroUsuario: "",
+          contexto: "",
+          cargando: false,
+          cargandoAudio: false,
+          // Variables para grabación
+          consentimiento: false,
+          grabando: false,
+          tiempoGrabacion: 0,
+          audioGrabado: null,
+          mediaRecorder: null,
+          audioChunks: [],
+          timerInterval: null,
+          maxRecordingTime: 30, // 30 segundos máximo
+          historiaSeleccionada: "",
+          historias: [
+            "Cuéntame qué hiciste hoy en el trabajo",
+            "Describe tu comida favorita y por qué te gusta",
+            "Habla sobre tu hobby o pasatiempo preferido",
+            "Explica cómo fue tu fin de semana",
+            "Describe el lugar donde vives",
+            "Cuéntame sobre tu familia o mascotas",
+            "Habla sobre tu película o serie favorita",
+            "Describe tu rutina matutina",
+            "Cuéntame sobre un viaje que hayas hecho",
+            "Explica qué te gusta hacer en tu tiempo libre"
+          ]
+        };
+      },
+      computed: {
+        usuariosFiltrados() {
+          const areaSeleccionada = this.areas.find(a => a.nombreArea === this.filtroArea);
+          return areaSeleccionada ? areaSeleccionada.usuarios : [];
+        }
+      },
+      watch: {
+        filtroArea() {
+          // Limpiar usuario seleccionado cuando cambie el área
+          this.filtroUsuario = "";
+        }
+      },
+      methods: {
+        async generarPreview() {
+          this.cargando = true;
+          try {
+            // Aquí iría la lógica para generar la llamada
+            console.log('Generando llamada con:', {
+              area: this.filtroArea,
+              usuario: this.filtroUsuario,
+              contexto: this.contexto
+            });
+            
+            this.mostrarToastExito();
+          } catch (e) {
+            console.error("Error:", e);
+            this.mostrarToastError();
+          } finally {
+            this.cargando = false;
+          }
+        },
+
+        abrirModalGrabacion() {
+          // Seleccionar una historia aleatoria
+          this.historiaSeleccionada = this.historias[Math.floor(Math.random() * this.historias.length)];
+          const modal = new bootstrap.Modal(document.getElementById("recordingModal"));
+          modal.show();
+        },
+
+        seleccionarNuevaHistoria() {
+          this.historiaSeleccionada = this.historias[Math.floor(Math.random() * this.historias.length)];
+        },
+
+        async toggleGrabacion() {
+          if (this.grabando) {
+            this.detenerGrabacion();
+          } else {
+            await this.iniciarGrabacion();
+          }
+        },
+
+        async iniciarGrabacion() {
+          try {
+            // Configurar audio crudo sin procesamiento
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+              audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false,
+                sampleRate: 16000,
+                channelCount: 1
+              } 
+            });
+            
+            // Configurar MediaRecorder con configuración básica
+            const options = {
+              mimeType: 'audio/webm',
+              audioBitsPerSecond: 64000
+            };
+            
+            this.mediaRecorder = new MediaRecorder(stream, options);
+            this.audioChunks = [];
+            
+            this.mediaRecorder.ondataavailable = (event) => {
+              this.audioChunks.push(event.data);
+            };
+            
+            this.mediaRecorder.onstop = () => {
+              const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+              this.audioGrabado = URL.createObjectURL(audioBlob);
+              stream.getTracks().forEach(track => track.stop());
+            };
+            
+            this.mediaRecorder.start();
+            this.grabando = true;
+            this.tiempoGrabacion = 0;
+            
+            // Iniciar timer
+            this.timerInterval = setInterval(() => {
+              this.tiempoGrabacion++;
+              if (this.tiempoGrabacion >= this.maxRecordingTime) {
+                this.detenerGrabacion();
+              }
+            }, 1000);
+            
+          } catch (error) {
+            console.error('Error al acceder al micrófono:', error);
+            this.mostrarToastError();
+          }
+        },
+
+        detenerGrabacion() {
+          if (this.mediaRecorder && this.grabando) {
+            this.mediaRecorder.stop();
+            this.grabando = false;
+            
+            if (this.timerInterval) {
+              clearInterval(this.timerInterval);
+              this.timerInterval = null;
+            }
+          }
+        },
+
+        formatearTiempo(segundos) {
+          const mins = Math.floor(segundos / 60);
+          const secs = segundos % 60;
+          return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        },
+
+        async guardarAudio() {
+          if (!this.audioGrabado) return;
+          
+          this.cargandoAudio = true;
+          try {
+            // Convertir el blob a FormData para enviar al servidor
+            const response = await fetch(this.audioGrabado);
+            const audioBlob = await response.blob();
+            
+            const formData = new FormData();
+            formData.append('audio', audioBlob, `audio_${Date.now()}.webm`);
+            formData.append('usuario', this.filtroUsuario.nombre + ' ' + this.filtroUsuario.apellido);
+            formData.append('area', this.filtroArea);
+            formData.append('historia', this.historiaSeleccionada);
+            
+            const uploadResponse = await fetch('http://localhost:8080/api/audio/upload', {
+              method: 'POST',
+              body: formData
+            });
+            
+            if (!uploadResponse.ok) {
+              throw new Error('Error al subir el audio');
+            }
+            
+            this.mostrarToastExito();
+            bootstrap.Modal.getInstance(document.getElementById("recordingModal")).hide();
+            
+            // Limpiar variables
+            this.audioGrabado = null;
+            this.tiempoGrabacion = 0;
+            this.consentimiento = false;
+            this.historiaSeleccionada = "";
+            
+          } catch (error) {
+            console.error('Error al guardar audio:', error);
+            this.mostrarToastError();
+          } finally {
+            this.cargandoAudio = false;
+          }
+        },
+
+        mostrarToastExito() {
+          const toastElement = document.getElementById('successToast');
+          const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 4000
+          });
+          toast.show();
+        },
+
+        mostrarToastError() {
+          const toastElement = document.getElementById('errorToast');
+          const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 5000
+          });
+          toast.show();
+        }
+      },
+      async mounted() {
+        try {
+          const resp = await fetch("http://localhost:8080/api/areas");
+          const data = await resp.json();
+          this.areas = data.areas || [];
+        } catch (e) {
+          console.error("Error cargando áreas:", e);
+        }
+      },
+      beforeUnmount() {
+        // Limpiar recursos al desmontar el componente
+        if (this.timerInterval) {
+          clearInterval(this.timerInterval);
+        }
+        if (this.audioGrabado) {
+          URL.revokeObjectURL(this.audioGrabado);
+        }
+      }
+    }).mount("#app");
+  </script>
+
 </body>
 </html>
