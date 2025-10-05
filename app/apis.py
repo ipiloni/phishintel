@@ -22,6 +22,8 @@ from app.utils.logger import log
 from flask_cors import CORS
 import os
 
+from Untitled.app.controllers.llamadas import elevenLabsController
+
 # Flask es la libreria que vamos a usar para generar los Endpoints
 apis = Blueprint("apis", __name__)
 
@@ -153,6 +155,9 @@ def enviarMensajeWhatsappGrupoWhapi():
     data = request.get_json()
     return WhatsAppController.enviarMensajeWhapiGrupo(data)
 
+@apis.route("/api/clonar", methods=["POST"])
+def clonarVoz(data):
+    return ElevenLabsController.clonarVoz(data)
 
 # ------ # REGISTROS DE EVENTOS +  # ------ #
 @apis.route("/api/sumar-falla", methods=["POST"])

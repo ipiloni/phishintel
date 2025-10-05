@@ -131,3 +131,17 @@ def tts(texto, idVoz, estabilidad, velocidad):
     except Exception as e:
         log.error("Hubo un error en la llamada a ElevenLabs: " + str(e))
         return responseError("ERROR_ELEVENLABS", "Hubo un error en la llamada a ElevenLabs: " + str(e), 500)
+
+def clonarVoz(ubicacionArchivo, nombreUsuario):
+    client = ElevenLabs(
+        base_url="https://api.elevenlabs.io"
+    )
+    response = client.voices.ivc.create(
+        name=nombreUsuario,
+        files=[ubicacionArchivo]
+    )
+    if response.status_code != 200:
+        log.error("No se pudo clonar la voz")
+        return responseError("ERROR_ELEVENLABS", "Hubo un error al clonar la voz: " + response.json(), 500)
+    #Puede ser que vaya sin el .dict
+    return response.dict()["voice_id"]

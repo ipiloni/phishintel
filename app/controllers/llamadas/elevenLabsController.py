@@ -3,6 +3,10 @@ from flask import jsonify
 from app.backend.apis.elevenLabs import elevenLabs
 from app.utils.logger import log
 
+from Untitled.app.backend.models.error import responseError
+from Untitled.app.controllers.abm.usuariosController import UsuariosController
+
+
 class ElevenLabsController:
 
     @staticmethod
@@ -25,3 +29,26 @@ class ElevenLabsController:
         texto = elevenLabs.stt(ubicacion)
         log.info("Finalizo la solicitud")
         return texto
+
+    @staticmethod
+    def clonarVoz(data):
+        log.info("Se comienza la clonacion de voz")
+        idUsuario = data["idUsuario"]
+        ubicacionArchivo = data["ubicacionArchivo"]
+        if idUsuario is None:
+            log.warn("No se ha especificado el usuario")
+            return responseError("USUARIO_INDEFINIDO", f"No se ha especificado el usuario",400)
+        if ubicacionArchivo is None:
+            log.warn("No se ha especificado el archivo de voz")
+            return responseError("ARCHIVO_DE_VOZ_INDEFINIDO", f"No se ha especificado el archivo de voz", 400)
+        response = UsuariosController.obtenerUsuario(idUsuario)
+        if response.status_code != 200:
+            log.error(f"No se encontró el usuario")
+            return responseError("USUARIO_NO_ENCONTRADO", f"No se ha encontrado el usuario de ID:{idUsuario}", 404)
+        from app.apis import exponerAudio
+        exponerAudio(f"{ubicacionArchivo}.mp3")# expone el archivo .mp3 a internet para que Twilio pueda reproducirlo
+        idVoz = elevenLabs.clonarVoz(ubicacionArchivo, response.get("nombreUsuario"))
+        dataUsuario = {"idVoz": idVoz}
+        UsuariosController.editarUsuario(idUsuario, dataUsuario)
+        log.info("La voz se ha creado correctamente")
+        return jsonify({"idVoz": idVoz})
