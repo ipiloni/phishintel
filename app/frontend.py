@@ -31,9 +31,18 @@ def abm():
 @frontend.route("/principal")
 def principal():
    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principal.html")
-@frontend.route("/usuarios")
-def usuarios():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "usuarios.html")
+
+@frontend.route("/principalEmpleado")
+def principalEmpleado():
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalEmpleado.html")
+
+@frontend.route("/principalEmpleadoScoring")
+def principalEmpleadoScoring():
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalEmpleadoScoring.html")
+
+@frontend.route("/principalEmpleadoReportar")
+def principalEmpleadoReportar():
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalEmpleadoReportar.html")
 
 @frontend.route("/selectorCampania")
 def selectorCampania():

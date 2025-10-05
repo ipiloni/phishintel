@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Mi Scoring - PhishIntel</title>
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+</head>
+
+<body class="index-page">
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container position-relative d-flex align-items-center justify-content-between">
+      <a href="/principalEmpleado" class="logo d-flex align-items-center me-auto me-xl-0">
+        <h1 class="sitename">PhishIntel</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><span id="user-info" class="user-welcome">Cargando...</span></li>
+          <li><a href="/principalEmpleado" class="btn-getstarted btn-login">Volver al Panel</a></li>
+          <li><a href="#" onclick="logout()" class="btn-getstarted btn-login">Salir</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+  <!-- End Header -->
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title py-5"></div>
+
+    <!-- Sección de Scoring -->
+    <section id="scoring" class="contact section">
+      <div class="col-lg-10 mx-auto" data-aos="fade-up" data-aos-delay="200">
+        <div class="contact-form-wrapper">
+          <div class="form-header">
+            <h3><i class="bi bi-graph-up me-2" style="color: #da02e5;"></i>Mi Scoring de Seguridad</h3>
+            <p>Detalle completo de tu puntuación y rendimiento en eventos de phishing.</p>
+          </div>
+          
+          <!-- Loading -->
+          <div id="loading-container" class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2">Cargando tu scoring...</p>
+          </div>
+          
+          <!-- Contenido del Scoring -->
+          <div id="scoring-content" style="display: none;">
+            <!-- Contenido se carga dinámicamente -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script>
+    AOS.init();
+  </script>
+
+  <script>
+    // Cargar información del usuario al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      loadUserInfo();
+      loadScoring();
+    });
+
+    function loadUserInfo() {
+      fetch('/api/auth/current-user')
+        .then(response => response.json())
+        .then(data => {
+          if (data.usuario) {
+            document.getElementById('user-info').textContent = `Bienvenido, ${data.usuario.nombre} ${data.usuario.apellido}`;
+          } else {
+            // Si no hay usuario logueado, redirigir al login
+            window.location.href = '/login';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          window.location.href = '/login';
+        });
+    }
+
+    async function loadScoring() {
+      try {
+        // Obtener el ID del usuario logueado
+        const userResponse = await fetch('/api/auth/current-user');
+        const userData = await userResponse.json();
+        
+        if (!userData.usuario) {
+          window.location.href = '/login';
+          return;
+        }
+        
+        const idUsuario = userData.usuario.id;
+        console.log('🔍 Obteniendo scoring para usuario:', idUsuario);
+        
+        // Usar el mismo endpoint que principalReportes
+        const response = await fetch(`/api/scoring/empleado/${idUsuario}`);
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('📊 Datos de scoring recibidos:', data);
+        
+        // Generar contenido usando la misma función que principalReportes
+        const contenido = generarContenidoDetalleEventos(data);
+        document.getElementById('scoring-content').innerHTML = contenido;
+        
+        // Ocultar loading y mostrar contenido
+        document.getElementById('loading-container').style.display = 'none';
+        document.getElementById('scoring-content').style.display = 'block';
+        
+      } catch (error) {
+        console.error('❌ Error obteniendo scoring:', error);
+        document.getElementById('loading-container').innerHTML = `
+          <div class="alert alert-danger">
+            <h6>Error al cargar tu scoring</h6>
+            <p>No se pudo obtener la información de tu puntuación. Por favor, inténtalo de nuevo.</p>
+            <button class="btn btn-primary" onclick="loadScoring()">Reintentar</button>
+          </div>
+        `;
+      }
+    }
+
+    // Función para generar el contenido del scoring (copiada de principalReportes)
+    function generarContenidoDetalleEventos(data) {
+      const eventos = data.eventos_detalle || {};
+      
+      let html = `
+        <div class="row">
+          <div class="col-12 mb-3">
+            <div class="card" style="background: rgba(218, 2, 229, 0.1); border: 2px solid #da02e5; box-shadow: 0 0 15px rgba(218, 2, 229, 0.2);">
+              <div class="card-body">
+                <h6 class="card-title text-center mb-3" style="color: #da02e5; font-weight: bold;">
+                  <i class="bi bi-graph-up me-2" style="color: #da02e5;"></i>
+                  Resumen del Scoring
+                </h6>
+                <div class="row text-center">
+                  <div class="col-3">
+                    <div class="h4" style="color: #da02e5; font-weight: bold;">${data.puntos_restantes || 100}</div>
+                    <small style="color: #ccc;">Puntos Restantes</small>
+                  </div>
+                  <div class="col-3">
+                    <div class="h5" style="color: #ff6b6b; font-weight: bold;">-${data.puntos_perdidos || 0}</div>
+                    <small style="color: #ccc;">Fallas Activas</small>
+                  </div>
+                  <div class="col-3">
+                    <div class="h5" style="color: #ffc107; font-weight: bold;">-${data.penalizacion_falla_pasado || 0}</div>
+                    <small style="color: #ccc;">Fallas Pasadas</small>
+                  </div>
+                  <div class="col-3">
+                    <div class="h5" style="color: #28a745; font-weight: bold;">+${data.puntos_ganados || 0}</div>
+                    <small style="color: #ccc;">Reportados</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Eventos activos
+      if (eventos.activos && eventos.activos.length > 0) {
+        html += `
+          <div class="mb-4">
+            <h6 class="mb-3" style="color: #ff6b6b; font-weight: bold;">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              Fallas Activas (${eventos.activos.length})
+            </h6>
+            <div class="row">
+        `;
+        
+        eventos.activos.forEach(evento => {
+          const iconos = {
+            'CORREO': '📧',
+            'MENSAJE': '💬', 
+            'LLAMADA': '📞',
+            'VIDEOLLAMADA': '📹'
+          };
+          const nombres = {
+            'CORREO': 'Correo',
+            'MENSAJE': 'Mensaje',
+            'LLAMADA': 'Llamada', 
+            'VIDEOLLAMADA': 'Videollamada'
+          };
+          
+          // Formatear fecha a día/mes/año
+          const fechaFormateada = evento.fechaCreacion ? 
+            new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 
+            'Sin fecha';
+          
+          html += `
+            <div class="col-md-6 mb-2">
+              <div class="card" style="background: rgba(255,107,107,0.1); border: 2px solid #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.2);">
+                <div class="card-body p-2">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
+                      <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                    </div>
+                    <span class="badge" style="background: #ff6b6b; color: white; font-weight: bold;">-${evento.puntos} pts</span>
+                  </div>
+                  <div class="small mt-1" style="color: #ccc;">
+                    <strong>${evento.titulo}</strong>
+                  </div>
+                  <div class="small" style="color: #999;">
+                    ID: ${evento.idEvento} | ${fechaFormateada}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += `</div></div>`;
+      }
+
+      // Eventos reportados (incluyendo los que fueron fallados y luego reportados)
+      if (eventos.reportados && eventos.reportados.length > 0) {
+        html += `
+          <div class="mb-4">
+            <h6 class="mb-3" style="color: #28a745; font-weight: bold;">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              Eventos Reportados (${eventos.reportados.length})
+            </h6>
+            <div class="row">
+        `;
+        
+        eventos.reportados.forEach(evento => {
+          const iconos = {
+            'CORREO': '📧',
+            'MENSAJE': '💬',
+            'LLAMADA': '📞',
+            'VIDEOLLAMADA': '📹'
+          };
+          const nombres = {
+            'CORREO': 'Correo',
+            'MENSAJE': 'Mensaje',
+            'LLAMADA': 'Llamada',
+            'VIDEOLLAMADA': 'Videollamada'
+          };
+          
+          // Formatear fecha a día/mes/año
+          const fechaFormateada = evento.fechaCreacion ? 
+            new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 
+            'Sin fecha';
+          
+          // Si el evento fue fallado en el pasado y luego reportado (tiene puntos de falla pasada)
+          if (evento.haFalladoEnElPasado && evento.puntosFallaPasada && evento.puntosFallaPasada > 0) {
+            html += `
+              <div class="col-md-6 mb-2">
+                <div class="card" style="background: rgba(255,193,7,0.1); border: 2px solid #ffc107; box-shadow: 0 0 10px rgba(255,193,7,0.2);">
+                  <div class="card-body p-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
+                        <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                      </div>
+                      <div class="d-flex gap-1">
+                        <span class="badge" style="background: #28a745; color: white; font-weight: bold;">Reportado +${evento.puntos}</span>
+                        <span class="badge" style="background: #ffc107; color: #000; font-weight: bold;">Fallado -${evento.puntosFallaPasada}</span>
+                      </div>
+                    </div>
+                    <div class="small mt-1" style="color: #ccc;">
+                      <strong>${evento.titulo}</strong>
+                    </div>
+                    <div class="small" style="color: #999;">
+                      ID: ${evento.idEvento} | ${fechaFormateada}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          } else {
+            // Evento solo reportado (sin falla previa)
+            html += `
+              <div class="col-md-6 mb-2">
+                <div class="card" style="background: rgba(40,167,69,0.1); border: 2px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.2);">
+                  <div class="card-body p-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
+                        <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                      </div>
+                      <span class="badge" style="background: #28a745; color: white; font-weight: bold;">Reportado +${evento.puntos}</span>
+                    </div>
+                    <div class="small mt-1" style="color: #ccc;">
+                      <strong>${evento.titulo}</strong>
+                    </div>
+                    <div class="small" style="color: #999;">
+                      ID: ${evento.idEvento} | ${fechaFormateada}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+        });
+        
+        html += `</div></div>`;
+      }
+
+      // NOTA: Los eventos pendientes NO se muestran en la pantalla de empleado
+      // para evitar que sea obvio cuáles son los eventos de phishing
+
+      // Si no hay eventos (solo considera activos y reportados para empleados)
+      if ((!eventos.activos || eventos.activos.length === 0) && 
+          (!eventos.reportados || eventos.reportados.length === 0)) {
+        html += `
+          <div class="text-center py-4">
+            <div class="card" style="background: rgba(218, 2, 229, 0.1); border: 2px solid #da02e5;">
+              <div class="card-body">
+                <i class="bi bi-info-circle" style="font-size: 3rem; color: #da02e5;"></i>
+                <h5 class="mt-3" style="color: #da02e5;">¡Excelente!</h5>
+                <p class="mb-0" style="color: #ccc;">No tienes eventos registrados aún. Mantén tu puntuación perfecta reportando cualquier intento de phishing.</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      return html;
+    }
+
+    function logout() {
+      fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        window.location.href = '/login';
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        window.location.href = '/login';
+      });
+    }
+  </script>
+
+</body>
+</html>

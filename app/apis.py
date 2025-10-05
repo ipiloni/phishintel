@@ -1,4 +1,4 @@
-from flask import request, Blueprint, send_file, jsonify
+from flask import request, Blueprint, send_file, jsonify, session
 from datetime import datetime
 
 from app.backend.models.error import responseError
@@ -17,6 +17,7 @@ from app.controllers.mensajes.telegram import telegram_bot
 from app.controllers.mensajes.whatsapp import WhatsAppController
 from app.controllers.mensajes.sms import SMSController
 from app.controllers.ngrokController import NgrokController
+from app.controllers.login import AuthController
 from app.utils.logger import log
 from flask_cors import CORS
 import os
@@ -627,3 +628,90 @@ def crearBatchEventos():
     except Exception as e:
         log.error(f"Error creando batch de eventos: {str(e)}")
         return responseError("ERROR", f"No se pudo crear el batch de eventos: {str(e)}", 500)
+
+
+# =================== SESIÓN Y AUTENTICACIÓN =================== #
+
+@apis.route("/api/auth/logout", methods=["POST"])
+def logout():
+    """Cerrar sesión del usuario"""
+    return AuthController.logout()
+
+
+@apis.route("/api/auth/current-user", methods=["GET"])
+def get_current_user():
+    """Obtener información del usuario actualmente logueado"""
+    user = AuthController.get_current_user()
+    if user:
+        return jsonify({"usuario": user}), 200
+    else:
+        return jsonify({"error": "No hay usuario logueado"}), 401
+
+
+@apis.route("/api/auth/check-session", methods=["GET"])
+def check_session():
+    """Verificar si hay una sesión activa"""
+    is_logged_in = AuthController.is_logged_in()
+    is_admin = AuthController.is_admin()
+    user = AuthController.get_current_user()
+    
+    return jsonify({
+        "isLoggedIn": is_logged_in,
+        "isAdmin": is_admin,
+        "usuario": user
+    }), 200
+
+
+# =================== REPORTES DE EMPLEADOS =================== #
+
+@apis.route("/api/empleado/reportar-evento", methods=["POST"])
+def reportar_evento():
+    """
+    Endpoint para que un empleado reporte un evento de phishing.
+    Verifica si el evento existe en usuarioxevento para ese usuario.
+    """
+    if not AuthController.is_logged_in():
+        return jsonify({"error": "Debe estar logueado para reportar eventos"}), 401
+    
+    data = request.get_json()
+    idUsuario = session.get('user_id')
+    
+    if not data or "tipoEvento" not in data or "fechaInicio" not in data or "fechaFin" not in data:
+        return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios: tipoEvento, fechaInicio, fechaFin", 400)
+    
+    try:
+        fechaInicio = datetime.fromisoformat(data["fechaInicio"].replace('Z', '+00:00'))
+        fechaFin = datetime.fromisoformat(data["fechaFin"].replace('Z', '+00:00'))
+    except ValueError:
+        return responseError("FECHA_INVALIDA", "Formato de fecha inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
+    
+    return ResultadoEventoController.procesarIntentoReporte(
+        idUsuario, 
+        data["tipoEvento"], 
+        fechaInicio, 
+        fechaFin
+    )
+
+
+@apis.route("/api/empleado/mis-reportes", methods=["GET"])
+def obtener_mis_reportes():
+    """
+    Endpoint para obtener los reportes realizados por el empleado logueado.
+    """
+    if not AuthController.is_logged_in():
+        return jsonify({"error": "Debe estar logueado para ver sus reportes"}), 401
+    
+    idUsuario = session.get('user_id')
+    return ResultadoEventoController.obtenerIntentosReportePorUsuario(idUsuario)
+
+
+@apis.route("/api/empleado/scoring", methods=["GET"])
+def obtener_scoring_empleado():
+    """
+    Endpoint para obtener el scoring del empleado logueado.
+    """
+    if not AuthController.is_logged_in():
+        return jsonify({"error": "Debe estar logueado para ver su scoring"}), 401
+    
+    idUsuario = session.get('user_id')
+    return ResultadoEventoController.calcularScoringPorEmpleado(idUsuario)

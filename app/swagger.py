@@ -14,6 +14,8 @@ def openapi_spec():
             "description": "Documentación básica de endpoints"
         },
         "tags": [
+            {"name": "🔐 Auth", "description": "Autenticación y gestión de sesiones"},
+            {"name": "👤 Empleados", "description": "Funcionalidades específicas para empleados"},
             {"name": "👥 Usuarios", "description": "Gestión de usuarios"},
             {"name": "🏢 Áreas", "description": "Gestión de áreas"},
             {"name": "📅 Eventos", "description": "Gestión de eventos"},
@@ -1706,6 +1708,312 @@ def openapi_spec():
                         "500": {"description": "Error del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
                     }
                 }
+            },
+            "/api/auth/logout": {
+                "post": {
+                    "summary": "Cerrar sesión del usuario",
+                    "description": "Cierra la sesión del usuario actualmente logueado y limpia los datos de sesión",
+                    "tags": ["🔐 Auth"],
+                    "responses": {
+                        "200": {
+                            "description": "Sesión cerrada exitosamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {
+                                                "type": "string",
+                                                "example": "Sesión cerrada exitosamente"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/api/auth/current-user": {
+                "get": {
+                    "summary": "Obtener información del usuario actual",
+                    "description": "Obtiene la información del usuario actualmente logueado",
+                    "tags": ["🔐 Auth"],
+                    "responses": {
+                        "200": {
+                            "description": "Información del usuario",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "usuario": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {"type": "integer", "example": 1},
+                                                    "nombre": {"type": "string", "example": "Juan"},
+                                                    "apellido": {"type": "string", "example": "Pérez"},
+                                                    "email": {"type": "string", "example": "juan.perez@empresa.com"},
+                                                    "esAdministrador": {"type": "boolean", "example": False}
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "401": {
+                            "description": "No hay usuario logueado",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "error": {
+                                                "type": "string",
+                                                "example": "No hay usuario logueado"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/api/auth/check-session": {
+                "get": {
+                    "summary": "Verificar estado de la sesión",
+                    "description": "Verifica si hay una sesión activa y obtiene información del usuario",
+                    "tags": ["🔐 Auth"],
+                    "responses": {
+                        "200": {
+                            "description": "Estado de la sesión",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "isLoggedIn": {"type": "boolean", "example": True},
+                                            "isAdmin": {"type": "boolean", "example": False},
+                                            "usuario": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {"type": "integer", "example": 1},
+                                                    "nombre": {"type": "string", "example": "Juan"},
+                                                    "apellido": {"type": "string", "example": "Pérez"},
+                                                    "email": {"type": "string", "example": "juan.perez@empresa.com"},
+                                                    "esAdministrador": {"type": "boolean", "example": False}
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/api/empleado/reportar-evento": {
+                "post": {
+                    "summary": "Reportar evento de phishing",
+                    "description": "Permite a un empleado reportar un evento de phishing. Verifica si el evento existe en usuarioxevento para ese usuario.",
+                    "tags": ["👤 Empleados"],
+                    "security": [{"sessionAuth": []}],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": ["tipoEvento", "fechaInicio", "fechaFin"],
+                                    "properties": {
+                                        "tipoEvento": {
+                                            "type": "string",
+                                            "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"],
+                                            "example": "CORREO",
+                                            "description": "Tipo de evento de phishing"
+                                        },
+                                        "fechaInicio": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2024-01-15T09:00:00Z",
+                                            "description": "Fecha y hora de inicio del evento"
+                                        },
+                                        "fechaFin": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2024-01-15T17:00:00Z",
+                                            "description": "Fecha y hora de fin del evento"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Evento reportado exitosamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {
+                                                "type": "string",
+                                                "example": "¡Gracias por reportar! El evento ha sido verificado correctamente."
+                                            },
+                                            "verificado": {
+                                                "type": "boolean",
+                                                "example": True
+                                            },
+                                            "idIntentoReporte": {
+                                                "type": "integer",
+                                                "example": 123
+                                            },
+                                            "resultadoVerificacion": {
+                                                "type": "string",
+                                                "example": "Evento verificado correctamente. ID: 456"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {
+                            "description": "Solicitud inválida",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/Error"}
+                                }
+                            }
+                        },
+                        "401": {
+                            "description": "Debe estar logueado para reportar eventos",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "error": {
+                                                "type": "string",
+                                                "example": "Debe estar logueado para reportar eventos"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/api/empleado/mis-reportes": {
+                "get": {
+                    "summary": "Obtener reportes del empleado",
+                    "description": "Obtiene todos los reportes realizados por el empleado logueado",
+                    "tags": ["👤 Empleados"],
+                    "security": [{"sessionAuth": []}],
+                    "responses": {
+                        "200": {
+                            "description": "Lista de reportes del empleado",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "intentos": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "idIntentoReporte": {"type": "integer", "example": 123},
+                                                        "idUsuario": {"type": "integer", "example": 1},
+                                                        "tipoEvento": {"type": "string", "example": "CORREO"},
+                                                        "fechaInicio": {"type": "string", "format": "date-time"},
+                                                        "fechaFin": {"type": "string", "format": "date-time"},
+                                                        "fechaIntento": {"type": "string", "format": "date-time"},
+                                                        "verificado": {"type": "boolean", "example": True},
+                                                        "resultadoVerificacion": {"type": "string"},
+                                                        "idEventoVerificado": {"type": "integer", "example": 456}
+                                                    }
+                                                }
+                                            },
+                                            "total": {"type": "integer", "example": 5}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "401": {
+                            "description": "Debe estar logueado para ver sus reportes",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "error": {
+                                                "type": "string",
+                                                "example": "Debe estar logueado para ver sus reportes"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/api/empleado/scoring": {
+                "get": {
+                    "summary": "Obtener scoring del empleado",
+                    "description": "Obtiene el scoring de phishing awareness del empleado logueado",
+                    "tags": ["👤 Empleados"],
+                    "security": [{"sessionAuth": []}],
+                    "responses": {
+                        "200": {
+                            "description": "Scoring del empleado",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "scoring": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "puntosActuales": {"type": "integer", "example": 85},
+                                                    "nivelRiesgo": {"type": "string", "example": "Riesgo bajo"},
+                                                    "totalEventos": {"type": "integer", "example": 10},
+                                                    "eventosReportados": {"type": "integer", "example": 7},
+                                                    "eventosFallidos": {"type": "integer", "example": 3},
+                                                    "fallasActivas": {"type": "integer", "example": 1},
+                                                    "fallasPasadas": {"type": "integer", "example": 2},
+                                                    "puntosPerdidos": {"type": "integer", "example": 15},
+                                                    "puntosGanados": {"type": "integer", "example": 0}
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "401": {
+                            "description": "Debe estar logueado para ver su scoring",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "error": {
+                                                "type": "string",
+                                                "example": "Debe estar logueado para ver su scoring"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "components": {
@@ -1978,6 +2286,14 @@ def openapi_spec():
                         "fechaReporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (OPCIONAL)"},
                         "fechaFalla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (OPCIONAL)"}
                     }
+                }
+            },
+            "securitySchemes": {
+                "sessionAuth": {
+                    "type": "apiKey",
+                    "in": "cookie",
+                    "name": "session",
+                    "description": "Autenticación basada en sesión de Flask"
                 }
             }
         }

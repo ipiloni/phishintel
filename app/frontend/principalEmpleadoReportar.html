@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Reportar Evento - PhishIntel</title>
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="assets/css/main.css" rel="stylesheet">
+</head>
+<style>
+/* Personalizar los radios */
+
+/* Cuando está seleccionado → círculo rosa */
+.custom-radio:checked {
+  background-color: #da02e5; /* rosa */
+  border-color: #da02e5;
+}
+
+/* Para navegadores que usan -webkit-appearance */
+.custom-radio[type="radio"] {
+  accent-color: #da02e5; /* Soporta Chrome/Edge/Firefox modernos */
+}
+
+/* Mejorar el selector de fecha */
+input[type="datetime-local"] {
+  background-color: #2d2d2d !important;
+  color: white !important;
+  border: 1px solid #da02e5 !important;
+  border-radius: 0.375rem !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.9rem !important;
+  transition: all 0.3s ease !important;
+}
+
+input[type="datetime-local"]:focus {
+  background-color: #2d2d2d !important;
+  color: white !important;
+  border-color: #da02e5 !important;
+  box-shadow: 0 0 0 0.2rem rgba(218, 2, 229, 0.25) !important;
+  outline: none !important;
+}
+
+input[type="datetime-local"]:hover {
+  border-color: #da02e5 !important;
+  box-shadow: 0 0 10px rgba(218, 2, 229, 0.2) !important;
+}
+
+/* Estilo para el calendario/reloj que aparece */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  background-color: #da02e5;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  background-color: #b802c7;
+}
+</style>
+<body class="index-page">
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container position-relative d-flex align-items-center justify-content-between">
+      <a href="/" class="logo d-flex align-items-center me-auto me-xl-0">
+        <h1 class="sitename">PhishIntel</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><span id="user-info" class="user-welcome">Cargando...</span></li>
+          <li><a href="/principalEmpleado" class="btn-getstarted btn-login">Volver al Panel</a></li>
+          <li><a href="#" onclick="logout()" class="btn-getstarted btn-login">Salir</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </header>
+  <!-- End Header -->
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title py-5"></div>
+
+    <!-- Formulario de Reporte -->
+    <section id="reporte" class="contact section">
+      <div class="col-lg-8 mx-auto" data-aos="fade-left" data-aos-delay="200">
+        <!-- Vue App -->
+        <div id="app" class="contact-form-wrapper">
+          <div class="form-header">
+            <h3>Reportar Evento de Phishing</h3>
+            <p>Reporta eventos de phishing que hayas recibido para mejorar tu scoring.</p>
+          </div>
+
+          <form class="php-email-form" @submit.prevent="reportarEvento">
+
+            <!-- Tipo de Evento -->
+            <div class="mb-4">
+              <label class="form-label mb-3">Tipo de Evento</label>
+              <div class="row g-2">
+                <div class="col-md-3">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': tipoEvento === 'CORREO', 'border-secondary': tipoEvento !== 'CORREO' }"
+                       @click="tipoEvento = 'CORREO'"
+                       :style="tipoEvento === 'CORREO' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-2">
+                      <div style="font-size: 1.5em;">📧</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Correo</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Electrónico</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': tipoEvento === 'MENSAJE', 'border-secondary': tipoEvento !== 'MENSAJE' }"
+                       @click="tipoEvento = 'MENSAJE'"
+                       :style="tipoEvento === 'MENSAJE' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-2">
+                      <div style="font-size: 1.5em;">💬</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Mensaje</h6>
+                      <small class="card-text" style="font-size: 0.7em;">WhatsApp/SMS</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': tipoEvento === 'LLAMADA', 'border-secondary': tipoEvento !== 'LLAMADA' }"
+                       @click="tipoEvento = 'LLAMADA'"
+                       :style="tipoEvento === 'LLAMADA' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-2">
+                      <div style="font-size: 1.5em;">📞</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Llamada</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Telefónica</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card h-100 cursor-pointer" 
+                       :class="{ 'border-0': tipoEvento === 'VIDEOLLAMADA', 'border-secondary': tipoEvento !== 'VIDEOLLAMADA' }"
+                       @click="tipoEvento = 'VIDEOLLAMADA'"
+                       :style="tipoEvento === 'VIDEOLLAMADA' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                    <div class="card-body text-center p-2">
+                      <div style="font-size: 1.5em;">📹</div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Videollamada</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Video Call</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rango de Fechas -->
+            <div class="mb-4">
+              <label class="form-label mb-3">Rango de Fechas en las que Ocurrió el Evento</label>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
+                  <input type="datetime-local" v-model="fechaInicio" class="form-control" id="fechaInicio" required
+                         @change="validarRangoFechas"
+                         style="background-color: #2d2d2d; color: white; border: 1px solid #da02e5;">
+                </div>
+                <div class="col-md-6">
+                  <label for="fechaFin" class="form-label">Fecha de Fin</label>
+                  <input type="datetime-local" v-model="fechaFin" class="form-control" id="fechaFin" required
+                         @change="validarRangoFechas"
+                         style="background-color: #2d2d2d; color: white; border: 1px solid #da02e5;">
+                </div>
+              </div>
+              <div v-if="errorFechas" class="alert alert-warning mt-2" style="background-color: rgba(255,193,7,0.1); border: 1px solid #ffc107; color: #ffc107;">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                {{ errorFechas }}
+              </div>
+              <small class="text-muted mt-1 d-block">
+                <i class="bi bi-info-circle me-1"></i>
+                Máximo 2 días de diferencia entre las fechas
+              </small>
+            </div>
+
+            <!-- Botón de enviar -->
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill" :disabled="cargando">
+                <span v-if="cargando">
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Reportando...
+                </span>
+                <span v-else>
+                  <i class="bi bi-shield-check"></i> Reportar Evento
+                </span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Modal Resultado -->
+          <div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+              <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                  <h5 class="modal-title">Resultado del Reporte</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-4">
+                    <h6 class="mb-3" style="color: white;">
+                      <i class="bi bi-info-circle-fill me-2"></i>Estado del Reporte
+                    </h6>
+                    
+                    <div class="row g-3">
+                      <!-- Tipo de Evento -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2">{{ getTipoIcon(tipoEvento) }}</span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Tipo de Evento</small>
+                            <strong>{{ getTipoNombre(tipoEvento) }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Estado -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2">{{ resultado.verificado ? '✅' : '⚠️' }}</span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Estado</small>
+                            <strong>{{ resultado.verificado ? 'Verificado' : 'No Verificado' }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Mensaje -->
+                      <div class="col-12">
+                        <div class="alert" :class="resultado.verificado ? 'alert-success' : 'alert-warning'" style="background-color: #2d2d2d; border: 1px solid #da02e5;">
+                          <h6>{{ resultado.mensaje }}</h6>
+                          <p class="mb-0">{{ resultado.resultadoVerificacion }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mis Reportes -->
+    <section id="reportes" class="contact section">
+      <div class="col-lg-10 mx-auto" data-aos="fade-right" data-aos-delay="300">
+        <div class="contact-form-wrapper">
+          <div class="form-header">
+            <h3>Mis Reportes Anteriores</h3>
+            <p>Historial completo de tus reportes de phishing.</p>
+          </div>
+          
+          <div id="reports-container">
+            <div class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script>
+    AOS.init();
+  </script>
+
+  <script>
+    // Vue App
+    const { createApp } = Vue;
+    
+    createApp({
+      data() {
+        return {
+          tipoEvento: '',
+          fechaInicio: '',
+          fechaFin: '',
+          cargando: false,
+          errorFechas: '',
+          resultado: {
+            mensaje: '',
+            verificado: false,
+            resultadoVerificacion: ''
+          }
+        }
+      },
+      methods: {
+        validarRangoFechas() {
+          if (!this.fechaInicio || !this.fechaFin) {
+            this.errorFechas = '';
+            return;
+          }
+          
+          const fechaInicio = new Date(this.fechaInicio);
+          const fechaFin = new Date(this.fechaFin);
+          
+          // Verificar que la fecha de fin sea posterior a la de inicio
+          if (fechaFin <= fechaInicio) {
+            this.errorFechas = 'La fecha de fin debe ser posterior a la fecha de inicio';
+            return;
+          }
+          
+          // Calcular la diferencia en días
+          const diferenciaMs = fechaFin - fechaInicio;
+          const diferenciaDias = diferenciaMs / (1000 * 60 * 60 * 24);
+          
+          if (diferenciaDias > 2) {
+            this.errorFechas = 'El rango de fechas no puede ser mayor a 2 días';
+            return;
+          }
+          
+          this.errorFechas = '';
+        },
+        
+        async reportarEvento() {
+          if (!this.tipoEvento || !this.fechaInicio || !this.fechaFin) {
+            alert('Por favor completa todos los campos');
+            return;
+          }
+          
+          // Validar fechas antes de enviar
+          this.validarRangoFechas();
+          if (this.errorFechas) {
+            alert('Por favor corrige los errores en las fechas antes de continuar');
+            return;
+          }
+
+          this.cargando = true;
+          
+          try {
+            const formData = {
+              tipoEvento: this.tipoEvento,
+              fechaInicio: new Date(this.fechaInicio).toISOString(),
+              fechaFin: new Date(this.fechaFin).toISOString()
+            };
+            
+            const response = await fetch('/api/empleado/reportar-evento', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(formData)
+            });
+            
+            const data = await response.json();
+            
+            this.resultado = {
+              mensaje: data.mensaje,
+              verificado: data.verificado,
+              resultadoVerificacion: data.resultadoVerificacion
+            };
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            modal.show();
+            
+            // Limpiar formulario
+            this.tipoEvento = '';
+            this.fechaInicio = '';
+            this.fechaFin = '';
+            
+            // Recargar reportes
+            this.loadReports();
+            
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Error al reportar evento. Por favor, inténtalo de nuevo.');
+          } finally {
+            this.cargando = false;
+          }
+        },
+        
+        getTipoIcon(tipo) {
+          const icons = {
+            'CORREO': '📧',
+            'MENSAJE': '💬',
+            'LLAMADA': '📞',
+            'VIDEOLLAMADA': '📹'
+          };
+          return icons[tipo] || '❓';
+        },
+        
+        getTipoNombre(tipo) {
+          const nombres = {
+            'CORREO': 'Correo Electrónico',
+            'MENSAJE': 'Mensaje (WhatsApp/SMS)',
+            'LLAMADA': 'Llamada Telefónica',
+            'VIDEOLLAMADA': 'Videollamada'
+          };
+          return nombres[tipo] || tipo;
+        },
+        
+        async loadReports() {
+          try {
+            const response = await fetch('/api/empleado/mis-reportes');
+            const data = await response.json();
+            
+            const container = document.getElementById('reports-container');
+            
+            if (data.intentos && data.intentos.length > 0) {
+              let html = '<div class="table-responsive"><table class="table table-dark table-striped">';
+              html += '<thead><tr><th>Tipo</th><th>Fecha Inicio</th><th>Fecha Fin</th><th>Fecha Reporte</th><th>Estado</th><th>Resultado</th></tr></thead>';
+              html += '<tbody>';
+              
+              data.intentos.forEach(intento => {
+                const estado = intento.verificado ? 
+                  '<span class="badge bg-success">Verificado</span>' : 
+                  '<span class="badge bg-warning">Pendiente</span>';
+                
+                html += `<tr>
+                  <td>${this.getTipoIcon(intento.tipoEvento)} ${this.getTipoNombre(intento.tipoEvento)}</td>
+                  <td>${new Date(intento.fechaInicio).toLocaleString()}</td>
+                  <td>${new Date(intento.fechaFin).toLocaleString()}</td>
+                  <td>${new Date(intento.fechaIntento).toLocaleString()}</td>
+                  <td>${estado}</td>
+                  <td>${intento.resultadoVerificacion || 'N/A'}</td>
+                </tr>`;
+              });
+              
+              html += '</tbody></table></div>';
+              container.innerHTML = html;
+            } else {
+              container.innerHTML = '<p class="text-center text-muted">No tienes reportes anteriores.</p>';
+            }
+          } catch (error) {
+            console.error('Error cargando reportes:', error);
+            document.getElementById('reports-container').innerHTML = 
+              '<p class="text-center text-danger">Error cargando reportes.</p>';
+          }
+        }
+      },
+      mounted() {
+        this.loadReports();
+      }
+    }).mount('#app');
+
+    // Cargar información del usuario al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      loadUserInfo();
+    });
+
+    function loadUserInfo() {
+      fetch('/api/auth/current-user')
+        .then(response => response.json())
+        .then(data => {
+          if (data.usuario) {
+            document.getElementById('user-info').textContent = `Bienvenido, ${data.usuario.nombre} ${data.usuario.apellido}`;
+          } else {
+            // Si no hay usuario logueado, redirigir al login
+            window.location.href = '/login';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          window.location.href = '/login';
+        });
+    }
+
+    function logout() {
+      fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        window.location.href = '/login';
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        window.location.href = '/login';
+      });
+    }
+  </script>
+
+</body>
+</html>

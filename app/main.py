@@ -3,8 +3,13 @@ from app.config.db_config import Base, engine
 from app.frontend import frontend
 from app.apis import apis
 from app.swagger import swagger
+import os
 
 app = Flask(__name__)
+
+# Configuración de sesión
+app.secret_key = os.environ.get('SECRET_KEY', 'phishintel-secret-key-change-in-production')
+
 Base.metadata.create_all(engine)
 
 # Registro de blueprints

@@ -4,6 +4,8 @@ from app.backend.models.error import responseError
 from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.usuarioxevento import UsuarioxEvento
 from app.backend.models.tipoEvento import TipoEvento
+from app.backend.models.intentoReporte import IntentoReporte
+from app.backend.models.evento import Evento
 from app.config.db_config import SessionLocal
 from app.utils.logger import log
 
@@ -512,3 +514,90 @@ class ResultadoEventoController:
             return "Riesgo alto"
         else:
             return "Riesgo máximo"
+
+    @staticmethod
+    def procesarIntentoReporte(idUsuario, tipoEvento, fechaInicio, fechaFin):
+        """
+        Procesa un intento de reporte de phishing por parte de un empleado.
+        Verifica si existe un evento asignado al usuario en el rango de fechas especificado.
+        """
+        session = SessionLocal()
+        try:
+            # Crear el intento de reporte
+            intento = IntentoReporte(
+                idUsuario=idUsuario,
+                tipoEvento=tipoEvento,
+                fechaInicio=fechaInicio,
+                fechaFin=fechaFin,
+                fechaIntento=datetime.now()
+            )
+            
+            # Buscar si existe un evento asignado al usuario en el rango de fechas
+            evento_encontrado = session.query(Evento).join(UsuarioxEvento).filter(
+                UsuarioxEvento.idUsuario == idUsuario,
+                Evento.tipoEvento == tipoEvento,
+                Evento.fechaEvento >= fechaInicio,
+                Evento.fechaEvento <= fechaFin
+            ).first()
+            
+            if evento_encontrado:
+                # Evento encontrado - marcar como verificado
+                intento.verificado = True
+                intento.idEventoVerificado = evento_encontrado.idEvento
+                intento.resultadoVerificacion = f"Evento verificado correctamente. ID: {evento_encontrado.idEvento}"
+                
+                # Actualizar el estado del usuarioxevento a REPORTADO
+                usuario_evento = session.query(UsuarioxEvento).filter_by(
+                    idUsuario=idUsuario,
+                    idEvento=evento_encontrado.idEvento
+                ).first()
+                
+                if usuario_evento:
+                    usuario_evento.resultado = ResultadoEvento.REPORTADO
+                    usuario_evento.fechaReporte = datetime.now()
+                
+                mensaje = "¡Gracias por reportar! El evento ha sido verificado correctamente."
+            else:
+                # No se encontró evento - marcar como no verificado
+                intento.verificado = False
+                intento.resultadoVerificacion = "No se encontró un evento asignado en el rango de fechas especificado"
+                mensaje = "¡Gracias por reportar! Sin embargo, no se encontró un evento asignado en el rango de fechas especificado."
+            
+            session.add(intento)
+            session.commit()
+            
+            return jsonify({
+                "mensaje": mensaje,
+                "verificado": intento.verificado,
+                "idIntentoReporte": intento.idIntentoReporte,
+                "resultadoVerificacion": intento.resultadoVerificacion
+            }), 200
+            
+        except Exception as e:
+            session.rollback()
+            log.error(f"Error procesando intento de reporte: {str(e)}")
+            return responseError("ERROR", f"Error procesando el reporte: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def obtenerIntentosReportePorUsuario(idUsuario):
+        """
+        Obtiene todos los intentos de reporte realizados por un usuario específico.
+        """
+        session = SessionLocal()
+        try:
+            intentos = session.query(IntentoReporte).filter_by(idUsuario=idUsuario).order_by(
+                IntentoReporte.fechaIntento.desc()
+            ).all()
+            
+            return jsonify({
+                "intentos": [intento.get() for intento in intentos],
+                "total": len(intentos)
+            }), 200
+            
+        except Exception as e:
+            log.error(f"Error obteniendo intentos de reporte: {str(e)}")
+            return responseError("ERROR", f"Error obteniendo reportes: {str(e)}", 500)
+        finally:
+            session.close()

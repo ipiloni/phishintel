@@ -16,3 +16,6 @@ class Evento(Base):
 
     # Relación con usuarios a través de UsuarioxEvento
     usuariosAsociados = relationship("UsuarioxEvento", back_populates="evento")
+    
+    # Relación con intentos de reporte
+    intentosReporte = relationship("IntentoReporte", back_populates="eventoVerificado")

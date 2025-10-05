@@ -3889,3 +3889,43 @@ section,
 .starter-section {
   /* Add your styles here */
 }
+
+/*--------------------------------------------------------------
+# User Welcome Styles
+--------------------------------------------------------------*/
+.user-welcome {
+  color: var(--nav-color);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  background: rgba(218, 2, 228, 0.1);
+  border: 1px solid rgba(218, 2, 228, 0.2);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-welcome::before {
+  content: "👤";
+  font-size: 1rem;
+}
+
+.user-welcome:hover {
+  background: rgba(218, 2, 228, 0.15);
+  border-color: rgba(218, 2, 228, 0.3);
+  color: var(--nav-hover-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .user-welcome {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .user-welcome::before {
+    font-size: 0.9rem;
+  }
+}
