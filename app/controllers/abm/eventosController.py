@@ -127,10 +127,12 @@ class EventosController:
 
             if "registroEvento" in data:
                 registro_evento_data = data["registroEvento"]
-                if "asunto" in registro_evento_data or "cuerpo" in registro_evento_data:
+                if "asunto" in registro_evento_data or "cuerpo" in registro_evento_data or "objetivo" in registro_evento_data or "conversacion" in registro_evento_data:
                     nuevo_registro_evento = RegistroEvento(
                         asunto=registro_evento_data.get("asunto"),
-                        cuerpo=registro_evento_data.get("cuerpo")
+                        cuerpo=registro_evento_data.get("cuerpo"),
+                        objetivo=registro_evento_data.get("objetivo"),
+                        conversacion=registro_evento_data.get("conversacion")
                     )
                     nuevo_evento.registroEvento = nuevo_registro_evento
 
@@ -171,7 +173,6 @@ class EventosController:
                 except ValueError:
                     return responseError("FECHA_INVALIDA", "El formato de la fecha no es válido", 400)
 
-
             if "registroEvento" in data:
                 registro_evento_data = data["registroEvento"]
                 if evento.registroEvento is None:
@@ -180,6 +181,8 @@ class EventosController:
                     evento.registroEvento.asunto = registro_evento_data["asunto"]
                 if "cuerpo" in registro_evento_data:
                     evento.registroEvento.cuerpo = registro_evento_data["cuerpo"]
+                if "conversacion" in registro_evento_data:
+                    evento.registroEvento.conversacion = registro_evento_data["conversacion"]
 
             session.commit()
             session.close()

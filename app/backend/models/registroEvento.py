@@ -12,7 +12,8 @@ class RegistroEvento(Base):
     cuerpo = Column(String(10000), nullable=True)
     # SMS o Whatsapp
     mensaje = Column(String(5000), nullable=True)
-
+    objetivo = Column(String(10000), nullable=True)
+    conversacion = Column(String(10000), nullable=True)
     # Para llamadas utilizaremos el prompt inicial u objetivo en la columna 'mensaje' y la conversacion estará en 'cuerpo'
 
     evento = relationship("Evento", back_populates="registroEvento")

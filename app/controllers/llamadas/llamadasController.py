@@ -14,6 +14,8 @@ from app.controllers.aiController import AIController
 from app.utils.config import get
 from app.utils import conversacion
 from app.utils.logger import log
+import threading
+
 
 password = get("LLAMAR_PASSWORD")
 host = get("URL_APP")
@@ -41,7 +43,6 @@ class LlamadasController:
 
         idUsuarioDestinatario = data["idUsuarioDestinatario"]
         idUsuarioRemitente = data["idUsuarioRemitente"]
-        tipoEvento = data["tipoEvento"].removeprefix("LLAMADA_")
 
         remitente = UsuariosController.obtenerUsuario(idUsuarioRemitente)
         usuario = UsuariosController.obtenerUsuario(idUsuarioDestinatario)
@@ -90,8 +91,8 @@ class LlamadasController:
             "fechaEvento": datetime.now(),
             "resultado": "PENDIENTE",
             "registroEvento": {
-                "mensaje": "",  # objetivo
-                "cuerpo": ""  # conversacion
+                "objetivo": conversacion.objetivoActual,  # objetivo
+                "conversacion": conversacion.conversacionActual  # conversacion
             }
         }
 
@@ -127,7 +128,7 @@ class LlamadasController:
 
 
 
-
+#Fletarlo cuando termine el metodo  generarLlamada()
     @staticmethod
     def llamar(data):
         """
@@ -237,7 +238,21 @@ class LlamadasController:
             conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
 
             log.info(f"URL audio actual: {conversacion.urlAudioActual}")
+            #Hilo
+            def editar_evento_hilo():
+                try:
+                    dataEvento = {
+                        "registroEvento": {
+                            "conversacion": conversacion.conversacionActual
+                        }
+                    }
+                    EventosController.editarEvento(conversacion.idEvento, dataEvento)
+                    log.info("Evento actualizado correctamente en hilo paralelo")
+                except Exception as e:
+                    log.error(f"Error actualizando evento en hilo: {str(e)}")
 
+            hilo = threading.Thread(target=editar_evento_hilo)
+            hilo.start()
             return LlamadasController.generarAccionesEnLlamada()
 
         except Exception as e:
