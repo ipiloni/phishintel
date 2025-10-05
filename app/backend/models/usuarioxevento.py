@@ -12,6 +12,7 @@ class UsuarioxEvento(Base):
     resultado = Column(SQLEnum(ResultadoEvento), nullable=False)
     fechaReporte = Column(DateTime, nullable=True)
     fechaFalla = Column(DateTime, nullable=True)
+    haFalladoEnElPasado = Column(Boolean, default=False, nullable=False)
 
     # Relaciones hacia Usuario y Evento
     usuario = relationship("Usuario", back_populates="eventosAsociados")

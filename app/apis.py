@@ -563,3 +563,15 @@ def cerrar_tuneles_ngrok():
     Cierra todos los túneles ngrok activos.
     """
     return NgrokController.cerrar_tuneles()
+
+@apis.route("/api/eventos/batch-prueba", methods=["POST"])
+def crearBatchEventos():
+    """
+    Crear un batch de eventos y resultados de prueba para empleados 1-9
+    """
+    try:
+        data = request.get_json()
+        return EventosController.crearBatchEventos(data)
+    except Exception as e:
+        log.error(f"Error creando batch de eventos: {str(e)}")
+        return responseError("ERROR", f"No se pudo crear el batch de eventos: {str(e)}", 500)

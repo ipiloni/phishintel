@@ -515,7 +515,7 @@ def openapi_spec():
             "/api/areas/fallas-empleados-scoring": {
                 "get": {
                     "summary": "🎯 Obtener Fallas por Empleado con Sistema de Scoring Invertido",
-                    "description": "Obtiene un listado completo de todos los empleados con sistema de scoring invertido (100-0 puntos) y niveles de riesgo. Incluye empleados sin fallas. Los empleados empiezan con 100 puntos y van perdiendo por fallas: Correos = -10 pts, Mensajes = -15 pts, Llamadas/VideoLlamadas = -20 pts. Clasifica en niveles de riesgo: Sin riesgo (100), Bajo (90-99), Medio (75-89), Alto (50-74), Máximo (0-49). El área muestra promedio de puntos de empleados. Implementado en ResultadoEventoController.",
+                    "description": "Obtiene un listado completo de todos los empleados con sistema de scoring invertido (100-0 puntos) y niveles de riesgo. Incluye empleados sin fallas. Los empleados empiezan con 100 puntos y van perdiendo por fallas: Correos = -10 pts, Mensajes = -15 pts, Llamadas/VideoLlamadas = -20 pts. Penalización adicional por haber fallado en el pasado: -10 pts. Pueden recuperar puntos reportando eventos: +5 pts por evento reportado. Clasifica en niveles de riesgo: Sin riesgo (100), Bajo (90-99), Medio (75-89), Alto (50-74), Máximo (0-49). El área muestra promedio de puntos de empleados. Implementado en ResultadoEventoController.",
                     "tags": ["📊 Reportes"],
                     "parameters": [
                         {
@@ -551,6 +551,7 @@ def openapi_spec():
                                                         "nombreArea": {"type": "string"},
                                                         "promedio_puntos": {"type": "number", "format": "float", "description": "Promedio de puntos restantes de empleados del área"},
                                                         "total_fallas": {"type": "integer", "description": "Total de fallas del área"},
+                                                        "total_reportados": {"type": "integer", "description": "Total de eventos reportados del área"},
                                                         "total_eventos": {"type": "integer", "description": "Total de eventos del área"},
                                                         "empleados_con_fallas": {"type": "integer", "description": "Número de empleados con fallas"},
                                                         "empleados": {
@@ -561,9 +562,13 @@ def openapi_spec():
                                                                     "idUsuario": {"type": "integer"},
                                                                     "nombre": {"type": "string"},
                                                                     "apellido": {"type": "string"},
-                                                                    "puntos_restantes": {"type": "integer", "description": "Puntos restantes del empleado (100 - puntos perdidos)"},
+                                                                    "puntos_restantes": {"type": "integer", "description": "Puntos restantes del empleado (100 - puntos perdidos - penalizacion_falla_pasado + puntos ganados)"},
                                                                     "puntos_perdidos": {"type": "integer", "description": "Puntos perdidos por fallas del empleado"},
+                                                                    "puntos_ganados": {"type": "integer", "description": "Puntos ganados por eventos reportados (5 pts por reporte)"},
+                                                                    "penalizacion_falla_pasado": {"type": "integer", "description": "Penalización por haber fallado en el pasado (10 pts)"},
+                                                                    "ha_fallado_en_pasado": {"type": "boolean", "description": "Indica si el empleado ha fallado en el pasado en algún evento"},
                                                                     "total_fallas": {"type": "integer", "description": "Total de fallas del empleado"},
+                                                                    "total_reportados": {"type": "integer", "description": "Total de eventos reportados del empleado"},
                                                                     "total_eventos": {"type": "integer", "description": "Total de eventos del empleado"},
                                                                     "nivel_riesgo": {"type": "string", "enum": ["Sin riesgo", "Riesgo bajo", "Riesgo medio", "Riesgo alto", "Riesgo máximo"], "description": "Nivel de riesgo basado en puntos"},
                                                                     "fallas_por_tipo": {
@@ -589,7 +594,7 @@ def openapi_spec():
             "/api/scoring/empleado/{idUsuario}": {
                 "get": {
                     "summary": "🎯 Obtener Scoring Individual de Empleado (Sistema Invertido)",
-                    "description": "Calcula el scoring individual de un empleado específico con sistema invertido (100-0 puntos). El empleado empieza con 100 puntos y va perdiendo por fallas. Clasifica en niveles de riesgo: Sin riesgo (100), Bajo (90-99), Medio (75-89), Alto (50-74), Máximo (0-49). Incluye puntos restantes, puntos perdidos y desglose detallado por tipo de evento. Implementado en ResultadoEventoController.",
+                    "description": "Calcula el scoring individual de un empleado específico con sistema invertido (100-0 puntos). El empleado empieza con 100 puntos y va perdiendo por fallas. Penalización adicional por haber fallado en el pasado: -10 pts. Puede recuperar puntos reportando eventos: +5 pts por evento reportado. Clasifica en niveles de riesgo: Sin riesgo (100), Bajo (90-99), Medio (75-89), Alto (50-74), Máximo (0-49). Incluye puntos restantes, puntos perdidos, puntos ganados, penalización por falla en el pasado y desglose detallado por tipo de evento. Implementado en ResultadoEventoController.",
                     "tags": ["📊 Reportes"],
                     "parameters": [
                         {
@@ -611,10 +616,14 @@ def openapi_spec():
                                             "idUsuario": {"type": "integer"},
                                             "nombre": {"type": "string"},
                                             "apellido": {"type": "string"},
-                                            "puntos_restantes": {"type": "integer", "description": "Puntos restantes del empleado (100 - puntos perdidos)"},
+                                            "puntos_restantes": {"type": "integer", "description": "Puntos restantes del empleado (100 - puntos perdidos - penalizacion_falla_pasado + puntos ganados)"},
                                             "puntos_perdidos": {"type": "integer", "description": "Puntos perdidos por fallas"},
+                                            "puntos_ganados": {"type": "integer", "description": "Puntos ganados por eventos reportados (5 pts por reporte)"},
+                                            "penalizacion_falla_pasado": {"type": "integer", "description": "Penalización por haber fallado en el pasado (10 pts)"},
+                                            "ha_fallado_en_pasado": {"type": "boolean", "description": "Indica si el empleado ha fallado en el pasado en algún evento"},
                                             "puntaje_inicial": {"type": "integer", "description": "Puntaje inicial (100 puntos)"},
                                             "total_fallas": {"type": "integer", "description": "Total de fallas"},
+                                            "total_reportados": {"type": "integer", "description": "Total de eventos reportados"},
                                             "nivel_riesgo": {"type": "string", "enum": ["Sin riesgo", "Riesgo bajo", "Riesgo medio", "Riesgo alto", "Riesgo máximo"]},
                                             "desglose_por_tipo": {
                                                 "type": "object",
@@ -1568,6 +1577,135 @@ def openapi_spec():
                         "500": {"description": "Error al consultar o cerrar túneles ngrok"}
                     }
                 }
+            },
+            "/api/eventos/batch-prueba": {
+                "post": {
+                    "summary": "Crear batch de eventos de prueba",
+                    "description": "Crea un conjunto de eventos de phishing de prueba para los empleados especificados. Los eventos incluyen diferentes tipos (correo, mensaje, llamada, videollamada) con fechas personalizables. Los usuarios 1-6 tienen distribución normal (40% fallas activas, 20% reportados, 40% pendientes). Los usuarios 7-9 tienen mayor probabilidad de reportar eventos (10% fallas activas, 20% reportados con falla previa, 50% reportados sin falla previa, 20% pendientes) para ganar puntos.",
+                    "tags": ["📅 Eventos"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "usuarios": {
+                                            "type": "array",
+                                            "items": {"type": "integer"},
+                                            "description": "IDs de usuarios a los que aplicar los eventos (por defecto 1-9)",
+                                            "example": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+                                        },
+                                        "eventos": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "tipoEvento": {
+                                                        "type": "string",
+                                                        "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"],
+                                                        "description": "Tipo de evento de phishing"
+                                                    },
+                                                    "asunto": {
+                                                        "type": "string",
+                                                        "description": "Título del evento"
+                                                    },
+                                                    "fechaEvento": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "description": "Fecha y hora del evento (formato ISO)"
+                                                    },
+                                                    "cuerpo": {
+                                                        "type": "string",
+                                                        "description": "Contenido del cuerpo del evento (para correos)"
+                                                    },
+                                                    "mensaje": {
+                                                        "type": "string",
+                                                        "description": "Contenido del mensaje (para SMS/WhatsApp/llamadas)"
+                                                    },
+                                                    "usuarios": {
+                                                        "type": "array",
+                                                        "items": {"type": "integer"},
+                                                        "description": "IDs específicos de usuarios para este evento (opcional)"
+                                                    }
+                                                },
+                                                "required": ["tipoEvento", "asunto", "fechaEvento"]
+                                            },
+                                            "description": "Array de eventos a crear"
+                                        }
+                                    },
+                                    "required": ["eventos"]
+                                },
+                                "example": {
+                                    "usuarios": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                                    "eventos": [
+                                        {
+                                            "tipoEvento": "CORREO",
+                                            "asunto": "Oferta especial de trabajo remoto",
+                                            "fechaEvento": "2025-09-05T10:30:00",
+                                            "cuerpo": "Estimado/a, tenemos una oferta especial de trabajo remoto con excelentes beneficios...",
+                                            "usuarios": [1, 2, 3, 4, 5]
+                                        },
+                                        {
+                                            "tipoEvento": "MENSAJE",
+                                            "asunto": "Mensaje de WhatsApp",
+                                            "fechaEvento": "2025-09-08T11:30:00",
+                                            "mensaje": "Hola! Te escribo porque necesito que me confirmes algunos datos de tu cuenta bancaria...",
+                                            "usuarios": [1, 2, 5, 6, 7]
+                                        },
+                                        {
+                                            "tipoEvento": "LLAMADA",
+                                            "asunto": "Llamada de soporte técnico",
+                                            "fechaEvento": "2025-09-10T10:15:00",
+                                            "mensaje": "Llamada simulada: 'Buenos días, soy del departamento de soporte técnico...'",
+                                            "usuarios": [1, 2, 4, 6, 7, 9]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Batch de eventos creado exitosamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string", "example": "Batch de eventos creado exitosamente"},
+                                            "eventos_creados": {"type": "integer", "example": 10},
+                                            "resultados_creados": {"type": "integer", "example": 50},
+                                            "eventos": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "idEvento": {"type": "integer"},
+                                                        "tipoEvento": {"type": "string", "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"]},
+                                                        "fechaEvento": {"type": "string", "format": "date-time"},
+                                                        "asunto": {"type": "string"},
+                                                        "usuariosAsociados": {"type": "integer"}
+                                                    }
+                                                }
+                                            },
+                                            "resumen_resultados": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "fallas_activas": {"type": "integer", "description": "Cantidad de fallas activas"},
+                                                    "reportados": {"type": "integer", "description": "Cantidad de eventos reportados"},
+                                                    "fallas_pasadas": {"type": "integer", "description": "Cantidad de fallas pasadas"},
+                                                    "pendientes": {"type": "integer", "description": "Cantidad de eventos pendientes sin falla"}
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {"description": "Error del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
             }
         },
         "components": {
@@ -1604,7 +1742,8 @@ def openapi_spec():
                                     "nombreUsuario": {"type": "string"},
                                     "resultado": {"$ref": "#/components/schemas/ResultadoEvento"},
                                     "fechaReporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (si existe)"},
-                                    "fechaFalla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (si existe)"}
+                                    "fechaFalla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (si existe)"},
+                                    "haFalladoEnElPasado": {"type": "boolean", "description": "Indica si el usuario ha fallado en el pasado en algún evento"}
                                 }
                             }
                         }

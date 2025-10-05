@@ -1662,7 +1662,7 @@
                      </span>
                      <span class="badge" style="background: rgba(255,193,7,0.8); color: #000;">
                        <i class="bi bi-bug-fill me-1"></i>
-                       ${area.total_fallas || 0} fallas
+                       ${area.total_fallas || 0} fallas activas
                      </span>
                      <span class="badge" style="background: rgba(218,2,229,0.8); color: white;">
                        <i class="bi bi-trophy-fill me-1"></i>
@@ -1671,6 +1671,10 @@
                      <span class="badge" style="background: rgba(0,123,255,0.8); color: white;">
                        <i class="bi bi-calendar-event me-1"></i>
                        ${area.total_eventos || 0} eventos
+                     </span>
+                     <span class="badge" style="background: rgba(40,167,69,0.8); color: white;">
+                       <i class="bi bi-check-circle-fill me-1"></i>
+                       ${area.total_reportados || 0} reportados
                      </span>
                    </div>
                  </h6>
@@ -1739,18 +1743,18 @@
                            ID: ${empleado.idUsuario || 'N/A'}
                          </div>
                          <div class="row g-2">
-                           <div class="col-4">
+                           <div class="col-3">
                              <div class="text-center">
                                <div class="text-white small mb-1">
                                  <i class="bi bi-bug-fill me-1" style="color: #ff6b6b;"></i>
-                                 Fallas
+                                 Fallas activas
                                </div>
                                <div class="fw-bold" style="color: #ff6b6b; font-size: 1.1rem;">
                                  ${empleado.total_fallas || 0}
                                </div>
                              </div>
                            </div>
-                           <div class="col-4">
+                           <div class="col-3">
                              <div class="text-center">
                                <div class="text-white small mb-1">
                                  <i class="bi bi-trophy-fill me-1" style="color: #da02e5;"></i>
@@ -1761,7 +1765,7 @@
                                </div>
                              </div>
                            </div>
-                           <div class="col-4">
+                           <div class="col-3">
                              <div class="text-center">
                                <div class="text-white small mb-1">
                                  <i class="bi bi-calendar-event me-1" style="color: #0dcaf0;"></i>
@@ -1772,20 +1776,48 @@
                                </div>
                              </div>
                            </div>
-                         </div>
-                         ${(empleado.total_fallas || 0) > 0 && empleado.fallas_por_tipo ? `
-                           <div class="mt-2">
-                             <div class="text-white small mb-1">
-                               <i class="bi bi-list-ul me-1" style="color: #da02e5;"></i>
-                               Desglose por tipo (puntos perdidos):
+                           <div class="col-3">
+                             <div class="text-center">
+                               <div class="text-white small mb-1">
+                                 <i class="bi bi-check-circle-fill me-1" style="color: #28a745;"></i>
+                                 Reportados
+                               </div>
+                               <div class="fw-bold" style="color: #28a745; font-size: 1.1rem;">
+                                 ${empleado.total_reportados || 0}
+                               </div>
                              </div>
-                             <div class="d-flex flex-wrap gap-1">
-                               ${Object.entries(empleado.fallas_por_tipo).map(([tipo, cantidad]) => {
+                           </div>
+                         </div>
+                         <div class="mt-2">
+                           <div class="text-white small mb-1 d-flex justify-content-between align-items-center">
+                             <span>
+                               <i class="bi bi-calculator me-1" style="color: #da02e5;"></i>
+                               Desglose del Scoring:
+                             </span>
+                             <button class="btn btn-sm btn-outline-light" onclick="mostrarDetalleEventos(${empleado.idUsuario})" title="Ver eventos específicos">
+                               <i class="bi bi-list-ul me-1"></i>Detalle
+                             </button>
+                           </div>
+                           <div class="d-flex flex-wrap gap-1">
+                             <!-- Puntos base -->
+                             <span class="badge" style="background: rgba(0,123,255,0.8); color: white; font-size: 0.7rem;">
+                               <i class="bi bi-star-fill me-1"></i> Base: +100 pts
+                             </span>
+                             
+                             <!-- Fallas activas por tipo -->
+                             ${(empleado.total_fallas || 0) > 0 && empleado.fallas_por_tipo ? 
+                               Object.entries(empleado.fallas_por_tipo).map(([tipo, cantidad]) => {
                                  const iconos = {
                                    'CORREO': '📧',
                                    'MENSAJE': '💬',
                                    'LLAMADA': '📞',
                                    'VIDEOLLAMADA': '📹'
+                                 };
+                                 const nombres = {
+                                   'CORREO': 'Correo',
+                                   'MENSAJE': 'Mensaje',
+                                   'LLAMADA': 'Llamada',
+                                   'VIDEOLLAMADA': 'Videollamada'
                                  };
                                  const puntos = {
                                    'CORREO': 10,
@@ -1794,12 +1826,26 @@
                                    'VIDEOLLAMADA': 20
                                  };
                                  return `<span class="badge" style="background: rgba(255,107,107,0.8); color: white; font-size: 0.7rem;">
-                                   ${iconos[tipo] || '❓'} ${cantidad} (-${cantidad * (puntos[tipo] || 0)} pts)
+                                   ${iconos[tipo] || '❓'} ${nombres[tipo] || tipo} ${cantidad} activas (-${cantidad * (puntos[tipo] || 0)} pts)
                                  </span>`;
-                               }).join('')}
-                             </div>
+                               }).join('') : ''
+                             }
+                             
+                             <!-- Penalización por falla en el pasado -->
+                             ${empleado.ha_fallado_en_pasado ? 
+                               `<span class="badge" style="background: rgba(220,53,69,0.8); color: white; font-size: 0.7rem;">
+                                 <i class="bi bi-exclamation-triangle-fill me-1"></i> Fallas pasadas (-${empleado.penalizacion_falla_pasado || 0} pts)
+                               </span>` : ''
+                             }
+                             
+                             <!-- Puntos ganados por reportes -->
+                             ${(empleado.total_reportados || 0) > 0 ? 
+                               `<span class="badge" style="background: rgba(40,167,69,0.8); color: white; font-size: 0.7rem;">
+                                 <i class="bi bi-check-circle-fill me-1"></i> Reportados: +${empleado.puntos_ganados || 0} pts
+                               </span>` : ''
+                             }
                            </div>
-                         ` : ''}
+                         </div>
                        </div>
                      </div>
                    </div>
@@ -2362,7 +2408,309 @@
        // Recargar datos
        cargarKPITasaFallas();
      });
+
+     // Función para mostrar detalle de eventos
+     async function mostrarDetalleEventos(idUsuario) {
+       console.log('🔍 Obteniendo detalle de eventos para usuario:', idUsuario);
+       
+       try {
+         const response = await fetch(`/api/scoring/empleado/${idUsuario}`);
+         if (!response.ok) {
+           throw new Error(`Error: ${response.status}`);
+         }
+         
+         const data = await response.json();
+         console.log('📊 Datos detallados recibidos:', data);
+         
+         // Actualizar nombre del empleado en el modal
+         document.getElementById('nombreEmpleadoModal').textContent = `${data.nombre} ${data.apellido}`;
+         
+         // Generar contenido del modal
+         const contenido = generarContenidoDetalleEventos(data);
+         document.getElementById('contenidoDetalleEventos').innerHTML = contenido;
+         
+         // Mostrar el modal
+         const modal = new bootstrap.Modal(document.getElementById('modalDetalleEventos'));
+         modal.show();
+         
+       } catch (error) {
+         console.error('❌ Error obteniendo detalle de eventos:', error);
+         alert('Error al obtener el detalle de eventos: ' + error.message);
+       }
+     }
+
+     // Función para generar el contenido del modal
+     function generarContenidoDetalleEventos(data) {
+       const eventos = data.eventos_detalle || {};
+       
+       let html = `
+         <div class="row">
+           <div class="col-12 mb-3">
+             <div class="card" style="background: rgba(218, 2, 229, 0.1); border: 2px solid #da02e5; box-shadow: 0 0 15px rgba(218, 2, 229, 0.2);">
+               <div class="card-body">
+                 <h6 class="card-title text-center mb-3" style="color: #da02e5; font-weight: bold;">
+                   <i class="bi bi-graph-up me-2" style="color: #da02e5;"></i>
+                   Resumen del Scoring
+                 </h6>
+                 <div class="row text-center">
+                   <div class="col-3">
+                     <div class="h4" style="color: #da02e5; font-weight: bold;">${data.puntos_restantes || 100}</div>
+                     <small style="color: #ccc;">Puntos Restantes</small>
+                   </div>
+                   <div class="col-3">
+                     <div class="h5" style="color: #ff6b6b; font-weight: bold;">-${data.puntos_perdidos || 0}</div>
+                     <small style="color: #ccc;">Fallas Activas</small>
+                   </div>
+                   <div class="col-3">
+                     <div class="h5" style="color: #ffc107; font-weight: bold;">-${data.penalizacion_falla_pasado || 0}</div>
+                     <small style="color: #ccc;">Fallas Pasadas</small>
+                   </div>
+                   <div class="col-3">
+                     <div class="h5" style="color: #28a745; font-weight: bold;">+${data.puntos_ganados || 0}</div>
+                     <small style="color: #ccc;">Reportados</small>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+       `;
+
+       // Eventos activos
+       if (eventos.activos && eventos.activos.length > 0) {
+         html += `
+           <div class="mb-4">
+             <h6 class="mb-3" style="color: #ff6b6b; font-weight: bold;">
+               <i class="bi bi-exclamation-triangle-fill me-2"></i>
+               Fallas Activas (${eventos.activos.length})
+             </h6>
+             <div class="row">
+         `;
+         
+         eventos.activos.forEach(evento => {
+           const iconos = {
+             'CORREO': '📧',
+             'MENSAJE': '💬', 
+             'LLAMADA': '📞',
+             'VIDEOLLAMADA': '📹'
+           };
+           const nombres = {
+             'CORREO': 'Correo',
+             'MENSAJE': 'Mensaje',
+             'LLAMADA': 'Llamada', 
+             'VIDEOLLAMADA': 'Videollamada'
+           };
+           
+           // Formatear fecha a día/mes/año
+           const fechaFormateada = evento.fechaCreacion ? 
+             new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 
+             'Sin fecha';
+           
+           html += `
+             <div class="col-md-6 mb-2">
+               <div class="card" style="background: rgba(255,107,107,0.1); border: 2px solid #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.2);">
+                 <div class="card-body p-2">
+                   <div class="d-flex justify-content-between align-items-center">
+                     <div>
+                       <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
+                       <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                     </div>
+                     <span class="badge" style="background: #ff6b6b; color: white; font-weight: bold;">-${evento.puntos} pts</span>
+                   </div>
+                   <div class="small mt-1" style="color: #ccc;">
+                     <strong>${evento.titulo}</strong>
+                   </div>
+                   <div class="small" style="color: #999;">
+                     ID: ${evento.idEvento} | ${fechaFormateada}
+                   </div>
+                 </div>
+               </div>
+             </div>
+           `;
+         });
+         
+         html += `</div></div>`;
+       }
+
+       // Eventos reportados (incluyendo los que fueron fallados y luego reportados)
+       if (eventos.reportados && eventos.reportados.length > 0) {
+         html += `
+           <div class="mb-4">
+             <h6 class="mb-3" style="color: #28a745; font-weight: bold;">
+               <i class="bi bi-check-circle-fill me-2"></i>
+               Eventos Reportados (${eventos.reportados.length})
+             </h6>
+             <div class="row">
+         `;
+         
+         eventos.reportados.forEach(evento => {
+           const iconos = {
+             'CORREO': '📧',
+             'MENSAJE': '💬',
+             'LLAMADA': '📞', 
+             'VIDEOLLAMADA': '📹'
+           };
+           const nombres = {
+             'CORREO': 'Correo',
+             'MENSAJE': 'Mensaje',
+             'LLAMADA': 'Llamada',
+             'VIDEOLLAMADA': 'Videollamada'
+           };
+           
+           // Formatear fecha a día/mes/año
+           const fechaFormateada = evento.fechaCreacion ? 
+             new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 
+             'Sin fecha';
+           
+           // Si el evento fue fallado en el pasado y luego reportado (tiene puntos de falla pasada)
+           if (evento.haFalladoEnElPasado && evento.puntosFallaPasada && evento.puntosFallaPasada > 0) {
+             html += `
+               <div class="col-md-6 mb-2">
+                 <div class="card" style="background: rgba(255,193,7,0.1); border: 2px solid #ffc107; box-shadow: 0 0 10px rgba(255,193,7,0.2);">
+                   <div class="card-body p-2">
+                     <div class="d-flex justify-content-between align-items-center">
+                       <div>
+                         <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
+                         <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                       </div>
+                       <div class="d-flex gap-1">
+                         <span class="badge" style="background: #28a745; color: white; font-weight: bold;">Reportado +${evento.puntos}</span>
+                         <span class="badge" style="background: #ffc107; color: #000; font-weight: bold;">Fallado -${evento.puntosFallaPasada}</span>
+                       </div>
+                     </div>
+                     <div class="small mt-1" style="color: #ccc;">
+                       <strong>${evento.titulo}</strong>
+                     </div>
+                     <div class="small" style="color: #999;">
+                       ID: ${evento.idEvento} | ${fechaFormateada}
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             `;
+           } else {
+             // Solo reportado sin falla previa
+             html += `
+               <div class="col-md-6 mb-2">
+                 <div class="card" style="background: rgba(40,167,69,0.1); border: 2px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.2);">
+                   <div class="card-body p-2">
+                     <div class="d-flex justify-content-between align-items-center">
+                       <div>
+                         <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
+                         <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                       </div>
+                       <span class="badge" style="background: #28a745; color: white; font-weight: bold;">+${evento.puntos} pts</span>
+                     </div>
+                     <div class="small mt-1" style="color: #ccc;">
+                       <strong>${evento.titulo}</strong>
+                     </div>
+                     <div class="small" style="color: #999;">
+                       ID: ${evento.idEvento} | ${fechaFormateada}
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             `;
+           }
+         });
+         
+        html += `</div></div>`;
+      }
+
+      // Eventos pendientes
+      if (eventos.pendientes && eventos.pendientes.length > 0) {
+        html += `
+          <div class="mb-4">
+            <h6 class="mb-3" style="color: #6c757d; font-weight: bold;">
+              <i class="bi bi-clock-fill me-2"></i>
+              Eventos Pendientes (${eventos.pendientes.length})
+            </h6>
+            <div class="row">
+        `;
+        
+        eventos.pendientes.forEach(evento => {
+          const iconos = {
+            'CORREO': '📧',
+            'MENSAJE': '💬',
+            'LLAMADA': '📞', 
+            'VIDEOLLAMADA': '📹'
+          };
+          const nombres = {
+            'CORREO': 'Correo',
+            'MENSAJE': 'Mensaje',
+            'LLAMADA': 'Llamada',
+            'VIDEOLLAMADA': 'Videollamada'
+          };
+          
+          // Formatear fecha a día/mes/año
+          const fechaFormateada = evento.fechaCreacion ? 
+            new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 
+            'Sin fecha';
+          
+          html += `
+            <div class="col-md-6 mb-2">
+              <div class="card" style="background: rgba(108,117,125,0.1); border: 2px solid #6c757d; box-shadow: 0 0 10px rgba(108,117,125,0.2);">
+                <div class="card-body p-2">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
+                      <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                    </div>
+                    <span class="badge" style="background: #6c757d; color: white; font-weight: bold;">0 pts</span>
+                  </div>
+                  <div class="small mt-1" style="color: #ccc;">
+                    <strong>${evento.titulo}</strong>
+                  </div>
+                  <div class="small" style="color: #999;">
+                    ID: ${evento.idEvento} | ${fechaFormateada}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += `</div></div>`;
+      }
+
+      // Si no hay eventos
+      if ((!eventos.activos || eventos.activos.length === 0) && 
+          (!eventos.reportados || eventos.reportados.length === 0) &&
+          (!eventos.pendientes || eventos.pendientes.length === 0)) {
+         html += `
+           <div class="text-center py-4">
+             <i class="bi bi-info-circle me-2" style="color: #da02e5;"></i>
+             <span style="color: #ccc;">No hay eventos registrados para este empleado.</span>
+           </div>
+         `;
+       }
+
+       return html;
+     }
   </script>
+
+  <!-- Modal para detalle de eventos -->
+  <div class="modal fade" id="modalDetalleEventos" tabindex="-1" aria-labelledby="modalDetalleEventosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); color: white; border: 2px solid #da02e5; box-shadow: 0 0 20px rgba(218, 2, 229, 0.3);">
+        <div class="modal-header" style="border-bottom: 2px solid #da02e5; background: rgba(218, 2, 229, 0.1);">
+          <h5 class="modal-title" id="modalDetalleEventosLabel" style="color: #da02e5; font-weight: bold;">
+            <i class="bi bi-list-ul me-2" style="color: #da02e5;"></i>
+            Detalle de Eventos - <span id="nombreEmpleadoModal" style="color: white;"></span>
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+        </div>
+        <div class="modal-body" style="background: rgba(0,0,0,0.3);">
+          <div id="contenidoDetalleEventos">
+            <!-- Contenido se carga dinámicamente -->
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top: 2px solid #da02e5; background: rgba(218, 2, 229, 0.1);">
+          <button type="button" class="btn" data-bs-dismiss="modal" style="background: #da02e5; color: white; border: none; font-weight: bold;">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>

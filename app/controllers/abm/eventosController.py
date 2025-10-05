@@ -28,7 +28,8 @@ class EventosController:
                     usuario_data = {
                         "idUsuario": ux.usuario.idUsuario,
                         "nombreUsuario": ux.usuario.nombreUsuario,
-                        "resultado": ux.resultado.value
+                        "resultado": ux.resultado.value,
+                        "haFalladoEnElPasado": ux.haFalladoEnElPasado
                     }
                     # Agregar fechas si existen
                     if ux.fechaReporte:
@@ -72,7 +73,8 @@ class EventosController:
                 usuario_data = {
                     "idUsuario": ux.usuario.idUsuario,
                     "nombreUsuario": ux.usuario.nombreUsuario,
-                    "resultado": ux.resultado.value
+                    "resultado": ux.resultado.value,
+                    "haFalladoEnElPasado": ux.haFalladoEnElPasado
                 }
                 # Agregar fechas si existen
                 if ux.fechaReporte:
@@ -215,13 +217,17 @@ class EventosController:
                     usuario_evento.fechaReporte = fechaReporte
                 if fechaFalla:
                     usuario_evento.fechaFalla = fechaFalla
+                # Marcar haFalladoEnElPasado si el resultado es FALLA
+                if ResultadoEvento(resultado_val) == ResultadoEvento.FALLA:
+                    usuario_evento.haFalladoEnElPasado = True
             else:
                 usuario_evento = UsuarioxEvento(
                     idEvento=idEvento,
                     idUsuario=idUsuario,
                     resultado=ResultadoEvento(resultado_val),
                     fechaReporte=fechaReporte,
-                    fechaFalla=fechaFalla
+                    fechaFalla=fechaFalla,
+                    haFalladoEnElPasado=(ResultadoEvento(resultado_val) == ResultadoEvento.FALLA)
                 )
                 session.add(usuario_evento)
 
@@ -257,5 +263,154 @@ class EventosController:
         except Exception as e:
             session.rollback()
             return responseError("ERROR", f"No se pudo eliminar el evento: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def crearBatchEventos(data):
+        """
+        Crear un batch de eventos y resultados de prueba basado en datos recibidos
+        """
+        from app.config.db_config import SessionLocal
+        from app.backend.models.evento import Evento
+        from app.backend.models.registroEvento import RegistroEvento
+        from app.backend.models.usuarioxevento import UsuarioxEvento
+        from app.backend.models.resultadoEvento import ResultadoEvento
+        from app.backend.models.tipoEvento import TipoEvento
+        from datetime import datetime, timedelta
+        import random
+        
+        session = SessionLocal()
+        
+        try:
+            # Obtener datos del request
+            eventos_data = data.get("eventos", [])
+            usuarios_objetivo = data.get("usuarios", list(range(1, 10)))  # Por defecto usuarios 1-9
+            
+            if not eventos_data:
+                return responseError("CAMPOS_OBLIGATORIOS", "Se requiere al menos un evento en el array 'eventos'", 400)
+            
+            eventos_creados = []
+            resultados_creados = []
+            
+            for evento_data in eventos_data:
+                # Validar datos del evento
+                if not evento_data.get("tipoEvento") or not evento_data.get("asunto"):
+                    continue
+                
+                # Crear evento
+                evento = Evento(
+                    tipoEvento=TipoEvento(evento_data["tipoEvento"]),
+                    fechaEvento=datetime.fromisoformat(evento_data["fechaEvento"])
+                )
+                session.add(evento)
+                session.flush()  # Para obtener el ID
+                
+                # Crear registro del evento
+                registro = RegistroEvento(
+                    idEvento=evento.idEvento,
+                    asunto=evento_data["asunto"],
+                    cuerpo=evento_data.get("cuerpo"),
+                    mensaje=evento_data.get("mensaje")
+                )
+                session.add(registro)
+                
+                # Obtener usuarios para este evento (si no se especifica, usar todos)
+                usuarios_evento = evento_data.get("usuarios", usuarios_objetivo)
+                
+                # Crear resultados para usuarios
+                for idUsuario in usuarios_evento:
+                    # Determinar resultado basado en probabilidades o configuración
+                    rand = random.random()
+                    
+                    # Usuarios 7, 8, 9 tienen más probabilidad de reportar eventos
+                    if idUsuario in [7, 8, 9]:
+                        if rand < 0.1:  # 10% falla activa
+                            resultado = ResultadoEvento.FALLA
+                            fechaFalla = evento.fechaEvento + timedelta(minutes=random.randint(5, 60))
+                            fechaReporte = None
+                            haFalladoEnElPasado = True
+                        elif rand < 0.3:  # 20% reportado con falla previa
+                            resultado = ResultadoEvento.REPORTADO
+                            fechaFalla = evento.fechaEvento + timedelta(minutes=random.randint(5, 30))
+                            fechaReporte = evento.fechaEvento + timedelta(minutes=random.randint(10, 120))
+                            haFalladoEnElPasado = True
+                        elif rand < 0.8:  # 50% reportado SIN falla previa - muy probable
+                            resultado = ResultadoEvento.REPORTADO
+                            fechaFalla = None
+                            fechaReporte = evento.fechaEvento + timedelta(minutes=random.randint(5, 60))
+                            haFalladoEnElPasado = False
+                        else:  # 20% pendiente (sin falla)
+                            resultado = ResultadoEvento.PENDIENTE
+                            fechaFalla = None
+                            fechaReporte = None
+                            haFalladoEnElPasado = False
+                    else:
+                        # Usuarios 1-6 tienen distribución normal
+                        if rand < 0.4:  # 40% falla activa
+                            resultado = ResultadoEvento.FALLA
+                            fechaFalla = evento.fechaEvento + timedelta(minutes=random.randint(5, 60))
+                            fechaReporte = None
+                            haFalladoEnElPasado = True
+                        elif rand < 0.6:  # 20% reportado (falla pasada)
+                            resultado = ResultadoEvento.REPORTADO
+                            fechaFalla = evento.fechaEvento + timedelta(minutes=random.randint(5, 30))
+                            fechaReporte = evento.fechaEvento + timedelta(minutes=random.randint(10, 120))
+                            haFalladoEnElPasado = True
+                        else:  # 40% pendiente (sin falla)
+                            resultado = ResultadoEvento.PENDIENTE
+                            fechaFalla = None
+                            fechaReporte = None
+                            haFalladoEnElPasado = False
+                    
+                    # Crear relación usuario-evento
+                    usuario_evento = UsuarioxEvento(
+                        idUsuario=idUsuario,
+                        idEvento=evento.idEvento,
+                        resultado=resultado,
+                        fechaFalla=fechaFalla,
+                        fechaReporte=fechaReporte,
+                        haFalladoEnElPasado=haFalladoEnElPasado
+                    )
+                    session.add(usuario_evento)
+                    
+                    resultados_creados.append({
+                        "idUsuario": idUsuario,
+                        "idEvento": evento.idEvento,
+                        "resultado": resultado.value,
+                        "fechaFalla": fechaFalla.isoformat() if fechaFalla else None,
+                        "fechaReporte": fechaReporte.isoformat() if fechaReporte else None,
+                        "haFalladoEnElPasado": haFalladoEnElPasado
+                    })
+                
+                eventos_creados.append({
+                    "idEvento": evento.idEvento,
+                    "tipoEvento": evento.tipoEvento.value,
+                    "fechaEvento": evento.fechaEvento.isoformat(),
+                    "asunto": evento_data["asunto"],
+                    "usuariosAsociados": len(usuarios_evento)
+                })
+            
+            session.commit()
+            
+            log.info(f"Batch de eventos creado exitosamente: {len(eventos_creados)} eventos, {len(resultados_creados)} resultados")
+            
+            return jsonify({
+                "mensaje": "Batch de eventos creado exitosamente",
+                "eventos_creados": len(eventos_creados),
+                "resultados_creados": len(resultados_creados),
+                "eventos": eventos_creados,
+                "resumen_resultados": {
+                    "fallas_activas": len([r for r in resultados_creados if r["resultado"] == "FALLA"]),
+                    "reportados": len([r for r in resultados_creados if r["resultado"] == "REPORTADO"]),
+                    "fallas_pasadas": len([r for r in resultados_creados if r["haFalladoEnElPasado"] and r["resultado"] != "FALLA"]),
+                    "pendientes": len([r for r in resultados_creados if r["resultado"] == "PENDIENTE" and not r["haFalladoEnElPasado"]])
+                }
+            }), 200
+            
+        except Exception as e:
+            session.rollback()
+            log.error(f"Error creando batch de eventos: {str(e)}")
+            return responseError("ERROR", f"No se pudo crear el batch de eventos: {str(e)}", 500)
         finally:
             session.close()
