@@ -841,6 +841,106 @@
                     </div>
                   </div>
                   
+                  <!-- KPI de Promedio de Scoring -->
+                  <div class="row g-4 mt-4">
+                    <div class="col-lg-8">
+                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
+                        <div class="card-body p-4">
+                          <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">
+                              <i class="bi bi-graph-up me-2" style="color: #17a2b8;"></i>
+                              Promedio de Scoring
+                            </h5>
+                            <div class="d-flex align-items-center">
+                              <i class="bi bi-info-circle me-2" style="color: #17a2b8; cursor: pointer;" 
+                                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                                 title="<strong>Promedio de Scoring</strong><br/>Sistema de puntuación que evalúa el comportamiento de seguridad de los empleados.<br/><strong>Fórmula:</strong> 100 - Fallas Activas - Fallas Pasadas + Eventos Reportados"></i>
+                              <span id="kpiPromedioScoring" class="display-4 fw-bold" style="color: #17a2b8;">0</span>
+                              <span class="ms-2 fs-5 text-white">pts</span>
+                            </div>
+                          </div>
+                          
+                          <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">Mediana</div>
+                                <div id="kpiMedianaScoring" class="fs-4 fw-bold" style="color: #00d4aa;">0</div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">P10</div>
+                                <div id="kpiP10Scoring" class="fs-4 fw-bold" style="color: #ff6b6b;">0</div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">Intentos</div>
+                                <div id="kpiTotalIntentosScoring" class="fs-4 fw-bold" style="color: #feca57;">0</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Barra de progreso del nivel -->
+                          <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                              <span class="fs-6 text-white">Nivel de Madurez</span>
+                              <span id="kpiNivelScoring" class="badge fs-6 px-3 py-2">0/5</span>
+                            </div>
+                            <div class="progress" style="height: 12px; background-color: #333;">
+                              <div id="kpiProgresoScoring" class="progress-bar" role="progressbar" style="width: 0%; transition: width 2s ease-in-out;"></div>
+                            </div>
+                            <!-- Estado del nivel debajo de la barra -->
+                            <div id="kpiEstadoNivelScoring" class="text-center mt-2" style="display: none;">
+                              <span id="kpiBadgeNivelScoring" class="badge fs-6 px-3 py-2">
+                                <i id="kpiIconoNivelScoring" class="bi me-1"></i>
+                                <span id="kpiTextoNivelScoring">Nivel 1</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
+                        <div class="card-body p-4">
+                          <h6 class="mb-3">
+                            <i class="bi bi-shield-check me-2" style="color: #17a2b8;"></i>
+                            Clasificación Actual
+                          </h6>
+                          
+                          <div class="text-center mb-3">
+                            <div id="kpiClasificacionScoring" class="fs-4 fw-bold mb-2" style="color: #17a2b8;">Cargando...</div>
+                            <div id="kpiDescripcionScoring" class="text-white small">Obteniendo datos...</div>
+                          </div>
+                          
+                          <!-- Indicador visual del nivel -->
+                          <div class="d-flex justify-content-center mb-3">
+                            <div id="kpiIndicadorScoring" class="kpi-indicator">
+                              <div class="kpi-level" data-level="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 1: Presas del Phishing</strong><br/>Promedio < 75 puntos<br/>Necesitan mejorar significativamente"></div>
+                              <div class="kpi-level" data-level="1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 2: Aprendices de Ciberseguridad</strong><br/>Promedio 75-90 puntos<br/>En proceso de mejora"></div>
+                              <div class="kpi-level" data-level="2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 3: Defensores Digitales</strong><br/>Promedio 90-100 puntos<br/>Rendimiento estándar"></div>
+                              <div class="kpi-level" data-level="3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 4: Guardianes Anti-Phishing</strong><br/>Promedio 100-125 puntos<br/>Alto rendimiento"></div>
+                              <div class="kpi-level" data-level="4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 5: Vigilantes del Ciberespacio</strong><br/>Promedio > 150 puntos<br/>Excelencia en ciberseguridad"></div>
+                            </div>
+                          </div>
+                          
+                          <div class="text-center">
+                            <button id="btnActualizarKPIScoring" class="btn btn-outline-info btn-sm me-2">
+                              <i class="bi bi-arrow-clockwise me-1"></i>
+                              Actualizar
+                            </button>
+                            <button id="btnDetalleKPIScoring" class="btn btn-info btn-sm">
+                              <i class="bi bi-eye me-1"></i>
+                              Detalle
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
                 </div>
               </div>
             </div>
@@ -978,27 +1078,27 @@
             <div class="row g-4">
               <div class="col-12">
                 <div class="card p-3 bg-dark text-white">
-                  <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">
+                          <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">
                       <i class="bi bi-person-badge me-2" style="color: #da02e5;"></i>
                       Fallas por Empleado con Scoring
-                    </h5>
-                  </div>
-                  
+                            </h5>
+                          </div>
+                          
                   
                   <div id="contenidoEmpleados">
                     <div class="text-center py-5">
                       <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Cargando...</span>
-                      </div>
+                            </div>
                       <p class="mt-3 text-muted">Cargando datos de empleados...</p>
+                            </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+                    
         </div>
       </div>
     </section>
@@ -1641,27 +1741,27 @@
          let html = '';
          
          areas.forEach((area, index) => {
-           const areaId = `area-${index}`;
-           html += `
+             const areaId = `area-${index}`;
+             html += `
              <div class="card mb-3 bg-dark border-0" style="border-left: 4px solid #da02e5 !important;">
                <div class="card-header bg-dark" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#${areaId}" aria-expanded="false">
                  <h6 class="mb-0 d-flex justify-content-between align-items-center">
                    <span>
-                     <i class="bi bi-building me-2"></i>
+                       <i class="bi bi-building me-2"></i>
                      ${area.nombreArea || 'Área sin nombre'}
-                     <i class="bi bi-chevron-down ms-2" id="icon-${areaId}"></i>
-                   </h6>
+                       <i class="bi bi-chevron-down ms-2" id="icon-${areaId}"></i>
+                     </h6>
                    <div class="d-flex gap-2 flex-wrap mt-2">
-                     <span class="badge" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
-                       <i class="bi bi-people-fill me-1"></i>
+                       <span class="badge" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                         <i class="bi bi-people-fill me-1"></i>
                        ${area.empleados ? area.empleados.length : 0} empleados
-                     </span>
-                     <span class="badge" style="background: rgba(255,107,107,0.8); color: white;">
-                       <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                       </span>
+                       <span class="badge" style="background: rgba(255,107,107,0.8); color: white;">
+                         <i class="bi bi-exclamation-triangle-fill me-1"></i>
                        ${area.empleados_con_fallas || 0} con fallas
-                     </span>
-                     <span class="badge" style="background: rgba(255,193,7,0.8); color: #000;">
-                       <i class="bi bi-bug-fill me-1"></i>
+                       </span>
+                       <span class="badge" style="background: rgba(255,193,7,0.8); color: #000;">
+                         <i class="bi bi-bug-fill me-1"></i>
                        ${area.total_fallas || 0} fallas activas
                      </span>
                      <span class="badge" style="background: rgba(218,2,229,0.8); color: white;">
@@ -1675,17 +1775,17 @@
                      <span class="badge" style="background: rgba(40,167,69,0.8); color: white;">
                        <i class="bi bi-check-circle-fill me-1"></i>
                        ${area.total_reportados || 0} reportados
-                     </span>
-                   </div>
+                       </span>
+                     </div>
                  </h6>
-               </div>
-               <div class="collapse" id="${areaId}">
-                 <div class="card-body p-3">
-                   <div class="row g-3">
-           `;
+                 </div>
+                 <div class="collapse" id="${areaId}">
+                   <div class="card-body p-3">
+                     <div class="row g-3">
+             `;
              
              if (area.empleados && area.empleados.length > 0) {
-               area.empleados.forEach(empleado => {
+             area.empleados.forEach(empleado => {
                  // Determinar color del nivel de riesgo
                  let riesgoColor = '#00d4aa';
                  let riesgoIcon = 'bi-check-circle-fill';
@@ -1715,17 +1815,17 @@
                  
                  const cardStyle = (empleado.total_fallas || 0) > 0 ? 
                    `border-left: 4px solid ${riesgoColor}; box-shadow: 0 2px 8px ${riesgoColor}40;` : 
-                   'border-left: 4px solid #00d4aa; box-shadow: 0 2px 8px rgba(0,212,170,0.3);';
-                 
-                 html += `
+                 'border-left: 4px solid #00d4aa; box-shadow: 0 2px 8px rgba(0,212,170,0.3);';
+               
+               html += `
                    <div class="col-lg-4 col-md-6 col-sm-12">
-                     <div class="card bg-dark border-0" style="${cardStyle}">
-                       <div class="card-body p-3">
-                         <div class="d-flex justify-content-between align-items-start mb-2">
-                           <h6 class="mb-0 text-white" style="font-size: 0.9rem;">
-                             <i class="bi bi-person-fill me-2" style="color: #da02e5;"></i>
+                   <div class="card bg-dark border-0" style="${cardStyle}">
+                     <div class="card-body p-3">
+                       <div class="d-flex justify-content-between align-items-start mb-2">
+                         <h6 class="mb-0 text-white" style="font-size: 0.9rem;">
+                           <i class="bi bi-person-fill me-2" style="color: #da02e5;"></i>
                              ${empleado.nombre || 'N/A'} ${empleado.apellido || 'N/A'}
-                           </h6>
+                         </h6>
                            <span class="badge" style="background: ${riesgoColor}; color: white; font-size: 0.75rem;" 
                                  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
                                  title="<strong>Escala de Riesgo (100-0 puntos):</strong><br/>
@@ -1736,12 +1836,12 @@
                                  • Riesgo máximo: 0-49 puntos">
                              <i class="bi ${riesgoIcon} me-1"></i>
                              ${empleado.nivel_riesgo || 'Sin riesgo'}
-                           </span>
-                         </div>
+                         </span>
+                       </div>
                          <div class="text-white small mb-2">
-                           <i class="bi bi-person-badge me-1" style="color: #da02e5;"></i>
+                         <i class="bi bi-person-badge me-1" style="color: #da02e5;"></i>
                            ID: ${empleado.idUsuario || 'N/A'}
-                         </div>
+                       </div>
                          <div class="row g-2">
                            <div class="col-3">
                              <div class="text-center">
@@ -1846,11 +1946,11 @@
                              }
                            </div>
                          </div>
-                       </div>
                      </div>
                    </div>
-                 `;
-               });
+                 </div>
+               `;
+             });
              } else {
                html += `
                  <div class="col-12">
@@ -1863,16 +1963,16 @@
              }
              
              html += `
+                     </div>
                    </div>
                  </div>
                </div>
-             </div>
-           `;
+             `;
          });
-
+         
          contenido.innerHTML = html;
          console.log('✅ HTML generado y mostrado');
-
+         
          // Configurar iconos de colapso
          areas.forEach((area, index) => {
            const areaId = `area-${index}`;
@@ -1924,6 +2024,7 @@
        cargarFallasPorEmpleado(); // Cargar también el reporte por empleado
        cargarKPITiempoRespuesta(); // Cargar KPI de tiempo de respuesta
        cargarKPITasaFallas(); // Cargar KPI de tasa de fallas
+       cargarKPIPromedioScoring(); // Cargar KPI de promedio de scoring
        
        // Inicializar tooltips
        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -2333,6 +2434,7 @@
          
          // Mostrar indicador visual
          document.getElementById('kpiIndicadorFallas').style.display = 'flex';
+         console.log('Mostrando indicador de fallas');
          
          // Actualizar indicador visual con delay
          setTimeout(() => {
@@ -2407,6 +2509,174 @@
        
        // Recargar datos
        cargarKPITasaFallas();
+     });
+
+     // Función para actualizar indicador visual de scoring
+     function actualizarIndicadorVisual(indicadorId, nivel) {
+       const niveles = document.querySelectorAll(`#${indicadorId} .kpi-level`);
+       console.log('Actualizando indicador de scoring, nivel:', nivel, 'elementos encontrados:', niveles.length);
+       
+       niveles.forEach((nivelElemento, index) => {
+         nivelElemento.classList.remove('active', 'critical');
+         
+         if (index < nivel) {
+           nivelElemento.classList.add('active');
+           console.log('Activando nivel', index + 1, 'para nivel', nivel);
+         }
+       });
+     }
+
+     // Función para cargar el KPI de promedio de scoring
+     async function cargarKPIPromedioScoring() {
+       try {
+         const resp = await fetch('/api/kpis/promedio-scoring');
+         if (!resp.ok) throw new Error('Error al obtener datos del KPI');
+         const data = await resp.json();
+
+         // Verificar si hay datos insuficientes
+         if (data.insuficienteDatos) {
+           // Mostrar mensaje de datos insuficientes
+           document.getElementById('kpiPromedioScoring').textContent = 'N/A';
+           document.getElementById('kpiMedianaScoring').textContent = 'N/A';
+           document.getElementById('kpiP10Scoring').textContent = 'N/A';
+           document.getElementById('kpiTotalIntentosScoring').textContent = Math.round(data.totalIntentosPhishing);
+           document.getElementById('kpiClasificacionScoring').textContent = data.clasificacion;
+           document.getElementById('kpiDescripcionScoring').textContent = data.descripcion;
+           document.getElementById('kpiNivelScoring').textContent = '0/5';
+           document.getElementById('kpiProgresoScoring').style.width = '0%';
+           
+           // Aplicar estilo de datos insuficientes
+           const kpiCard = document.querySelector('#panel-kpis .row:nth-child(4) .card');
+           if (kpiCard) {
+             kpiCard.classList.add('insuficiente-datos');
+           }
+           
+           // Ocultar indicador visual y estado del nivel
+           document.getElementById('kpiIndicadorScoring').style.display = 'none';
+           document.getElementById('kpiEstadoNivelScoring').style.display = 'none';
+           
+           return;
+         }
+
+         // Remover estilo de datos insuficientes si existe
+         const kpiCard = document.querySelector('#panel-kpis .row:nth-child(4) .card');
+         if (kpiCard) {
+           kpiCard.classList.remove('insuficiente-datos');
+         }
+
+         // Animar el contador principal (más lento)
+         animarContador('kpiPromedioScoring', data.promedioScoring, 4);
+         
+         // Animar métricas secundarias con delay escalonado
+         setTimeout(() => {
+           animarContadorEntero('kpiMedianaScoring', data.medianaScoring, 3, '');
+         }, 500);
+         
+         setTimeout(() => {
+           animarContadorEntero('kpiP10Scoring', data.percentil10Scoring, 3, '');
+         }, 1000);
+         
+         setTimeout(() => {
+           animarContadorEntero('kpiTotalIntentosScoring', data.totalIntentosPhishing, 3, '');
+         }, 1500);
+
+         // Actualizar clasificación y descripción
+         setTimeout(() => {
+           document.getElementById('kpiClasificacionScoring').textContent = data.clasificacion;
+           document.getElementById('kpiDescripcionScoring').textContent = data.descripcion;
+         }, 2000);
+
+         // Actualizar nivel y progreso
+         setTimeout(() => {
+           const nivel = data.nivel;
+           const porcentaje = (nivel / 5) * 100;
+           
+           document.getElementById('kpiNivelScoring').textContent = `${nivel}/5`;
+           document.getElementById('kpiProgresoScoring').style.width = `${porcentaje}%`;
+           
+           // Actualizar colores de la barra de progreso según el nivel
+           const progressBar = document.getElementById('kpiProgresoScoring');
+           progressBar.className = 'progress-bar';
+           
+           if (nivel >= 5) {
+             progressBar.style.background = 'linear-gradient(90deg, #28a745, #20c997)';
+           } else if (nivel >= 4) {
+             progressBar.style.background = 'linear-gradient(90deg, #17a2b8, #28a745)';
+           } else if (nivel >= 3) {
+             progressBar.style.background = 'linear-gradient(90deg, #ffc107, #17a2b8)';
+           } else if (nivel >= 2) {
+             progressBar.style.background = 'linear-gradient(90deg, #fd7e14, #ffc107)';
+           } else {
+             progressBar.style.background = 'linear-gradient(90deg, #dc3545, #fd7e14)';
+           }
+           
+           // Mostrar estado del nivel
+           document.getElementById('kpiEstadoNivelScoring').style.display = 'block';
+           
+           // Actualizar badge del nivel
+           const badgeNivel = document.getElementById('kpiBadgeNivelScoring');
+           const iconoNivel = document.getElementById('kpiIconoNivelScoring');
+           const textoNivel = document.getElementById('kpiTextoNivelScoring');
+           
+           if (nivel >= 5) {
+             badgeNivel.className = 'badge fs-6 px-3 py-2 bg-success';
+             iconoNivel.className = 'bi bi-shield-check me-1';
+             textoNivel.textContent = 'Vigilantes del Ciberespacio';
+           } else if (nivel >= 4) {
+             badgeNivel.className = 'badge fs-6 px-3 py-2 bg-info';
+             iconoNivel.className = 'bi bi-shield me-1';
+             textoNivel.textContent = 'Guardianes Anti-Phishing';
+           } else if (nivel >= 3) {
+             badgeNivel.className = 'badge fs-6 px-3 py-2 bg-warning';
+             iconoNivel.className = 'bi bi-shield-exclamation me-1';
+             textoNivel.textContent = 'Defensores Digitales';
+           } else if (nivel >= 2) {
+             badgeNivel.className = 'badge fs-6 px-3 py-2 bg-warning';
+             iconoNivel.className = 'bi bi-exclamation-triangle me-1';
+             textoNivel.textContent = 'Aprendices de Ciberseguridad';
+           } else {
+             badgeNivel.className = 'badge fs-6 px-3 py-2 bg-danger';
+             iconoNivel.className = 'bi bi-exclamation-triangle-fill me-1';
+             textoNivel.textContent = 'Presas del Phishing';
+           }
+           
+           // Mostrar indicador visual
+           document.getElementById('kpiIndicadorScoring').style.display = 'flex';
+           
+           // Actualizar indicador visual con delay
+           setTimeout(() => {
+             actualizarIndicadorVisual('kpiIndicadorScoring', nivel);
+           }, 2600);
+           
+         }, 2500);
+
+       } catch (error) {
+         console.error('Error cargando KPI de promedio de scoring:', error);
+         document.getElementById('kpiPromedioScoring').textContent = 'Error';
+         document.getElementById('kpiClasificacionScoring').textContent = 'Error';
+         document.getElementById('kpiDescripcionScoring').textContent = 'Error al cargar datos';
+       }
+     }
+
+     // Event listener para el botón de detalle KPI de scoring
+     document.getElementById('btnDetalleKPIScoring').addEventListener('click', function() {
+       // Cambiar a la pestaña de Scoring Empleado
+       const tabScoring = document.getElementById('tab-empleado');
+       const tabScoringInstance = new bootstrap.Tab(tabScoring);
+       tabScoringInstance.show();
+     });
+
+     // Event listener para el botón de actualizar KPI de scoring
+     document.getElementById('btnActualizarKPIScoring').addEventListener('click', function() {
+       // Remover clases de animación
+       document.getElementById('kpiPromedioScoring').classList.remove('counter-animate');
+       document.getElementById('kpiMedianaScoring').classList.remove('counter-animate');
+       document.getElementById('kpiP10Scoring').classList.remove('counter-animate');
+       document.getElementById('kpiTotalIntentosScoring').classList.remove('counter-animate');
+       document.getElementById('kpiClasificacionScoring').classList.remove('counter-animate');
+       
+       // Recargar datos
+       cargarKPIPromedioScoring();
      });
 
      // Función para mostrar detalle de eventos

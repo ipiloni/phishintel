@@ -11,7 +11,7 @@ from app.controllers.abm.eventosController import EventosController
 from app.controllers.llamadas.llamadasController import LlamadasController
 from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.resultadoEventoController import ResultadoEventoController
-from app.controllers.controllerKpis import ControllerKpis
+from app.controllers.kpiController import KpiController
 from app.controllers.mensajes.msjController import MsjController
 from app.controllers.mensajes.telegram import telegram_bot
 from app.controllers.mensajes.whatsapp import WhatsAppController
@@ -522,7 +522,7 @@ def obtenerTiempoRespuestaKPI():
     Endpoint para obtener el KPI de tiempo de respuesta promedio.
     Calcula la diferencia en horas entre fechaReporte y fechaEvento para eventos reportados.
     """
-    return ControllerKpis.obtenerTiempoRespuestaPromedio()
+    return KpiController.obtenerTiempoRespuestaPromedio()
 
 
 @apis.route("/api/kpis/tasa-fallas", methods=["GET"])
@@ -531,7 +531,17 @@ def obtenerTasaFallasKPI():
     Endpoint para obtener el KPI de tasa de fallas.
     Calcula el porcentaje de eventos que tienen resultado FALLA en usuarioxevento.
     """
-    return ControllerKpis.obtenerTasaFallas()
+    return KpiController.obtenerTasaFallas()
+
+
+@apis.route("/api/kpis/promedio-scoring", methods=["GET"])
+def obtenerPromedioScoringKPI():
+    """
+    Endpoint para obtener el KPI de promedio de scoring.
+    Calcula el promedio de scoring de todos los empleados considerando fallas activas, 
+    fallas pasadas y eventos reportados.
+    """
+    return KpiController.obtenerPromedioScoring()
 
 
 # ------ # NGROK # ------ #
