@@ -14,14 +14,14 @@ def openapi_spec():
             "description": "Documentación básica de endpoints"
         },
         "tags": [
-            {"name": "🔐 Auth", "description": "Autenticación y gestión de sesiones"},
-            {"name": "👤 Empleados", "description": "Funcionalidades específicas para empleados"},
             {"name": "👥 Usuarios", "description": "Gestión de usuarios"},
+            {"name": "👤 Empleados", "description": "Funcionalidades específicas para empleados"},
             {"name": "🏢 Áreas", "description": "Gestión de áreas"},
             {"name": "📅 Eventos", "description": "Gestión de eventos"},
             {"name": "📊 Reportes", "description": "Reportes y métricas de fallas por área y empleado"},
             {"name": "📧 Emails", "description": "Envío de emails y notificaciones"},
             {"name": "💬 Mensajes", "description": "Envío de mensajes WhatsApp y SMS"},
+            {"name": "🔐 Auth", "description": "Autenticación y gestión de sesiones"},
             {"name": "🤖 Telegram Bot", "description": "Gestión del bot de Telegram"},
             {"name": "🌐 Ngrok", "description": "Gestión de túneles ngrok temporales"}
         ],
@@ -153,6 +153,14 @@ def openapi_spec():
                                         "nombre": "Juan Martin",
                                         "apellido": "Del Potro",
                                         "correo": "juan.delpotro@pgcontrol.com.ar"
+                                    },
+                                    {
+                                        "nombreUsuario": "admin",
+                                        "password": "adminadmin",
+                                        "nombre": "Admin",
+                                        "apellido": "Admin",
+                                        "correo": "admin@admin.com",
+                                        "esAdministrador": True
                                     }
                                 ]
                             }
@@ -807,6 +815,89 @@ def openapi_spec():
                                                 "type": "string",
                                                 "description": "Descripción detallada de la clasificación y criterios utilizados",
                                                 "example": "Fallas frecuentes, requieren refuerzo de procesos y controles. Failure Rate > 10% y ≤ 20%"
+                                            },
+                                            "insuficienteDatos": {
+                                                "type": "boolean",
+                                                "description": "Indica si hay suficientes datos para mostrar el KPI (mínimo 5 intentos de phishing)",
+                                                "example": False
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {
+                            "description": "Error del servidor al calcular el KPI",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/Error"}
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/api/kpis/promedio-scoring": {
+                "get": {
+                    "summary": "🎯 Obtener KPI de Promedio de Scoring",
+                    "description": "Calcula el promedio de scoring de todos los empleados de la empresa utilizando el sistema de scoring invertido (100-0 puntos). Incluye estadísticas completas: promedio, mediana, percentil 10, y clasificación automática en 5 niveles de madurez organizacional. Requiere mínimo 5 intentos de phishing para mostrar resultados. Implementado en KpiController.",
+                    "tags": ["📊 Reportes"],
+                    "responses": {
+                        "200": {
+                            "description": "KPI de promedio de scoring calculado exitosamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "promedioScoring": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "description": "Promedio de scoring de todos los empleados (sistema 100-0 puntos)",
+                                                "example": 85.5
+                                            },
+                                            "medianaScoring": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "description": "Mediana de scoring de todos los empleados",
+                                                "example": 87.0
+                                            },
+                                            "percentil10Scoring": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "description": "Percentil 10 del scoring (peores 10% de empleados)",
+                                                "example": 65.0
+                                            },
+                                            "totalIntentosPhishing": {
+                                                "type": "integer",
+                                                "description": "Número total de intentos de phishing en la empresa",
+                                                "example": 150
+                                            },
+                                            "clasificacion": {
+                                                "type": "string",
+                                                "description": "Clasificación de madurez organizacional basada en el promedio de scoring",
+                                                "enum": [
+                                                    "Vigilantes del Ciberespacio",
+                                                    "Guardianes Anti-Phishing",
+                                                    "Defensores Digitales",
+                                                    "Aprendices de Ciberseguridad",
+                                                    "Presas del Phishing",
+                                                    "Datos Insuficientes",
+                                                    "Sin datos"
+                                                ],
+                                                "example": "Defensores Digitales"
+                                            },
+                                            "nivel": {
+                                                "type": "integer",
+                                                "description": "Nivel de madurez (0-5, donde 5 es el más alto). Nivel 0 indica datos insuficientes",
+                                                "minimum": 0,
+                                                "maximum": 5,
+                                                "example": 3
+                                            },
+                                            "descripcion": {
+                                                "type": "string",
+                                                "description": "Descripción detallada de la clasificación y criterios utilizados",
+                                                "example": "Rendimiento estándar en ciberseguridad. Promedio entre 90-100 puntos"
                                             },
                                             "insuficienteDatos": {
                                                 "type": "boolean",
@@ -2288,14 +2379,14 @@ def openapi_spec():
                     }
                 }
             },
-            "securitySchemes": {
-                "sessionAuth": {
-                    "type": "apiKey",
-                    "in": "cookie",
-                    "name": "session",
-                    "description": "Autenticación basada en sesión de Flask"
-                }
-            }
+            # "securitySchemes": {
+            #     "sessionAuth": {
+            #         "type": "apiKey",
+            #         "in": "cookie",
+            #         "name": "session",
+            #         "description": "Autenticación basada en sesión de Flask"
+            #     }
+            # }
         }
     }
     return jsonify(spec)
