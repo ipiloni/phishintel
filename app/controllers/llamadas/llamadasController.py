@@ -109,7 +109,7 @@ class LlamadasController:
             "fechaEvento": datetime.now().isoformat(),
             "resultado": "PENDIENTE",
             "registroEvento": {
-                "objetivo": conversacion.objetivoActual,  # objetivo
+                "objetivo": " ".join(conversacion.objetivoActual.split()).strip(),  # elimina doble espacios y \n
                 "conversacion": json.dumps(conversacion.conversacionActual) # convierte la lista conversacionActual a un string para que pueda guardarse
             }
         }
