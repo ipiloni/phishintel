@@ -3,8 +3,8 @@ from flask import jsonify
 from app.backend.apis.elevenLabs import elevenLabs
 from app.utils.logger import log
 
-from Untitled.app.backend.models.error import responseError
-from Untitled.app.controllers.abm.usuariosController import UsuariosController
+from app.backend.models.error import responseError
+from app.controllers.abm.usuariosController import UsuariosController
 
 
 class ElevenLabsController:

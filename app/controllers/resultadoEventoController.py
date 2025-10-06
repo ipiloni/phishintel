@@ -16,8 +16,9 @@ conteo_fallas = {"total": 0}
 PUNTOS_FALLA = {
     TipoEvento.CORREO: 10,
     TipoEvento.MENSAJE: 15,
-    TipoEvento.LLAMADA: 20,
-    TipoEvento.VIDEOLLAMADA: 20
+    TipoEvento.LLAMADA_SMS: 20,
+    TipoEvento.LLAMADA_CORREO: 20,
+    TipoEvento.LLAMADA_WPP: 20
 }
 
 # Puntos por evento reportado (se SUMAN al puntaje)

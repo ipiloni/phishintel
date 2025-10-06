@@ -46,7 +46,9 @@ class EventosController:
                     "registroEvento": {
                         "idRegistroEvento": evento.registroEvento.idRegistroEvento,
                         "asunto": evento.registroEvento.asunto,
-                        "cuerpo": evento.registroEvento.cuerpo
+                        "cuerpo": evento.registroEvento.cuerpo,
+                        "objetivo": evento.registroEvento.objetivo,
+                        "conversacion": evento.registroEvento.conversacion
                     } if evento.registroEvento else None,
                     "usuarios": usuarios_info
                 })
@@ -106,6 +108,7 @@ class EventosController:
         if not data or "tipoEvento" not in data or "fechaEvento" not in data:
             return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios para crear el evento", 400)
 
+        session = None
         try:
             tipo_evento_val = data["tipoEvento"]
             if tipo_evento_val not in [e.value for e in TipoEvento]:
@@ -146,7 +149,12 @@ class EventosController:
             return jsonify({"mensaje": "Evento creado correctamente", "idEvento": idevento}), 201
 
         except Exception as e:
-            session.close()
+            if session is not None:
+                try:
+                    session.rollback()
+                    session.close()
+                except Exception:
+                    pass
             return responseError("ERROR_CREACION_EVENTO", f"Error al crear el evento: {str(e)}", 500)
 
 

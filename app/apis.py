@@ -22,7 +22,7 @@ from app.utils.logger import log
 from flask_cors import CORS
 import os
 
-from Untitled.app.controllers.llamadas import elevenLabsController
+from app.controllers.llamadas import elevenLabsController
 
 # Flask es la libreria que vamos a usar para generar los Endpoints
 apis = Blueprint("apis", __name__)

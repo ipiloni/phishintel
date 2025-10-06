@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from flask import Response
@@ -105,11 +106,11 @@ class LlamadasController:
 
         dataEvento = {
             "tipoEvento": data["tipoEvento"],
-            "fechaEvento": datetime.now(),
+            "fechaEvento": datetime.now().isoformat(),
             "resultado": "PENDIENTE",
             "registroEvento": {
                 "objetivo": conversacion.objetivoActual,  # objetivo
-                "conversacion": conversacion.conversacionActual  # conversacion
+                "conversacion": json.dumps(conversacion.conversacionActual) # convierte la lista conversacionActual a un string para que pueda guardarse
             }
         }
 
@@ -125,22 +126,23 @@ class LlamadasController:
 
         conversacion.idVozActual = data.get(remitente["idVoz"], "O1CnH2NGEehfL1nmYACp")  # esto es un get o default, intenta obtener la voz del remitente y si no lo pasaron toma el default
 
-        elevenLabsResponse = elevenLabs.tts(texto, conversacion.idVozActual, None,None)  # TODO por el momento estabilidad y velocidad en None
-
-        idAudio = elevenLabsResponse["idAudio"]
-
-        log.info("Ponemos en internet el audio: " + str(idAudio))
-
-        from app.apis import exponerAudio
-        exponerAudio(f"{idAudio}.mp3")  # expone el archivo .mp3 a internet para que Twilio pueda reproducirlo
+        #comento para no generar TTS al pedo. Luego eliminar comentario.
+        #elevenLabsResponse = elevenLabs.tts(texto, conversacion.idVozActual, None,None)  # TODO por el momento estabilidad y velocidad en None
+        #
+        #idAudio = elevenLabsResponse["idAudio"]
+        #
+        #log.info("Ponemos en internet el audio: " + str(idAudio))
+        #
+        #from app.apis import exponerAudio
+        #exponerAudio(f"{idAudio}.mp3")  # expone el archivo .mp3 a internet para que Twilio pueda reproducirlo
 
         if destinatario == remitente:
             return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
 
-        url = host
-        conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
-
-        log.info(f"La URL del audio actual es: {conversacion.urlAudioActual}")
+        #url = host
+        #conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
+        #
+        #log.info(f"La URL del audio actual es: {conversacion.urlAudioActual}")
 
         return twilio.llamar(destinatario, remitente, host + "/api/twilio/accion")
 
@@ -168,7 +170,7 @@ class LlamadasController:
                 try:
                     dataEvento = {
                         "registroEvento": {
-                            "conversacion": conversacion.conversacionActual
+                            "conversacion": json.dumps(conversacion.conversacionActual)
                         }
                     }
                     statusEvento = EventosController.editarEvento(conversacion.idEvento, dataEvento)
