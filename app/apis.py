@@ -101,7 +101,7 @@ def procesarRespuestaLlamada():
 @apis.route("/api/llamadas", methods=["POST"])
 def generarLlamada():
     data = request.get_json()
-    return LlamadasController.llamar(data)
+    return LlamadasController.generarLlamada(data)
 
 @apis.route("/api/twilio/accion", methods=["POST"])
 def generarAccionesEnLlamada():
