@@ -1,6 +1,6 @@
 from flask import request, Blueprint, send_file, jsonify, session
 from datetime import datetime
-
+import requests
 from app.backend.models.error import responseError
 from app.controllers.abm.areasController import AreasController
 from app.controllers.aiController import AIController
@@ -18,11 +18,14 @@ from app.controllers.mensajes.whatsapp import WhatsAppController
 from app.controllers.mensajes.sms import SMSController
 from app.controllers.ngrokController import NgrokController
 from app.controllers.login import AuthController
+from app.utils.config import get
 from app.utils.logger import log
 from flask_cors import CORS
 import os
 
-from app.controllers.llamadas import elevenLabsController
+GOOGLE_CLIENT_ID = get("GOOGLE_AUTH_CLIENT")
+GOOGLE_CLIENT_SECRET = get("GOOGLE_AUTH_SECRET")
+GOOGLE_REDIRECT_URI = "postmessage"
 
 # Flask es la libreria que vamos a usar para generar los Endpoints
 apis = Blueprint("apis", __name__)
@@ -33,6 +36,8 @@ CORS(apis, resources={r"/api/*": {"origins": "*"}},
 
 
 # =================== ENDPOINTS =================== #
+
+
 # ------ # LLAMADAS TWILIO # ------ #
 @apis.route("/api/ia/gemini", methods=["POST"])
 def enviarPromptGemini():
@@ -636,6 +641,51 @@ def crearBatchEventos():
 
 
 # =================== SESIÓN Y AUTENTICACIÓN =================== #
+@apis.route("/api/google/login", methods=["POST"])
+def googleLogin():
+    log.info("Se recibio un logueo desde Google")
+
+    try:
+
+        data = request.get_json()
+        auth_code = data.get("token")
+
+        if not auth_code:
+            return jsonify({"error": "Falta el código de autorización"}), 400
+
+        token_url = "https://oauth2.googleapis.com/token"
+        token_data = {
+            "code": auth_code,
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "redirect_uri": GOOGLE_REDIRECT_URI,
+            "grant_type": "authorization_code",
+        }
+
+        token_response = requests.post(token_url, data=token_data)
+        token_response.raise_for_status()
+        tokens = token_response.json()
+
+        id_token_value = tokens.get("id_token")
+        if not id_token_value:
+            return jsonify({"error": "No se obtuvo id_token"}), 400
+
+        # Verificar el id_token con Google
+        from google.oauth2 import id_token
+        from google.auth.transport import requests as google_requests
+
+        idinfo = id_token.verify_oauth2_token(
+            id_token_value,
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID
+        )
+
+        email = idinfo.get("email")
+
+        return AuthController.loginWithGoogle(email)
+    except Exception as e:
+        log.error(f"Error creando el logueo: {str(e)}")
+        return responseError("ERROR", f"Error creando el logueo: {str(e)}", 500)
 
 @apis.route("/api/auth/logout", methods=["POST"])
 def logout():

@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Login - PhishIntel</title>
@@ -82,9 +83,13 @@
     <i id="loginButtonIcon" class="bi bi-arrow-right"></i>
     <span id="loginButtonSpinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
   </button>
+
+  <button type="button" id="googleLoginButton" class="submit-btn-google">
+      <span id="googleLoginButtonText">Ingresar con Google</span>
+      <i id="googleLoginButtonIcon" class="bi bi-google"></i>
+      <span id="googleLoginButtonSpinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none;"></span>
+  </button>
 </form>
-
-
 
         <p class="mt-3 text-center">
           ¿No tenes una cuenta? <a href="/registro">Registrate acá</a>
@@ -99,6 +104,7 @@
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
+  <meta name="google-signin-client_id" content="387090655276-8f9s91d8ir0go3ujuspnu6kc78d2ti6h.apps.googleusercontent.com">
   <script>
     AOS.init();
   </script>
@@ -177,6 +183,49 @@ function resetearBoton() {
   loginButtonText.textContent = "Ingresar";
   loginButtonIcon.style.display = "inline-block";
   loginButtonSpinner.style.display = "none";
+}
+
+let googleClient;
+
+function initializeGoogleLogin() {
+  googleClient = google.accounts.oauth2.initCodeClient({
+    client_id: "387090655276-8f9s91d8ir0go3ujuspnu6kc78d2ti6h.apps.googleusercontent.com",
+    scope: "email profile",
+    ux_mode: "popup",
+    callback: handleCredentialResponse
+  });
+
+  const btn = document.getElementById("googleLoginButton");
+  btn.addEventListener("click", () => {
+    googleClient.requestCode(); // 🔥 Esto abre el popup clásico
+  });
+}
+
+function handleCredentialResponse(response) {
+  // Este callback se ejecuta cuando Google responde con el token
+  fetch("/api/google/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: response.code }) // ahora es "code" (authorization code)
+  })
+  .then(async res => {
+    const data = await res.json();
+    if (res.ok) {
+      mostrarToastExito();
+      setTimeout(() => window.location.href = data.redirect, 1500);
+    } else {
+      mostrarToastError(data.error || "Error al iniciar sesión");
+      resetearBotonGoogle();
+    }
+  });
+}
+
+window.onload = initializeGoogleLogin;
+
+function resetearBotonGoogle() {
+  document.getElementById("googleLoginButtonText").style.display = "inline";
+  document.getElementById("googleLoginButtonIcon").style.display = "inline";
+  document.getElementById("googleLoginButtonSpinner").style.display = "none";
 }
 </script>
 

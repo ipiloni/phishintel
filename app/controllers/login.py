@@ -3,6 +3,11 @@ from sqlalchemy.orm import Session
 from app.config.db_config import SessionLocal
 from app.backend.models import Usuario
 from app.utils.hash import check_password  # función que compara hash vs texto plano
+from app.utils.config import get
+from google.oauth2 import id_token
+from google.auth.transport import requests
+
+GOOGLE_AUTH_CLIENT = get("GOOGLE_AUTH_CLIENT")
 
 class AuthController:
 
@@ -81,3 +86,36 @@ class AuthController:
     def is_admin():
         """Verificar si el usuario logueado es administrador"""
         return session.get('is_admin', False)
+
+    @staticmethod
+    def loginWithGoogle(email):
+        session_db: Session = SessionLocal()
+        usuario = session_db.query(Usuario).filter_by(correo=email).first()
+
+        if usuario is None:
+            session_db.close()
+            return jsonify({"error": "Credenciales inválidas"}), 401
+
+        # Guardar información del usuario en la sesión
+        session['user_id'] = usuario.idUsuario
+        session['user_name'] = f"{usuario.nombre} {usuario.apellido}"
+        session['user_email'] = usuario.correo
+        session['is_admin'] = usuario.esAdministrador or False
+
+        session_db.close()
+
+        # Determinar redirección basada en si es administrador
+        redirect_url = "/principal" if usuario.esAdministrador else "/principalEmpleado"
+
+        # OK
+        return jsonify({
+            "mensaje": "Login exitoso",
+            "redirect": redirect_url,
+            "usuario": {
+                "id": usuario.idUsuario,
+                "nombre": usuario.nombre,
+                "apellido": usuario.apellido,
+                "email": usuario.correo,
+                "esAdministrador": usuario.esAdministrador
+            }
+        }), 200
