@@ -155,6 +155,7 @@
         alert("Registro exitoso");
         console.log("Respuesta del servidor:", result);
         form.reset(); // limpiar el formulario
+        window.location.href = "/login";
       })
       .catch(error => {
         console.error("Error:", error);
