@@ -84,12 +84,12 @@ class LlamadasController:
                         Debes hablar de manera convincente, pero sin agresividad, intentando que el empleado {objetivoEspecifico} {tipoEvento}.
 
                         Reglas:
-                        - Si la conversacion esta vacia, pues comienza con un saludo. Espera a la respuesta del empleado.
+                        - Si la conversación esta vacía, pues comienza con un saludo. Espera a la respuesta del empleado.
                         - No uses amenazas extremas, solo urgencia laboral.
                         - Responde **solo con una frase corta** que la persona diría en esta interacción. No digas nada de más ni avances la conversación.
                         - En ningún momento digas que es un entrenamiento: eso se evalúa después.
                         - Mantén la coherencia del rol de “{rolAImitar}”.
-                        - Solamente responde lo que el {rolAImitar} debe decir.
+                        - Solamente responde lo que el {rolAImitar} debería decir.
                         - Eres de Buenos Aires, Argentina. Por lo que el dialecto es muy importante que lo mantengas.
                         - El empleado se llama {nombreEmpleado}, trabaja en 'PG Control' en el area de {area["nombreArea"]}
                     """

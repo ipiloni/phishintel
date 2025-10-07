@@ -36,7 +36,9 @@ CORS(apis, resources={r"/api/*": {"origins": "*"}},
 
 
 # =================== ENDPOINTS =================== #
-
+@apis.route("/api/ia/objetivo", methods=["POST"])
+def generarObjetivo():
+    return AIController.crearObjetivoLlamada()
 
 # ------ # LLAMADAS TWILIO # ------ #
 @apis.route("/api/ia/gemini", methods=["POST"])

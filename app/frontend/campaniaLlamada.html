@@ -256,14 +256,19 @@
         <div id="app" class="contact-form-wrapper">
           <div class="form-header">
             <h3>Generación de Simulación de Llamada</h3>
-            <p>Selecciona el área, usuario y configura la voz para generar una llamada de phishing.</p>
+            <p>Esta simulación llamará al usuario destinatario y se hará pasar por el remitente seleccionado.</p>
+            <ul>Notas a tener en cuenta:
+                <li>Si el usuario no tiene una voz guardada, la puede generar ahora; en caso de no tener una voz configurada, se utilizará una predeterminada.</li>
+                <li>La charla tendrá un objetivo específico (abrir un link, enviar un documento, etc.): puede generarse uno propio, o que la IA asigne un objetivo.</li>
+                <li>La llamada desencadena otro evento a seleccionar: mensaje SMS / WhatsApp o correo.</li>
+            </ul>
           </div>
 
           <form class="php-email-form" @submit.prevent="generarPreview">
 
             <!-- Selector de Área -->
             <div class="mb-3">
-              <label for="areaSelect" class="form-label">Seleccionar Área</label>
+              <label for="areaSelect" class="form-label">Seleccionar área</label>
               <select v-model="filtroArea" class="form-control" id="areaSelect" name="area" required>
                 <option value="">-- Selecciona un área --</option>
                 <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
@@ -274,7 +279,7 @@
 
             <!-- Selector de Usuario (solo visible cuando hay área seleccionada) -->
             <div class="mb-3" v-if="filtroArea">
-              <label for="userSelect" class="form-label">Seleccionar Usuario</label>
+              <label for="userSelect" class="form-label">Seleccionar usuario destinatario</label>
               <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" required>
                 <option value="">-- Selecciona un usuario --</option>
                 <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario">
@@ -283,24 +288,34 @@
               </select>
             </div>
 
-            <!-- Contexto -->
-            <div class="mb-3">
-              <label for="context" class="form-label">Contexto de la Llamada</label>
-              <textarea class="form-control" v-model="contexto" id="context" rows="5" placeholder="Escribe el guion de la llamada" required></textarea>
-            </div>
+            <!-- Selector de Remitente (un usuario) -->
 
+            <!-- Si no tiene voz configurada, deberia aparecer el boton grabar voz;
+            caso contrario, algo que diga "el usuario tiene voz configurada" -->
             <!-- Botón para grabar voz -->
             <div class="mb-4">
               <label class="form-label mb-3">Configuración de Voz</label>
               <div class="text-center">
                 <button type="button" class="btn btn-primary px-4 py-2 rounded-pill" @click="abrirModalGrabacion">
-                  <i class="bi bi-mic"></i> Grabar Voz para Clonación
+                  <i class="bi bi-mic"></i> Grabar voz para clonación
                 </button>
                 <p class="mt-2 text-muted" style="color: #ccc !important;">
-                  <small>Graba una historia de 30 segundos para clonar tu voz</small>
+                  <small>Graba una historia de 30 segundos o más para clonar tu voz</small>
                 </p>
               </div>
             </div>
+
+            <!-- Contexto: esto se puede cambiar por algun select porque son bastante basicos los objetivos:
+             Por ejemplo: "abrir un link que se envia por SMS", "envie un archivo por Whatsapp", "descargue un archivo por un link que envio por WPP"
+             -->
+            <div class="mb-3">
+              <label for="context" class="form-label">Objetivo de la llamada</label>
+              <textarea class="form-control" v-model="contexto" id="context" rows="5" placeholder="Escribe el objetivo de la llamada" required></textarea>
+            </div>
+
+              <!-- Evento desencadenador: aca seria un select que diga si luego se envia un email, un sms o un whatsapp -->
+
+
 
             <!-- Botón de enviar -->
             <div class="text-center">

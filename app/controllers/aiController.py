@@ -1,5 +1,7 @@
 import re
 import google.generativeai as genai
+from flask import jsonify
+
 from app.utils.config import get
 from app.backend.models.error import responseError
 from app.utils.logger import log
@@ -143,3 +145,16 @@ class AIController:
                 f"Hubo un error al intentar obtener la respuesta: {str(ex)}, posiblemente no hay mas creditos de Google, cambiando el API_KEY...")
             genai.configure(api_key=api_key_marcos)
             return model.generate_content(prompt)
+
+    @staticmethod
+    def crearObjetivoLlamada():
+        model = "gemini-2.0-flash-lite"
+        log.info("Se llama a Gemini...")
+
+        prompt = ""
+
+        response = AIController.enviarPrompt(prompt, model)
+
+        return jsonify({
+            "objetivo": response
+        }), 201
