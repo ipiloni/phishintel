@@ -257,12 +257,12 @@
           <div class="form-header">
             <h3>Generación de Simulación de Llamada</h3>
             <p>Esta simulación llamará al usuario destinatario y se hará pasar por el remitente seleccionado.</p>
-            <ul>Notas a tener en cuenta:
+          </div>
+            <ul style="font-size: 14px;">Notas a tener en cuenta:
                 <li>Si el usuario no tiene una voz guardada, la puede generar ahora; en caso de no tener una voz configurada, se utilizará una predeterminada.</li>
                 <li>La charla tendrá un objetivo específico (abrir un link, enviar un documento, etc.): puede generarse uno propio, o que la IA asigne un objetivo.</li>
                 <li>La llamada desencadena otro evento a seleccionar: mensaje SMS / WhatsApp o correo.</li>
             </ul>
-          </div>
 
           <form class="php-email-form" @submit.prevent="generarPreview">
 
@@ -270,7 +270,7 @@
             <div class="mb-3">
               <label for="areaSelect" class="form-label">Seleccionar área</label>
               <select v-model="filtroArea" class="form-control" id="areaSelect" name="area" required>
-                <option value="">-- Selecciona un área --</option>
+                <option value="" disabled>-- Selecciona un área --</option>
                 <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
                   {{ area.nombreArea }} 
                 </option>
@@ -281,7 +281,7 @@
             <div class="mb-3" v-if="filtroArea">
               <label for="userSelect" class="form-label">Seleccionar usuario destinatario</label>
               <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" required>
-                <option value="">-- Selecciona un usuario --</option>
+                <option value="" disabled>-- Selecciona un usuario --</option>
                 <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario">
                   {{ usuario.nombre }} {{ usuario.apellido }}
                 </option>
@@ -289,11 +289,21 @@
             </div>
 
             <!-- Selector de Remitente (un usuario) -->
+            <div class="mb-3">
+              <label for="usuarioRemitente" class="form-label">Seleccionar usuario remitente</label>
+              <select v-model="filtroUsuario" class="form-control" id="usuarioRemitente" name="usuarioRemitente" required>
+                <option value="">-- Selecciona un usuario --</option>
+                <option v-for="usuario in usuarios" :key="usuario.idUsuario" :value="usuario">
+                  {{ usuario.nombre }} {{ usuario.apellido }}
+                </option>
+              </select>
+            </div>
 
             <!-- Si no tiene voz configurada, deberia aparecer el boton grabar voz;
             caso contrario, algo que diga "el usuario tiene voz configurada" -->
-            <!-- Botón para grabar voz -->
-            <div class="mb-4">
+            <!-- Botón para grabar voz: debe aparecer solo si el remitente NO TIENE idVoz CONFIGURADA!
+            Caso contrario mostrar un mensaje o algo que diga que el usuario ya tiene configurada la voz-->
+            <div class="mb-4" v-if="filtroRemitente">
               <label class="form-label mb-3">Configuración de Voz</label>
               <div class="text-center">
                 <button type="button" class="btn btn-primary px-4 py-2 rounded-pill" @click="abrirModalGrabacion">
@@ -310,12 +320,26 @@
              -->
             <div class="mb-3">
               <label for="context" class="form-label">Objetivo de la llamada</label>
-              <textarea class="form-control" v-model="contexto" id="context" rows="5" placeholder="Escribe el objetivo de la llamada" required></textarea>
+              <!--<textarea class="form-control" v-model="contexto" id="context" rows="5" placeholder="Escribe el objetivo de la llamada" required></textarea>-->
+                <select style="margin-bottom: 15px;" class="form-control" id="context">
+                  <option selected disabled>-- Selecciona un objetivo --</option>
+                  <!-- En los values está lo que le pasamos a la IA, tiene que ser algo corto, agregar más opciones -->
+                  <option value="abra un link que se le enviará por">Solicitar abrir un link</option>
+                  <option value="descargue un archivo que se le enviará por">Solicitar descargar un archivo</option>
+                  <option value="envie un archivo que se le enviará por">Solicitar enviar un archivo</option>
+                </select>
             </div>
 
               <!-- Evento desencadenador: aca seria un select que diga si luego se envia un email, un sms o un whatsapp -->
-
-
+            <div class="mb-3">
+                <label for="eventoDesencadenador" class="form-label">Evento desencadenador</label>
+                <select style="margin-bottom: 35px;" class="form-control" id="eventoDesencadenador">
+                  <option selected disabled>-- Selecciona un evento --</option>
+                  <option value="LLAMADA_CORREO">Correo</option> <!-- Los values son el TipoEvento -->
+                  <option value="LLAMADA_SMS">Mensaje SMS</option>
+                  <option value="LLAMADA_WPP">Mensaje WhatsApp</option>
+                </select>
+            </div>
 
             <!-- Botón de enviar -->
             <div class="text-center">
