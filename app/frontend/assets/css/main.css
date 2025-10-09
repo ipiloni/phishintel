@@ -3400,7 +3400,7 @@ section,
 
 .submit-btn-google {
   width: 100%;
-  background: linear-gradient(135deg, var(--surface-color), color-mix(in srgb, var(--surface-color), #000 20%));
+  background: linear-gradient(135deg, #dc3545, #c82333);
   color: var(--contrast-color);
   border: none;
   margin-top: 15px;
@@ -3418,8 +3418,9 @@ section,
 }
 
 .submit-btn-google:hover {
+  background: linear-gradient(135deg, #c82333, #a71e2a);
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px color-mix(in srgb, var(--surface-color), transparent 70%);
+  box-shadow: 0 10px 25px rgba(220, 53, 69, 0.4);
 }
 
 .contact .contact-form-wrapper .php-email-form .submit-btn {

@@ -186,6 +186,10 @@ class UsuariosController:
             usuario.esAdministrador = data["esAdministrador"]
         if "idArea" in data:
             usuario.idArea = data["idArea"]
+        if "password" in data and data["password"]:
+            # Hash the new password before saving
+            hashedPassword = hash_password(data["password"])
+            usuario.password = hashedPassword
 
         session.commit()
         session.close()
