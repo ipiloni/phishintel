@@ -268,7 +268,7 @@
 
             <!-- Selector de Área -->
             <div class="mb-3">
-              <label for="areaSelect" class="form-label">Seleccionar área</label>
+              <label for="areaSelect" class="form-label">Seleccione el área del destinatario</label>
               <select v-model="filtroArea" class="form-control" id="areaSelect" name="area" required>
                 <option value="" disabled>-- Selecciona un área --</option>
                 <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">

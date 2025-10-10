@@ -188,7 +188,7 @@
                         </td>
                       </tr>
                       <tr v-if="areas.length===0">
-                        <td colspan="5" class="text-center text-muted">Sin áreas</td>
+                        <td colspan="5" style="color:#b0b0b0;" class="text-center">Sin áreas</td>
                       </tr>
                     </tbody>
                   </table>
@@ -238,7 +238,7 @@
                         </td>
                       </tr>
                       <tr v-if="usuarios.length===0">
-                        <td colspan="6" class="text-center text-muted">Sin usuarios</td>
+                        <td colspan="6" class="text-center" style="color:#b0b0b0;">Sin usuarios</td>
                       </tr>
                     </tbody>
                   </table>
@@ -266,13 +266,13 @@
                   <div class="mb-3">
                     <label class="form-label">Datos del Área</label>
                     <textarea class="form-control" v-model="datosDelAreaTexto" rows="3" placeholder="Ingrese los datos del área, uno por línea o separados por comas"></textarea>
-                    <small class="text-muted">Cada línea o elemento separado por coma será un dato del área</small>
+                    <small style="color:#b0b0b0;">Cada línea o elemento separado por coma será un dato del área</small>
                   </div>
 
                   <div class="mb-2 d-flex justify-content-between align-items-center">
                     <label class="form-label mb-0">Asignación de usuarios</label>
-                    <small class="text-muted" v-if="!areaForm.idArea">Se asignarán al crear el área</small>
-                    <small class="text-muted" v-else>Se actualizarán asignaciones al guardar</small>
+                    <small style="color:#b0b0b0;" v-if="!areaForm.idArea">Se asignarán al crear el área</small>
+                    <small style="color:#b0b0b0;" v-else>Se actualizarán asignaciones al guardar</small>
                   </div>
 
                   <div class="row g-2 align-items-center">
@@ -355,7 +355,7 @@
                           <option :value="null">Sin área</option>
                           <option v-for="a in areas" :key="a.idArea" :value="a.idArea">{{ a.nombreArea }}</option>
                         </select>
-                        <small class="text-muted">Para crear, el área se asignará luego de la creación.</small>
+                        <small style="color:#b0b0b0;">Para crear, el área se asignará luego de la creación.</small>
                       </div>
                     </div>
                   </div>
