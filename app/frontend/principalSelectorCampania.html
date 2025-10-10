@@ -59,7 +59,7 @@
 
         <div class="row gy-4">
           <!-- Campaña Email -->
-          <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+          <div class="col-lg-4 col-md-6 clickable" data-aos="zoom-in" data-aos-delay="200" onclick="redirigir('/campania-email')">
             <div class="pricing-card">
               <div class="plan-header">
                 <div class="plan-icon">
@@ -75,15 +75,12 @@
                   <li><i class="bi bi-check-circle-fill"></i> Seguimiento de clics</li>
                 </ul>
               </div>
-              <div class="plan-cta">
-                <a href="/campania-email" class="btn-plan">Elegir Opción</a>
-              </div>
             </div>
           </div><!-- End Email -->
 
           <!-- Campaña Mensaje -->
-          <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="300">
-            <div class="pricing-card popular">
+          <div class="col-lg-4 col-md-6 clickable" data-aos="zoom-in" data-aos-delay="300" onclick="redirigir('/campania-mensaje')">
+            <div class="pricing-card">
               <div class="popular-tag">Más Usado</div>
               <div class="plan-header">
                 <div class="plan-icon">
@@ -99,14 +96,11 @@
                   <li><i class="bi bi-check-circle-fill"></i> Registro de enlaces accedidos</li>
                 </ul>
               </div>
-              <div class="plan-cta">
-                <a href="/campania-mensaje" class="btn-plan">Elegir Opción</a>
-              </div>
             </div>
           </div><!-- End Mensaje -->
 
           <!-- Campaña Llamada -->
-          <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="400">
+          <div class="col-lg-4 col-md-6 clickable" data-aos="zoom-in" data-aos-delay="400" onclick="redirigir('/campania-llamada')">
             <div class="pricing-card">
               <div class="plan-header">
                 <div class="plan-icon">
@@ -121,9 +115,6 @@
                   <li><i class="bi bi-check-circle-fill"></i> Opciones de respuesta</li>
                   <li><i class="bi bi-check-circle-fill"></i> Reportes de interacción</li>
                 </ul>
-              </div>
-              <div class="plan-cta">
-                <a href="/campania-llamada" class="btn-plan">Elegir Opción</a>
               </div>
             </div>
           </div><!-- End Llamada -->
@@ -141,6 +132,10 @@
   <script src="assets/vendor/aos/aos.js"></script>
   <script>
     AOS.init();
+
+    function redirigir(endpoint) {
+        window.location.href = endpoint;
+    }
   </script>
 
 </body>

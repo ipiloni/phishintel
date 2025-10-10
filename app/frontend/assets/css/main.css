@@ -2673,6 +2673,49 @@ section,
   }
 }
 
+.bloque-facil {
+  border-color: #b0b0b0;
+}
+
+.bloque-facil:hover {
+  border-color: #198754;
+  border: 2px solid var(#198754);
+}
+
+.bloque-medio {
+  border-color: #b0b0b0;
+}
+
+.bloque-medio:hover {
+  border-color: #ffc107;
+  border: 2px solid var(#ffc107);
+}
+
+.bloque-dificil {
+  border-color: #b0b0b0;
+}
+
+.bloque-dificil:hover {
+  border-color: #dc3545;
+  border: 2px solid var(#dc3545);
+}
+
+.bloque-normal {
+  border-color: #b0b0b0;
+}
+
+.bloque-normal:hover {
+  border-color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+}
+
+.bloque {
+  background-color: #2d2d2d;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
 .clickable {
     cursor: pointer;
     transition: 0.2s ease;
