@@ -2673,6 +2673,15 @@ section,
   }
 }
 
+.clickable {
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
+
+.clickable:hover {
+  transform: scale(1.03);
+}
+
 /*--------------------------------------------------------------
 # Pricing Section
 --------------------------------------------------------------*/
@@ -2701,6 +2710,7 @@ section,
 .pricing .pricing-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--accent-color);
 }
 
 .pricing .pricing-card.popular {

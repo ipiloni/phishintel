@@ -59,7 +59,7 @@
 
         <div class="row gy-4">
           <!-- Basic Plan -->
-          <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+          <div class="col-lg-4 col-md-6 clickable" data-aos="zoom-in" data-aos-delay="200" onclick="redirigir('/abm')">
             <div class="pricing-card">
               <div class="plan-header">
                 <div class="plan-icon">
@@ -77,15 +77,12 @@
                   <li><i class="bi bi-check-circle-fill"></i> Edición de Áreas</li>
                 </ul>
               </div>
-              <div class="plan-cta">
-                <a href="/abm" class="btn-plan">Elegir Opcion</a>
-              </div>
             </div>
           </div><!-- End Basic Plan -->
 
           <!-- Professional Plan -->
-          <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="300">
-            <div class="pricing-card popular">
+          <div class="col-lg-4 col-md-6 clickable" data-aos="zoom-in" data-aos-delay="300" onclick="redirigir('selectorCampania')">
+            <div class="pricing-card">
               <div class="popular-tag">Más Usado</div>
               <div class="plan-header">
                 <div class="plan-icon">
@@ -103,14 +100,11 @@
                   <li><i class="bi bi-check-circle-fill"></i> Opciones</li>
                 </ul>
               </div>
-              <div class="plan-cta">
-                <a href="/selectorCampania" class="btn-plan">Elegir Opción</a>
-              </div>
             </div>
           </div><!-- End Professional Plan -->
 
           <!-- Enterprise Plan -->
-          <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="400">
+          <div class="col-lg-4 col-md-6 clickable" data-aos="zoom-in" data-aos-delay="400" onclick="redirigir('/reportes')">
             <div class="pricing-card">
               <div class="plan-header">
                 <div class="plan-icon">
@@ -127,9 +121,6 @@
                   <li><i class="bi bi-check-circle-fill"></i> Programación de envíos</li>
                   <li><i class="bi bi-check-circle-fill"></i> Dashboards en vivo</li>
                 </ul>
-              </div>
-              <div class="plan-cta">
-                <a href="/reportes" class="btn-plan">Elegir Opción</a>
               </div>
             </div>
           </div><!-- End Enterprise Plan -->
@@ -186,6 +177,10 @@
         console.error('Error:', error);
         window.location.href = '/login';
       });
+    }
+
+    function redirigir(endpoint) {
+        window.location.href = endpoint;
     }
   </script>
 
