@@ -11,6 +11,7 @@
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+
     <link href="https://fonts.googleapis.com" rel="preconnect">
     <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Raleway&display=swap" rel="stylesheet">
@@ -22,7 +23,7 @@
       .nav-tabs { border-bottom: 1px solid #3a3a3a; }
       .nav-tabs .nav-link { color: #dddddd; }
       .nav-tabs .nav-link:hover { color: #ffffff; }
-      
+
       /* Estilos para select múltiple mejorados - Oculto por defecto */
       select[multiple] {
         min-height: 40px;
@@ -38,7 +39,7 @@
         overflow: hidden;
         position: relative;
       }
-      
+
        select[multiple]:focus {
          border-color: #da02e5;
          box-shadow: 0 0 0 3px rgba(218, 2, 229, 0.2);
@@ -46,12 +47,12 @@
          max-height: 200px;
          overflow-y: auto;
        }
-       
+
        select[multiple]:hover {
          border-color: #da02e5;
          cursor: pointer;
        }
-      
+
       select[multiple] option {
         padding: 8px 12px;
         margin: 2px 0;
@@ -61,27 +62,27 @@
         transition: all 0.2s ease;
         display: none;
       }
-      
+
       select[multiple]:focus option {
         display: block;
       }
-      
+
       /* Asegurar que el placeholder se oculte cuando hay opciones visibles */
       select[multiple]:focus .filter-placeholder {
         display: none !important;
       }
-      
+
        select[multiple] option:hover {
          background: rgba(218, 2, 229, 0.1);
        }
-       
+
        select[multiple] option:checked {
          background: linear-gradient(135deg, #da02e5, #e533f0);
          color: white;
          font-weight: 600;
          box-shadow: 0 2px 4px rgba(218, 2, 229, 0.3);
        }
-      
+
       /* Placeholder text para mostrar selecciones */
       .filter-placeholder {
         position: absolute;
@@ -93,12 +94,12 @@
         font-size: 0.9rem;
         transition: all 0.3s ease;
       }
-      
+
       select[multiple]:focus .filter-placeholder {
         opacity: 0;
         visibility: hidden;
       }
-      
+
        /* Indicador de dropdown */
        .filter-dropdown-icon {
          position: absolute;
@@ -109,32 +110,32 @@
          pointer-events: none;
          transition: transform 0.3s ease;
        }
-      
+
       select[multiple]:focus .filter-dropdown-icon {
         transform: translateY(-50%) rotate(180deg);
       }
-      
+
       /* Ocultar opciones cuando se pierde el foco */
       select[multiple]:not(:focus) {
         max-height: 40px;
         overflow: hidden;
       }
-      
+
       select[multiple]:not(:focus) option {
         display: none;
       }
-      
+
       /* Mejorar la apariencia del placeholder cuando hay selecciones */
       .filter-placeholder.has-selection {
         color: #f1f1f1;
         font-weight: 500;
       }
-      
+
       /* Mejorar la apariencia de los filtros */
       .form-select-sm[multiple] {
         font-size: 0.9rem;
       }
-      
+
        /* Estilos para los labels de filtros */
        .filter-label {
          background: linear-gradient(135deg, #da02e5, #e533f0);
@@ -150,9 +151,13 @@
          min-width: 80px;
          text-align: center;
        }
-      
+
       /* Contenedor de filtros mejorado */
       .filters-container {
+        /* CAMBIO CLAVE: Posicionamiento para forzar el contexto de apilamiento */
+        position: relative;
+        z-index: 10;
+
         background: rgba(255, 255, 255, 0.05);
         border-radius: 15px;
         padding: 15px;
@@ -160,7 +165,7 @@
         backdrop-filter: blur(10px);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       }
-      
+
       /* Espaciado mejorado entre filtros */
       .filter-group {
         display: flex;
@@ -168,109 +173,114 @@
         gap: 10px;
         margin-bottom: 10px;
       }
-      
+
       .filter-group:last-child {
         margin-bottom: 0;
       }
-      
+
       /* Iconos para los filtros */
       .filter-icon {
         font-size: 1.1rem;
         margin-right: 6px;
       }
-      
+
       /* Responsive para filtros */
       @media (max-width: 768px) {
         .filters-container {
           flex-direction: column;
           gap: 10px;
         }
-        
+
         .filter-group {
           flex-direction: column;
           align-items: stretch;
           gap: 8px;
         }
-        
+
         .filter-label {
           text-align: center;
           min-width: auto;
         }
-        
+
+        /* Modificación para el nuevo filtro jerárquico */
+        .custom-dropdown-container {
+            width: 100% !important;
+        }
+
         select[multiple] {
           width: 100% !important;
         }
       }
-      
+
       /* Animación suave para hover */
       .filters-container:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
       }
-      
+
       /* Mejorar el scroll de los selects */
       select[multiple]::-webkit-scrollbar {
         width: 8px;
       }
-      
+
       select[multiple]::-webkit-scrollbar-track {
         background: #2a2a2a;
         border-radius: 4px;
       }
-      
+
        select[multiple]::-webkit-scrollbar-thumb {
          background: #da02e5;
          border-radius: 4px;
        }
-       
+
        select[multiple]::-webkit-scrollbar-thumb:hover {
          background: #e533f0;
        }
       .nav-tabs .nav-link.active { color: #ffffff; background-color: #1f1f1f; border-color: #3a3a3a #3a3a3a #1f1f1f; }
-      
+
       /* Estilos para las áreas colapsables */
       .card-header[data-bs-toggle="collapse"] {
         transition: all 0.3s ease;
       }
-      
+
       .card-header[data-bs-toggle="collapse"]:hover {
         background: linear-gradient(135deg, #e533f0, #f066ff) !important;
         transform: translateY(-1px);
         box-shadow: 0 6px 20px rgba(218, 2, 229, 0.4);
       }
-      
+
       .bi-chevron-down {
         transition: transform 0.3s ease;
       }
-      
+
       /* Mejorar el estilo de las tarjetas de empleados */
       .card.bg-dark {
         transition: all 0.3s ease;
       }
-      
+
       .card.bg-dark:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 15px rgba(218, 2, 229, 0.3);
       }
-      
+
       /* Estilos para badges mejorados */
       .badge {
         font-weight: 600;
         letter-spacing: 0.5px;
         transition: all 0.3s ease;
       }
-      
+
       .badge:hover {
         transform: scale(1.05);
       }
-      
+
       /* Estilos para el indicador de KPI */
       .kpi-indicator {
         display: flex;
         gap: 8px;
         align-items: center;
       }
-      
+
       .kpi-level {
         width: 20px;
         height: 20px;
@@ -280,14 +290,14 @@
         transition: all 0.5s ease;
         position: relative;
       }
-      
+
       .kpi-level.active {
         background-color: #da02e5;
         border-color: #da02e5;
         box-shadow: 0 0 10px rgba(218, 2, 229, 0.5);
         transform: scale(1.1);
       }
-      
+
       .kpi-level.active::after {
         content: '';
         position: absolute;
@@ -299,7 +309,7 @@
         border: 2px solid #da02e5;
         animation: pulse 2s infinite;
       }
-      
+
       /* Estilos para nivel crítico (nivel 0) */
       .kpi-level.critical {
         background-color: #dc3545;
@@ -307,7 +317,7 @@
         box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
         transform: scale(1.1);
       }
-      
+
       .kpi-level.critical::after {
         content: '';
         position: absolute;
@@ -319,35 +329,35 @@
         border: 2px solid #dc3545;
         animation: pulse 2s infinite;
       }
-      
+
       /* Estilos para la barra de progreso crítica */
       .progress-bar.critical {
         background: linear-gradient(90deg, #dc3545, #ff6b7a);
         box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
       }
-      
+
       /* Estilos para la barra de progreso de tasa de fallas */
       #kpiProgresoFallas {
         background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
         transition: width 2s ease-in-out;
       }
-      
+
       /* Estilos para datos insuficientes */
       .insuficiente-datos {
         opacity: 0.6;
         filter: grayscale(50%);
       }
-      
+
       /* Estilos para el estado del nivel */
       #kpiEstadoNivel {
         transition: all 0.3s ease;
       }
-      
+
       /* Estilos para nivel 1 (Presas del Phishing) */
       #kpiEstadoNivel.nivel1 {
         animation: pulse-nivel1 2s infinite;
       }
-      
+
       #kpiEstadoNivel.nivel1 .badge {
         background-color: #dc3545 !important;
         color: white;
@@ -361,7 +371,7 @@
       #kpiEstadoNivelFallas.nivel1 {
         animation: pulse-nivel1 2s infinite;
       }
-      
+
       #kpiEstadoNivelFallas.nivel1 .badge {
         background-color: #dc3545 !important;
         color: white;
@@ -370,7 +380,7 @@
         box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
         border: 1px solid rgba(220, 53, 69, 0.3);
       }
-      
+
       /* Estilos para niveles normales (2-3) */
       #kpiEstadoNivel.normal .badge {
         background-color: #6c757d;
@@ -388,7 +398,7 @@
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         border: 1px solid rgba(108, 117, 125, 0.3);
       }
-      
+
       /* Estilos para nivel alto (4-5) */
       #kpiEstadoNivel.alto .badge {
         background-color: #28a745;
@@ -406,7 +416,7 @@
         box-shadow: 0 1px 4px rgba(40, 167, 69, 0.3);
         border: 1px solid rgba(40, 167, 69, 0.3);
       }
-      
+
       @keyframes pulse-nivel1 {
         0% {
           transform: scale(1);
@@ -421,7 +431,7 @@
           opacity: 1;
         }
       }
-      
+
       @keyframes pulse {
         0% {
           transform: scale(1);
@@ -432,7 +442,7 @@
           opacity: 0;
         }
       }
-      
+
       /* Colores para diferentes niveles */
       .kpi-level[data-level="0"].active { background-color: #dc3545; border-color: #dc3545; }
       .kpi-level[data-level="1"].active { background-color: #fd7e14; border-color: #fd7e14; }
@@ -440,7 +450,7 @@
       .kpi-level[data-level="3"].active { background-color: #20c997; border-color: #20c997; }
       .kpi-level[data-level="4"].active { background-color: #0d6efd; border-color: #0d6efd; }
       .kpi-level[data-level="5"].active { background-color: #6f42c1; border-color: #6f42c1; }
-      
+
        /* Colores específicos para KPI de fallas */
        #kpiIndicadorFallas .kpi-level[data-level="0"].active { background-color: #dc3545 !important; border-color: #dc3545 !important; }
        #kpiIndicadorFallas .kpi-level[data-level="1"].active { background-color: #dc3545 !important; border-color: #dc3545 !important; }
@@ -458,12 +468,12 @@
          background-color: rgb(218, 2, 229) !important;
          color: white !important;
        }
-      
+
       /* Animación del contador */
       .counter-animate {
         animation: countUp 2s ease-out;
       }
-      
+
       @keyframes countUp {
         from {
           opacity: 0;
@@ -474,13 +484,13 @@
           transform: translateY(0);
         }
       }
-      
+
       /* Estilos para la barra de progreso */
       .progress-bar {
         background: linear-gradient(90deg, #da02e5, #e533f0);
         transition: width 2s ease-in-out;
       }
-      
+
       /* Tooltip personalizado */
       .tooltip-inner {
         background-color: #1a1a1a;
@@ -488,11 +498,11 @@
         border: 1px solid #da02e5;
         max-width: 300px;
       }
-      
+
       .tooltip.bs-tooltip-top .tooltip-arrow::before {
         border-top-color: #da02e5;
       }
-      
+
       /* Estilos para el dropdown de navegación */
       .nav-item.dropdown .nav-link.dropdown-toggle {
         color: #dddddd;
@@ -500,31 +510,32 @@
         background: transparent;
         transition: all 0.3s ease;
       }
-      
+
       .nav-item.dropdown .nav-link.dropdown-toggle:hover {
         color: #ffffff;
         background: rgba(218, 2, 229, 0.1);
       }
-      
+
       .nav-item.dropdown .nav-link.dropdown-toggle:focus {
         color: #ffffff;
         background: rgba(218, 2, 229, 0.2);
         box-shadow: 0 0 0 2px rgba(218, 2, 229, 0.3);
+        outline: none;
       }
-      
+
       .nav-item.dropdown .nav-link.dropdown-toggle[aria-expanded="true"] {
         color: #ffffff;
         background: rgba(218, 2, 229, 0.2);
       }
-      
+
       .nav-item.dropdown .nav-link.dropdown-toggle .bi-chevron-down {
         transition: transform 0.3s ease;
       }
-      
+
       .nav-item.dropdown .nav-link.dropdown-toggle[aria-expanded="true"] .bi-chevron-down {
         transform: rotate(180deg);
       }
-      
+
       .nav-item.dropdown .dropdown-menu {
         background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
         border: 1px solid #444;
@@ -534,7 +545,7 @@
         padding: 8px 0;
         margin-top: 4px;
       }
-      
+
       .nav-item.dropdown .dropdown-menu .dropdown-item {
         color: #f1f1f1;
         padding: 10px 16px;
@@ -545,37 +556,191 @@
         text-align: left;
         font-size: 0.9rem;
       }
-      
+
       .nav-item.dropdown .dropdown-menu .dropdown-item:hover {
         background: rgba(218, 2, 229, 0.2);
         color: #ffffff;
         transform: translateX(4px);
       }
-      
+
       .nav-item.dropdown .dropdown-menu .dropdown-item:focus {
         background: rgba(218, 2, 229, 0.3);
         color: #ffffff;
         box-shadow: none;
         outline: none;
       }
-      
+
       .nav-item.dropdown .dropdown-menu .dropdown-item.active {
         background: linear-gradient(135deg, #da02e5, #e533f0);
         color: #ffffff;
         font-weight: 600;
       }
-      
+
       .nav-item.dropdown .dropdown-menu .dropdown-item i {
         color: #da02e5;
         transition: color 0.3s ease;
       }
-      
+
       .nav-item.dropdown .dropdown-menu .dropdown-item:hover i {
         color: #ffffff;
       }
-      
+
       .nav-item.dropdown .dropdown-menu .dropdown-item.active i {
         color: #ffffff;
+      }
+
+      /* --- NUEVOS ESTILOS PARA EL FILTRO JERÁRQUICO (PERÍODO) --- */
+
+      /* Estilo del botón que simula el select */
+      .custom-select-toggle {
+        width: 100%;
+        padding: 8px 12px;
+        background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+        border: 2px solid #444;
+        border-radius: 12px;
+        color: #f1f1f1;
+        font-size: 0.9rem;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+      }
+
+      .custom-select-toggle:hover {
+        border-color: #da02e5;
+        cursor: pointer;
+      }
+
+      .custom-select-toggle:focus {
+        border-color: #da02e5;
+        box-shadow: 0 0 0 3px rgba(218, 2, 229, 0.2);
+        outline: none;
+      }
+
+      /* El menú desplegable */
+      .custom-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        /* CAMBIO CRÍTICO PARA SUPERPOSICIÓN */
+        z-index: 1550;
+        width: 100%;
+        min-width: 250px;
+        background: var(--surface-color);
+        border: 1px solid #da02e5;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        padding: 8px 0;
+        margin-top: 5px;
+        max-height: 250px; /* Altura máxima para permitir scroll */
+        overflow-y: auto;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+      }
+
+      .custom-dropdown-menu.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      /* Contenedor relativo para el menú flotante */
+      .custom-dropdown-container {
+        position: relative;
+        z-index: 10; /* Z-index base para asegurar que el menú superior (1550) se vea */
+      }
+
+      /* Estilos de la lista jerárquica */
+      .filter-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .filter-list .filter-item {
+        padding: 0;
+        margin: 0;
+      }
+
+      .filter-list .filter-toggle,
+      .filter-list .filter-select {
+        padding: 8px 15px;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+        display: flex;
+        align-items: center;
+      }
+
+      /* Nivel 1 (Año) */
+      .filter-item.level-1 > .filter-toggle {
+        font-weight: 700;
+        color: var(--heading-color); /* Blanco */
+        border-bottom: 1px solid color-mix(in srgb, var(--surface-color), white 10%);
+      }
+      .filter-item.level-1 > .filter-toggle:hover {
+        background-color: color-mix(in srgb, var(--surface-color), #da02e5 5%);
+      }
+
+      /* Nivel 2 (Trimestre) */
+      .filter-item.level-2 > .filter-toggle {
+        font-weight: 600;
+        color: #da02e5; /* Violeta */
+        padding-left: 30px;
+      }
+      .filter-item.level-2 > .filter-toggle:hover {
+        background-color: color-mix(in srgb, var(--surface-color), #da02e5 8%);
+      }
+
+      /* Nivel 3 (Mes) - Item seleccionable */
+      .filter-item.level-3 .filter-select {
+        font-weight: 400;
+        color: var(--default-color); /* Gris claro */
+        padding-left: 45px;
+      }
+
+      .filter-item.level-3 .filter-select:hover {
+        background-color: color-mix(in srgb, var(--surface-color), #da02e5 12%);
+        color: var(--contrast-color);
+      }
+
+      /* Icono de check (oculto por defecto) */
+      .filter-list .check-icon {
+        color: #da02e5;
+        display: none;
+      }
+
+      /* Estilo para el ítem seleccionado */
+      .filter-list .filter-select.selected {
+        background: linear-gradient(90deg, color-mix(in srgb, #da02e5, transparent 85%), transparent);
+        color: var(--contrast-color);
+        font-weight: 600;
+      }
+      .filter-list .filter-select.selected .check-icon {
+        display: block;
+      }
+
+      /* Iconos de colapso */
+      .filter-list .toggle-icon {
+        transition: transform 0.3s ease;
+      }
+
+      /* Submenús */
+      .filter-submenu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      /* Estilo del texto de display cuando hay selección */
+      #filtroPeriodoDisplay {
+        color: #f1f1f1;
+      }
+      #filtroPeriodoDisplay:not(.has-selection) {
+        color: #888; /* Placeholder */
       }
     </style>
 </head>
@@ -648,8 +813,7 @@
                       KPIs de Seguridad
                     </h3>
                   </div>
-                  
-                  <!-- KPI de Tiempo de Respuesta -->
+
                   <div class="row g-4">
                     <div class="col-lg-8">
                       <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
@@ -660,14 +824,14 @@
                               Tiempo de Respuesta Promedio
                             </h5>
                             <div class="d-flex align-items-center">
-                              <i class="bi bi-info-circle me-2" style="color: #da02e5; cursor: pointer;" 
+                              <i class="bi bi-info-circle me-2" style="color: #da02e5; cursor: pointer;"
                                  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
                                  title="<strong>Tiempo de Respuesta Promedio</strong><br/>Tiempo promedio que tardan los usuarios en reportar un evento de phishing simulado, contado desde que se generó el evento hasta que el sistema lo registra como reportado.<br/>Mide qué tan rápido los usuarios detectan y reportan los intentos de phishing."></i>
                               <span id="kpiTiempoRespuesta" class="display-4 fw-bold" style="color: #da02e5;">0</span>
                               <span class="ms-2 fs-5 text-white">horas</span>
                             </div>
                           </div>
-                          
+
                           <div class="row g-3 mb-3">
                             <div class="col-md-4">
                               <div class="text-center">
@@ -688,8 +852,7 @@
                               </div>
                             </div>
                           </div>
-                          
-                          <!-- Barra de progreso del nivel -->
+
                           <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                               <span class="fs-6 text-white">Nivel de Madurez</span>
@@ -698,7 +861,6 @@
                             <div class="progress" style="height: 12px; background-color: #333;">
                               <div id="kpiProgreso" class="progress-bar" role="progressbar" style="width: 0%; transition: width 2s ease-in-out;"></div>
                             </div>
-                            <!-- Estado del nivel debajo de la barra -->
                             <div id="kpiEstadoNivel" class="text-center mt-2" style="display: none;">
                               <span id="kpiBadgeNivel" class="badge fs-6 px-3 py-2">
                                 <i id="kpiIconoNivel" class="bi me-1"></i>
@@ -709,7 +871,7 @@
                         </div>
                       </div>
                     </div>
-                    
+
                     <div class="col-lg-4">
                       <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
                         <div class="card-body p-4">
@@ -717,13 +879,12 @@
                             <i class="bi bi-shield-check me-2" style="color: #da02e5;"></i>
                             Clasificación Actual
                           </h6>
-                          
+
                           <div class="text-center mb-3">
                             <div id="kpiClasificacion" class="fs-4 fw-bold mb-2" style="color: #da02e5;">Cargando...</div>
                             <div id="kpiDescripcion" class="text-white small">Obteniendo datos...</div>
                           </div>
-                          
-                          <!-- Indicador visual del nivel -->
+
                           <div class="d-flex justify-content-center mb-3">
                             <div id="kpiIndicador" class="kpi-indicator">
                               <div class="kpi-level" data-level="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 1: Presas del Phishing</strong><br/>Mediana > 12h o P90 > 60h<br/>Necesitan mejorar significativamente"></div>
@@ -733,7 +894,7 @@
                               <div class="kpi-level" data-level="4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 5: Vigilantes del Ciberespacio</strong><br/>Mediana ≤ 1h, P90 ≤ 24h<br/>Excelencia en ciberseguridad"></div>
                             </div>
                           </div>
-                          
+
                           <div class="text-center">
                             <button id="btnActualizarKPITiempo" class="btn btn-outline-primary btn-sm">
                               <i class="bi bi-arrow-clockwise me-1"></i>
@@ -744,8 +905,7 @@
                       </div>
                     </div>
                   </div>
-                  
-                  <!-- KPI de Tasa de Fallas -->
+
                   <div class="row g-4 mt-4">
                     <div class="col-lg-8">
                       <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
@@ -756,14 +916,14 @@
                               Tasa de Fallas
                             </h5>
                             <div class="d-flex align-items-center">
-                              <i class="bi bi-info-circle me-2" style="color: #ff6b6b; cursor: pointer;" 
+                              <i class="bi bi-info-circle me-2" style="color: #ff6b6b; cursor: pointer;"
                                  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
                                  title="<strong>Tasa de Fallas</strong><br/>Porcentaje de usuarios que interactuaron de forma riesgosa con el intento de phishing (por ejemplo, haciendo clic o entregando credenciales), en relación al total de usuarios expuestos en la campaña"></i>
                               <span id="kpiTasaFallas" class="display-4 fw-bold" style="color: #ff6b6b;">0</span>
                               <span class="ms-2 fs-5 text-white">%</span>
                             </div>
                           </div>
-                          
+
                           <div class="row g-3 mb-3">
                             <div class="col-md-4">
                               <div class="text-center">
@@ -784,8 +944,7 @@
                               </div>
                             </div>
                           </div>
-                          
-                          <!-- Barra de progreso del nivel -->
+
                           <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                               <span class="fs-6 text-white">Nivel de Madurez</span>
@@ -794,7 +953,6 @@
                             <div class="progress" style="height: 12px; background-color: #333;">
                               <div id="kpiProgresoFallas" class="progress-bar" role="progressbar" style="width: 0%; transition: width 2s ease-in-out;"></div>
                             </div>
-                            <!-- Estado del nivel debajo de la barra -->
                             <div id="kpiEstadoNivelFallas" class="text-center mt-2" style="display: none;">
                               <span id="kpiBadgeNivelFallas" class="badge fs-6 px-3 py-2">
                                 <i id="kpiIconoNivelFallas" class="bi me-1"></i>
@@ -805,7 +963,7 @@
                         </div>
                       </div>
                     </div>
-                    
+
                     <div class="col-lg-4">
                       <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
                         <div class="card-body p-4">
@@ -813,13 +971,12 @@
                             <i class="bi bi-shield-exclamation me-2" style="color: #ff6b6b;"></i>
                             Clasificación Actual
                           </h6>
-                          
+
                           <div class="text-center mb-3">
                             <div id="kpiClasificacionFallas" class="fs-4 fw-bold mb-2" style="color: #ff6b6b;">Cargando...</div>
                             <div id="kpiDescripcionFallas" class="text-white small">Obteniendo datos...</div>
                           </div>
-                          
-                          <!-- Indicador visual del nivel -->
+
                           <div class="d-flex justify-content-center mb-3">
                             <div id="kpiIndicadorFallas" class="kpi-indicator">
                               <div class="kpi-level" data-level="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 1: Presas del Phishing</strong><br/>Failure Rate > 20%<br/>Nivel crítico de fallas"></div>
@@ -829,7 +986,7 @@
                               <div class="kpi-level" data-level="4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 5: Vigilantes del Ciberespacio</strong><br/>Failure Rate ≤ 2%<br/>Operación prácticamente sin fallas"></div>
                             </div>
                           </div>
-                          
+
                           <div class="text-center">
                             <button id="btnActualizarKPIFallas" class="btn btn-outline-danger btn-sm">
                               <i class="bi bi-arrow-clockwise me-1"></i>
@@ -840,8 +997,7 @@
                       </div>
                     </div>
                   </div>
-                  
-                  <!-- KPI de Promedio de Scoring -->
+
                   <div class="row g-4 mt-4">
                     <div class="col-lg-8">
                       <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
@@ -852,14 +1008,14 @@
                               Promedio de Scoring
                             </h5>
                             <div class="d-flex align-items-center">
-                              <i class="bi bi-info-circle me-2" style="color: #17a2b8; cursor: pointer;" 
+                              <i class="bi bi-info-circle me-2" style="color: #17a2b8; cursor: pointer;"
                                  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
                                  title="<strong>Promedio de Scoring</strong><br/>Sistema de puntuación que evalúa el comportamiento de seguridad de los empleados.<br/><strong>Fórmula:</strong> 100 - Fallas Activas - Fallas Pasadas + Eventos Reportados"></i>
                               <span id="kpiPromedioScoring" class="display-4 fw-bold" style="color: #17a2b8;">0</span>
                               <span class="ms-2 fs-5 text-white">pts</span>
                             </div>
                           </div>
-                          
+
                           <div class="row g-3 mb-3">
                             <div class="col-md-4">
                               <div class="text-center">
@@ -880,8 +1036,7 @@
                               </div>
                             </div>
                           </div>
-                          
-                          <!-- Barra de progreso del nivel -->
+
                           <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                               <span class="fs-6 text-white">Nivel de Madurez</span>
@@ -890,7 +1045,6 @@
                             <div class="progress" style="height: 12px; background-color: #333;">
                               <div id="kpiProgresoScoring" class="progress-bar" role="progressbar" style="width: 0%; transition: width 2s ease-in-out;"></div>
                             </div>
-                            <!-- Estado del nivel debajo de la barra -->
                             <div id="kpiEstadoNivelScoring" class="text-center mt-2" style="display: none;">
                               <span id="kpiBadgeNivelScoring" class="badge fs-6 px-3 py-2">
                                 <i id="kpiIconoNivelScoring" class="bi me-1"></i>
@@ -901,7 +1055,7 @@
                         </div>
                       </div>
                     </div>
-                    
+
                     <div class="col-lg-4">
                       <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
                         <div class="card-body p-4">
@@ -909,13 +1063,12 @@
                             <i class="bi bi-shield-check me-2" style="color: #17a2b8;"></i>
                             Clasificación Actual
                           </h6>
-                          
+
                           <div class="text-center mb-3">
                             <div id="kpiClasificacionScoring" class="fs-4 fw-bold mb-2" style="color: #17a2b8;">Cargando...</div>
                             <div id="kpiDescripcionScoring" class="text-white small">Obteniendo datos...</div>
                           </div>
-                          
-                          <!-- Indicador visual del nivel -->
+
                           <div class="d-flex justify-content-center mb-3">
                             <div id="kpiIndicadorScoring" class="kpi-indicator">
                               <div class="kpi-level" data-level="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 1: Presas del Phishing</strong><br/>Promedio < 75 puntos<br/>Necesitan mejorar significativamente"></div>
@@ -925,7 +1078,7 @@
                               <div class="kpi-level" data-level="4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 5: Vigilantes del Ciberespacio</strong><br/>Promedio > 150 puntos<br/>Excelencia en ciberseguridad"></div>
                             </div>
                           </div>
-                          
+
                           <div class="text-center">
                             <button id="btnActualizarKPIScoring" class="btn btn-outline-info btn-sm me-2">
                               <i class="bi bi-arrow-clockwise me-1"></i>
@@ -940,7 +1093,7 @@
                       </div>
                     </div>
                   </div>
-                  
+
                 </div>
               </div>
             </div>
@@ -958,11 +1111,16 @@
                           <i class="bi bi-calendar3 filter-icon"></i>
                           Período
                         </span>
-                        <div style="position: relative; width: 220px;">
-                          <select id="filtroPeriodo" class="form-select form-select-sm" style="width: 100%;" multiple>
-                          </select>
-                          <div class="filter-placeholder" id="filtroPeriodoPlaceholder">Seleccionar períodos...</div>
-                          <i class="bi bi-chevron-down filter-dropdown-icon"></i>
+                        <div class="custom-dropdown-container" style="position: relative; width: 220px;">
+                          <button id="filtroPeriodoToggle" class="custom-select-toggle" type="button" aria-expanded="false">
+                            <span id="filtroPeriodoDisplay">Seleccionar períodos...</span>
+                            <i class="bi bi-chevron-down filter-dropdown-icon" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%);"></i>
+                          </button>
+
+                          <div id="filtroPeriodoMenu" class="custom-dropdown-menu">
+                            <ul id="filtroPeriodoLista" class="filter-list">
+                              </ul>
+                          </div>
                         </div>
                       </div>
                       <div class="filter-group">
@@ -1084,8 +1242,8 @@
                       Fallas por Empleado con Scoring
                             </h5>
                           </div>
-                          
-                  
+
+
                   <div id="contenidoEmpleados">
                     <div class="text-center py-5">
                       <div class="spinner-border text-primary" role="status">
@@ -1098,7 +1256,7 @@
                         </div>
                       </div>
                     </div>
-                    
+
         </div>
       </div>
     </section>
@@ -1107,7 +1265,6 @@
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
   <script> AOS.init(); </script>
-  <!-- ApexCharts -->
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   <script>
@@ -1121,7 +1278,7 @@
           tiposEvento.forEach(tipo => params.append('tipo_evento', tipo));
           url += `?${params.toString()}`;
         }
-        
+
         const resp = await fetch(url);
         if (!resp.ok) throw new Error('Error al obtener datos');
         const data = await resp.json();
@@ -1130,7 +1287,7 @@
         const labels = areas.map(a => a.nombreArea);
         const valores = areas.map(a => a.totalFallas);
         const total = valores.reduce((acc, v) => acc + v, 0);
-        
+
         // Calcular porcentajes y crear datos en formato correcto
         const datosTorta = areas.map((area, index) => {
           const porcentaje = total > 0 ? parseFloat(((area.totalFallas / total) * 100).toFixed(1)) : 0;
@@ -1140,19 +1297,19 @@
             cantidad: area.totalFallas
           };
         });
-        
+
         document.getElementById('totalFallas').textContent = total;
 
         const opciones = {
-          chart: { 
-            type: 'pie', 
-            height: 420, 
-            toolbar: { show: false }, 
-            foreColor: '#f1f1f1' 
+          chart: {
+            type: 'pie',
+            height: 420,
+            toolbar: { show: false },
+            foreColor: '#f1f1f1'
           },
           theme: { mode: 'dark' },
-          plotOptions: { 
-            pie: { 
+          plotOptions: {
+            pie: {
               expandOnClick: true,
               donut: {
                 size: '60%',
@@ -1178,15 +1335,15 @@
                   }
                 }
               }
-            } 
+            }
           },
-          dataLabels: { 
-            enabled: true, 
-            style: { 
+          dataLabels: {
+            enabled: true,
+            style: {
               colors: ['#ffffff'],
               fontSize: '12px',
               fontWeight: 600
-            }, 
+            },
             formatter: (val, opts) => {
               const dataPoint = datosTorta[opts.seriesIndex];
               return `${dataPoint.name}\n${val}% (${dataPoint.cantidad})`;
@@ -1195,7 +1352,7 @@
           series: datosTorta.map(item => item.value),
           labels: datosTorta.map(item => item.name),
           colors: ['#da02e5', '#00d4aa', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'],
-          tooltip: { 
+          tooltip: {
             theme: 'dark',
             style: {
               fontSize: '14px',
@@ -1205,12 +1362,12 @@
             marker: {
               show: true
             },
-            y: { 
+            y: {
               formatter: (val, { seriesIndex, dataPointIndex }) => {
                 const dataPoint = datosTorta[dataPointIndex];
                 return `${dataPoint.name}: ${val}% (${dataPoint.cantidad} fallas)`;
               }
-            } 
+            }
           },
           legend: {
             position: 'bottom',
@@ -1234,7 +1391,7 @@
         if (chartInstance) {
           chartInstance.destroy();
         }
-        
+
         chartInstance = new ApexCharts(document.querySelector('#chartFallasPorArea'), opciones);
         chartInstance.render();
       } catch (e) {
@@ -1242,16 +1399,16 @@
       }
     }
 
-    // Función para actualizar placeholder
+    // Función para actualizar placeholder (Solo para filtros tipo select)
     function actualizarPlaceholder(selectId, placeholderId) {
       const select = document.getElementById(selectId);
       const placeholder = document.getElementById(placeholderId);
       const seleccionados = Array.from(select.selectedOptions);
-      
+
       // Solo mostrar placeholder si el select no tiene foco
       if (document.activeElement !== select) {
         placeholder.style.display = 'block';
-        
+
         if (seleccionados.length === 0) {
           placeholder.textContent = placeholderId.includes('Periodo') ? 'Seleccionar períodos...' : 'Seleccionar tipos...';
           placeholder.style.opacity = '1';
@@ -1293,17 +1450,17 @@
     document.getElementById('filtroTipo').addEventListener('mousedown', function(e) {
       // Ocultar placeholder inmediatamente
       document.getElementById('filtroTipoPlaceholder').style.display = 'none';
-      
+
       // Solo permitir deselección sin Ctrl si la opción ya está seleccionada
       if (e.target.tagName === 'OPTION' && e.target.selected) {
         e.preventDefault();
         e.target.selected = false;
-        
+
         // Actualizar placeholder después de un pequeño delay
         setTimeout(() => {
           actualizarPlaceholder('filtroTipo', 'filtroTipoPlaceholder');
         }, 50);
-        
+
         // Disparar evento change manualmente
         this.dispatchEvent(new Event('change'));
       }
@@ -1311,17 +1468,17 @@
 
      // Variables para el gráfico de fecha
      let chartFechaInstance = null;
-     
+
      // Variables para el gráfico de campaña
      let chartCampaniaInstance = null;
 
     // Función para cargar fallas por fecha
-    async function cargarFallasPorFecha(periodos = [], tiposEvento = []) {
+    async function cargarFallasPorFecha(periodos = [], tiposEvento = [], preservarFiltros = false) {
       try {
         const params = new URLSearchParams();
         periodos.forEach(periodo => params.append('periodo', periodo));
         tiposEvento.forEach(tipo => params.append('tipo_evento', tipo));
-        
+
         const url = `/api/areas/fallas-fecha?${params.toString()}`;
         const resp = await fetch(url);
         if (!resp.ok) throw new Error('Error al obtener datos');
@@ -1330,7 +1487,7 @@
         const periodosData = data.periodos || [];
         const fallas = data.fallas || [];
         const total = data.totalFallas || 0;
-        
+
         // Actualizar total
         document.getElementById('totalFallasFecha').textContent = total;
 
@@ -1344,48 +1501,48 @@
 
         // Configurar gráfico de barras
         const opciones = {
-          chart: { 
-            type: 'bar', 
-            height: 420, 
-            toolbar: { show: false }, 
-            foreColor: '#f1f1f1' 
+          chart: {
+            type: 'bar',
+            height: 420,
+            toolbar: { show: false },
+            foreColor: '#f1f1f1'
           },
           theme: { mode: 'dark' },
           grid: { borderColor: '#444' },
-          plotOptions: { 
-            bar: { 
-              horizontal: false, 
-              columnWidth: '60%', 
-              borderRadius: 6 
-            } 
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              columnWidth: '60%',
+              borderRadius: 6
+            }
           },
-          dataLabels: { 
-            enabled: true, 
+          dataLabels: {
+            enabled: true,
             style: { colors: ['#ffffff'] },
             formatter: (val) => `${val}`
           },
-          xaxis: { 
-            categories: etiquetas, 
-            labels: { 
+          xaxis: {
+            categories: etiquetas,
+            labels: {
               style: { colors: '#ffffff' },
               rotate: -45
             }
           },
-          yaxis: { 
-            title: { 
-              text: 'Cantidad de fallas', 
-              style: { color: '#ffffff', fontSize: '16px' } 
-            }, 
+          yaxis: {
+            title: {
+              text: 'Cantidad de fallas',
+              style: { color: '#ffffff', fontSize: '16px' }
+            },
             labels: { style: { colors: '#ffffff' } },
             min: 0
           },
            series: [{ name: 'Fallas', data: fallas }],
            colors: ['#da02e5'],
-          tooltip: { 
-            theme: 'dark', 
-            y: { 
+          tooltip: {
+            theme: 'dark',
+            y: {
               formatter: (val) => `${val} fallas`
-            } 
+            }
           }
         };
 
@@ -1393,12 +1550,12 @@
         if (chartFechaInstance) {
           chartFechaInstance.destroy();
         }
-        
+
         chartFechaInstance = new ApexCharts(document.querySelector('#chartFallasPorFecha'), opciones);
         chartFechaInstance.render();
 
-        // Actualizar opciones de filtros si es la primera carga
-        if (data.filtros) {
+        // Actualizar opciones de filtros si es la primera carga (solo si no hay filtros existentes y no se debe preservar)
+        if (data.filtros && document.getElementById('filtroPeriodoLista').children.length === 0 && !preservarFiltros) {
           actualizarFiltros(data.filtros);
         }
 
@@ -1416,72 +1573,72 @@
            areas.forEach(area => params.append('area', area));
            url += `?${params.toString()}`;
          }
-         
+
          const resp = await fetch(url);
          if (!resp.ok) throw new Error('Error al obtener datos');
          const data = await resp.json();
 
          const campanias = data.campanias || [];
          const total = campanias.reduce((acc, campania) => acc + campania.totalFallas, 0);
-         
+
          document.getElementById('totalFallasCampania').textContent = total;
 
          // Crear datos para el gráfico de torta
          const labels = campanias.map(campania => {
            const nombres = {
              'CORREO': '📧 Correo',
-             'MENSAJE': '💬 Mensaje', 
+             'MENSAJE': '💬 Mensaje',
              'LLAMADA': '📞 Llamada',
              'VIDEOLLAMADA': '📹 Videollamada'
            };
            return nombres[campania.tipo] || campania.tipo;
          });
-         
+
          const valores = campanias.map(campania => campania.totalFallas);
 
          const opciones = {
-           chart: { 
-             type: 'bar', 
-             height: 420, 
-             toolbar: { show: false }, 
-             foreColor: '#f1f1f1' 
+           chart: {
+             type: 'bar',
+             height: 420,
+             toolbar: { show: false },
+             foreColor: '#f1f1f1'
            },
            theme: { mode: 'dark' },
            grid: { borderColor: '#444' },
-           plotOptions: { 
-             bar: { 
-               horizontal: false, 
-               columnWidth: '60%', 
-               borderRadius: 6 
-             } 
+           plotOptions: {
+             bar: {
+               horizontal: false,
+               columnWidth: '60%',
+               borderRadius: 6
+             }
            },
-           dataLabels: { 
-             enabled: true, 
+           dataLabels: {
+             enabled: true,
              style: { colors: ['#ffffff'] },
              formatter: (val) => `${val}`
            },
-           xaxis: { 
-             categories: labels, 
-             labels: { 
+           xaxis: {
+             categories: labels,
+             labels: {
                style: { colors: '#ffffff' },
                rotate: -45
              }
            },
-           yaxis: { 
-             title: { 
-               text: 'Cantidad de fallas', 
-               style: { color: '#ffffff', fontSize: '16px' } 
-             }, 
+           yaxis: {
+             title: {
+               text: 'Cantidad de fallas',
+               style: { color: '#ffffff', fontSize: '16px' }
+             },
              labels: { style: { colors: '#ffffff' } },
              min: 0
            },
            series: [{ name: 'Fallas', data: valores }],
            colors: ['#da02e5'],
-           tooltip: { 
-             theme: 'dark', 
-             y: { 
+           tooltip: {
+             theme: 'dark',
+             y: {
                formatter: (val) => `${val} fallas`
-             } 
+             }
            }
          };
 
@@ -1489,7 +1646,7 @@
          if (chartCampaniaInstance) {
            chartCampaniaInstance.destroy();
          }
-         
+
          chartCampaniaInstance = new ApexCharts(document.querySelector('#chartFallasPorCampania'), opciones);
          chartCampaniaInstance.render();
 
@@ -1514,10 +1671,10 @@
      // Función para actualizar las opciones de filtros de área
      function actualizarFiltrosArea(areas) {
        const selectArea = document.getElementById('filtroAreaCampania');
-       
+
        // Limpiar opciones existentes
        selectArea.innerHTML = '';
-       
+
        // Agregar áreas
        areas.forEach(area => {
          const option = document.createElement('option');
@@ -1528,101 +1685,470 @@
        });
      }
 
-    // Función para actualizar las opciones de filtros jerárquicos
+    // Función para actualizar las opciones de filtros jerárquicos (PERIODO)
     function actualizarFiltros(filtros) {
-      const selectPeriodo = document.getElementById('filtroPeriodo');
+      const listaPeriodo = document.getElementById('filtroPeriodoLista');
       
-      // Limpiar opciones existentes
-      selectPeriodo.innerHTML = '';
+      // Guardar las selecciones actuales antes de limpiar
+      const seleccionesActuales = Array.from(listaPeriodo.querySelectorAll('.filter-select.selected'))
+        .map(el => el.getAttribute('data-value'));
       
+      // Guardar el estado de expansión actual
+      const estadoExpansion = {};
+      listaPeriodo.querySelectorAll('.filter-toggle[data-bs-target]').forEach(toggle => {
+        const targetId = toggle.getAttribute('data-bs-target').replace('#', '');
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          estadoExpansion[targetId] = targetElement.classList.contains('show');
+        }
+      });
+      
+      listaPeriodo.innerHTML = ''; // Limpiar opciones existentes
+
+      if (!filtros || !filtros.años) return;
+
       const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                           'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-      
-      // Agregar años
-      if (filtros.años) {
-        filtros.años.forEach(año => {
-          const option = document.createElement('option');
-          option.value = año.toString();
-          option.textContent = `📅 ${año}`;
-          option.style.fontWeight = 'bold';
-          option.style.fontSize = '0.95rem';
-          selectPeriodo.appendChild(option);
-        });
-      }
-      
-       // Agregar trimestres
-       if (filtros.trimestres) {
-         filtros.trimestres.forEach(trimestre => {
-           const option = document.createElement('option');
-           option.value = trimestre;
-           option.textContent = `📊 ${trimestre}`;
-           option.style.color = '#da02e5';
-           option.style.fontWeight = '600';
-           option.style.fontSize = '0.9rem';
-           option.style.paddingLeft = '20px';
-           selectPeriodo.appendChild(option);
-         });
-       }
-      
-      // Agregar meses
+                            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+      // Agrupar meses y trimestres por año para la jerarquía
+      const datosJerarquicos = {};
+
+      // Inicializar años
+      filtros.años.forEach(año => {
+        datosJerarquicos[año] = { trimestres: {} };
+      });
+
+      // Agrupar meses por trimestre y año
       if (filtros.meses) {
         filtros.meses.forEach(mesPeriodo => {
           const [mes, año] = mesPeriodo.split('-');
-          const option = document.createElement('option');
-          option.value = mesPeriodo;
-          option.textContent = `📅 ${nombresMeses[parseInt(mes) - 1]} ${año}`;
-          option.style.paddingLeft = '40px';
-          option.style.fontSize = '0.85rem';
-          option.style.opacity = '0.9';
-          selectPeriodo.appendChild(option);
+          const trimestre = `Q${Math.ceil(parseInt(mes) / 3)}`;
+
+          if (!datosJerarquicos[año]) {
+            datosJerarquicos[año] = { trimestres: {} };
+          }
+          if (!datosJerarquicos[año].trimestres[trimestre]) {
+            datosJerarquicos[año].trimestres[trimestre] = { meses: [] };
+          }
+          datosJerarquicos[año].trimestres[trimestre].meses.push(mesPeriodo);
+        });
+      }
+
+      // Generar la estructura de la lista jerárquica
+      for (const año in datosJerarquicos) {
+        // AÑO (Nivel 1)
+        const liAño = document.createElement('li');
+        liAño.classList.add('filter-item', 'level-1');
+        
+        // Verificar si este año estaba seleccionado anteriormente
+        const añoEstabaSeleccionado = seleccionesActuales.some(sel => sel.startsWith(año));
+        const añoClaseSelected = añoEstabaSeleccionado ? ' selected' : '';
+        const añoDisplayCheck = añoEstabaSeleccionado ? 'block' : 'none';
+        
+        liAño.innerHTML = `
+          <div class="d-flex align-items-center justify-content-between filter-toggle filter-select${añoClaseSelected}" data-bs-toggle="collapse" data-bs-target="#list-${año}" aria-expanded="false" data-value="${año}" data-type="año">
+            <span><i class="bi bi-calendar3 me-2"></i> ${año}</span>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-check-circle-fill check-icon me-2" style="display: ${añoDisplayCheck};"></i>
+              <i class="bi bi-chevron-down toggle-icon"></i>
+            </div>
+          </div>
+          <ul id="list-${año}" class="filter-submenu collapse"></ul>
+        `;
+
+        const ulTrimestres = liAño.querySelector('ul');
+
+        // TRIMESTRES (Nivel 2)
+        const trimestresOrdenados = Object.keys(datosJerarquicos[año].trimestres).sort();
+
+        trimestresOrdenados.forEach(trimestreKey => {
+          const trimestreCompleto = `${trimestreKey}-${año}`;
+          const liTrimestre = document.createElement('li');
+          liTrimestre.classList.add('filter-item', 'level-2');
+          
+          // Verificar si este trimestre estaba seleccionado anteriormente
+          const trimestreEstabaSeleccionado = datosJerarquicos[año].trimestres[trimestreKey].meses.every(mes => seleccionesActuales.includes(mes));
+          const trimestreClaseSelected = trimestreEstabaSeleccionado ? ' selected' : '';
+          const trimestreDisplayCheck = trimestreEstabaSeleccionado ? 'block' : 'none';
+          
+          liTrimestre.innerHTML = `
+            <div class="d-flex align-items-center justify-content-between filter-toggle filter-select${trimestreClaseSelected}" data-bs-toggle="collapse" data-bs-target="#list-${trimestreKey}-${año}" aria-expanded="false" data-value="${trimestreKey}-${año}" data-type="trimestre">
+              <span><i class="bi bi-graph-up-arrow me-2"></i> ${trimestreKey}-${año}</span>
+              <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill check-icon me-2" style="display: ${trimestreDisplayCheck};"></i>
+                <i class="bi bi-chevron-down toggle-icon"></i>
+              </div>
+            </div>
+            <ul id="list-${trimestreKey}-${año}" class="filter-submenu collapse"></ul>
+          `;
+
+          const ulMeses = liTrimestre.querySelector('ul');
+
+          // MESES (Nivel 3)
+          datosJerarquicos[año].trimestres[trimestreKey].meses.forEach(mesPeriodo => {
+            const [mesNum, mesAño] = mesPeriodo.split('-');
+            const nombreMes = nombresMeses[parseInt(mesNum) - 1];
+
+            const liMes = document.createElement('li');
+            liMes.classList.add('filter-item', 'level-3');
+            
+            // Verificar si este mes estaba seleccionado anteriormente
+            const estabaSeleccionado = seleccionesActuales.includes(mesPeriodo);
+            const claseSelected = estabaSeleccionado ? ' selected' : '';
+            const displayCheck = estabaSeleccionado ? 'block' : 'none';
+            
+            liMes.innerHTML = `
+              <div class="d-flex align-items-center filter-select${claseSelected}" data-value="${mesPeriodo}" data-type="mes">
+                <i class="bi bi-calendar-event me-2"></i> ${nombreMes} ${mesAño}
+                <i class="bi bi-check-circle-fill check-icon ms-auto" style="display: ${displayCheck};"></i>
+              </div>
+            `;
+            ulMeses.appendChild(liMes);
+          });
+
+          ulTrimestres.appendChild(liTrimestre);
+        });
+
+        listaPeriodo.appendChild(liAño);
+      }
+
+      // Asignar listeners después de construir el DOM
+      asignarListenersFiltroJerarquico();
+      
+      // Restaurar el estado de expansión
+      setTimeout(() => {
+        Object.keys(estadoExpansion).forEach(targetId => {
+          if (estadoExpansion[targetId]) {
+            const targetElement = document.getElementById(targetId);
+            const toggleElement = document.querySelector(`[data-bs-target="#${targetId}"]`);
+            if (targetElement && toggleElement) {
+              targetElement.classList.add('show');
+              toggleElement.setAttribute('aria-expanded', 'true');
+              const icon = toggleElement.querySelector('.toggle-icon');
+              if (icon) {
+                icon.style.transform = 'rotate(180deg)';
+              }
+            }
+          }
+        });
+      }, 50);
+      
+      // Actualizar el texto del display si hay selecciones restauradas
+      if (seleccionesActuales.length > 0) {
+        const displayElement = document.getElementById('filtroPeriodoDisplay');
+        if (seleccionesActuales.length === 1) {
+          const selectedText = listaPeriodo.querySelector('.filter-select.selected')?.textContent?.trim().replace(/(\r\n|\n|\r)/gm, " ").trim() || 'Período seleccionado';
+          displayElement.textContent = selectedText;
+          displayElement.style.color = '#f1f1f1';
+        } else {
+          displayElement.textContent = `${seleccionesActuales.length} períodos seleccionados`;
+          displayElement.style.color = '#f1f1f1';
+        }
+      }
+    }
+
+    // Variables para controlar si los listeners ya fueron asignados
+    let listenersAsignados = false;
+    let documentClickListenerAsignado = false;
+
+    // Función para manejar selección de año
+    function manejarSeleccionAño(elementoAño, año) {
+      const lista = document.getElementById('filtroPeriodoLista');
+      const estaSeleccionado = elementoAño.classList.contains('selected');
+      const checkIcon = elementoAño.querySelector('.check-icon');
+      
+      // Buscar todos los elementos del año (trimestres y meses)
+      const trimestresAño = lista.querySelectorAll(`[data-value^="${año}-"]`);
+      const mesesAño = lista.querySelectorAll(`[data-value^="${año}-"][data-type="mes"]`);
+      
+      if (estaSeleccionado) {
+        // Deseleccionar año: deseleccionar todos los trimestres y meses
+        elementoAño.classList.remove('selected');
+        checkIcon.style.display = 'none';
+        
+        trimestresAño.forEach(trimestre => {
+          if (trimestre.getAttribute('data-type') === 'trimestre') {
+            trimestre.classList.remove('selected');
+            const trimestreCheck = trimestre.querySelector('.check-icon');
+            if (trimestreCheck) trimestreCheck.style.display = 'none';
+          }
+        });
+        
+        mesesAño.forEach(mes => {
+          mes.classList.remove('selected');
+          const mesCheck = mes.querySelector('.check-icon');
+          if (mesCheck) mesCheck.style.display = 'none';
+        });
+      } else {
+        // Seleccionar año: seleccionar todos los trimestres y meses
+        elementoAño.classList.add('selected');
+        checkIcon.style.display = 'block';
+        
+        trimestresAño.forEach(trimestre => {
+          if (trimestre.getAttribute('data-type') === 'trimestre') {
+            trimestre.classList.add('selected');
+            const trimestreCheck = trimestre.querySelector('.check-icon');
+            if (trimestreCheck) trimestreCheck.style.display = 'block';
+          }
+        });
+        
+        mesesAño.forEach(mes => {
+          mes.classList.add('selected');
+          const mesCheck = mes.querySelector('.check-icon');
+          if (mesCheck) mesCheck.style.display = 'block';
         });
       }
     }
 
-    // Event listeners para filtros de fecha
-    document.getElementById('filtroPeriodo').addEventListener('change', function() {
-      const periodos = Array.from(this.selectedOptions).map(option => option.value);
-      const tipos = Array.from(document.getElementById('filtroTipoFecha').selectedOptions).map(option => option.value);
-      actualizarPlaceholder('filtroPeriodo', 'filtroPeriodoPlaceholder');
-      cargarFallasPorFecha(periodos, tipos);
-    });
+    // Función para manejar selección de trimestre
+    function manejarSeleccionTrimestre(elementoTrimestre, trimestreCompleto) {
+      const lista = document.getElementById('filtroPeriodoLista');
+      const estaSeleccionado = elementoTrimestre.classList.contains('selected');
+      const checkIcon = elementoTrimestre.querySelector('.check-icon');
+      
+      // Buscar todos los meses del trimestre
+      const mesesTrimestre = obtenerMesesDelTrimestre(trimestreCompleto);
+      
+      if (estaSeleccionado) {
+        // Deseleccionar trimestre: deseleccionar todos los meses del trimestre
+        elementoTrimestre.classList.remove('selected');
+        checkIcon.style.display = 'none';
+        
+        mesesTrimestre.forEach(mesValor => {
+          const mesElemento = lista.querySelector(`[data-value="${mesValor}"][data-type="mes"]`);
+          if (mesElemento) {
+            mesElemento.classList.remove('selected');
+            const mesCheck = mesElemento.querySelector('.check-icon');
+            if (mesCheck) mesCheck.style.display = 'none';
+          }
+        });
+      } else {
+        // Seleccionar trimestre: seleccionar todos los meses del trimestre
+        elementoTrimestre.classList.add('selected');
+        checkIcon.style.display = 'block';
+        
+        mesesTrimestre.forEach(mesValor => {
+          const mesElemento = lista.querySelector(`[data-value="${mesValor}"][data-type="mes"]`);
+          if (mesElemento) {
+            mesElemento.classList.add('selected');
+            const mesCheck = mesElemento.querySelector('.check-icon');
+            if (mesCheck) mesCheck.style.display = 'block';
+          }
+        });
+      }
+    }
 
+    // Función para manejar selección de mes
+    function manejarSeleccionMes(elementoMes, mesValor) {
+      const estaSeleccionado = elementoMes.classList.contains('selected');
+      const checkIcon = elementoMes.querySelector('.check-icon');
+      
+      if (estaSeleccionado) {
+        elementoMes.classList.remove('selected');
+        checkIcon.style.display = 'none';
+      } else {
+        elementoMes.classList.add('selected');
+        checkIcon.style.display = 'block';
+      }
+    }
+
+    // Función para obtener todos los meses de un año
+    function obtenerMesesDelAño(año) {
+      const meses = [];
+      const lista = document.getElementById('filtroPeriodoLista');
+      const mesesElementos = lista.querySelectorAll('.filter-select[data-type="mes"]');
+      
+      mesesElementos.forEach(mesEl => {
+        const valorMes = mesEl.getAttribute('data-value');
+        if (valorMes.startsWith(año)) {
+          meses.push(valorMes);
+        }
+      });
+      
+      return meses;
+    }
+
+    // Función para obtener todos los meses de un trimestre
+    function obtenerMesesDelTrimestre(trimestreCompleto) {
+      const meses = [];
+      const [trimestre, año] = trimestreCompleto.split('-');
+      const trimestreNum = parseInt(trimestre.replace('Q', ''));
+      
+      // Calcular los meses del trimestre
+      const mesInicio = (trimestreNum - 1) * 3 + 1;
+      const mesFin = mesInicio + 2;
+      
+      for (let mes = mesInicio; mes <= mesFin; mes++) {
+        const mesStr = mes.toString().padStart(2, '0');
+        meses.push(`${mesStr}-${año}`);
+      }
+      
+      return meses;
+    }
+
+    // Función para aplicar el filtro automáticamente
+    function aplicarFiltroPeriodo() {
+      const lista = document.getElementById('filtroPeriodoLista');
+      
+      // 1. Recoger las selecciones y expandir jerarquías
+      const selecciones = [];
+      const elementosSeleccionados = Array.from(lista.querySelectorAll('.filter-select.selected'));
+      
+      elementosSeleccionados.forEach(elemento => {
+        const valor = elemento.getAttribute('data-value');
+        const tipo = elemento.getAttribute('data-type');
+        
+        if (tipo === 'año') {
+          // Si se selecciona un año, agregar todos sus meses
+          const mesesAño = obtenerMesesDelAño(valor);
+          selecciones.push(...mesesAño);
+        } else if (tipo === 'trimestre') {
+          // Si se selecciona un trimestre, agregar todos sus meses
+          const mesesTrimestre = obtenerMesesDelTrimestre(valor);
+          selecciones.push(...mesesTrimestre);
+        } else if (tipo === 'mes') {
+          // Si se selecciona un mes individual, agregarlo directamente
+          selecciones.push(valor);
+        }
+      });
+      
+      // Eliminar duplicados
+      const seleccionesUnicas = [...new Set(selecciones)];
+
+      // 2. Actualizar el texto del botón
+      const displayElement = document.getElementById('filtroPeriodoDisplay');
+      if (seleccionesUnicas.length === 0) {
+        displayElement.textContent = 'Seleccionar períodos...';
+        displayElement.style.color = '#888';
+      } else if (seleccionesUnicas.length === 1) {
+        // Limpiar saltos de línea y espacios extra del texto para un solo item
+        const selectedText = lista.querySelector(`.filter-select.selected`)?.textContent?.trim().replace(/(\r\n|\n|\r)/gm, " ").trim() || 'Período seleccionado';
+        displayElement.textContent = selectedText;
+        displayElement.style.color = '#f1f1f1';
+      } else {
+        displayElement.textContent = `${seleccionesUnicas.length} períodos seleccionados`;
+        displayElement.style.color = '#f1f1f1';
+      }
+
+      // 3. Disparar la carga de datos (manteniendo el dropdown abierto y el estado de expansión)
+      const tipos = Array.from(document.getElementById('filtroTipoFecha').selectedOptions).map(option => option.value);
+      cargarFallasPorFecha(seleccionesUnicas, tipos, true); // true para preservar filtros
+    }
+
+    // FUNCIÓN PRINCIPAL para manejar la lógica de selección y colapso
+    function asignarListenersFiltroJerarquico() {
+      // Solo asignar listeners una vez
+      if (listenersAsignados) {
+        return;
+      }
+
+      const lista = document.getElementById('filtroPeriodoLista');
+      const toggleButton = document.getElementById('filtroPeriodoToggle');
+      const dropdownMenu = document.getElementById('filtroPeriodoMenu');
+
+      // FIX CLAVE 1: Asegurarse de que el botón esté activo al cargar/reabrir.
+      toggleButton.removeAttribute('disabled');
+
+      // Lógica de Abrir/Cerrar Dropdown (Con preventDefault y stopImmediatePropagation)
+      toggleButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation(); // FIX CRÍTICO: Previene cualquier otra función de Bootstrap o del padre.
+
+        const isExpanded = toggleButton.getAttribute('aria-expanded') === 'true';
+        const icon = toggleButton.querySelector('.filter-dropdown-icon');
+
+        if (isExpanded) {
+          // CERRAR
+          dropdownMenu.classList.remove('show');
+          toggleButton.setAttribute('aria-expanded', 'false');
+          icon.style.transform = 'translateY(-50%) rotate(0deg)';
+        } else {
+          // ABRIR
+          dropdownMenu.classList.add('show');
+          toggleButton.setAttribute('aria-expanded', 'true');
+          icon.style.transform = 'translateY(-50%) rotate(180deg)';
+        }
+      });
+
+      // Lógica de Colapsar/Expandir submenús y Selección (Delegación de eventos)
+      lista.addEventListener('click', function(e) {
+        // FIX CLAVE 4: Detenemos la propagación aquí para que el clic no sea interpretado como "clic fuera del menú"
+        e.stopPropagation();
+
+        const targetDiv = e.target.closest('.filter-toggle');
+        const targetSelect = e.target.closest('.filter-select');
+
+        if (targetDiv) {
+          // Manejar colapso/expansión (Nivel 1 y 2)
+          const targetListId = targetDiv.getAttribute('data-bs-target');
+          const targetList = document.querySelector(targetListId);
+          const icon = targetDiv.querySelector('.toggle-icon');
+
+          // Usar Bootstrap Collapse API
+          const collapseInstance = bootstrap.Collapse.getInstance(targetList) || new bootstrap.Collapse(targetList, { toggle: false });
+
+          if (targetList.classList.contains('show')) {
+            collapseInstance.hide();
+            icon.style.transform = 'rotate(0deg)';
+            targetDiv.setAttribute('aria-expanded', 'false');
+          } else {
+            collapseInstance.show();
+            icon.style.transform = 'rotate(180deg)';
+            targetDiv.setAttribute('aria-expanded', 'true');
+          }
+
+        } else if (targetSelect) {
+          // Manejar selección de cualquier nivel (Año, Trimestre, o Mes)
+          const tipo = targetSelect.getAttribute('data-type');
+          const valor = targetSelect.getAttribute('data-value');
+          
+          if (tipo === 'año') {
+            // Seleccionar/deseleccionar año completo
+            manejarSeleccionAño(targetSelect, valor);
+          } else if (tipo === 'trimestre') {
+            // Seleccionar/deseleccionar trimestre completo
+            manejarSeleccionTrimestre(targetSelect, valor);
+          } else if (tipo === 'mes') {
+            // Seleccionar/deseleccionar mes individual
+            manejarSeleccionMes(targetSelect, valor);
+          }
+
+          // Aplicar filtro automáticamente después de la selección/deselección
+          setTimeout(() => {
+            aplicarFiltroPeriodo();
+          }, 100); // Pequeño delay para que se complete la animación visual
+
+        }
+      });
+
+
+      // Cerrar dropdown al hacer clic fuera (Este listener debe ejecutarse al final)
+      if (!documentClickListenerAsignado) {
+        document.addEventListener('click', (event) => {
+          const isClickInside = toggleButton.contains(event.target) || dropdownMenu.contains(event.target);
+          if (!isClickInside && dropdownMenu.classList.contains('show')) {
+            dropdownMenu.classList.remove('show');
+            toggleButton.setAttribute('aria-expanded', 'false');
+            toggleButton.querySelector('.filter-dropdown-icon').style.transform = 'translateY(-50%) rotate(0deg)';
+          }
+        });
+        documentClickListenerAsignado = true;
+      }
+
+      // Marcar que los listeners ya fueron asignados
+      listenersAsignados = true;
+    }
+
+    // Event listeners para filtros de fecha
     document.getElementById('filtroTipoFecha').addEventListener('change', function() {
-      const periodos = Array.from(document.getElementById('filtroPeriodo').selectedOptions).map(option => option.value);
+      // Obtener las selecciones del nuevo filtro jerárquico (solo meses)
+      const lista = document.getElementById('filtroPeriodoLista');
+      const periodos = Array.from(lista.querySelectorAll('.filter-select.selected'))
+        .map(el => el.getAttribute('data-value'));
+
       const tipos = Array.from(this.selectedOptions).map(option => option.value);
       actualizarPlaceholder('filtroTipoFecha', 'filtroTipoFechaPlaceholder');
-      cargarFallasPorFecha(periodos, tipos);
-    });
-
-    // Event listeners para ocultar/mostrar placeholder - Filtro Período
-    document.getElementById('filtroPeriodo').addEventListener('focus', function() {
-      document.getElementById('filtroPeriodoPlaceholder').style.display = 'none';
-    });
-
-    document.getElementById('filtroPeriodo').addEventListener('blur', function() {
-      setTimeout(() => {
-        actualizarPlaceholder('filtroPeriodo', 'filtroPeriodoPlaceholder');
-      }, 100);
-    });
-
-    // Event listener para manejar clics en opciones (deselección sin Ctrl) - Período
-    document.getElementById('filtroPeriodo').addEventListener('mousedown', function(e) {
-      // Ocultar placeholder inmediatamente
-      document.getElementById('filtroPeriodoPlaceholder').style.display = 'none';
-      
-      // Solo permitir deselección sin Ctrl si la opción ya está seleccionada
-      if (e.target.tagName === 'OPTION' && e.target.selected) {
-        e.preventDefault();
-        e.target.selected = false;
-        
-        // Actualizar placeholder después de un pequeño delay
-        setTimeout(() => {
-          actualizarPlaceholder('filtroPeriodo', 'filtroPeriodoPlaceholder');
-        }, 50);
-        
-        // Disparar evento change manualmente
-        this.dispatchEvent(new Event('change'));
-      }
+      cargarFallasPorFecha(periodos, tipos, false); // false para no preservar filtros
     });
 
     // Event listeners para ocultar/mostrar placeholder - Filtro Tipo Fecha
@@ -1640,17 +2166,17 @@
     document.getElementById('filtroTipoFecha').addEventListener('mousedown', function(e) {
       // Ocultar placeholder inmediatamente
       document.getElementById('filtroTipoFechaPlaceholder').style.display = 'none';
-      
+
       // Solo permitir deselección sin Ctrl si la opción ya está seleccionada
       if (e.target.tagName === 'OPTION' && e.target.selected) {
         e.preventDefault();
         e.target.selected = false;
-        
+
         // Actualizar placeholder después de un pequeño delay
         setTimeout(() => {
           actualizarPlaceholder('filtroTipoFecha', 'filtroTipoFechaPlaceholder');
         }, 50);
-        
+
         // Disparar evento change manualmente
         this.dispatchEvent(new Event('change'));
       }
@@ -1678,17 +2204,17 @@
      document.getElementById('filtroAreaCampania').addEventListener('mousedown', function(e) {
        // Ocultar placeholder inmediatamente
        document.getElementById('filtroAreaCampaniaPlaceholder').style.display = 'none';
-       
+
        // Solo permitir deselección sin Ctrl si la opción ya está seleccionada
        if (e.target.tagName === 'OPTION' && e.target.selected) {
          e.preventDefault();
          e.target.selected = false;
-         
+
          // Actualizar placeholder después de un pequeño delay
          setTimeout(() => {
            actualizarPlaceholder('filtroAreaCampania', 'filtroAreaCampaniaPlaceholder');
          }, 50);
-         
+
          // Disparar evento change manualmente
          this.dispatchEvent(new Event('change'));
        }
@@ -1698,9 +2224,9 @@
      // Función para cargar fallas por empleado con scoring
     async function cargarFallasPorEmpleado() {
       console.log('🚀 Iniciando carga de fallas por empleado...');
-      
+
       const contenido = document.getElementById('contenidoEmpleados');
-      
+
       try {
         // Mostrar loading
         contenido.innerHTML = `
@@ -1713,20 +2239,20 @@
         `;
 
         const url = '/api/areas/fallas-empleados-scoring';
-         
+
          console.log('📡 Haciendo petición a:', url);
          const resp = await fetch(url);
-         
+
          if (!resp.ok) {
            throw new Error(`Error HTTP: ${resp.status} - ${resp.statusText}`);
          }
-         
+
          const data = await resp.json();
          console.log('📊 Datos recibidos:', data);
          console.log('📊 Primer empleado:', data.areas?.[0]?.empleados?.[0]);
 
          const areas = data.areas || [];
-         
+
          if (areas.length === 0) {
            contenido.innerHTML = `
              <div class="text-center py-5">
@@ -1739,7 +2265,7 @@
          }
 
          let html = '';
-         
+
          areas.forEach((area, index) => {
              const areaId = `area-${index}`;
              html += `
@@ -1783,13 +2309,13 @@
                    <div class="card-body p-3">
                      <div class="row g-3">
              `;
-             
+
              if (area.empleados && area.empleados.length > 0) {
              area.empleados.forEach(empleado => {
                  // Determinar color del nivel de riesgo
                  let riesgoColor = '#00d4aa';
                  let riesgoIcon = 'bi-check-circle-fill';
-                 
+
                  switch(empleado.nivel_riesgo) {
                    case 'Sin riesgo':
                      riesgoColor = '#00d4aa';
@@ -1812,11 +2338,11 @@
                      riesgoIcon = 'bi-exclamation-triangle-fill';
                      break;
                  }
-                 
-                 const cardStyle = (empleado.total_fallas || 0) > 0 ? 
-                   `border-left: 4px solid ${riesgoColor}; box-shadow: 0 2px 8px ${riesgoColor}40;` : 
+
+                 const cardStyle = (empleado.total_fallas || 0) > 0 ?
+                   `border-left: 4px solid ${riesgoColor}; box-shadow: 0 2px 8px ${riesgoColor}40;` :
                  'border-left: 4px solid #00d4aa; box-shadow: 0 2px 8px rgba(0,212,170,0.3);';
-               
+
                html += `
                    <div class="col-lg-4 col-md-6 col-sm-12">
                    <div class="card bg-dark border-0" style="${cardStyle}">
@@ -1826,7 +2352,7 @@
                            <i class="bi bi-person-fill me-2" style="color: #da02e5;"></i>
                              ${empleado.nombre || 'N/A'} ${empleado.apellido || 'N/A'}
                          </h6>
-                           <span class="badge" style="background: ${riesgoColor}; color: white; font-size: 0.75rem;" 
+                           <span class="badge" style="background: ${riesgoColor}; color: white; font-size: 0.75rem;"
                                  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
                                  title="<strong>Escala de Riesgo (100-0 puntos):</strong><br/>
                                  • Sin riesgo: 100 puntos<br/>
@@ -1899,13 +2425,11 @@
                              </button>
                            </div>
                            <div class="d-flex flex-wrap gap-1">
-                             <!-- Puntos base -->
                              <span class="badge" style="background: rgba(0,123,255,0.8); color: white; font-size: 0.7rem;">
                                <i class="bi bi-star-fill me-1"></i> Base: +100 pts
                              </span>
-                             
-                             <!-- Fallas activas por tipo -->
-                             ${(empleado.total_fallas || 0) > 0 && empleado.fallas_por_tipo ? 
+
+                             ${(empleado.total_fallas || 0) > 0 && empleado.fallas_por_tipo ?
                                Object.entries(empleado.fallas_por_tipo).map(([tipo, cantidad]) => {
                                  const iconos = {
                                    'CORREO': '📧',
@@ -1930,16 +2454,14 @@
                                  </span>`;
                                }).join('') : ''
                              }
-                             
-                             <!-- Penalización por falla en el pasado -->
-                             ${empleado.ha_fallado_en_pasado ? 
+
+                             ${empleado.ha_fallado_en_pasado ?
                                `<span class="badge" style="background: rgba(220,53,69,0.8); color: white; font-size: 0.7rem;">
                                  <i class="bi bi-exclamation-triangle-fill me-1"></i> Fallas pasadas (-${empleado.penalizacion_falla_pasado || 0} pts)
                                </span>` : ''
                              }
-                             
-                             <!-- Puntos ganados por reportes -->
-                             ${(empleado.total_reportados || 0) > 0 ? 
+
+                             ${(empleado.total_reportados || 0) > 0 ?
                                `<span class="badge" style="background: rgba(40,167,69,0.8); color: white; font-size: 0.7rem;">
                                  <i class="bi bi-check-circle-fill me-1"></i> Reportados: +${empleado.puntos_ganados || 0} pts
                                </span>` : ''
@@ -1961,7 +2483,7 @@
                  </div>
                `;
              }
-             
+
              html += `
                      </div>
                    </div>
@@ -1969,34 +2491,34 @@
                </div>
              `;
          });
-         
+
          contenido.innerHTML = html;
          console.log('✅ HTML generado y mostrado');
-         
+
          // Configurar iconos de colapso
          areas.forEach((area, index) => {
            const areaId = `area-${index}`;
            const collapseElement = document.getElementById(areaId);
            const iconElement = document.getElementById(`icon-${areaId}`);
-           
+
            if (collapseElement && iconElement) {
              collapseElement.addEventListener('show.bs.collapse', function () {
                iconElement.style.transform = 'rotate(180deg)';
              });
-             
+
              collapseElement.addEventListener('hide.bs.collapse', function () {
                iconElement.style.transform = 'rotate(0deg)';
              });
            }
          });
-         
+
          // Inicializar tooltips
          const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
          tooltipTriggerList.map(function (tooltipTriggerEl) {
            return new bootstrap.Tooltip(tooltipTriggerEl);
          });
          console.log('✅ Tooltips inicializados');
-         
+
        } catch (e) {
          console.error('❌ Error cargando fallas por empleado:', e);
          contenido.innerHTML = `
@@ -2017,34 +2539,34 @@
      // Cargar datos iniciales
      document.addEventListener('DOMContentLoaded', () => {
        console.log('🚀 DOM cargado, iniciando carga de datos...');
-       
-       cargarFallasPorFecha(); // Cargar primero el reporte por fecha
+
+       cargarFallasPorFecha([], [], false); // Cargar primero el reporte por fecha
        cargarFallasPorArea(); // Cargar también el reporte por área
        cargarFallasPorCampania(); // Cargar también el reporte por campaña
        cargarFallasPorEmpleado(); // Cargar también el reporte por empleado
        cargarKPITiempoRespuesta(); // Cargar KPI de tiempo de respuesta
        cargarKPITasaFallas(); // Cargar KPI de tasa de fallas
        cargarKPIPromedioScoring(); // Cargar KPI de promedio de scoring
-       
+
        // Inicializar tooltips
        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
          return new bootstrap.Tooltip(tooltipTriggerEl);
        });
-       
+
        // Inicializar funcionalidad del dropdown de estadísticas
        inicializarDropdownEstadisticas();
      });
-     
+
      // Función para inicializar el dropdown de estadísticas
      function inicializarDropdownEstadisticas() {
        const dropdownToggle = document.getElementById('dropdown-estadisticas');
        const dropdownItems = document.querySelectorAll('.nav-item.dropdown .dropdown-item');
        const kpisTab = document.getElementById('tab-kpis');
-       
+
        // Texto original del dropdown
        const originalDropdownText = '<i class="bi bi-bar-chart"></i> Estadísticas Fallas <i class="bi bi-chevron-down ms-1"></i>';
-       
+
        // Función para resetear el dropdown a su estado original
        function resetearDropdown() {
          dropdownToggle.innerHTML = originalDropdownText;
@@ -2052,38 +2574,38 @@
            dropdownItem.classList.remove('active');
          });
        }
-       
+
        // Manejar clics en los elementos del dropdown
        dropdownItems.forEach(item => {
          item.addEventListener('click', function(e) {
            e.preventDefault();
-           
+
            // Remover clase active de todos los elementos del dropdown
            dropdownItems.forEach(dropdownItem => {
              dropdownItem.classList.remove('active');
            });
-           
+
            // Agregar clase active al elemento clickeado
            this.classList.add('active');
-           
+
            // Cerrar el dropdown
            const dropdown = bootstrap.Dropdown.getInstance(dropdownToggle);
            if (dropdown) {
              dropdown.hide();
            }
-           
+
            // Actualizar el texto del botón del dropdown para mostrar la opción seleccionada
            const icon = this.querySelector('i');
            const text = this.textContent.trim();
            dropdownToggle.innerHTML = `${icon.outerHTML} ${text} <i class="bi bi-chevron-down ms-1"></i>`;
          });
        });
-       
+
        // Manejar clic en el tab de KPIs para resetear el dropdown
        kpisTab.addEventListener('click', function() {
          resetearDropdown();
        });
-       
+
        // Manejar clic en el tab de empleado para resetear el dropdown
        const empleadoTab = document.getElementById('tab-empleado');
        if (empleadoTab) {
@@ -2097,12 +2619,12 @@
            }, 100);
          });
        }
-       
+
        // Manejar el estado del dropdown cuando se abre/cierra
        dropdownToggle.addEventListener('show.bs.dropdown', function() {
          this.setAttribute('aria-expanded', 'true');
        });
-       
+
        dropdownToggle.addEventListener('hide.bs.dropdown', function() {
          this.setAttribute('aria-expanded', 'false');
        });
@@ -2117,20 +2639,20 @@
 
          // Animar el contador principal (más lento)
          animarContador('kpiTiempoRespuesta', data.tiempoRespuestaPromedio, 4);
-         
+
          // Animar métricas secundarias con delay escalonado
          setTimeout(() => {
            animarContador('kpiMediana', data.tiempoRespuestaMediana, 3, 'h');
          }, 500);
-         
+
          setTimeout(() => {
            animarContador('kpiP90', data.tiempoRespuestaP90, 3, 'h');
          }, 1000);
-         
+
          setTimeout(() => {
            animarContadorEntero('kpiTotalEventos', data.totalEventosReportados, 2, '');
          }, 1500);
-         
+
          // Actualizar clasificación con animación
          setTimeout(() => {
            document.getElementById('kpiClasificacion').textContent = data.clasificacion;
@@ -2139,21 +2661,21 @@
            document.getElementById('kpiDescripcion').style.opacity = '0';
            document.getElementById('kpiClasificacion').style.transition = 'opacity 1s ease-in-out';
            document.getElementById('kpiDescripcion').style.transition = 'opacity 1s ease-in-out';
-           
+
            setTimeout(() => {
              document.getElementById('kpiClasificacion').style.opacity = '1';
              document.getElementById('kpiDescripcion').style.opacity = '1';
            }, 100);
          }, 3000);
-         
+
          // Actualizar nivel y progreso
          const nivel = data.nivel;
          let porcentaje;
-         
+
          // Configurar barra de progreso y estado del nivel
          porcentaje = (nivel / 5) * 100;
          document.getElementById('kpiProgreso').className = 'progress-bar';
-         
+
          // Determinar clase y texto según el nivel
          let claseNivel, icono, texto;
          if (nivel === 1) {
@@ -2181,27 +2703,27 @@
            icono = 'bi-question-circle';
            texto = 'Nivel Desconocido';
          }
-         
+
          actualizarEstadoNivel(nivel, claseNivel, icono, texto);
-         
+
          // Animar la barra de progreso
          setTimeout(() => {
            document.getElementById('kpiProgreso').style.width = `${porcentaje}%`;
          }, 2000);
-         
+
          document.getElementById('kpiNivel').textContent = `${nivel}/5`;
-         
+
          // Actualizar indicador visual con delay
          setTimeout(() => {
            actualizarIndicadorNivel(nivel);
          }, 2500);
-         
+
          // Aplicar animaciones
          document.getElementById('kpiMediana').classList.add('counter-animate');
          document.getElementById('kpiP90').classList.add('counter-animate');
          document.getElementById('kpiTotalEventos').classList.add('counter-animate');
          document.getElementById('kpiClasificacion').classList.add('counter-animate');
-         
+
        } catch (e) {
          console.error('Error cargando KPI:', e);
          document.getElementById('kpiTiempoRespuesta').textContent = 'Error';
@@ -2215,18 +2737,18 @@
        const elemento = document.getElementById(elementId);
        const valorInicial = 0;
        const startTime = Date.now();
-       
+
        function animar() {
          const elapsed = (Date.now() - startTime) / 1000; // tiempo transcurrido en segundos
          const progress = Math.min(elapsed / duracion, 1); // progreso de 0 a 1
-         
+
          // Función de easing para desaceleración suave (ease-out)
          const easeOut = 1 - Math.pow(1 - progress, 3);
-         
+
          const valorActual = valorInicial + (valorFinal - valorInicial) * easeOut;
-         
+
          elemento.textContent = valorActual.toFixed(2) + sufijo;
-         
+
          if (progress < 1) {
            requestAnimationFrame(animar);
          } else {
@@ -2234,7 +2756,7 @@
            elemento.textContent = valorFinal.toFixed(2) + sufijo;
          }
        }
-       
+
        requestAnimationFrame(animar);
      }
 
@@ -2243,18 +2765,18 @@
        const elemento = document.getElementById(elementId);
        const valorInicial = 0;
        const startTime = Date.now();
-       
+
        function animar() {
          const elapsed = (Date.now() - startTime) / 1000; // tiempo transcurrido en segundos
          const progress = Math.min(elapsed / duracion, 1); // progreso de 0 a 1
-         
+
          // Función de easing para desaceleración suave (ease-out)
          const easeOut = 1 - Math.pow(1 - progress, 3);
-         
+
          const valorActual = valorInicial + (valorFinal - valorInicial) * easeOut;
-         
+
          elemento.textContent = Math.round(valorActual) + sufijo;
-         
+
          if (progress < 1) {
            requestAnimationFrame(animar);
          } else {
@@ -2262,7 +2784,7 @@
            elemento.textContent = Math.round(valorFinal) + sufijo;
          }
        }
-       
+
        requestAnimationFrame(animar);
      }
 
@@ -2272,23 +2794,23 @@
        const badgeNivel = document.getElementById('kpiBadgeNivel');
        const iconoNivel = document.getElementById('kpiIconoNivel');
        const textoNivel = document.getElementById('kpiTextoNivel');
-       
+
        // Limpiar clases anteriores
        estadoNivel.className = 'text-center mt-2';
        badgeNivel.className = 'badge fs-6 px-3 py-2';
-       
+
        // Aplicar nueva clase
        estadoNivel.classList.add(claseNivel);
-       
+
        // Actualizar contenido
        iconoNivel.className = `bi ${icono} me-1`;
        textoNivel.textContent = texto;
-       
+
        // Mostrar con animación
        estadoNivel.style.display = 'block';
        estadoNivel.style.opacity = '0';
        estadoNivel.style.transition = 'opacity 0.5s ease-in-out';
-       
+
        setTimeout(() => {
          estadoNivel.style.opacity = '1';
        }, 100);
@@ -2299,7 +2821,7 @@
        const niveles = document.querySelectorAll('.kpi-level');
        niveles.forEach((nivelElemento, index) => {
          nivelElemento.classList.remove('active', 'critical');
-         
+
          if (index < nivel) {
            nivelElemento.classList.add('active');
          }
@@ -2313,7 +2835,7 @@
        document.getElementById('kpiP90').classList.remove('counter-animate');
        document.getElementById('kpiTotalEventos').classList.remove('counter-animate');
        document.getElementById('kpiClasificacion').classList.remove('counter-animate');
-       
+
        // Recargar datos
        cargarKPITiempoRespuesta();
      });
@@ -2336,17 +2858,17 @@
            document.getElementById('kpiDescripcionFallas').textContent = data.descripcion;
            document.getElementById('kpiNivelFallas').textContent = '0/5';
            document.getElementById('kpiProgresoFallas').style.width = '0%';
-           
+
            // Aplicar estilo de datos insuficientes
            const kpiCard = document.querySelector('#panel-kpis .row:nth-child(3) .card');
            if (kpiCard) {
              kpiCard.classList.add('insuficiente-datos');
            }
-           
+
            // Ocultar indicador visual y estado del nivel
            document.getElementById('kpiIndicadorFallas').style.display = 'none';
            document.getElementById('kpiEstadoNivelFallas').style.display = 'none';
-           
+
            return;
          }
 
@@ -2358,20 +2880,20 @@
 
          // Animar el contador principal (más lento)
          animarContador('kpiTasaFallas', data.tasaFallas, 4);
-         
+
          // Animar métricas secundarias con delay escalonado
          setTimeout(() => {
            animarContadorEntero('kpiTotalIntentosFallas', data.totalIntentos, 3, '');
          }, 500);
-         
+
          setTimeout(() => {
            animarContadorEntero('kpiIntentosConFallas', data.intentosConFalla, 3, '');
          }, 1000);
-         
+
          setTimeout(() => {
            animarContadorEntero('kpiIntentosSinFallas', data.intentosSinFalla, 3, '');
          }, 1500);
-         
+
          // Actualizar clasificación con animación
          setTimeout(() => {
            document.getElementById('kpiClasificacionFallas').textContent = data.clasificacion;
@@ -2380,21 +2902,21 @@
            document.getElementById('kpiDescripcionFallas').style.opacity = '0';
            document.getElementById('kpiClasificacionFallas').style.transition = 'opacity 1s ease-in-out';
            document.getElementById('kpiDescripcionFallas').style.transition = 'opacity 1s ease-in-out';
-           
+
            setTimeout(() => {
              document.getElementById('kpiClasificacionFallas').style.opacity = '1';
              document.getElementById('kpiDescripcionFallas').style.opacity = '1';
            }, 100);
          }, 3000);
-         
+
          // Actualizar nivel y progreso
          const nivel = data.nivel;
          let porcentaje;
-         
+
          // Configurar barra de progreso y estado del nivel
          porcentaje = (nivel / 5) * 100;
          document.getElementById('kpiProgresoFallas').className = 'progress-bar';
-         
+
          // Determinar clase y texto según el nivel
          let claseNivel, icono, texto;
          if (nivel === 1) {
@@ -2422,32 +2944,32 @@
            icono = 'bi-question-circle';
            texto = 'Nivel Desconocido';
          }
-         
+
          actualizarEstadoNivelFallas(nivel, claseNivel, icono, texto);
-         
+
          // Animar la barra de progreso
          setTimeout(() => {
            document.getElementById('kpiProgresoFallas').style.width = `${porcentaje}%`;
          }, 2000);
-         
+
          document.getElementById('kpiNivelFallas').textContent = `${nivel}/5`;
-         
+
          // Mostrar indicador visual
          document.getElementById('kpiIndicadorFallas').style.display = 'flex';
          console.log('Mostrando indicador de fallas');
-         
+
          // Actualizar indicador visual con delay
          setTimeout(() => {
            console.log('Llamando actualizarIndicadorNivelFallas con nivel:', nivel);
            actualizarIndicadorNivelFallas(nivel);
          }, 2500);
-         
+
          // Aplicar animaciones
          document.getElementById('kpiTotalIntentosFallas').classList.add('counter-animate');
          document.getElementById('kpiIntentosConFallas').classList.add('counter-animate');
          document.getElementById('kpiIntentosSinFallas').classList.add('counter-animate');
          document.getElementById('kpiClasificacionFallas').classList.add('counter-animate');
-         
+
        } catch (e) {
          console.error('Error cargando KPI de tasa de fallas:', e);
          document.getElementById('kpiTasaFallas').textContent = 'Error';
@@ -2462,23 +2984,23 @@
        const badgeNivel = document.getElementById('kpiBadgeNivelFallas');
        const iconoNivel = document.getElementById('kpiIconoNivelFallas');
        const textoNivel = document.getElementById('kpiTextoNivelFallas');
-       
+
        // Limpiar clases anteriores
        estadoNivel.className = 'text-center mt-2';
        badgeNivel.className = 'badge fs-6 px-3 py-2';
-       
+
        // Aplicar nueva clase
        estadoNivel.classList.add(claseNivel);
-       
+
        // Actualizar contenido
        iconoNivel.className = `bi ${icono} me-1`;
        textoNivel.textContent = texto;
-       
+
        // Mostrar con animación
        estadoNivel.style.display = 'block';
        estadoNivel.style.opacity = '0';
        estadoNivel.style.transition = 'opacity 0.5s ease-in-out';
-       
+
        setTimeout(() => {
          estadoNivel.style.opacity = '1';
        }, 100);
@@ -2488,10 +3010,10 @@
      function actualizarIndicadorNivelFallas(nivel) {
        const niveles = document.querySelectorAll('#kpiIndicadorFallas .kpi-level');
        console.log('Actualizando indicador de tasa de fallas, nivel:', nivel, 'elementos encontrados:', niveles.length);
-       
+
        niveles.forEach((nivelElemento, index) => {
          nivelElemento.classList.remove('active', 'critical');
-         
+
          if (index < nivel) {
            nivelElemento.classList.add('active');
            console.log('Activando nivel', index + 1, 'para nivel', nivel);
@@ -2506,7 +3028,7 @@
        document.getElementById('kpiIntentosConFallas').classList.remove('counter-animate');
        document.getElementById('kpiIntentosSinFallas').classList.remove('counter-animate');
        document.getElementById('kpiClasificacionFallas').classList.remove('counter-animate');
-       
+
        // Recargar datos
        cargarKPITasaFallas();
      });
@@ -2515,10 +3037,10 @@
      function actualizarIndicadorVisual(indicadorId, nivel) {
        const niveles = document.querySelectorAll(`#${indicadorId} .kpi-level`);
        console.log('Actualizando indicador de scoring, nivel:', nivel, 'elementos encontrados:', niveles.length);
-       
+
        niveles.forEach((nivelElemento, index) => {
          nivelElemento.classList.remove('active', 'critical');
-         
+
          if (index < nivel) {
            nivelElemento.classList.add('active');
            console.log('Activando nivel', index + 1, 'para nivel', nivel);
@@ -2544,17 +3066,17 @@
            document.getElementById('kpiDescripcionScoring').textContent = data.descripcion;
            document.getElementById('kpiNivelScoring').textContent = '0/5';
            document.getElementById('kpiProgresoScoring').style.width = '0%';
-           
+
            // Aplicar estilo de datos insuficientes
            const kpiCard = document.querySelector('#panel-kpis .row:nth-child(4) .card');
            if (kpiCard) {
              kpiCard.classList.add('insuficiente-datos');
            }
-           
+
            // Ocultar indicador visual y estado del nivel
            document.getElementById('kpiIndicadorScoring').style.display = 'none';
            document.getElementById('kpiEstadoNivelScoring').style.display = 'none';
-           
+
            return;
          }
 
@@ -2566,16 +3088,16 @@
 
          // Animar el contador principal (más lento)
          animarContador('kpiPromedioScoring', data.promedioScoring, 4);
-         
+
          // Animar métricas secundarias con delay escalonado
          setTimeout(() => {
            animarContadorEntero('kpiMedianaScoring', data.medianaScoring, 3, '');
          }, 500);
-         
+
          setTimeout(() => {
            animarContadorEntero('kpiP10Scoring', data.percentil10Scoring, 3, '');
          }, 1000);
-         
+
          setTimeout(() => {
            animarContadorEntero('kpiTotalIntentosScoring', data.totalIntentosPhishing, 3, '');
          }, 1500);
@@ -2590,14 +3112,14 @@
          setTimeout(() => {
            const nivel = data.nivel;
            const porcentaje = (nivel / 5) * 100;
-           
+
            document.getElementById('kpiNivelScoring').textContent = `${nivel}/5`;
            document.getElementById('kpiProgresoScoring').style.width = `${porcentaje}%`;
-           
+
            // Actualizar colores de la barra de progreso según el nivel
            const progressBar = document.getElementById('kpiProgresoScoring');
            progressBar.className = 'progress-bar';
-           
+
            if (nivel >= 5) {
              progressBar.style.background = 'linear-gradient(90deg, #28a745, #20c997)';
            } else if (nivel >= 4) {
@@ -2609,15 +3131,15 @@
            } else {
              progressBar.style.background = 'linear-gradient(90deg, #dc3545, #fd7e14)';
            }
-           
+
            // Mostrar estado del nivel
            document.getElementById('kpiEstadoNivelScoring').style.display = 'block';
-           
+
            // Actualizar badge del nivel
            const badgeNivel = document.getElementById('kpiBadgeNivelScoring');
            const iconoNivel = document.getElementById('kpiIconoNivelScoring');
            const textoNivel = document.getElementById('kpiTextoNivelScoring');
-           
+
            if (nivel >= 5) {
              badgeNivel.className = 'badge fs-6 px-3 py-2 bg-success';
              iconoNivel.className = 'bi bi-shield-check me-1';
@@ -2639,15 +3161,15 @@
              iconoNivel.className = 'bi bi-exclamation-triangle-fill me-1';
              textoNivel.textContent = 'Presas del Phishing';
            }
-           
+
            // Mostrar indicador visual
            document.getElementById('kpiIndicadorScoring').style.display = 'flex';
-           
+
            // Actualizar indicador visual con delay
            setTimeout(() => {
              actualizarIndicadorVisual('kpiIndicadorScoring', nivel);
            }, 2600);
-           
+
          }, 2500);
 
        } catch (error) {
@@ -2674,7 +3196,7 @@
        document.getElementById('kpiP10Scoring').classList.remove('counter-animate');
        document.getElementById('kpiTotalIntentosScoring').classList.remove('counter-animate');
        document.getElementById('kpiClasificacionScoring').classList.remove('counter-animate');
-       
+
        // Recargar datos
        cargarKPIPromedioScoring();
      });
@@ -2682,27 +3204,27 @@
      // Función para mostrar detalle de eventos
      async function mostrarDetalleEventos(idUsuario) {
        console.log('🔍 Obteniendo detalle de eventos para usuario:', idUsuario);
-       
+
        try {
          const response = await fetch(`/api/scoring/empleado/${idUsuario}`);
          if (!response.ok) {
            throw new Error(`Error: ${response.status}`);
          }
-         
+
          const data = await response.json();
          console.log('📊 Datos detallados recibidos:', data);
-         
+
          // Actualizar nombre del empleado en el modal
          document.getElementById('nombreEmpleadoModal').textContent = `${data.nombre} ${data.apellido}`;
-         
+
          // Generar contenido del modal
          const contenido = generarContenidoDetalleEventos(data);
          document.getElementById('contenidoDetalleEventos').innerHTML = contenido;
-         
+
          // Mostrar el modal
          const modal = new bootstrap.Modal(document.getElementById('modalDetalleEventos'));
          modal.show();
-         
+
        } catch (error) {
          console.error('❌ Error obteniendo detalle de eventos:', error);
          alert('Error al obtener el detalle de eventos: ' + error.message);
@@ -2712,7 +3234,7 @@
      // Función para generar el contenido del modal
      function generarContenidoDetalleEventos(data) {
        const eventos = data.eventos_detalle || {};
-       
+
        let html = `
          <div class="row">
            <div class="col-12 mb-3">
@@ -2756,26 +3278,26 @@
              </h6>
              <div class="row">
          `;
-         
+
          eventos.activos.forEach(evento => {
            const iconos = {
              'CORREO': '📧',
-             'MENSAJE': '💬', 
+             'MENSAJE': '💬',
              'LLAMADA': '📞',
              'VIDEOLLAMADA': '📹'
            };
            const nombres = {
              'CORREO': 'Correo',
              'MENSAJE': 'Mensaje',
-             'LLAMADA': 'Llamada', 
+             'LLAMADA': 'Llamada',
              'VIDEOLLAMADA': 'Videollamada'
            };
-           
+
            // Formatear fecha a día/mes/año
-           const fechaFormateada = evento.fechaCreacion ? 
-             new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 
+           const fechaFormateada = evento.fechaCreacion ?
+             new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) :
              'Sin fecha';
-           
+
            html += `
              <div class="col-md-6 mb-2">
                <div class="card" style="background: rgba(255,107,107,0.1); border: 2px solid #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.2);">
@@ -2798,7 +3320,7 @@
              </div>
            `;
          });
-         
+
          html += `</div></div>`;
        }
 
@@ -2812,12 +3334,12 @@
              </h6>
              <div class="row">
          `;
-         
+
          eventos.reportados.forEach(evento => {
            const iconos = {
              'CORREO': '📧',
              'MENSAJE': '💬',
-             'LLAMADA': '📞', 
+             'LLAMADA': '📞',
              'VIDEOLLAMADA': '📹'
            };
            const nombres = {
@@ -2826,12 +3348,12 @@
              'LLAMADA': 'Llamada',
              'VIDEOLLAMADA': 'Videollamada'
            };
-           
+
            // Formatear fecha a día/mes/año
-           const fechaFormateada = evento.fechaCreacion ? 
-             new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 
+           const fechaFormateada = evento.fechaCreacion ?
+             new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) :
              'Sin fecha';
-           
+
            // Si el evento fue fallado en el pasado y luego reportado (tiene puntos de falla pasada)
            if (evento.haFalladoEnElPasado && evento.puntosFallaPasada && evento.puntosFallaPasada > 0) {
              html += `
@@ -2883,7 +3405,7 @@
              `;
            }
          });
-         
+
         html += `</div></div>`;
       }
 
@@ -2897,12 +3419,12 @@
             </h6>
             <div class="row">
         `;
-        
+
         eventos.pendientes.forEach(evento => {
           const iconos = {
             'CORREO': '📧',
             'MENSAJE': '💬',
-            'LLAMADA': '📞', 
+            'LLAMADA': '📞',
             'VIDEOLLAMADA': '📹'
           };
           const nombres = {
@@ -2911,12 +3433,12 @@
             'LLAMADA': 'Llamada',
             'VIDEOLLAMADA': 'Videollamada'
           };
-          
+
           // Formatear fecha a día/mes/año
-          const fechaFormateada = evento.fechaCreacion ? 
-            new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 
+          const fechaFormateada = evento.fechaCreacion ?
+            new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) :
             'Sin fecha';
-          
+
           html += `
             <div class="col-md-6 mb-2">
               <div class="card" style="background: rgba(108,117,125,0.1); border: 2px solid #6c757d; box-shadow: 0 0 10px rgba(108,117,125,0.2);">
@@ -2939,12 +3461,12 @@
             </div>
           `;
         });
-        
+
         html += `</div></div>`;
       }
 
       // Si no hay eventos
-      if ((!eventos.activos || eventos.activos.length === 0) && 
+      if ((!eventos.activos || eventos.activos.length === 0) &&
           (!eventos.reportados || eventos.reportados.length === 0) &&
           (!eventos.pendientes || eventos.pendientes.length === 0)) {
          html += `
@@ -2959,7 +3481,6 @@
      }
   </script>
 
-  <!-- Modal para detalle de eventos -->
   <div class="modal fade" id="modalDetalleEventos" tabindex="-1" aria-labelledby="modalDetalleEventosLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); color: white; border: 2px solid #da02e5; box-shadow: 0 0 20px rgba(218, 2, 229, 0.3);">
@@ -2972,8 +3493,7 @@
         </div>
         <div class="modal-body" style="background: rgba(0,0,0,0.3);">
           <div id="contenidoDetalleEventos">
-            <!-- Contenido se carga dinámicamente -->
-          </div>
+            </div>
         </div>
         <div class="modal-footer" style="border-top: 2px solid #da02e5; background: rgba(218, 2, 229, 0.1);">
           <button type="button" class="btn" data-bs-dismiss="modal" style="background: #da02e5; color: white; border: none; font-weight: bold;">Cerrar</button>
