@@ -100,37 +100,37 @@
             <div class="mb-4">
               <label class="form-label mb-3">Nivel de Dificultad</label>
               <div class="row g-2">
+
                 <div class="col-md-4">
-                  <div class="card h-100 cursor-pointer" 
-                       :class="{ 'border-0': nivel === 'Fácil', 'border-secondary': nivel !== 'Fácil' }"
-                       @click="nivel = 'Fácil'"
-                       :style="nivel === 'Fácil' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                  <div class="card bloque bloque-facil"
+                    @click="nivel = 'Fácil'"
+                       :style="nivel === 'Fácil' ? 'border-color: #198754;' : 'bloque-facil'">
                     <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;">🟢</div>
+                      <div style="font-size: 1em;"><i class="bi bi-puzzle-fill text-success"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Fácil</h6>
                       <small class="card-text" style="font-size: 0.7em;">phishintel@gmail.com</small>
                     </div>
                   </div>
                 </div>
+
                 <div class="col-md-4">
-                  <div class="card h-100 cursor-pointer" 
-                       :class="{ 'border-0': nivel === 'Medio', 'border-secondary': nivel !== 'Medio' }"
-                       @click="nivel = 'Medio'"
-                       :style="nivel === 'Medio' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                  <div class="card bloque bloque-medio"
+                    @click="nivel = 'Medio'"
+                       :style="nivel === 'Medio' ? 'border-color: #ffc107;' : 'bloque-medio'">
                     <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;">🟡</div>
+                      <div style="font-size: 1em;"><i class="bi bi-gear text-warning"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Medio</h6>
                       <small class="card-text" style="font-size: 0.7em;">pgcontrolcito.com</small>
                     </div>
                   </div>
                 </div>
+
                 <div class="col-md-4">
-                  <div class="card h-100 cursor-pointer" 
-                       :class="{ 'border-0': nivel === 'Difícil', 'border-secondary': nivel !== 'Difícil' }"
-                       @click="nivel = 'Difícil'"
-                       :style="nivel === 'Difícil' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                  <div class="card bloque bloque-dificil"
+                    @click="nivel = 'Difícil'"
+                       :style="nivel === 'Difícil' ? 'border-color: #dc3545;' : 'bloque-dificil'">
                     <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;">🔴</div>
+                      <div style="font-size: 1em;"><i class="bi bi-fire text-danger"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Difícil</h6>
                       <small class="card-text" style="font-size: 0.7em;">pgcontrol.com.ar</small>
                     </div>
@@ -172,7 +172,7 @@
                       <!-- Área -->
                       <div class="col-md-6">
                         <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
-                          <span class="me-2">🏢</span>
+                          <span class="me-2"><i class="bi bi-building"></i></span>
                           <div>
                             <small class="d-block" style="color: #ccc;">Área</small>
                             <strong>{{ filtroArea }}</strong>
@@ -183,7 +183,7 @@
                       <!-- Usuario -->
                       <div class="col-md-6">
                         <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
-                          <span class="me-2">👤</span>
+                          <span class="me-2"><i class="bi bi-person-fill"></i></span>
                           <div>
                             <small class="d-block" style="color: #ccc;">Usuario</small>
                             <strong>{{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}</strong>
@@ -194,7 +194,11 @@
                       <!-- Dificultad -->
                       <div class="col-12">
                         <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
-                          <span class="me-2">{{ nivel === 'Fácil' ? '🟢' : nivel === 'Medio' ? '🟡' : '🔴' }}</span>
+                          <span class="me-2">
+                            <i v-if="nivel === 'Fácil'" class="bi bi-puzzle-fill"></i>
+                            <i v-else-if="nivel === 'Medio'" class="bi bi-gear"></i>
+                            <i v-else class="bi bi-fire"></i>
+                          </span>
                           <div>
                             <small class="d-block" style="color: #ccc;">Dificultad</small>
                             <strong>{{ nivel }}</strong>
@@ -231,11 +235,11 @@
                       v-model="modalCuerpoTexto" 
                       class="form-control" 
                       rows="8" 
-                      style="background-color: #2d2d2d; color: white; border: 1px solid #444; resize: vertical;"
+                      style="margin-bottom: 15px; background-color: #2d2d2d; color: white; border: 1px solid #444; resize: vertical;"
                       placeholder="El contenido del email aparecerá aquí..."
                     ></textarea>
                     <small class="text-muted" style="color: #ccc !important;">
-                      💡 Puedes usar **texto en negrita** y *texto en cursiva*. Usa doble salto de línea para crear párrafos separados.
+                      <i class="bi bi-lightbulb-fill"></i> Puedes usar **texto en negrita** y *texto en cursiva*. Usa doble salto de línea para crear párrafos separados.
                     </small>
                   </div>
                 </div>

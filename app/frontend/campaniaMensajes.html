@@ -386,7 +386,7 @@
                       <!-- Área -->
                       <div class="col-md-6">
                         <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
-                          <span class="me-2">🏢</span>
+                            <span class="me-2"><i class="bi bi-building"></i></span>
                           <div>
                             <small class="d-block" style="color: #ccc;">Área</small>
                             <strong>{{ filtroArea }}</strong>
@@ -397,7 +397,7 @@
                       <!-- Usuario -->
                       <div class="col-md-6">
                         <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
-                          <span class="me-2">👤</span>
+                          <span class="me-2"><i class="bi bi-person-fill"></i></span>
                           <div>
                             <small class="d-block" style="color: #ccc;">Usuario</small>
                             <strong>{{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}</strong>
@@ -408,7 +408,11 @@
                       <!-- Dificultad -->
                       <div class="col-md-6">
                         <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
-                          <span class="me-2">{{ nivel === 'Fácil' ? '🟢' : nivel === 'Medio' ? '🟡' : '🔴' }}</span>
+                          <span class="me-2">
+                              <i v-if="nivel === 'Fácil'" class="bi bi-puzzle-fill"></i>
+                              <i v-else-if="nivel === 'Medio'" class="bi bi-gear"></i>
+                              <i v-else class="bi bi-fire"></i>
+                         </span>
                           <div>
                             <small class="d-block" style="color: #ccc;">Dificultad</small>
                             <strong>{{ nivel }}</strong>
@@ -419,7 +423,11 @@
                       <!-- Medio -->
                       <div class="col-md-6">
                         <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
-                          <span class="me-2">{{ medio === 'whatsapp' ? '💬' : medio === 'telegram' ? '📱' : '📲' }}</span>
+                          <span class="me-2">
+                              <i v-if="medio === 'whatsapp'" class="bi bi-whatsapp"></i>
+                              <i v-else-if="medio === 'telegram'" class="bi bi-telegram"></i>
+                              <i v-else class="bi bi-phone"></i>
+                          </span>
                           <div>
                             <small class="d-block" style="color: #ccc;">Medio</small>
                             <strong>{{ medio === 'whatsapp' ? 'WhatsApp' : medio === 'telegram' ? 'Telegram' : 'SMS' }}</strong>
@@ -431,11 +439,11 @@
                       <div class="col-12">
                         <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
                           <span class="me-2">
-                            {{ proveedor === 'bot' ? '🤖' : 
-                               proveedor === 'whapi' ? '☁️' : 
-                               proveedor === 'whapi-link-preview' ? '🔗' : 
-                               proveedor === 'twilio' ? '📞' : 
-                               proveedor === 'selenium' ? '🤖' : '📱' }}
+                              <i v-if="proveedor === 'bot' || proveedor === 'selenium'" class="bi bi-robot"></i>
+                              <i v-else-if="proveedor === 'whapi'" class="bi bi-cloud"></i>
+                              <i v-else-if="proveedor === 'whapi-link-preview'" class="bi bi-link-45deg"></i>
+                              <i v-else-if="proveedor === 'twilio'" class="bi bi-telephone"></i>
+                              <i v-else class="bi bi-phone"></i>
                           </span>
                           <div>
                             <small class="d-block" style="color: #ccc;">Proveedor</small>
