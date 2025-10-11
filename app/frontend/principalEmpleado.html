@@ -59,7 +59,7 @@
 
         <div class="row gy-4">
           <!-- Mi Scoring -->
-          <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+          <div class="col-lg-4 col-md-6 clickable" data-aos="zoom-in" data-aos-delay="200" onclick="redirigir('/principalEmpleadoScoring')">
             <div class="pricing-card">
               <div class="plan-header">
                 <div class="plan-icon">
@@ -77,15 +77,12 @@
                   <li><i class="bi bi-check-circle-fill"></i> Estadísticas detalladas</li>
                 </ul>
               </div>
-              <div class="plan-cta">
-                <a href="/principalEmpleadoScoring" class="btn-plan">Ver Mi Scoring</a>
-              </div>
             </div>
           </div><!-- End Mi Scoring -->
 
           <!-- Reportar Evento -->
-          <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="300">
-            <div class="pricing-card popular">
+          <div class="col-lg-4 col-md-6 clickable" data-aos="zoom-in" data-aos-delay="300" onclick="redirigir('/principalEmpleadoReportar')">
+            <div class="pricing-card">
               <div class="popular-tag">Más Usado</div>
               <div class="plan-header">
                 <div class="plan-icon">
@@ -102,9 +99,6 @@
                   <li><i class="bi bi-check-circle-fill"></i> Historial completo</li>
                   <li><i class="bi bi-check-circle-fill"></i> Confirmación automática</li>
                 </ul>
-              </div>
-              <div class="plan-cta">
-                <a href="/principalEmpleadoReportar" class="btn-plan">Reportar Evento</a>
               </div>
             </div>
           </div><!-- End Reportar Evento -->
@@ -162,6 +156,10 @@
         console.error('Error:', error);
         window.location.href = '/login';
       });
+    }
+
+    function redirigir(endpoint) {
+        window.location.href = endpoint;
     }
   </script>
 

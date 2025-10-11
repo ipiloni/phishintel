@@ -116,50 +116,45 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
               <label class="form-label mb-3">Tipo de Evento</label>
               <div class="row g-2">
                 <div class="col-md-3">
-                  <div class="card h-100 cursor-pointer" 
-                       :class="{ 'border-0': tipoEvento === 'CORREO', 'border-secondary': tipoEvento !== 'CORREO' }"
+                  <div class="card bloque bloque-normal"
                        @click="tipoEvento = 'CORREO'"
-                       :style="tipoEvento === 'CORREO' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                       :style="tipoEvento === 'CORREO' ? 'border-color: var(--accent-color);' : 'bloque-normal'">
                     <div class="card-body text-center p-2">
-                      <div style="font-size: 1.5em;">📧</div>
+                      <div style="font-size: 1.5em;"><i class="bi bi-mailbox"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Correo</h6>
                       <small class="card-text" style="font-size: 0.7em;">Electrónico</small>
                     </div>
                   </div>
                 </div>
                 <div class="col-md-3">
-                  <div class="card h-100 cursor-pointer" 
-                       :class="{ 'border-0': tipoEvento === 'MENSAJE', 'border-secondary': tipoEvento !== 'MENSAJE' }"
+                  <div class="card bloque bloque-normal"
                        @click="tipoEvento = 'MENSAJE'"
-                       :style="tipoEvento === 'MENSAJE' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                       :style="tipoEvento === 'MENSAJE' ? 'border-color: var(--accent-color);' : 'bloque-normal'">
                     <div class="card-body text-center p-2">
-                      <div style="font-size: 1.5em;">💬</div>
+                      <div style="font-size: 1.5em;"><i class="bi bi-cloud"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Mensaje</h6>
                       <small class="card-text" style="font-size: 0.7em;">WhatsApp/SMS</small>
                     </div>
                   </div>
                 </div>
                 <div class="col-md-3">
-                  <div class="card h-100 cursor-pointer" 
-                       :class="{ 'border-0': tipoEvento === 'LLAMADA', 'border-secondary': tipoEvento !== 'LLAMADA' }"
+                  <div class="card bloque bloque-normal"
                        @click="tipoEvento = 'LLAMADA'"
-                       :style="tipoEvento === 'LLAMADA' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                       :style="tipoEvento === 'LLAMADA' ? 'border-color: var(--accent-color);' : 'bloque-normal'">
                     <div class="card-body text-center p-2">
-                      <div style="font-size: 1.5em;">📞</div>
+                      <div style="font-size: 1.5em;"><i class="bi bi-telephone"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Llamada</h6>
                       <small class="card-text" style="font-size: 0.7em;">Telefónica</small>
                     </div>
                   </div>
                 </div>
                 <div class="col-md-3">
-                  <div class="card h-100 cursor-pointer" 
-                       :class="{ 'border-0': tipoEvento === 'VIDEOLLAMADA', 'border-secondary': tipoEvento !== 'VIDEOLLAMADA' }"
-                       @click="tipoEvento = 'VIDEOLLAMADA'"
-                       :style="tipoEvento === 'VIDEOLLAMADA' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
+                  <div class="card h-100 cursor-pointer border-danger"
+                  style="cursor: not-allowed; opacity: 0.6; background-color: #2d2d2d; color: white;">
                     <div class="card-body text-center p-2">
-                      <div style="font-size: 1.5em;">📹</div>
+                      <div style="font-size: 1.5em;"><i class="bi bi-camera-video"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Videollamada</h6>
-                      <small class="card-text" style="font-size: 0.7em;">Video Call</small>
+                      <small class="card-text" style="font-size: 0.7em;">Próximamente</small>
                     </div>
                   </div>
                 </div>
@@ -449,7 +444,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
               html += '</tbody></table></div>';
               container.innerHTML = html;
             } else {
-              container.innerHTML = '<p class="text-center text-muted">No tienes reportes anteriores.</p>';
+              container.innerHTML = '<p class="text-center" style="color: #b0b0b0)">No tienes reportes anteriores.</p>';
             }
           } catch (error) {
             console.error('Error cargando reportes:', error);
