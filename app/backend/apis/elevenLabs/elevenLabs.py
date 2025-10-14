@@ -61,10 +61,6 @@ def stt(ubicacion):
 
 def tts(texto, idVoz, estabilidad, velocidad):
 
-    if idVoz is None:
-        log.warning("No se ha elegido un id de Voz, se utilizara la predeterminada.")
-        idVoz = "O1CnH2NGEehfL1nmYACp"
-
     if estabilidad is not None and (estabilidad < 0.0 or estabilidad > 1.0):
         log.error("La estabilidad debe estar entre 0.0 y 1.0")
         return responseError("PARAMETRO_INVALIDO", "La estabilidad debe estar entre 0.0 y 1.0.", 400)
@@ -85,9 +81,16 @@ def tts(texto, idVoz, estabilidad, velocidad):
         return {"PARAMETRO_INVALIDO": "La velocidad debe ser 'Rapida', 'Normal' o 'Lenta'."}, 400
 
     try:
-        elevenlabs = ElevenLabs(
-            api_key=api_key_2,
-        )
+        if idVoz is None:
+            elevenlabs = ElevenLabs(
+                api_key=api_key,
+            )
+            log.warning("No se ha elegido un id de Voz, se utilizara la predeterminada.")
+            idVoz = "O1CnH2NGEehfL1nmYACp"
+        else:
+            elevenlabs = ElevenLabs(
+                api_key=api_key_2
+            )
 
         # Calling the text_to_speech conversion API with detailed parameters
         response = elevenlabs.text_to_speech.convert(
@@ -135,20 +138,28 @@ def tts(texto, idVoz, estabilidad, velocidad):
         return responseError("ERROR_ELEVENLABS", "Hubo un error en la llamada a ElevenLabs: " + str(e), 500)
 
 def clonarVoz(ubicacionArchivo, nombreUsuario):
-    load_dotenv()
-    elevenlabs = ElevenLabs(
-        api_key=api_key_2
-    )
-    voice = elevenlabs.voices.ivc.create(
-        name=nombreUsuario,
-        # Replace with the paths to your audio files.
-        # The more files you add, the better the clone will be.
-        files=[BytesIO(open(ubicacionArchivo, "rb").read())]
-    )
-    log.info(f"Se creo la voz bajo el ID:{voice.voice_id}")
+    try:
+        load_dotenv()
+        elevenlabs = ElevenLabs(
+            api_key=api_key_2
+        )
+        voice = elevenlabs.voices.ivc.create(
+            name=nombreUsuario,
+            # Replace with the paths to your audio files.
+            # The more files you add, the better the clone will be.
+            files=[BytesIO(open(ubicacionArchivo, "rb").read())]
+        )
+        log.info(f"Se creo la voz bajo el ID:{voice.voice_id}")
 
-    #if voice.status_code != 200:
-    #    log.error("No se pudo clonar la voz")
-    #    return responseError("ERROR_ELEVENLABS", "Hubo un error al clonar la voz: " + voice.json(), 500)
-    #Puede ser que vaya sin el .dict
-    return voice.dict()["voice_id"]
+        if not hasattr(voice, "voice_id") or voice.voice_id is None:
+            log.error("No se pudo clonar la voz")
+            return responseError("ERROR_ELEVENLABS", "Hubo un error al clonar la voz: " + voice.json(), 500)
+        # Puede ser que vaya sin el .dict
+        return voice.dict()["voice_id"]
+    except Exception as e:
+        log.exception("Error al clonar la voz con ElevenLabs")
+        return responseError(
+            "ERROR_ELEVENLABS",
+            f"Excepción al clonar la voz: {str(e)}",
+            500
+        )
