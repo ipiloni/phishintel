@@ -94,7 +94,7 @@ def tts(texto, idVoz, estabilidad, velocidad):
             voice_id=idVoz,
             output_format="mp3_22050_32",
             text=texto,
-            model_id="eleven_turbo_v2_5", # use the turbo model for low latency
+            model_id="eleven_flash_v2_5", # use the turbo model for low latency
             # Optional voice settings that allow you to customize the output
             voice_settings=VoiceSettings(
                 stability=estabilidad,
