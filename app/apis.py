@@ -163,7 +163,8 @@ def enviarMensajeWhatsappGrupoWhapi():
     return WhatsAppController.enviarMensajeWhapiGrupo(data)
 
 @apis.route("/api/clonar", methods=["POST"])
-def clonarVoz(data):
+def clonarVoz():
+    data = request.get_json()
     return ElevenLabsController.clonarVoz(data)
 
 # ------ # REGISTROS DE EVENTOS +  # ------ #

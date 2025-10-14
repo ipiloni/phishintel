@@ -7,6 +7,7 @@ from elevenlabs import VoiceSettings
 from elevenlabs.client import ElevenLabs
 from elevenlabs import play
 from flask import jsonify
+from io import BytesIO
 
 from app.backend.models.error import responseError
 from app.utils.logger import log
@@ -14,6 +15,7 @@ from app.utils.logger import log
 from app.utils.config import get
 
 api_key = get("ELEVEN_LABS_IGNA")
+api_key_2 = get("API_KEY_CLONACION_VOZ")
 
 def generarVoz(texto):
     load_dotenv()
@@ -84,7 +86,7 @@ def tts(texto, idVoz, estabilidad, velocidad):
 
     try:
         elevenlabs = ElevenLabs(
-            api_key=api_key,
+            api_key=api_key_2,
         )
 
         # Calling the text_to_speech conversion API with detailed parameters
@@ -133,15 +135,20 @@ def tts(texto, idVoz, estabilidad, velocidad):
         return responseError("ERROR_ELEVENLABS", "Hubo un error en la llamada a ElevenLabs: " + str(e), 500)
 
 def clonarVoz(ubicacionArchivo, nombreUsuario):
-    client = ElevenLabs(
-        base_url="https://api.elevenlabs.io"
+    load_dotenv()
+    elevenlabs = ElevenLabs(
+        api_key=api_key_2
     )
-    response = client.voices.ivc.create(
+    voice = elevenlabs.voices.ivc.create(
         name=nombreUsuario,
-        files=[ubicacionArchivo]
+        # Replace with the paths to your audio files.
+        # The more files you add, the better the clone will be.
+        files=[BytesIO(open(ubicacionArchivo, "rb").read())]
     )
-    if response.status_code != 200:
-        log.error("No se pudo clonar la voz")
-        return responseError("ERROR_ELEVENLABS", "Hubo un error al clonar la voz: " + response.json(), 500)
+    log.info(f"Se creo la voz bajo el ID:{voice.voice_id}")
+
+    #if voice.status_code != 200:
+    #    log.error("No se pudo clonar la voz")
+    #    return responseError("ERROR_ELEVENLABS", "Hubo un error al clonar la voz: " + voice.json(), 500)
     #Puede ser que vaya sin el .dict
-    return response.dict()["voice_id"]
+    return voice.dict()["voice_id"]

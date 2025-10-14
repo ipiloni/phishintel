@@ -41,13 +41,13 @@ class ElevenLabsController:
         if ubicacionArchivo is None:
             log.warn("No se ha especificado el archivo de voz")
             return responseError("ARCHIVO_DE_VOZ_INDEFINIDO", f"No se ha especificado el archivo de voz", 400)
-        response = UsuariosController.obtenerUsuario(idUsuario)
-        if response.status_code != 200:
-            log.error(f"No se encontró el usuario")
-            return responseError("USUARIO_NO_ENCONTRADO", f"No se ha encontrado el usuario de ID:{idUsuario}", 404)
-        from app.apis import exponerAudio
-        exponerAudio(f"{ubicacionArchivo}.mp3")# expone el archivo .mp3 a internet para que Twilio pueda reproducirlo
-        idVoz = elevenLabs.clonarVoz(ubicacionArchivo, response.get("nombreUsuario"))
+       # response = UsuariosController.obtenerUsuario(idUsuario)
+        #if response.status_code != 200:
+        #   log.error(f"No se encontró el usuario")
+        #   return responseError("USUARIO_NO_ENCONTRADO", f"No se ha encontrado el usuario de ID:{idUsuario}", 404)
+        #from app.apis import exponerAudio
+        #exponerAudio(f"{ubicacionArchivo}")# expone el archivo .mp3 a internet para que Twilio pueda reproducirlo
+        idVoz = elevenLabs.clonarVoz(ubicacionArchivo, idUsuario)
         dataUsuario = {"idVoz": idVoz}
         UsuariosController.editarUsuario(idUsuario, dataUsuario)
         log.info("La voz se ha creado correctamente")
