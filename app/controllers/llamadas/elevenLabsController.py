@@ -13,12 +13,14 @@ class ElevenLabsController:
     def generarTTS(data):
         log.info("Se recibio una solicitud para generar TTS: ", data)
 
+        modelId = data["modelo"]
         texto = data["texto"]
         idVoz = data["idVoz"]
         estabilidad = data["estabilidad"]
-        velocidad = data["velocidad"].strip().lower()
+        velocidad = data["velocidad"]
+        exageracion = data["exageracion"]
 
-        ttsElevenLabs = elevenLabs.tts(texto, idVoz, estabilidad, velocidad)
+        ttsElevenLabs = elevenLabs.tts(texto, idVoz, modelId, estabilidad, velocidad, exageracion)
 
         log.info("Finalizo la solicitud")
         return jsonify(ttsElevenLabs)

@@ -59,26 +59,20 @@ def stt(ubicacion):
         log.error("Hubo un error al generar el STT: " + str(e))
         return responseError("ERROR_ELEVENLABS", "Hubo un error en la llamada a ElevenLabs: " + str(e), 500)
 
-def tts(texto, idVoz, estabilidad, velocidad):
+def tts(texto, idVoz, modelId, estabilidad, velocidad, exageracion):
 
     if estabilidad is not None and (estabilidad < 0.0 or estabilidad > 1.0):
         log.error("La estabilidad debe estar entre 0.0 y 1.0")
         return responseError("PARAMETRO_INVALIDO", "La estabilidad debe estar entre 0.0 y 1.0.", 400)
 
+    if modelId is None:
+        modelId = "eleven_flash_v2_5"
+
     if estabilidad is None:
         estabilidad = 0.5
 
     if velocidad is None:
-        velocidad_num = 1.0
-    elif velocidad == "normal":
-        velocidad_num = 1.0
-    elif velocidad == "rapida":
-        velocidad_num = 1.2
-    elif velocidad == "lenta":
-        velocidad_num = 0.7
-    else:
-        log.error("La velocidad debe ser 'Rapida', 'Normal' o 'Lenta'.")
-        return {"PARAMETRO_INVALIDO": "La velocidad debe ser 'Rapida', 'Normal' o 'Lenta'."}, 400
+        velocidad = 0.6
 
     try:
         if idVoz is None:
@@ -92,24 +86,39 @@ def tts(texto, idVoz, estabilidad, velocidad):
                 api_key=api_key_2
             )
 
+        if modelId == "eleven_multilingual_v2":
+            response = elevenlabs.text_to_speech.convert(
+                voice_id=idVoz,
+                output_format="mp3_22050_32",
+                text=texto,
+                model_id="eleven_multilingual_v2",
+
+                voice_settings=VoiceSettings(
+                    stability=estabilidad,
+                    similarity_boost=1.0,
+                    style=exageracion,
+                    use_speaker_boost=True,
+                    speed=velocidad,
+                ),
+            )
+        else:
+            response = elevenlabs.text_to_speech.convert(
+                voice_id=idVoz,
+                output_format="mp3_22050_32",
+                text=texto,
+                model_id="eleven_flash_v2_5",  # use the turbo model for low latency
+
+                voice_settings=VoiceSettings(
+                    stability=estabilidad,
+                    similarity_boost=1.0,
+                    style=0.0,
+                    use_speaker_boost=False,
+                    speed=velocidad,
+                ),
+            )
+
         # Calling the text_to_speech conversion API with detailed parameters
-        response = elevenlabs.text_to_speech.convert(
-            voice_id=idVoz,
-            output_format="mp3_22050_32",
-            text=texto,
-            model_id="eleven_flash_v2_5", # use the turbo model for low latency
-            # Optional voice settings that allow you to customize the output
-            voice_settings=VoiceSettings(
-                stability=estabilidad,
-                    # Controla cuán repetitivo o predecible es el tono de voz.
-                    # Valores altos (~1.0): voz más monótona y consistente.
-                    # Valores bajos (~0.0): más emoción, variaciones en inflexión y ritmo.
-                similarity_boost=1.0,
-                style=0.0,
-                use_speaker_boost=True,
-                speed=velocidad_num,
-            ),
-        )
+
 
         root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
         audios_dir = os.path.join(root_dir, "audios")
