@@ -2222,6 +2222,46 @@
 
 
      // Función para cargar fallas por empleado con scoring
+    function ordenarTablaPorColumna(tabla, indiceColumna, ascendente) {
+      const tbody = tabla.querySelector('tbody');
+      const filas = Array.from(tbody.querySelectorAll('tr'));
+
+      const comparar = (a, b) => {
+        const celdaA = a.children[indiceColumna]?.textContent.trim() || '';
+        const celdaB = b.children[indiceColumna]?.textContent.trim() || '';
+        
+        // Para columnas de riesgo, usar orden específico
+        if (indiceColumna === 8) { // Columna Riesgo
+          const ordenRiesgo = {
+            'Sin riesgo': 0,
+            'Riesgo bajo': 1,
+            'Riesgo medio': 2,
+            'Riesgo alto': 3,
+            'Riesgo máximo': 4
+          };
+          const nivelA = ordenRiesgo[celdaA] ?? 999;
+          const nivelB = ordenRiesgo[celdaB] ?? 999;
+          const res = nivelA - nivelB;
+          return ascendente ? res : -res;
+        }
+        
+        // Para columnas numéricas (ID, Eventos, Puntos, Fallas activas, Reportados)
+        const numA = parseFloat(celdaA.replace(/[^0-9.-]+/g, ''));
+        const numB = parseFloat(celdaB.replace(/[^0-9.-]+/g, ''));
+        const esNumeroA = !isNaN(numA);
+        const esNumeroB = !isNaN(numB);
+
+        let res = 0;
+        if (esNumeroA && esNumeroB) {
+          res = numA - numB;
+        } else {
+          res = celdaA.localeCompare(celdaB, 'es', { sensitivity: 'base' });
+        }
+        return ascendente ? res : -res;
+      };
+
+      filas.sort(comparar).forEach(fila => tbody.appendChild(fila));
+    }
     async function cargarFallasPorEmpleado() {
       console.log('🚀 Iniciando carga de fallas por empleado...');
 
@@ -2305,13 +2345,28 @@
                      </div>
                  </h6>
                  </div>
-                 <div class="collapse" id="${areaId}">
-                   <div class="card-body p-3">
-                     <div class="row g-3">
+                <div class="collapse" id="${areaId}">
+                  <div class="card-body p-3">
+                   <div class="table-responsive">
+                      <table id="tabla-${areaId}" class="table table-dark table-hover align-middle mb-0" style="background-color:#111;color:#fff;">
+                        <thead style="background-color:#1a1a1a;border-bottom:2px solid #da02e5;">
+                          <tr class="text-center">
+                            <th class="sortable" data-col="0" style="color:#fff;width:20%;cursor:pointer;">Empleado <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                            <th class="sortable" data-col="1" style="color:#fff;width:8%;cursor:pointer;">ID <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                            <th class="sortable" data-col="2" style="color:#fff;width:10%;cursor:pointer;">Eventos <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                            <th class="sortable" data-col="3" style="color:#fff;width:10%;cursor:pointer;">Puntos <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                            <th class="sortable" data-col="4" style="color:#fff;width:14%;cursor:pointer;">Fallas activas <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                            <th class="sortable" data-col="5" style="color:#fff;width:12%;cursor:pointer;">Reportados <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                            <th style="color:#fff;width:18%;">Scoring <i class="bi bi-info-circle ms-1" style="color:#da02e5;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Scoring</strong><br/>Base: +100 puntos<br/><strong>Fórmula:</strong> 100 - Fallas activas - Fallas pasadas + Reportados"></i></th>
+                            <th style="color:#fff;width:4%;">Detalle</th>
+                            <th class="sortable" data-col="8" style="color:#fff;width:4%;cursor:pointer;">Riesgo <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                          </tr>
+                        </thead>
+                        <tbody>
              `;
 
-             if (area.empleados && area.empleados.length > 0) {
-             area.empleados.forEach(empleado => {
+            if (area.empleados && area.empleados.length > 0) {
+            area.empleados.forEach(empleado => {
                  // Determinar color del nivel de riesgo
                  let riesgoColor = '#00d4aa';
                  let riesgoIcon = 'bi-check-circle-fill';
@@ -2339,153 +2394,64 @@
                      break;
                  }
 
-                 const cardStyle = (empleado.total_fallas || 0) > 0 ?
-                   `border-left: 4px solid ${riesgoColor}; box-shadow: 0 2px 8px ${riesgoColor}40;` :
-                 'border-left: 4px solid #00d4aa; box-shadow: 0 2px 8px rgba(0,212,170,0.3);';
+               const desgloseBadges = (() => {
+                  const porTipo = (empleado.total_fallas || 0) > 0 && empleado.fallas_por_tipo ?
+                    Object.entries(empleado.fallas_por_tipo).map(([tipo, cantidad]) => {
+                      const iconos = { 'CORREO': '📧', 'MENSAJE': '💬', 'LLAMADA': '📞', 'VIDEOLLAMADA': '📹' };
+                      const nombres = { 'CORREO': 'Correo', 'MENSAJE': 'Mensaje', 'LLAMADA': 'Llamada', 'VIDEOLLAMADA': 'Videollamada' };
+                      const puntos = { 'CORREO': 10, 'MENSAJE': 15, 'LLAMADA': 20, 'VIDEOLLAMADA': 20 };
+                      return `<span class=\"badge\" style=\"background: rgba(255,107,107,0.8); color: white; font-size: 0.7rem;\">${iconos[tipo] || '❓'} ${nombres[tipo] || tipo} ${cantidad} activas (-${cantidad * (puntos[tipo] || 0)} pts)</span>`;
+                    }).join('') : '';
+                  const pasado = empleado.ha_fallado_en_pasado ? `<span class=\"badge\" style=\"background: rgba(220,53,69,0.8); color: white; font-size: 0.7rem;\"><i class=\"bi bi-exclamation-triangle-fill me-1\"></i> Fallas pasadas (-${empleado.penalizacion_falla_pasado || 0} pts)</span>` : '';
+                  const reportados = (empleado.total_reportados || 0) > 0 ? `<span class=\"badge\" style=\"background: rgba(40,167,69,0.8); color: white; font-size: 0.7rem;\"><i class=\"bi bi-check-circle-fill me-1\"></i> Reportados: +${empleado.puntos_ganados || 0} pts</span>` : '';
+                  return `${porTipo} ${pasado} ${reportados}`;
+                })();
 
-               html += `
-                   <div class="col-lg-4 col-md-6 col-sm-12">
-                   <div class="card bg-dark border-0" style="${cardStyle}">
-                     <div class="card-body p-3">
-                       <div class="d-flex justify-content-between align-items-start mb-2">
-                         <h6 class="mb-0 text-white" style="font-size: 0.9rem;">
-                           <i class="bi bi-person-fill me-2" style="color: #da02e5;"></i>
-                             ${empleado.nombre || 'N/A'} ${empleado.apellido || 'N/A'}
-                         </h6>
-                           <span class="badge" style="background: ${riesgoColor}; color: white; font-size: 0.75rem;"
-                                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-                                 title="<strong>Escala de Riesgo (100-0 puntos):</strong><br/>
-                                 • Sin riesgo: 100 puntos<br/>
-                                 • Riesgo bajo: 90-99 puntos<br/>
-                                 • Riesgo medio: 75-89 puntos<br/>
-                                 • Riesgo alto: 50-74 puntos<br/>
-                                 • Riesgo máximo: 0-49 puntos">
-                             <i class="bi ${riesgoIcon} me-1"></i>
-                             ${empleado.nivel_riesgo || 'Sin riesgo'}
-                         </span>
-                       </div>
-                         <div class="text-white small mb-2">
-                         <i class="bi bi-person-badge me-1" style="color: #da02e5;"></i>
-                           ID: ${empleado.idUsuario || 'N/A'}
-                       </div>
-                         <div class="row g-2">
-                           <div class="col-3">
-                             <div class="text-center">
-                               <div class="text-white small mb-1">
-                                 <i class="bi bi-bug-fill me-1" style="color: #ff6b6b;"></i>
-                                 Fallas activas
-                               </div>
-                               <div class="fw-bold" style="color: #ff6b6b; font-size: 1.1rem;">
-                                 ${empleado.total_fallas || 0}
-                               </div>
-                             </div>
-                           </div>
-                           <div class="col-3">
-                             <div class="text-center">
-                               <div class="text-white small mb-1">
-                                 <i class="bi bi-trophy-fill me-1" style="color: #da02e5;"></i>
-                                 Puntos
-                               </div>
-                               <div class="fw-bold" style="color: #da02e5; font-size: 1.1rem;">
-                                 ${empleado.puntos_restantes || 100}
-                               </div>
-                             </div>
-                           </div>
-                           <div class="col-3">
-                             <div class="text-center">
-                               <div class="text-white small mb-1">
-                                 <i class="bi bi-calendar-event me-1" style="color: #0dcaf0;"></i>
-                                 Eventos
-                               </div>
-                               <div class="fw-bold" style="color: #0dcaf0; font-size: 1.1rem;">
-                                 ${empleado.total_eventos || 0}
-                               </div>
-                             </div>
-                           </div>
-                           <div class="col-3">
-                             <div class="text-center">
-                               <div class="text-white small mb-1">
-                                 <i class="bi bi-check-circle-fill me-1" style="color: #28a745;"></i>
-                                 Reportados
-                               </div>
-                               <div class="fw-bold" style="color: #28a745; font-size: 1.1rem;">
-                                 ${empleado.total_reportados || 0}
-                               </div>
-                             </div>
-                           </div>
-                         </div>
-                         <div class="mt-2">
-                           <div class="text-white small mb-1 d-flex justify-content-between align-items-center">
-                             <span>
-                               <i class="bi bi-calculator me-1" style="color: #da02e5;"></i>
-                               Desglose del Scoring:
-                             </span>
-                             <button class="btn btn-sm btn-outline-light" onclick="mostrarDetalleEventos(${empleado.idUsuario})" title="Ver eventos específicos">
-                               <i class="bi bi-list-ul me-1"></i>Detalle
-                             </button>
-                           </div>
-                           <div class="d-flex flex-wrap gap-1">
-                             <span class="badge" style="background: rgba(0,123,255,0.8); color: white; font-size: 0.7rem;">
-                               <i class="bi bi-star-fill me-1"></i> Base: +100 pts
-                             </span>
-
-                             ${(empleado.total_fallas || 0) > 0 && empleado.fallas_por_tipo ?
-                               Object.entries(empleado.fallas_por_tipo).map(([tipo, cantidad]) => {
-                                 const iconos = {
-                                   'CORREO': '📧',
-                                   'MENSAJE': '💬',
-                                   'LLAMADA': '📞',
-                                   'VIDEOLLAMADA': '📹'
-                                 };
-                                 const nombres = {
-                                   'CORREO': 'Correo',
-                                   'MENSAJE': 'Mensaje',
-                                   'LLAMADA': 'Llamada',
-                                   'VIDEOLLAMADA': 'Videollamada'
-                                 };
-                                 const puntos = {
-                                   'CORREO': 10,
-                                   'MENSAJE': 15,
-                                   'LLAMADA': 20,
-                                   'VIDEOLLAMADA': 20
-                                 };
-                                 return `<span class="badge" style="background: rgba(255,107,107,0.8); color: white; font-size: 0.7rem;">
-                                   ${iconos[tipo] || '❓'} ${nombres[tipo] || tipo} ${cantidad} activas (-${cantidad * (puntos[tipo] || 0)} pts)
-                                 </span>`;
-                               }).join('') : ''
-                             }
-
-                             ${empleado.ha_fallado_en_pasado ?
-                               `<span class="badge" style="background: rgba(220,53,69,0.8); color: white; font-size: 0.7rem;">
-                                 <i class="bi bi-exclamation-triangle-fill me-1"></i> Fallas pasadas (-${empleado.penalizacion_falla_pasado || 0} pts)
-                               </span>` : ''
-                             }
-
-                             ${(empleado.total_reportados || 0) > 0 ?
-                               `<span class="badge" style="background: rgba(40,167,69,0.8); color: white; font-size: 0.7rem;">
-                                 <i class="bi bi-check-circle-fill me-1"></i> Reportados: +${empleado.puntos_ganados || 0} pts
-                               </span>` : ''
-                             }
-                           </div>
-                         </div>
-                     </div>
-                   </div>
-                 </div>
-               `;
+                html += `
+                  <tr class="text-center">
+                    <td>
+                      <span class="text-white"><i class="bi bi-person-fill me-2" style="color:#da02e5;"></i>${empleado.nombre || 'N/A'} ${empleado.apellido || 'N/A'}</span>
+                    </td>
+                    <td>
+                      <span class="text-white-50"><i class="bi bi-person-badge me-1" style="color:#da02e5;"></i>${empleado.idUsuario || 'N/A'}</span>
+                    </td>
+                    <td style="color:#0dcaf0;">${empleado.total_eventos || 0}</td>
+                    <td style="color:#da02e5;">${empleado.puntos_restantes || 100}</td>
+                    <td style="color:#ff6b6b;">${empleado.total_fallas || 0}</td>
+                    <td style="color:#28a745;">${empleado.total_reportados || 0}</td>
+                    <td>
+                      <div class="d-flex flex-wrap gap-1 justify-content-center">${desgloseBadges || '<span class=\"text-white-50\">—</span>'}</div>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm" style="background-color:#da02e5;border-color:#da02e5;color:#fff;" onclick="mostrarDetalleEventos(${empleado.idUsuario})" title="Ver eventos específicos">
+                        <i class="bi bi-list-ul me-1"></i>
+                      </button>
+                    </td>
+                    <td class="text-end">
+                      <span class="badge" style="background: ${riesgoColor}; color: white; font-size: 0.75rem;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Escala de Riesgo (100-0 puntos):</strong><br/>• Sin riesgo: 100 puntos<br/>• Riesgo bajo: 90-99 puntos<br/>• Riesgo medio: 75-89 puntos<br/>• Riesgo alto: 50-74 puntos<br/>• Riesgo máximo: 0-49 puntos">
+                        <i class="bi ${riesgoIcon} me-1"></i>${empleado.nivel_riesgo || 'Sin riesgo'}
+                      </span>
+                    </td>
+                  </tr>
+                `;
              });
              } else {
-               html += `
-                 <div class="col-12">
-                   <div class="text-center py-3 text-muted">
-                     <i class="bi bi-info-circle me-2"></i>
-                     No hay empleados en esta área
-                   </div>
-                 </div>
-               `;
+              html += `
+                <tr>
+                  <td colspan="9">
+                    <div class="text-center py-3 text-muted">
+                      <i class="bi bi-info-circle me-2"></i>
+                      No hay empleados en esta área
+                    </div>
+                  </td>
+                </tr>
+              `;
              }
 
              html += `
-                     </div>
+                        </tbody>
+                      </table>
+                    </div>
                    </div>
                  </div>
                </div>
@@ -2495,11 +2461,12 @@
          contenido.innerHTML = html;
          console.log('✅ HTML generado y mostrado');
 
-         // Configurar iconos de colapso
+        // Configurar iconos de colapso
          areas.forEach((area, index) => {
            const areaId = `area-${index}`;
            const collapseElement = document.getElementById(areaId);
            const iconElement = document.getElementById(`icon-${areaId}`);
+          const tabla = document.getElementById(`tabla-${areaId}`);
 
            if (collapseElement && iconElement) {
              collapseElement.addEventListener('show.bs.collapse', function () {
@@ -2510,6 +2477,31 @@
                iconElement.style.transform = 'rotate(0deg)';
              });
            }
+
+          // Inicializar sorting por columnas numéricas
+          if (tabla) {
+            const headers = tabla.querySelectorAll('thead th.sortable');
+            headers.forEach((th) => {
+              let asc = false;
+              th.addEventListener('click', () => {
+                const colIndex = parseInt(th.getAttribute('data-col'), 10);
+                asc = !asc;
+                ordenarTablaPorColumna(tabla, colIndex, asc);
+                // actualizar iconos del header clickeado
+                headers.forEach(h => {
+                  const icon = h.querySelector('.sort-icon');
+                  if (!icon) return;
+                  if (h === th) {
+                    icon.classList.remove('bi-caret-down','bi-caret-up-fill','bi-caret-down-fill');
+                    icon.classList.add(asc ? 'bi-caret-up-fill' : 'bi-caret-down-fill');
+                  } else {
+                    icon.classList.remove('bi-caret-up-fill','bi-caret-down-fill');
+                    icon.classList.add('bi-caret-down');
+                  }
+                });
+              });
+            });
+          }
          });
 
          // Inicializar tooltips
