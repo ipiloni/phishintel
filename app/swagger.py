@@ -1129,7 +1129,8 @@ def openapi_spec():
             },
             "/api/email/enviar-id": {
                 "post": {
-                    "summary": "Enviar email por ID de usuario",
+                    "summary": "Enviar email por ID de usuario con nivel de dificultad",
+                    "description": "Envía un email de phishing a un usuario específico. El nivel de dificultad determina el proveedor de envío: Fácil/Medio usa PhishIntel, Difícil usa PGControl.",
                     "tags": ["📧 Emails"],
                     "requestBody": {
                         "required": True,
@@ -1140,7 +1141,8 @@ def openapi_spec():
                                     "proveedor": "twilio",
                                     "idUsuario": 1,
                                     "asunto": "Notificación importante",
-                                    "cuerpo": "<p>Este es un email de prueba</p>"
+                                    "cuerpo": "<p>Este es un email de prueba</p>",
+                                    "dificultad": "Medio"
                                 }
                             }
                         }
@@ -2259,12 +2261,13 @@ def openapi_spec():
                 },
                 "EmailEnviarID": {
                     "type": "object",
-                    "required": ["proveedor", "idUsuario", "asunto", "cuerpo"],
+                    "required": ["proveedor", "idUsuario", "asunto", "cuerpo", "dificultad"],
                     "properties": {
                         "proveedor": {"type": "string", "enum": ["twilio", "smtp"]},
                         "idUsuario": {"type": "integer"},
                         "asunto": {"type": "string"},
-                        "cuerpo": {"type": "string"}
+                        "cuerpo": {"type": "string"},
+                        "dificultad": {"type": "string", "enum": ["Fácil", "Medio", "Difícil"], "description": "Nivel de dificultad del email de phishing"}
                     }
                 },
                 "EmailGenerar": {

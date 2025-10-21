@@ -103,10 +103,10 @@
 
                 <div class="col-md-4">
                   <div class="card bloque bloque-facil"
-                    @click="nivel = 'Fácil'"
-                       :style="nivel === 'Fácil' ? 'border-color: #198754;' : 'bloque-facil'">
+                       @click="nivel = 'Fácil'"
+                       :class="{ 'seleccionado': nivel === 'Fácil' }">
                     <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;"><i class="bi bi-puzzle-fill text-success"></i></div>
+                      <div style="font-size: 1em;"><i class="bi bi-puzzle-fill"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Fácil</h6>
                       <small class="card-text" style="font-size: 0.7em;">phishintel@gmail.com</small>
                     </div>
@@ -115,10 +115,10 @@
 
                 <div class="col-md-4">
                   <div class="card bloque bloque-medio"
-                    @click="nivel = 'Medio'"
-                       :style="nivel === 'Medio' ? 'border-color: #ffc107;' : 'bloque-medio'">
+                       @click="nivel = 'Medio'"
+                       :class="{ 'seleccionado': nivel === 'Medio' }">
                     <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;"><i class="bi bi-gear text-warning"></i></div>
+                      <div style="font-size: 1em;"><i class="bi bi-shield-fill-x"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Medio</h6>
                       <small class="card-text" style="font-size: 0.7em;">pgcontrolcito.com</small>
                     </div>
@@ -127,15 +127,16 @@
 
                 <div class="col-md-4">
                   <div class="card bloque bloque-dificil"
-                    @click="nivel = 'Difícil'"
-                       :style="nivel === 'Difícil' ? 'border-color: #dc3545;' : 'bloque-dificil'">
+                       @click="nivel = 'Difícil'"
+                       :class="{ 'seleccionado': nivel === 'Difícil' }">
                     <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;"><i class="bi bi-fire text-danger"></i></div>
+                      <div style="font-size: 1em;"><i class="bi bi-fire"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Difícil</h6>
                       <small class="card-text" style="font-size: 0.7em;">pgcontrol.com.ar</small>
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
 
@@ -318,7 +319,8 @@
             proveedor: "twilio",
             idUsuario: null, 
             asunto: "",
-            cuerpo: ""
+            cuerpo: "",
+            dificultad: ""
           }
         };
       },
@@ -342,7 +344,9 @@
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam.`,
+                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, 
+                La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. 
+                Pone un tono mas corporativo para que no llegue a spam.`,
                 formato: "html",
                 nivel: this.nivel
               })
@@ -358,6 +362,7 @@
             this.emailGenerado.asunto = data.asunto;
             this.emailGenerado.cuerpo = data.cuerpo;
             this.emailGenerado.idUsuario = this.filtroUsuario.idUsuario;
+            this.emailGenerado.dificultad = this.nivel;
 
             // Abrir modal
             const modal = new bootstrap.Modal(document.getElementById("previewModal"));
@@ -392,6 +397,7 @@
             this.modalCuerpoTexto = this.htmlToText(data.cuerpo || "Sin cuerpo");
             this.emailGenerado.asunto = data.asunto;
             this.emailGenerado.cuerpo = data.cuerpo;
+            this.emailGenerado.dificultad = this.nivel;
 
           } catch (e) {
             console.error("Error:", e);
@@ -408,6 +414,8 @@
             this.emailGenerado.asunto = this.modalAsunto;
             // Convertir el texto editado de vuelta a HTML
             this.emailGenerado.cuerpo = this.textToHtml(this.modalCuerpoTexto);
+            // Asegurar que la dificultad esté incluida
+            this.emailGenerado.dificultad = this.nivel;
             
             const resp = await fetch("http://localhost:8080/api/email/enviar-id", {
               method: "POST",

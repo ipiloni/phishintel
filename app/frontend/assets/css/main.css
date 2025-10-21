@@ -2673,40 +2673,79 @@ section,
   }
 }
 
-.bloque-facil {
-  border-color: #b0b0b0;
+/* --- Estilos Base para TODOS los bloques --- */
+.bloque {
+  cursor: pointer;
+  
+  /* Borde transparente para evitar saltos de layout */
+  border: 3px solid transparent; 
+  
+  /* Transiciones suaves para todos los efectos */
+  transition: border-color 0.2s ease, 
+              box-shadow 0.2s ease, 
+              transform 0.2s ease;
 }
 
-.bloque-facil:hover {
-  border-color: #198754;
-  border: 2px solid var(#198754);
+/* Estilos de fuente que estaban inline */
+.bloque .card-body div:first-child { /* Contenedor del ícono */
+  font-size: 1em;
+}
+.bloque .card-body .card-title {
+  font-size: 0.8em;
+}
+.bloque .card-body .card-text {
+  font-size: 0.7em;
 }
 
-.bloque-medio {
-  border-color: #b0b0b0;
+/* Estilo base del ícono (blanco por defecto) */
+.bloque .card-body .bi {
+  color: white;
+  transition: color 0.2s ease;
+  font-size: 2em;
 }
 
-.bloque-medio:hover {
-  border-color: #ffc107;
-  border: 2px solid var(#ffc107);
+
+/* --- Nivel Fácil --- */
+/* Aplica estos estilos CUANDO el mouse esté encima O la clase 'seleccionado' esté presente */
+.bloque-facil:hover,
+.bloque-facil.seleccionado {
+  border-color: #F98AFF;
+  box-shadow: 0 6px 20px rgba(218, 2, 229, 0.4);
+  transform: translateY(-1px); /* Efecto de "levantar" */
 }
 
-.bloque-dificil {
-  border-color: #b0b0b0;
+/* Cambia el color del ícono (sea cual sea) dentro del bloque fácil */
+.bloque-facil:hover .bi,
+.bloque-facil.seleccionado .bi {
+  color: #F98AFF;
 }
 
-.bloque-dificil:hover {
-  border-color: #dc3545;
-  border: 2px solid var(#dc3545);
+
+/* --- Nivel Medio --- */
+.bloque-medio:hover,
+.bloque-medio.seleccionado {
+  border-color: #F200FF; /* Púrpura medio */
+  box-shadow: 0 6px 20px rgba(218, 2, 229, 0.4);
+  transform: translateY(-1px);
 }
 
-.bloque-normal {
-  border-color: #b0b0b0;
+.bloque-medio:hover .bi,
+.bloque-medio.seleccionado .bi {
+  color: #F200FF;
 }
 
-.bloque-normal:hover {
-  border-color: var(--accent-color);
-  border: 1px solid var(--accent-color);
+
+/* --- Nivel Difícil --- */
+.bloque-dificil:hover,
+.bloque-dificil.seleccionado {
+  border-color: #9B00A3; /* Púrpura oscuro */
+  box-shadow: 0 6px 20px rgba(218, 2, 229, 0.4);
+  transform: translateY(-1px);
+}
+
+.bloque-dificil:hover .bi,
+.bloque-dificil.seleccionado .bi {
+  color: #9B00A3;
 }
 
 .bloque {

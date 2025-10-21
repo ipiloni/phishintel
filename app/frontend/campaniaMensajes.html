@@ -103,78 +103,39 @@
 
                 <div class="col-md-4">
                   <div class="card bloque bloque-facil"
-                    @click="nivel = 'Fácil'"
-                       :style="nivel === 'Fácil' ? 'border-color: #198754;' : 'bloque-facil'">
+                       @click="nivel = 'Fácil'"
+                       :class="{ 'seleccionado': nivel === 'Fácil' }">
                     <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;"><i class="bi bi-puzzle-fill text-success"></i></div>
+                      <div style="font-size: 1em;"><i class="bi bi-puzzle-fill"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Fácil</h6>
                       <small class="card-text" style="font-size: 0.7em;">Directo y obvio</small>
                     </div>
                   </div>
                 </div>
-
-                <!--<div class="col-md-4">
-                  <div class="card h-100 cursor-pointer" 
-                       :class="{ 'border-0': nivel === 'Fácil', 'border-secondary': nivel !== 'Fácil' }"
-                       @click="nivel = 'Fácil'"
-                       :style="nivel === 'Fácil' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
-                    <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;"><i class="bi bi-puzzle-fill text-success"></i></div>
-                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Fácil</h6>
-                      <small class="card-text" style="font-size: 0.7em;">Directo y obvio</small>
-                    </div>
-                  </div>
-                </div>-->
-
+                
                 <div class="col-md-4">
                   <div class="card bloque bloque-medio"
-                    @click="nivel = 'Medio'"
-                       :style="nivel === 'Medio' ? 'border-color: #ffc107;' : 'bloque-medio'">
+                       @click="nivel = 'Medio'"
+                       :class="{ 'seleccionado': nivel === 'Medio' }">
                     <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;"><i class="bi bi-gear text-warning"></i></div>
+                      <div style="font-size: 1em;"><i class="bi bi-shield-fill-x"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Medio</h6>
-                      <small class="card-text" style="font-size: 0.7em;">Contexto corporativo</small>
+                      <small class="card-text" style="font-size: 0.7em;">Mensaje Elaborado</small>
                     </div>
                   </div>
                 </div>
-
-                <!--<div class="col-md-4">
-                  <div class="card h-100 cursor-pointer"
-                       :class="{ 'border-0': nivel === 'Medio', 'border-secondary': nivel !== 'Medio' }"
-                       @click="nivel = 'Medio'"
-                       :style="nivel === 'Medio' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
-                    <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;"><i class="bi bi-gear text-warning"></i></div>
-                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Medio</h6>
-                      <small class="card-text" style="font-size: 0.7em;">Contexto corporativo</small>
-                    </div>
-                  </div>
-                </div>-->
 
                 <div class="col-md-4">
                   <div class="card bloque bloque-dificil"
-                    @click="nivel = 'Difícil'"
-                       :style="nivel === 'Difícil' ? 'border-color: #dc3545;' : 'bloque-dificil'">
+                       @click="nivel = 'Difícil'"
+                       :class="{ 'seleccionado': nivel === 'Difícil' }">
                     <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;"><i class="bi bi-fire text-danger"></i></div>
+                      <div style="font-size: 1em;"><i class="bi bi-fire"></i></div>
                       <h6 class="card-title mb-0" style="font-size: 0.8em;">Difícil</h6>
-                      <small class="card-text" style="font-size: 0.7em;">Sofisticado y personalizado</small>
+                      <small class="card-text" style="font-size: 0.7em;">Realista</small>
                     </div>
                   </div>
                 </div>
-
-                <!--<div class="col-md-4">
-                  <div class="card h-100 cursor-pointer" 
-                       :class="{ 'border-0': nivel === 'Difícil', 'border-secondary': nivel !== 'Difícil' }"
-                       @click="nivel = 'Difícil'"
-                       :style="nivel === 'Difícil' ? 'background-color: #da02e5; color: white; cursor: pointer; transition: all 0.3s ease;' : 'background-color: #2d2d2d; color: white; cursor: pointer; transition: all 0.3s ease;'">
-                    <div class="card-body text-center p-1">
-                      <div style="font-size: 1em;"><i class="bi bi-fire text-danger"></i></div>
-                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Difícil</h6>
-                      <small class="card-text" style="font-size: 0.7em;">Sofisticado y personalizado</small>
-                    </div>
-                  </div>
-                </div>-->
 
               </div>
             </div>

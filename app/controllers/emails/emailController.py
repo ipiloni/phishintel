@@ -9,7 +9,7 @@ from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.tipoEvento import TipoEvento
 from app.backend.models.usuarioxevento import UsuarioxEvento
 from app.config.db_config import SessionLocal
-from app.backend.apis.twilio.sendgrid import enviarMail as enviarMailTwilio, enviarNotificacionEmail
+from app.backend.apis.twilio.sendgrid import enviarMail as enviarMailTwilio, enviarNotificacionEmail, enviarMailPG
 from app.backend.apis.smtp.smtpconnection import SMTPConnection
 from app.controllers.aiController import AIController
 from app.utils.logger import log
@@ -20,14 +20,15 @@ class EmailController:
 
     @staticmethod
     def enviarMailPorID(data):
-        if not data or "proveedor" not in data or "idUsuario" not in data or "asunto" not in data or "cuerpo" not in data:
+        if not data or "proveedor" not in data or "idUsuario" not in data or "asunto" not in data or "cuerpo" not in data or "dificultad" not in data:
             return responseError("CAMPOS_OBLIGATORIOS",
-                                 "Faltan campos obligatorios como 'proveedor', 'idUsuario', 'asunto' o 'cuerpo'", 400)
+                                 "Faltan campos obligatorios como 'proveedor', 'idUsuario', 'asunto', 'cuerpo' o 'dificultad'", 400)
 
         proveedor = data["proveedor"]
         id_usuario = data["idUsuario"]
         asunto = data["asunto"]
         cuerpo = data["cuerpo"]
+        dificultad = data["dificultad"]
 
         session = SessionLocal()
         try:
@@ -68,17 +69,29 @@ class EmailController:
             )
             cuerpo_con_boton = f"{cuerpo}{boton_html}"
 
-            # Enviar email
+            # Enviar email según proveedor y dificultad
             if proveedor == "twilio":
-                response = enviarNotificacionEmail(asunto, cuerpo_con_boton, "phishingintel@gmail.com")
-                log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
+                if dificultad.lower() in ["fácil", "facil", "medio", "media"]:
+                    # TODO: Hardcoded - destinatario debe ser configurable
+                    log.info(f"Enviando email con dificultad '{dificultad}' usando PhishIntel API")
+                    response = enviarNotificacionEmail(asunto, cuerpo_con_boton, "phishingintel@gmail.com")
+                    log.info(f"Respuesta del servicio Twilio sendgrid (PhishIntel): {response.status_code}")
+                elif dificultad.lower() in ["difícil", "dificil"]:
+                    # TODO: Hardcoded - remitente y destinatario deben ser configurables
+                    log.info(f"Enviando email con dificultad '{dificultad}' usando PGControl API")
+                    response = enviarMailPG(asunto, cuerpo_con_boton, "juan.perez@pgcontrol.com.ar", "phishingintel@gmail.com")
+                    log.info(f"Respuesta del servicio Twilio sendgrid (PGControl): {response.status_code}")
+                else:
+                    session.rollback()
+                    return responseError("DIFICULTAD_INVALIDA", "Dificultad no reconocida", 400)
             elif proveedor == "smtp":
+                # TODO: Hardcoded - configuración SMTP debe ser configurable
                 smtp = SMTPConnection("mail.pgcontrol.com.ar", "26")
                 smtp.login("juan.perez@pgcontrol.com.ar", "juan.perez1")
                 message = smtp.compose_message(
                     sender="juan.perez@pgcontrol.com.ar",
-                    name="Administración PGControl",
-                    recipients=[usuario.correo],
+                    name="Juan Perez de PG Control",
+                    recipients=["phishingintel@gmail.com"],
                     subject=asunto,
                     html=cuerpo_con_boton
                 )
@@ -93,6 +106,10 @@ class EmailController:
 
         except Exception as e:
             log.error(f"Error en enviarMailPorID: {str(e)}")
+            log.error(f"Tipo de error: {type(e).__name__}")
+            if hasattr(e, 'response'):
+                log.error(f"Response status: {e.response.status_code if hasattr(e.response, 'status_code') else 'N/A'}")
+                log.error(f"Response body: {e.response.text if hasattr(e.response, 'text') else 'N/A'}")
             session.rollback()
             session.close()
             return responseError("ERROR", f"Hubo un error al enviar mail: {str(e)}", 500)
