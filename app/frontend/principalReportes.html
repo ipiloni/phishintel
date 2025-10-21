@@ -244,9 +244,9 @@
       }
 
       .card-header[data-bs-toggle="collapse"]:hover {
-        background: linear-gradient(135deg, #e533f0, #f066ff) !important;
         transform: translateY(-1px);
         box-shadow: 0 6px 20px rgba(218, 2, 229, 0.4);
+        border: 1px solid rgb(218, 2, 229); /* Added purple border */
       }
 
       .bi-chevron-down {
@@ -2317,32 +2317,40 @@
                      ${area.nombreArea || 'Área sin nombre'}
                        <i class="bi bi-chevron-down ms-2" id="icon-${areaId}"></i>
                      </h6>
-                   <div class="d-flex gap-2 flex-wrap mt-2">
-                       <span class="badge" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
-                         <i class="bi bi-people-fill me-1"></i>
-                       ${area.empleados ? area.empleados.length : 0} empleados
+                  <div class="d-flex justify-content-between align-items-center mt-2">
+                      <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge" style="background: rgba(204,0,204,0.9); color: white; border: 1px solid rgba(218,2,229,0.5);">
+                          <i class="bi bi-people-fill me-1"></i>
+                        ${area.empleados ? area.empleados.length : 0} empleados
+                        </span>
+                        <span class="badge" style="background: rgba(255,51,255,0.9); color: white;">
+                        <i class="bi bi-trophy-fill me-1"></i>
+                        ${area.promedio_puntos || 0} pts promedio
+                        </span>
+                      </div>
+                      <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge" style="background: rgba(204,0,204,0.9); color: white;">
+                        <i class="bi bi-calendar-event me-1"></i>
+                        ${area.total_eventos || 0} eventos
                        </span>
-                       <span class="badge" style="background: rgba(255,107,107,0.8); color: white;">
-                         <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                       ${area.empleados_con_fallas || 0} con fallas
-                       </span>
-                       <span class="badge" style="background: rgba(255,193,7,0.8); color: #000;">
-                         <i class="bi bi-bug-fill me-1"></i>
-                       ${area.total_fallas || 0} fallas activas
-                     </span>
-                     <span class="badge" style="background: rgba(218,2,229,0.8); color: white;">
-                       <i class="bi bi-trophy-fill me-1"></i>
-                       ${area.promedio_puntos || 0} pts promedio
-                     </span>
-                     <span class="badge" style="background: rgba(0,123,255,0.8); color: white;">
-                       <i class="bi bi-calendar-event me-1"></i>
-                       ${area.total_eventos || 0} eventos
-                     </span>
-                     <span class="badge" style="background: rgba(40,167,69,0.8); color: white;">
-                       <i class="bi bi-check-circle-fill me-1"></i>
-                       ${area.total_reportados || 0} reportados
-                       </span>
-                     </div>
+                        ${(area.empleados_con_fallas && area.empleados_con_fallas > 0) ? `
+                        <span class="badge" style="background: #540E59; color: white;">
+                          <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        ${area.empleados_con_fallas} empleados con fallas
+                        </span>
+                        ` : ''}
+                        ${(area.total_fallas && area.total_fallas > 0) ? `
+                        <span class="badge" style="background: #540E59; color: white;">
+                          <i class="bi bi-bug-fill me-1"></i>
+                        ${area.total_fallas} fallas activas total
+                        </span>
+                        ` : ''}
+                      <span class="badge" style="background: rgba(255,51,255,0.9); color: white;">
+                        <i class="bi bi-check-circle-fill me-1"></i>
+                        ${area.total_reportados || 0} reportados
+                        </span>
+                      </div>
+                    </div>
                  </h6>
                  </div>
                 <div class="collapse" id="${areaId}">
@@ -2358,7 +2366,7 @@
                             <th class="sortable" data-col="4" style="color:#fff;width:14%;cursor:pointer;">Fallas activas <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                             <th class="sortable" data-col="5" style="color:#fff;width:12%;cursor:pointer;">Reportados <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                             <th style="color:#fff;width:18%;">Scoring <i class="bi bi-info-circle ms-1" style="color:#da02e5;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Scoring</strong><br/>Base: +100 puntos<br/><strong>Fórmula:</strong> 100 - Fallas activas - Fallas pasadas + Reportados"></i></th>
-                            <th style="color:#fff;width:4%;">Detalle</th>
+                            <th style="color:#fff;width:4%;">Detalles</th>
                             <th class="sortable" data-col="8" style="color:#fff;width:4%;cursor:pointer;">Riesgo <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                           </tr>
                         </thead>
@@ -2368,57 +2376,56 @@
             if (area.empleados && area.empleados.length > 0) {
             area.empleados.forEach(empleado => {
                  // Determinar color del nivel de riesgo
-                 let riesgoColor = '#00d4aa';
+                 let riesgoColor = '#da02e5';
                  let riesgoIcon = 'bi-check-circle-fill';
 
                  switch(empleado.nivel_riesgo) {
                    case 'Sin riesgo':
-                     riesgoColor = '#00d4aa';
+                     riesgoColor = '#ff51ff';
                      riesgoIcon = 'bi-check-circle-fill';
                      break;
                    case 'Riesgo bajo':
-                     riesgoColor = '#ffc107';
+                     riesgoColor = '#A51CB0';
                      riesgoIcon = 'bi-exclamation-triangle-fill';
                      break;
                    case 'Riesgo medio':
-                     riesgoColor = '#fd7e14';
+                     riesgoColor = '#87178F';
                      riesgoIcon = 'bi-exclamation-triangle-fill';
                      break;
                    case 'Riesgo alto':
-                     riesgoColor = '#dc3545';
+                     riesgoColor = '#540E59';
                      riesgoIcon = 'bi-exclamation-triangle-fill';
                      break;
                    case 'Riesgo máximo':
-                     riesgoColor = '#6f42c1';
+                     riesgoColor = '#990099';
                      riesgoIcon = 'bi-exclamation-triangle-fill';
                      break;
                  }
 
-               const desgloseBadges = (() => {
+                const desgloseBadges = (() => {
                   const porTipo = (empleado.total_fallas || 0) > 0 && empleado.fallas_por_tipo ?
                     Object.entries(empleado.fallas_por_tipo).map(([tipo, cantidad]) => {
                       const iconos = { 'CORREO': '📧', 'MENSAJE': '💬', 'LLAMADA': '📞', 'VIDEOLLAMADA': '📹' };
                       const nombres = { 'CORREO': 'Correo', 'MENSAJE': 'Mensaje', 'LLAMADA': 'Llamada', 'VIDEOLLAMADA': 'Videollamada' };
                       const puntos = { 'CORREO': 10, 'MENSAJE': 15, 'LLAMADA': 20, 'VIDEOLLAMADA': 20 };
-                      return `<span class=\"badge\" style=\"background: rgba(255,107,107,0.8); color: white; font-size: 0.7rem;\">${iconos[tipo] || '❓'} ${nombres[tipo] || tipo} ${cantidad} activas (-${cantidad * (puntos[tipo] || 0)} pts)</span>`;
+                      return `<span class=\"badge\" style=\"background: #540E59; color: white; font-size: 0.7rem;\">${iconos[tipo] || '❓'} ${cantidad} ${nombres[tipo] || tipo} (-${cantidad * (puntos[tipo] || 0)} pts)</span>`;
                     }).join('') : '';
-                  const pasado = empleado.ha_fallado_en_pasado ? `<span class=\"badge\" style=\"background: rgba(220,53,69,0.8); color: white; font-size: 0.7rem;\"><i class=\"bi bi-exclamation-triangle-fill me-1\"></i> Fallas pasadas (-${empleado.penalizacion_falla_pasado || 0} pts)</span>` : '';
-                  const reportados = (empleado.total_reportados || 0) > 0 ? `<span class=\"badge\" style=\"background: rgba(40,167,69,0.8); color: white; font-size: 0.7rem;\"><i class=\"bi bi-check-circle-fill me-1\"></i> Reportados: +${empleado.puntos_ganados || 0} pts</span>` : '';
-                  return `${porTipo} ${pasado} ${reportados}`;
+                  const reportados = (empleado.total_reportados || 0) > 0 ? `<span class=\"badge\" style=\"background: rgba(255,51,255,0.8); color: white; font-size: 0.7rem;\"><i class=\"bi bi-check-circle-fill me-1\"></i> Reportados: +${empleado.puntos_ganados || 0} pts</span>` : '';
+                  return `${porTipo} ${reportados}`;
                 })();
 
                 html += `
                   <tr class="text-center">
-                    <td>
+                    <td class="text-start">
                       <span class="text-white"><i class="bi bi-person-fill me-2" style="color:#da02e5;"></i>${empleado.nombre || 'N/A'} ${empleado.apellido || 'N/A'}</span>
                     </td>
-                    <td>
-                      <span class="text-white-50"><i class="bi bi-person-badge me-1" style="color:#da02e5;"></i>${empleado.idUsuario || 'N/A'}</span>
-                    </td>
-                    <td style="color:#0dcaf0;">${empleado.total_eventos || 0}</td>
-                    <td style="color:#da02e5;">${empleado.puntos_restantes || 100}</td>
-                    <td style="color:#ff6b6b;">${empleado.total_fallas || 0}</td>
-                    <td style="color:#28a745;">${empleado.total_reportados || 0}</td>
+                     <td style="color:#ffffff;">
+                       <span ><i style="color:#da02e5;"></i>${String(empleado.idUsuario || 'N/A').padStart(3, '0')}</span>
+                     </td>
+                    <td style="color:#ffffff;">${empleado.total_eventos || 0}</td>
+                    <td style="color:#ffffff; font-weight: bold;">${empleado.puntos_restantes || 100}</td>
+                    <td style="color:#ffffff;">${empleado.total_fallas || 0}</td>
+                    <td style="color:#ffffff;">${empleado.total_reportados || 0}</td>
                     <td>
                       <div class="d-flex flex-wrap gap-1 justify-content-center">${desgloseBadges || '<span class=\"text-white-50\">—</span>'}</div>
                     </td>
