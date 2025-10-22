@@ -19,7 +19,7 @@ def enviarMail(asunto, cuerpo, destinatario):
     return sg.send(message)
 
 def enviarNotificacionEmail(asunto, cuerpo, destinatario):
-    from_email = Email(email='phishingintel@gmail.com', name='PhishIntel')
+    from_email = Email(email='phishingintel@gmail.com', name='Administracion desde PhishIntel')
     message = Mail(
         from_email=from_email,
         to_emails=destinatario,
@@ -41,15 +41,15 @@ def enviarNotificacionEmail(asunto, cuerpo, destinatario):
             log.error(f"Response body: {e.response.text if hasattr(e.response, 'text') else 'N/A'}")
         raise
 
-def enviarMailPG(asunto, cuerpo, remitente,destinatario):
-    from_email = Email(email=remitente)
+def enviarMailPG(asunto, cuerpo, remitente, destinatario, name="PGControl"):
+    from_email = Email(email=remitente, name=name)
     message = Mail(
         from_email=from_email,
         to_emails=destinatario,
         subject=asunto,
         html_content=cuerpo
     )
-    log.info(f"Enviando email con PGControl API desde: {remitente} a: {destinatario}")
+    log.info(f"Enviando email con PGControl API desde: {remitente} ({name}) a: {destinatario}")
     log.info(f"API Key configurada: {'Sí' if pgcontrol_api_key else 'No'}")
     sg = SendGridAPIClient(pgcontrol_api_key)
     try:

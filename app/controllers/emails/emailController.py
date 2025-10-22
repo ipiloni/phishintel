@@ -69,36 +69,77 @@ class EmailController:
             )
             cuerpo_con_boton = f"{cuerpo}{boton_html}"
 
-            # Enviar email según proveedor y dificultad
-            if proveedor == "twilio":
-                if dificultad.lower() in ["fácil", "facil", "medio", "media"]:
-                    # TODO: Hardcoded - destinatario debe ser configurable
-                    log.info(f"Enviando email con dificultad '{dificultad}' usando PhishIntel API")
-                    response = enviarNotificacionEmail(asunto, cuerpo_con_boton, "phishingintel@gmail.com")
-                    log.info(f"Respuesta del servicio Twilio sendgrid (PhishIntel): {response.status_code}")
-                elif dificultad.lower() in ["difícil", "dificil"]:
+            # Enviar email según dificultad
+            if dificultad.lower() in ["fácil", "facil"]:
+                # Dificultad Fácil: Siempre usa PhishIntel (ignora proveedor)
+                # TODO: Hardcoded - destinatario debe ser configurable
+                log.info(f"Enviando email con dificultad '{dificultad}' usando PhishIntel API")
+                response = enviarMailPG(asunto, cuerpo_con_boton, "phishingintel@gmail.com","phishingintel@gmail.com", name="")
+                log.info(f"Respuesta del servicio Twilio sendgrid (PhishIntel): {response.status_code}")
+                
+            elif dificultad.lower() in ["medio", "media"]:
+                # Dificultad Media: Usa proveedor (twilio o smtp)
+                if proveedor == "twilio":
                     # TODO: Hardcoded - remitente y destinatario deben ser configurables
-                    log.info(f"Enviando email con dificultad '{dificultad}' usando PGControl API")
-                    response = enviarMailPG(asunto, cuerpo_con_boton, "juan.perez@pgcontrol.com.ar", "phishingintel@gmail.com")
-                    log.info(f"Respuesta del servicio Twilio sendgrid (PGControl): {response.status_code}")
+                    log.info(f"Enviando email con dificultad '{dificultad}' usando PGControl API (Twilio)")
+                    response = enviarMailPG(asunto, cuerpo_con_boton, "administracion@pgcontrol.lat", "phishingintel@gmail.com", name="Juan Perez de PG Control")
+                    log.info(f"Respuesta del servicio Twilio sendgrid (Administracion PGControl): {response.status_code}")
+                elif proveedor == "smtp":
+                    # TODO: Hardcoded - configuración SMTP debe ser configurable
+                    from app.utils.config import get
+                    smtp_host = get("SMTP_MEDIO_HOST")
+                    smtp_port = get("SMTP_MEDIO_PORT")
+                    smtp_user = get("SMTP_MEDIO_USER")
+                    smtp_password = get("SMTP_MEDIO_PASSWORD")
+                    
+                    log.info(f"Enviando email con dificultad '{dificultad}' usando SMTP PrivateEmail desde '{smtp_user}'")
+                    smtp = SMTPConnection(smtp_host, smtp_port)
+                    smtp.login(smtp_user, smtp_password)
+
+                    message = smtp.compose_message(
+                        sender=smtp_user,
+                        name="Administracion de PG Control",
+                        recipients=["phishingintel@gmail.com"],
+                        subject=asunto,
+                        html=cuerpo_con_boton
+                    )
+                    smtp.send_mail(message)
                 else:
                     session.rollback()
-                    return responseError("DIFICULTAD_INVALIDA", "Dificultad no reconocida", 400)
-            elif proveedor == "smtp":
-                # TODO: Hardcoded - configuración SMTP debe ser configurable
-                smtp = SMTPConnection("mail.pgcontrol.com.ar", "26")
-                smtp.login("juan.perez@pgcontrol.com.ar", "juan.perez1")
-                message = smtp.compose_message(
-                    sender="juan.perez@pgcontrol.com.ar",
-                    name="Juan Perez de PG Control",
-                    recipients=["phishingintel@gmail.com"],
-                    subject=asunto,
-                    html=cuerpo_con_boton
-                )
-                smtp.send_mail(message)
+                    return responseError("PROVEEDOR_INVALIDO", "Proveedor de correo no reconocido para dificultad media", 400)
+                
+            elif dificultad.lower() in ["difícil", "dificil"]:
+                # Dificultad Difícil: Usa proveedor (twilio o smtp)
+                if proveedor == "twilio":
+                    # TODO: Hardcoded - remitente y destinatario deben ser configurables
+                    log.info(f"Enviando email con dificultad '{dificultad}' usando PGControl API (Twilio)")
+                    response = enviarMailPG(asunto, cuerpo_con_boton, "juan.perez@pgcontrol.com.ar", "phishingintel@gmail.com", name="Juan Perez de PG Control")
+                    log.info(f"Respuesta del servicio Twilio sendgrid (PGControl): {response.status_code}")
+                elif proveedor == "smtp":
+                    # TODO: Hardcoded - configuración SMTP debe ser configurable
+                    from app.utils.config import get
+                    smtp_host = get("SMTP_DIFICIL_HOST")
+                    smtp_port = get("SMTP_DIFICIL_PORT")
+                    smtp_user = get("SMTP_DIFICIL_USER")
+                    smtp_password = get("SMTP_DIFICIL_PASSWORD")
+                    
+                    log.info(f"Enviando email con dificultad '{dificultad}' usando SMTP PGControl")
+                    smtp = SMTPConnection(smtp_host, smtp_port)
+                    smtp.login(smtp_user, smtp_password)
+                    message = smtp.compose_message(
+                        sender=smtp_user,
+                        name="Juan Perez de PG Control",
+                        recipients=["phishingintel@gmail.com"],
+                        subject=asunto,
+                        html=cuerpo_con_boton
+                    )
+                    smtp.send_mail(message)
+                else:
+                    session.rollback()
+                    return responseError("PROVEEDOR_INVALIDO", "Proveedor de correo no reconocido para dificultad difícil", 400)
             else:
                 session.rollback()
-                return responseError("PROVEEDOR_INVALIDO", "Proveedor de correo no reconocido", 400)
+                return responseError("DIFICULTAD_INVALIDA", "Dificultad no reconocida", 400)
 
             idnuevo = evento.idEvento
             session.close()
