@@ -1,7 +1,8 @@
-from flask import Blueprint, send_from_directory, request
+from flask import Blueprint, send_from_directory, request, redirect, url_for
 import os
 
 from app.controllers.login import AuthController
+from app.controllers.resultadoEventoController import ResultadoEventoController
 
 frontend = Blueprint("frontend", __name__, static_folder="frontend")
 
@@ -64,7 +65,15 @@ def enConstruccion():
 
 @frontend.route("/caiste")
 def caiste():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "caiste.html")
+    idUsuario = request.args.get('idUsuario', type=int)
+    idEvento = request.args.get('idEvento', type=int)
+    
+    if idUsuario and idEvento:
+        ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+        # Redirigir a la misma ruta sin parámetros para limpiar la URL
+        return redirect(url_for('frontend.caiste'))
+    
+    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "caiste.html")
 
 @frontend.route("/caisteLogin")
 def caisteLogin():

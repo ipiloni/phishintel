@@ -134,42 +134,6 @@
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
 
-  <script>
-    // Obtener parámetros de la URL
-    function getUrlParams() {
-      const urlParams = new URLSearchParams(window.location.search);
-      return {
-        idUsuario: urlParams.get('idUsuario'),
-        idEvento: urlParams.get('idEvento')
-      };
-    }
-
-    // Llamar a sumar-falla cuando se carga la página
-    document.addEventListener('DOMContentLoaded', function() {
-      const params = getUrlParams();
-      
-      if (params.idUsuario && params.idEvento) {
-        // Hacer llamada AJAX a sumar-falla
-        fetch('/api/sumar-falla', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            idUsuario: parseInt(params.idUsuario),
-            idEvento: parseInt(params.idEvento)
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          console.log('Falla registrada:', data);
-        })
-        .catch(error => {
-          console.error('Error al registrar falla:', error);
-        });
-      }
-    });
-  </script>
 
 </body>
 
