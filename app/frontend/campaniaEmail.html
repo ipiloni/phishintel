@@ -87,7 +87,7 @@
 
             <!-- Selector de Usuario (solo visible cuando hay área seleccionada) -->
             <div class="mb-3" v-if="filtroArea">
-              <label for="userSelect" class="form-label">Seleccionar Usuario</label>
+              <label for="userSelect" class="form-label">Seleccionar Usuario Destinatario</label>
               <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" required>
                 <option value="">-- Selecciona un usuario --</option>
                 <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario">
@@ -138,6 +138,20 @@
                 </div>
 
               </div>
+            </div>
+
+            <!-- Selector de Remitente (solo para dificultad Difícil) -->
+            <div class="mb-3" v-if="nivel === 'Difícil' && filtroUsuario">
+              <label for="remitenteSelect" class="form-label">Seleccionar Usuario Remitente</label>
+              <select v-model="filtroUsuarioRemitente" class="form-control" id="remitenteSelect" name="remitente" required>
+                <option value="">-- Selecciona un usuario remitente --</option>
+                <template v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario">
+                  <option :value="usuario" v-if="usuario.idUsuario !== filtroUsuario.idUsuario">
+                    {{ usuario.nombre }} {{ usuario.apellido }}
+                  </option>
+                </template>
+              </select>
+              <small class="form-text" style="color: #ffffff;">DISCLAIMER: Suplantarás la identidad de un compañero de trabajo del individuo seleccionado. Declaras que no usarás este correo para ningún otro propósito que una simulación de phishing.</small>
             </div>
 
             <!-- Botón de enviar -->
@@ -203,6 +217,17 @@
                           <div>
                             <small class="d-block" style="color: #ccc;">Dificultad</small>
                             <strong>{{ nivel }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Remitente (solo para Difícil) -->
+                      <div class="col-12" v-if="nivel === 'Difícil' && filtroUsuarioRemitente">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2"><i class="bi bi-person-check-fill"></i></span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Remitente</small>
+                            <strong>{{ filtroUsuarioRemitente.nombre }} {{ filtroUsuarioRemitente.apellido }}</strong>
                           </div>
                         </div>
                       </div>
@@ -308,6 +333,7 @@
           areas: [],
           filtroArea: "",
           filtroUsuario: "",
+          filtroUsuarioRemitente: "",
           nivel: "Fácil",
           modalAsunto: "",
           modalCuerpo: "",
@@ -317,7 +343,8 @@
           cargandoEnvio: false,
           emailGenerado: {
             proveedor: "twilio",
-            idUsuario: null, 
+            idUsuarioDestinatario: null, 
+            idUsuarioRemitente: null,
             asunto: "",
             cuerpo: "",
             dificultad: ""
@@ -338,6 +365,12 @@
       },
       methods: {
         async generarPreview() {
+          // Validar que se haya seleccionado remitente para dificultad Difícil
+          if (this.nivel === 'Difícil' && !this.filtroUsuarioRemitente) {
+            alert('Debe seleccionar un usuario remitente para la dificultad Difícil');
+            return;
+          }
+          
           this.cargando = true;
           try {
             const resp = await fetch("http://localhost:8080/api/email/generar", {
@@ -361,7 +394,8 @@
             
             this.emailGenerado.asunto = data.asunto;
             this.emailGenerado.cuerpo = data.cuerpo;
-            this.emailGenerado.idUsuario = this.filtroUsuario.idUsuario;
+            this.emailGenerado.idUsuarioDestinatario = this.filtroUsuario.idUsuario;
+            this.emailGenerado.idUsuarioRemitente = this.nivel === 'Difícil' ? this.filtroUsuarioRemitente.idUsuario : null;
             this.emailGenerado.dificultad = this.nivel;
 
             // Abrir modal
@@ -397,6 +431,8 @@
             this.modalCuerpoTexto = this.htmlToText(data.cuerpo || "Sin cuerpo");
             this.emailGenerado.asunto = data.asunto;
             this.emailGenerado.cuerpo = data.cuerpo;
+            this.emailGenerado.idUsuarioDestinatario = this.filtroUsuario.idUsuario;
+            this.emailGenerado.idUsuarioRemitente = this.nivel === 'Difícil' ? this.filtroUsuarioRemitente.idUsuario : null;
             this.emailGenerado.dificultad = this.nivel;
 
           } catch (e) {

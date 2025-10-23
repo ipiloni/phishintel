@@ -20,6 +20,8 @@ from app.controllers.ngrokController import NgrokController
 from app.controllers.login import AuthController
 from app.utils.config import get
 from app.utils.logger import log
+from app.config.db_config import SessionLocal
+from app.backend.models import Usuario, Area, Evento, RegistroEvento, UsuarioxEvento, ResultadoEvento, IntentoReporte
 from flask_cors import CORS
 import os
 
@@ -773,3 +775,47 @@ def obtener_scoring_empleado():
     
     idUsuario = session.get('user_id')
     return ResultadoEventoController.calcularScoringPorEmpleado(idUsuario)
+
+@apis.route("/api/admin/limpiar-bd", methods=["DELETE"])
+def limpiarBaseDatos():
+    """
+    Endpoint para limpiar completamente la base de datos.
+    Elimina todos los datos: usuarios, áreas, eventos, resultados, etc.
+    """
+    if not AuthController.is_logged_in():
+        return jsonify({"error": "Debe estar logueado para limpiar la base de datos"}), 401
+    
+    # Verificar que sea administrador
+    idUsuario = session.get('user_id')
+    session_db = SessionLocal()
+    try:
+        usuario = session_db.query(Usuario).filter_by(idUsuario=idUsuario).first()
+        if not usuario or not usuario.esAdministrador:
+            return jsonify({"error": "Solo los administradores pueden limpiar la base de datos"}), 403
+    except Exception as e:
+        session_db.close()
+        return jsonify({"error": f"Error verificando permisos: {str(e)}"}), 500
+    finally:
+        session_db.close()
+    
+    # Limpiar la base de datos
+    session_db = SessionLocal()
+    try:
+        # Eliminar en orden para respetar las foreign keys
+        session_db.query(IntentoReporte).delete()
+        session_db.query(UsuarioxEvento).delete()
+        session_db.query(RegistroEvento).delete()
+        session_db.query(Evento).delete()
+        session_db.query(Usuario).delete()
+        session_db.query(Area).delete()
+        
+        session_db.commit()
+        log.info("Base de datos limpiada completamente")
+        return jsonify({"mensaje": "Base de datos limpiada exitosamente"}), 200
+        
+    except Exception as e:
+        session_db.rollback()
+        log.error(f"Error limpiando base de datos: {str(e)}")
+        return jsonify({"error": f"Error limpiando la base de datos: {str(e)}"}), 500
+    finally:
+        session_db.close()

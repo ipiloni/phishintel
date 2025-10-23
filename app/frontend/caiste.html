@@ -20,11 +20,11 @@
   <link href="assets/css/main.css" rel="stylesheet">
   <style>
     .alert-caiste {
-      background: linear-gradient(135deg, #dc3545, #c82333);
+      background: linear-gradient(135deg, #000000, #000000);
       border: none;
       color: white;
       border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+      box-shadow: 0 10px 30px var(--accent-color);
     }
     
     .alert-caiste .alert-heading {
@@ -33,25 +33,26 @@
     }
     
     .btn-warning {
-      background-color: #ffc107;
-      border-color: #ffc107;
-      color: #212529;
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
       font-weight: bold;
+      color: #ffffff;
       padding: 12px 30px;
       border-radius: 25px;
       transition: all 0.3s ease;
     }
     
     .btn-warning:hover {
-      background-color: #e0a800;
-      border-color: #d39e00;
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+      box-shadow: 0 5px 15px var(--accent-color);
+      color: #ffffff;
     }
     
     .phishing-icon {
       font-size: 4rem;
-      color: #dc3545;
+      color: var(--accent-color);
       margin-bottom: 1rem;
     }
     

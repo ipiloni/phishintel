@@ -23,7 +23,8 @@ def openapi_spec():
             {"name": "💬 Mensajes", "description": "Envío de mensajes WhatsApp y SMS"},
             {"name": "🔐 Auth", "description": "Autenticación y gestión de sesiones"},
             {"name": "🤖 Telegram Bot", "description": "Gestión del bot de Telegram"},
-            {"name": "🌐 Ngrok", "description": "Gestión de túneles ngrok temporales"}
+            {"name": "🌐 Ngrok", "description": "Gestión de túneles ngrok temporales"},
+            {"name": "⚠️ PELIGRO", "description": "Operaciones destructivas - USAR CON EXTREMA PRECAUCIÓN"}
         ],
         "paths": {
             "/api/usuarios": {
@@ -92,18 +93,18 @@ def openapi_spec():
                                 },
                                 "example": [
                                     {
-                                        "nombreUsuario": "nachoscocco",
-                                        "password": "ignacio.scocco1",
-                                        "nombre": "Ignacio",
-                                        "apellido": "Scocco",
-                                        "correo": "ignacio.scocco@pgcontrol.com.ar"
+                                        "nombreUsuario": "marcosgurruchaga",
+                                        "password": "marcos.gurruchaga1",
+                                        "nombre": "Marcos",
+                                        "apellido": "Gurruchaga",
+                                        "correo": "marcos.gurruchaga@pgcontrol.com.ar"
                                     },
                                     {
-                                        "nombreUsuario": "manuginobili",
-                                        "password": "manuel.ginobili1",
-                                        "nombre": "Manuel",
-                                        "apellido": "Ginobili",
-                                        "correo": "manuel.ginobili@pgcontrol.com.ar"
+                                        "nombreUsuario": "morarodriguez",
+                                        "password": "mora.rodriguez1",
+                                        "nombre": "Mora",
+                                        "apellido": "Rodriguez",
+                                        "correo": "mora.rodriguez@pgcontrol.com.ar"
                                     },
                                     {
                                         "nombreUsuario": "juanperez",
@@ -1130,19 +1131,48 @@ def openapi_spec():
             "/api/email/enviar-id": {
                 "post": {
                     "summary": "Enviar email por ID de usuario con nivel de dificultad",
-                    "description": "Envía un email de phishing a un usuario específico. El nivel de dificultad determina el proveedor de envío: Fácil/Medio usa PhishIntel, Difícil usa PGControl.",
+                    "description": "Envía un email de phishing a un usuario específico. El nivel de dificultad determina el proveedor de envío: Fácil/Medio usa PhishIntel, Difícil usa PGControl. Para dificultad Difícil, se requiere especificar el remitente (idUsuarioRemitente).",
                     "tags": ["📧 Emails"],
                     "requestBody": {
                         "required": True,
                         "content": {
                             "application/json": {
                                 "schema": {"$ref": "#/components/schemas/EmailEnviarID"},
-                                "example": {
-                                    "proveedor": "twilio",
-                                    "idUsuario": 1,
-                                    "asunto": "Notificación importante",
-                                    "cuerpo": "<p>Este es un email de prueba</p>",
-                                    "dificultad": "Medio"
+                                "examples": {
+                                    "facil": {
+                                        "summary": "Dificultad Fácil",
+                                        "description": "Email de dificultad fácil desde phishingintel@gmail.com",
+                                        "value": {
+                                            "proveedor": "twilio",
+                                            "idUsuarioDestinatario": 1,
+                                            "asunto": "Mensaje de dificultad fácil - Verificación de cuenta",
+                                            "cuerpo": "<p>Este es un mensaje de prueba de dificultad fácil</p>",
+                                            "dificultad": "Fácil"
+                                        }
+                                    },
+                                    "medio": {
+                                        "summary": "Dificultad Medio",
+                                        "description": "Email de dificultad medio desde administracion@pgcontrol.lat",
+                                        "value": {
+                                            "proveedor": "twilio",
+                                            "idUsuarioDestinatario": 2,
+                                            "asunto": "Mensaje de dificultad medio - Actualización de seguridad",
+                                            "cuerpo": "<p>Este es un mensaje de prueba de dificultad medio</p>",
+                                            "dificultad": "Medio"
+                                        }
+                                    },
+                                    "dificil": {
+                                        "summary": "Dificultad Difícil",
+                                        "description": "Email de dificultad difícil con remitente configurable",
+                                        "value": {
+                                            "proveedor": "twilio",
+                                            "idUsuarioDestinatario": 3,
+                                            "idUsuarioRemitente": 4,
+                                            "asunto": "Mensaje de dificultad difícil - Revisión urgente de documentos",
+                                            "cuerpo": "<p>Este es un mensaje de prueba de dificultad difícil</p>",
+                                            "dificultad": "Difícil"
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -2107,6 +2137,80 @@ def openapi_spec():
                         }
                     }
                 }
+            },
+            "/api/admin/limpiar-bd": {
+                "delete": {
+                    "summary": "⚠️ LIMPIAR BASE DE DATOS COMPLETAMENTE",
+                    "description": "🚨 OPERACIÓN EXTREMADAMENTE PELIGROSA 🚨\n\nElimina TODOS los datos de la base de datos de forma irreversible:\n- Todos los usuarios\n- Todas las áreas\n- Todos los eventos\n- Todos los resultados\n- Todos los intentos de reporte\n\n⚠️ ESTA OPERACIÓN NO SE PUEDE DESHACER ⚠️\n\nSolo disponible para administradores. Usar con extrema precaución.",
+                    "tags": ["⚠️ PELIGRO"],
+                    "security": [{"sessionAuth": []}],
+                    "responses": {
+                        "200": {
+                            "description": "⚠️ Base de datos eliminada completamente - OPERACIÓN IRREVERSIBLE",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {
+                                                "type": "string",
+                                                "example": "⚠️ Base de datos limpiada exitosamente - TODOS LOS DATOS HAN SIDO ELIMINADOS"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "401": {
+                            "description": "Debe estar logueado",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "error": {
+                                                "type": "string",
+                                                "example": "Debe estar logueado para limpiar la base de datos"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "403": {
+                            "description": "🚫 ACCESO DENEGADO - Solo administradores pueden ejecutar operaciones destructivas",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "error": {
+                                                "type": "string",
+                                                "example": "🚫 Solo los administradores pueden limpiar la base de datos - OPERACIÓN BLOQUEADA"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "500": {
+                            "description": "💥 Error crítico durante operación destructiva",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "error": {
+                                                "type": "string",
+                                                "example": "💥 Error crítico limpiando la base de datos: [detalle del error] - OPERACIÓN FALLIDA"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "components": {
@@ -2261,10 +2365,11 @@ def openapi_spec():
                 },
                 "EmailEnviarID": {
                     "type": "object",
-                    "required": ["proveedor", "idUsuario", "asunto", "cuerpo", "dificultad"],
+                    "required": ["proveedor", "idUsuarioDestinatario", "asunto", "cuerpo", "dificultad"],
                     "properties": {
                         "proveedor": {"type": "string", "enum": ["twilio", "smtp"]},
-                        "idUsuario": {"type": "integer"},
+                        "idUsuarioDestinatario": {"type": "integer", "description": "ID del usuario destinatario del email"},
+                        "idUsuarioRemitente": {"type": "integer", "description": "ID del usuario remitente - requerido solo para dificultad Difícil"},
                         "asunto": {"type": "string"},
                         "cuerpo": {"type": "string"},
                         "dificultad": {"type": "string", "enum": ["Fácil", "Medio", "Difícil"], "description": "Nivel de dificultad del email de phishing"}

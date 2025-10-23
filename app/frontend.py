@@ -65,6 +65,11 @@ def enConstruccion():
 @frontend.route("/caiste")
 def caiste():
    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "caiste.html")
+
+@frontend.route("/caisteLogin")
+def caisteLogin():
+   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "caisteLogin.html")
+
 @frontend.route("/verificarlogin", methods=["POST"])
 def verificarlogin():
     data = request.get_json()

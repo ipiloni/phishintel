@@ -20,24 +20,25 @@ class EmailController:
 
     @staticmethod
     def enviarMailPorID(data):
-        if not data or "proveedor" not in data or "idUsuario" not in data or "asunto" not in data or "cuerpo" not in data or "dificultad" not in data:
+        if not data or "proveedor" not in data or "idUsuarioDestinatario" not in data or "asunto" not in data or "cuerpo" not in data or "dificultad" not in data:
             return responseError("CAMPOS_OBLIGATORIOS",
-                                 "Faltan campos obligatorios como 'proveedor', 'idUsuario', 'asunto', 'cuerpo' o 'dificultad'", 400)
+                                 "Faltan campos obligatorios como 'proveedor', 'idUsuarioDestinatario', 'asunto', 'cuerpo' o 'dificultad'", 400)
 
         proveedor = data["proveedor"]
-        id_usuario = data["idUsuario"]
+        id_usuario_destinatario = data["idUsuarioDestinatario"]
+        id_usuario_remitente = data.get("idUsuarioRemitente")  # Opcional, solo para dificultad Difícil
         asunto = data["asunto"]
         cuerpo = data["cuerpo"]
         dificultad = data["dificultad"]
 
         session = SessionLocal()
         try:
-            # Buscar el usuario en la BD
-            usuario = session.query(Usuario).filter_by(idUsuario=id_usuario).first()
-            if not usuario or not usuario.correo:
+            # Buscar el usuario destinatario en la BD
+            usuario_destinatario = session.query(Usuario).filter_by(idUsuario=id_usuario_destinatario).first()
+            if not usuario_destinatario or not usuario_destinatario.correo:
                 session.close()
                 return responseError("USUARIO_NO_ENCONTRADO",
-                                     "No se encontró el usuario o no tiene correo registrado", 404)
+                                     "No se encontró el usuario destinatario o no tiene correo registrado", 404)
 
             # Crear el evento y registro
             registroEvento = RegistroEvento(asunto=asunto, cuerpo=cuerpo)
@@ -49,9 +50,9 @@ class EmailController:
             session.add(evento)
             session.commit()  # Para obtener idEvento
 
-            # Vincular el evento con el usuario
+            # Vincular el evento con el usuario destinatario
             usuario_evento = UsuarioxEvento(
-                idUsuario=id_usuario,
+                idUsuario=id_usuario_destinatario,
                 idEvento=evento.idEvento,
                 resultado=ResultadoEvento.PENDIENTE
             )
@@ -59,7 +60,7 @@ class EmailController:
             session.commit()
 
             # Construir link a caiste con parámetros y agregar botón al cuerpo
-            link_caiste = f"http://localhost:8080/caiste?idUsuario={id_usuario}&idEvento={evento.idEvento}"
+            link_caiste = f"http://localhost:8080/caiste?idUsuario={id_usuario_destinatario}&idEvento={evento.idEvento}"
             boton_html = (
                 f"<div style=\"margin-top:20px;text-align:center\">"
                 f"<a href=\"{link_caiste}\" style=\"background-color:#d9534f;color:#ffffff;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;font-family:Arial,Helvetica,sans-serif\">"
@@ -69,12 +70,24 @@ class EmailController:
             )
             cuerpo_con_boton = f"{cuerpo}{boton_html}"
 
+            # Obtener información del remitente para dificultad Difícil
+            usuario_remitente = None
+            if dificultad.lower() in ["difícil", "dificil"]:
+                if not id_usuario_remitente:
+                    session.rollback()
+                    return responseError("REMITENTE_REQUERIDO", "Se requiere idUsuarioRemitente para dificultad Difícil", 400)
+                
+                usuario_remitente = session.query(Usuario).filter_by(idUsuario=id_usuario_remitente).first()
+                if not usuario_remitente or not usuario_remitente.correo:
+                    session.rollback()
+                    return responseError("REMITENTE_NO_ENCONTRADO", "No se encontró el usuario remitente o no tiene correo registrado", 404)
+
             # Enviar email según dificultad
             if dificultad.lower() in ["fácil", "facil"]:
                 # Dificultad Fácil: Siempre usa PhishIntel (ignora proveedor)
                 # TODO: Hardcoded - destinatario debe ser configurable
                 log.info(f"Enviando email con dificultad '{dificultad}' usando PhishIntel API")
-                response = enviarMailPG(asunto, cuerpo_con_boton, "phishingintel@gmail.com","phishingintel@gmail.com", name="")
+                response = enviarMailPG(asunto, cuerpo_con_boton, "phishingintel@gmail.com","phishingintel@gmail.com", name="Juan Perez de PG Control")
                 log.info(f"Respuesta del servicio Twilio sendgrid (PhishIntel): {response.status_code}")
                 
             elif dificultad.lower() in ["medio", "media"]:
@@ -109,26 +122,43 @@ class EmailController:
                     return responseError("PROVEEDOR_INVALIDO", "Proveedor de correo no reconocido para dificultad media", 400)
                 
             elif dificultad.lower() in ["difícil", "dificil"]:
-                # Dificultad Difícil: Usa proveedor (twilio o smtp)
+                # Dificultad Difícil: Usa proveedor (twilio o smtp) con remitente configurable
                 if proveedor == "twilio":
-                    # TODO: Hardcoded - remitente y destinatario deben ser configurables
-                    log.info(f"Enviando email con dificultad '{dificultad}' usando PGControl API (Twilio)")
-                    response = enviarMailPG(asunto, cuerpo_con_boton, "juan.perez@pgcontrol.com.ar", "phishingintel@gmail.com", name="Juan Perez de PG Control")
-                    log.info(f"Respuesta del servicio Twilio sendgrid (PGControl): {response.status_code}")
+                    # Usar email y nombre del remitente seleccionado
+                    nombre_remitente = f"{usuario_remitente.nombre} {usuario_remitente.apellido} de PG Control"
+                    log.info(f"Enviando email con dificultad '{dificultad}' usando Twilio desde '{usuario_remitente.correo}'")
+                    response = enviarMailPG(asunto, cuerpo_con_boton, usuario_remitente.correo, "phishingintel@gmail.com", name=nombre_remitente)
+                    log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
                 elif proveedor == "smtp":
-                    # TODO: Hardcoded - configuración SMTP debe ser configurable
+                    # Mapeo fijo de credenciales basado en email del remitente
                     from app.utils.config import get
-                    smtp_host = get("SMTP_DIFICIL_HOST")
-                    smtp_port = get("SMTP_DIFICIL_PORT")
-                    smtp_user = get("SMTP_DIFICIL_USER")
-                    smtp_password = get("SMTP_DIFICIL_PASSWORD")
                     
-                    log.info(f"Enviando email con dificultad '{dificultad}' usando SMTP PGControl")
+                    if usuario_remitente.correo == "juan.perez@pgcontrol.com.ar":
+                        smtp_host = get("SMTP_DIFICIL_HOST")
+                        smtp_port = get("SMTP_DIFICIL_PORT")
+                        smtp_user = get("SMTP_DIFICIL_USER")
+                        smtp_password = get("SMTP_DIFICIL_PASSWORD")
+                    elif usuario_remitente.correo == "marcos.gurruchaga@pgcontrol.com.ar":
+                        smtp_host = get("SMTP_DIFICIL_HOST")
+                        smtp_port = get("SMTP_DIFICIL_PORT")
+                        smtp_user = get("SMTP_DIFICIL_MARCOS_USER")
+                        smtp_password = get("SMTP_DIFICIL_MARCOS_PASSWORD")
+                    elif usuario_remitente.correo == "mora.rodriguez@pgcontrol.com.ar":
+                        smtp_host = get("SMTP_DIFICIL_HOST")
+                        smtp_port = get("SMTP_DIFICIL_PORT")
+                        smtp_user = get("SMTP_DIFICIL_MORA_USER")
+                        smtp_password = get("SMTP_DIFICIL_MORA_PASSWORD")
+                    else:
+                        session.rollback()
+                        return responseError("REMITENTE_NO_CONFIGURADO", f"Email del remitente '{usuario_remitente.correo}' no está configurado para SMTP", 400)
+                    
+                    nombre_remitente = f"{usuario_remitente.nombre} {usuario_remitente.apellido}"
+                    log.info(f"Enviando email con dificultad '{dificultad}' usando SMTP desde '{usuario_remitente.correo}'")
                     smtp = SMTPConnection(smtp_host, smtp_port)
                     smtp.login(smtp_user, smtp_password)
                     message = smtp.compose_message(
-                        sender=smtp_user,
-                        name="Juan Perez de PG Control",
+                        sender=usuario_remitente.correo,
+                        name=nombre_remitente,
                         recipients=["phishingintel@gmail.com"],
                         subject=asunto,
                         html=cuerpo_con_boton
