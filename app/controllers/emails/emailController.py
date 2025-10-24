@@ -59,8 +59,13 @@ class EmailController:
             session.add(usuario_evento)
             session.commit()
 
-            # Construir link a caiste con parámetros y agregar botón al cuerpo
-            link_caiste = f"http://localhost:8080/caiste?idUsuario={id_usuario_destinatario}&idEvento={evento.idEvento}"
+            # Construir link según dificultad
+            if dificultad.lower() in ["medio", "media"]:
+                # Dificultad Media: Usar caisteLogin para mayor realismo
+                link_caiste = f"http://localhost:8080/caisteLogin?idUsuario={id_usuario_destinatario}&idEvento={evento.idEvento}"
+            else:
+                # Dificultad Fácil y Difícil: Usar caiste directamente
+                link_caiste = f"http://localhost:8080/caiste?idUsuario={id_usuario_destinatario}&idEvento={evento.idEvento}"
             boton_html = (
                 f"<div style=\"margin-top:20px;text-align:center\">"
                 f"<a href=\"{link_caiste}\" style=\"background-color:#d9534f;color:#ffffff;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;font-family:Arial,Helvetica,sans-serif\">"

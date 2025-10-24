@@ -1,4 +1,4 @@
-from flask import Blueprint, send_from_directory, request, redirect, url_for
+from flask import Blueprint, send_from_directory, request, redirect, url_for, session
 import os
 
 from app.controllers.login import AuthController
@@ -65,8 +65,18 @@ def enConstruccion():
 
 @frontend.route("/caiste")
 def caiste():
+    # Primero intentar obtener parámetros de la URL (dificultad fácil/difícil)
     idUsuario = request.args.get('idUsuario', type=int)
     idEvento = request.args.get('idEvento', type=int)
+    
+    # Si no hay parámetros en URL, intentar obtener de la sesión (dificultad media)
+    if not idUsuario or not idEvento:
+        idUsuario = session.get('caiste_idUsuario')
+        idEvento = session.get('caiste_idEvento')
+        # Limpiar la sesión después de usar los parámetros
+        if idUsuario and idEvento:
+            session.pop('caiste_idUsuario', None)
+            session.pop('caiste_idEvento', None)
     
     if idUsuario and idEvento:
         ResultadoEventoController.sumarFalla(idUsuario, idEvento)
@@ -77,7 +87,17 @@ def caiste():
 
 @frontend.route("/caisteLogin")
 def caisteLogin():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "caisteLogin.html")
+    idUsuario = request.args.get('idUsuario', type=int)
+    idEvento = request.args.get('idEvento', type=int)
+    
+    if idUsuario and idEvento:
+        # Almacenar parámetros en sesión para usar después
+        session['caiste_idUsuario'] = idUsuario
+        session['caiste_idEvento'] = idEvento
+        # Redirigir a la misma ruta sin parámetros para limpiar la URL
+        return redirect(url_for('frontend.caisteLogin'))
+    
+    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "caisteLogin.html")
 
 @frontend.route("/verificarlogin", methods=["POST"])
 def verificarlogin():
