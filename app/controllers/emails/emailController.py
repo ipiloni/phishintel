@@ -63,9 +63,13 @@ class EmailController:
             if dificultad.lower() in ["medio", "media"]:
                 # Dificultad Media: Usar caisteLogin para mayor realismo
                 link_caiste = f"http://localhost:8080/caisteLogin?idUsuario={id_usuario_destinatario}&idEvento={evento.idEvento}"
+            elif dificultad.lower() in ["difícil", "dificil"]:
+                # Dificultad Difícil: Usar caisteDatos para solicitar datos sensibles
+                link_caiste = f"http://localhost:8080/caisteDatos?idUsuario={id_usuario_destinatario}&idEvento={evento.idEvento}"
             else:
-                # Dificultad Fácil y Difícil: Usar caiste directamente
+                # Dificultad Fácil: Usar caiste directamente
                 link_caiste = f"http://localhost:8080/caiste?idUsuario={id_usuario_destinatario}&idEvento={evento.idEvento}"
+            
             boton_html = (
                 f"<div style=\"margin-top:20px;text-align:center\">"
                 f"<a href=\"{link_caiste}\" style=\"background-color:#d9534f;color:#ffffff;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;font-family:Arial,Helvetica,sans-serif\">"
@@ -355,4 +359,3 @@ class EmailController:
             session.rollback()
             session.close()
             return responseError("ERROR", f"Hubo un error al generar y enviar el mail: {str(e)}", 500)
-

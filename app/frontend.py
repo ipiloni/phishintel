@@ -99,6 +99,20 @@ def caisteLogin():
     
     return send_from_directory(os.path.join(frontend.root_path, "frontend"), "caisteLogin.html")
 
+@frontend.route("/caisteDatos")
+def caisteDatos():
+    idUsuario = request.args.get('idUsuario', type=int)
+    idEvento = request.args.get('idEvento', type=int)
+    
+    if idUsuario and idEvento:
+        # Almacenar parámetros en sesión para usar después
+        session['caiste_idUsuario'] = idUsuario
+        session['caiste_idEvento'] = idEvento
+        # Redirigir a la misma ruta sin parámetros para limpiar la URL
+        return redirect(url_for('frontend.caisteDatos'))
+    
+    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "caisteDatos.html")
+
 @frontend.route("/verificarlogin", methods=["POST"])
 def verificarlogin():
     data = request.get_json()

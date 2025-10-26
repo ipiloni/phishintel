@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Actualización de Datos</title>
+    <link rel="stylesheet" href="assets/css/estilosLoginCaiste.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="assets/img/logoPG.png" alt="PG Control">
+                <h2>Actualizar tus datos</h2>
+                <p>Por favor, mantené tu información al día.</p>
+            </div>
+            
+            <form class="login-form" id="updateForm" novalidate>
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="nombre" name="nombre" required>
+                        <label for="nombre">Nombre</label>
+                        <div class="input-line"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="apellido" name="apellido" required>
+                        <label for="apellido">Apellido</label>
+                        <div class="input-line"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="dni" name="dni" required pattern="\d{7,8}">
+                        <label for="dni">DNI</label>
+                        <div class="input-line"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+                        <label for="fechaNacimiento" style="top: -1.5em; font-size: 0.75em;">Fecha de Nacimiento</label>
+                        <div class="input-line"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="domicilio" name="domicilio" required>
+                        <label for="domicilio">Domicilio</label>
+                        <div class="input-line"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="cbu" name="cbu" required pattern="\d{22}">
+                        <label for="cbu">CBU (Clave Bancaria Uniforme)</label>
+                        <div class="input-line"></div>
+                    </div>
+                </div>
+
+                <button type="button" class="login-btn material-btn" onclick="window.location.href='/caiste'">
+                    <div class="btn-ripple"></div>
+                    <span class="btn-text">CONFIRMAR</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
