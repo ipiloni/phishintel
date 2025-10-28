@@ -275,6 +275,23 @@ def enviarEmailPorID():
 @apis.route("/api/email/generar", methods=["POST"])  # Esta ruta llama a gemini y genera un asunto y texto en html
 def llamarIAGemini():
     data = request.get_json()
+    
+    # Si se proporciona idUsuarioDestinatario, enriquecer el contexto con info de LinkedIn
+    if "idUsuarioDestinatario" in data and data["idUsuarioDestinatario"]:
+        try:
+            info_linkedin = AIController.obtenerInfoLinkedinUsuario(data["idUsuarioDestinatario"])
+            
+            if info_linkedin:
+                log.info(f"Info de LinkedIn encontrada para usuario {data['idUsuarioDestinatario']}")
+                # Enriquecer el contexto con la info de LinkedIn
+                contexto_enriquecido = AIController.construirContextoConLinkedin(data["contexto"], info_linkedin)
+                data["contexto"] = contexto_enriquecido
+            else:
+                log.info(f"Usuario {data['idUsuarioDestinatario']} no tiene perfil de LinkedIn")
+        except Exception as e:
+            log.error(f"Error obteniendo info de LinkedIn: {str(e)}")
+            # Continuar sin la info de LinkedIn si hay error
+    
     return AIController.armarEmail(data)
 
 

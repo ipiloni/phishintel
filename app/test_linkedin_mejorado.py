@@ -155,6 +155,36 @@ def extraer_informacion_personal(driver):
     except:
         print("⚠️ No se pudo extraer la ubicación")
     
+    # Extraer información "Acerca de"
+    try:
+        print("📖 Buscando información de 'Acerca de'...")
+        acerca_selectors = [
+            "#about",
+            "section.artdeco-card #about",
+            ".pv-profile-section p"
+        ]
+        
+        for selector in acerca_selectors:
+            try:
+                # Buscar sección de "Acerca de"
+                acerca_section = driver.find_element(By.CSS_SELECTOR, selector)
+                
+                # Buscar el texto del párrafo
+                parrafos = acerca_section.find_elements(By.TAG_NAME, "p")
+                if parrafos:
+                    # Tomar el primero que tenga contenido significativo
+                    for parrafo in parrafos:
+                        texto = parrafo.text.strip()
+                        if texto and len(texto) > 10:
+                            info_personal["acerca_de"] = texto
+                            print(f"📝 Acerca de: {texto[:100]}...")
+                            break
+                    break
+            except:
+                continue
+    except Exception as e:
+        print(f"⚠️ No se pudo extraer 'Acerca de': {str(e)}")
+    
     return info_personal
 
 def extraer_experiencia_linkedin(driver):
@@ -172,81 +202,67 @@ def extraer_experiencia_linkedin(driver):
         
         # Scroll a la sección
         driver.execute_script("arguments[0].scrollIntoView();", exp_section)
-        time.sleep(3)
+        time.sleep(2)
         
-        # Buscar los elementos de experiencia usando la estructura real
-        # Cada trabajo está en un li con clase específica
-        exp_items = driver.find_elements(By.CSS_SELECTOR, "li.artdeco-list__item")
+        # Buscar todos los elementos li que contienen experiencia
+        # La estructura: el anchor está dentro de un li.artdeco-list__item
+        exp_items = driver.find_elements(By.CSS_SELECTOR, "#experience ~ .artdeco-card li.artdeco-list__item")
+        
+        # Si no encuentra, probar otro selector
+        if not exp_items or len(exp_items) == 0:
+            # Buscar por XPath: elementos li que tienen un anchor con id="experience" en el mismo section
+            exp_items = driver.find_elements(By.XPATH, "//section[descendant::div[@id='experience']]//li[contains(@class, 'artdeco-list__item')]")
         
         print(f"📋 Encontrados {len(exp_items)} elementos de experiencia")
         
         for i, item in enumerate(exp_items):
             try:
-                # Verificar si este elemento contiene información de experiencia
-                # Buscar el patrón específico de LinkedIn
-                empresa_elements = item.find_elements(By.CSS_SELECTOR, ".hoverable-link-text.t-bold span[aria-hidden='true']")
-                titulo_elements = item.find_elements(By.CSS_SELECTOR, ".hoverable-link-text.t-bold span[aria-hidden='true']")
+                # Obtener todo el texto del elemento
+                texto_completo = item.text
                 
-                if not empresa_elements:
+                if not texto_completo or len(texto_completo) < 10 or "Experiencia" in texto_completo:
                     continue
                 
+                print(f"  📄 Procesando elemento {i+1}:")
+                print(f"  Texto completo: {texto_completo[:150]}...")
+                
                 experiencia = {}
+                lineas = [line.strip() for line in texto_completo.split('\n') if line.strip()]
                 
-                # Extraer empresa (primer elemento)
-                if len(empresa_elements) > 0:
-                    empresa_text = empresa_elements[0].text.strip()
-                    if empresa_text and empresa_text not in ["Experiencia"]:  # Filtrar el título de la sección
-                        experiencia["empresa"] = empresa_text
-                        print(f"  🏢 Empresa: {empresa_text}")
+                # La primera línea suele ser la empresa
+                if len(lineas) > 0:
+                    experiencia["empresa"] = lineas[0]
+                    print(f"  🏢 Empresa: {lineas[0]}")
                 
-                # Extraer título del trabajo (segundo elemento si existe)
-                if len(titulo_elements) > 1:
-                    titulo_text = titulo_elements[1].text.strip()
-                    if titulo_text and titulo_text != experiencia.get("empresa", ""):
-                        experiencia["titulo"] = titulo_text
-                        print(f"  💼 Título: {titulo_text}")
+                # La segunda línea puede ser el título o la duración
+                if len(lineas) > 1:
+                    if any(p in lineas[1].lower() for p in ["año", "mes", "actualidad"]):
+                        experiencia["fechas"] = lineas[1]
+                        print(f"  📅 Fechas: {lineas[1]}")
+                    else:
+                        experiencia["titulo"] = lineas[1]
+                        print(f"  💼 Título: {lineas[1]}")
                 
-                # Extraer fechas
-                try:
-                    fecha_elements = item.find_elements(By.CSS_SELECTOR, ".pvs-entity__caption-wrapper span[aria-hidden='true']")
-                    if fecha_elements:
-                        fecha_text = fecha_elements[0].text.strip()
-                        experiencia["fechas"] = fecha_text
-                        print(f"  📅 Fechas: {fecha_text}")
-                except:
-                    pass
+                # Buscar fechas en las líneas
+                for linea in lineas:
+                    if any(palabra in linea for palabra in ["año", "mes", "actualidad", "2024", "2023", "ago.", "sept."]):
+                        if not experiencia.get("fechas"):
+                            experiencia["fechas"] = linea
+                            print(f"  📅 Fechas: {linea}")
+                        break
                 
-                # Extraer ubicación
-                try:
-                    ubicacion_elements = item.find_elements(By.CSS_SELECTOR, ".t-14.t-normal.t-black--light span[aria-hidden='true']")
-                    for elem in ubicacion_elements:
-                        ubicacion_text = elem.text.strip()
-                        if "Argentina" in ubicacion_text or "Buenos Aires" in ubicacion_text:
-                            experiencia["ubicacion"] = ubicacion_text
-                            print(f"  📍 Ubicación: {ubicacion_text}")
-                            break
-                except:
-                    pass
+                # Buscar ubicación
+                for linea in lineas:
+                    if any(palabra in linea for palabra in ["Argentina", "Buenos Aires", "Provincia", "Híbrido", "Remoto"]):
+                        experiencia["ubicacion"] = linea
+                        print(f"  📍 Ubicación: {linea}")
+                        break
                 
-                # Extraer descripción
-                try:
-                    desc_elements = item.find_elements(By.CSS_SELECTOR, ".inline-show-more-text--is-collapsed span[aria-hidden='true']")
-                    if desc_elements:
-                        desc_text = desc_elements[0].text.strip()
-                        experiencia["descripcion"] = desc_text
-                        print(f"  📝 Descripción: {desc_text[:100]}...")
-                except:
-                    pass
-                
-                # Extraer habilidades relacionadas
-                try:
-                    skills_elements = item.find_elements(By.CSS_SELECTOR, ".hoverable-link-text.t-14.t-normal.t-black strong")
-                    if skills_elements:
-                        skills_text = skills_elements[0].text.strip()
-                        experiencia["habilidades_relacionadas"] = skills_text
-                        print(f"  🛠️ Habilidades: {skills_text}")
-                except:
-                    pass
+                # Descripción: texto largo o múltiples líneas
+                descripcion = "\n".join([linea for linea in lineas if len(linea) > 50])
+                if descripcion:
+                    experiencia["descripcion"] = descripcion
+                    print(f"  📝 Descripción: {descripcion[:80]}...")
                 
                 # Solo agregar si tenemos información útil
                 if experiencia and (experiencia.get("empresa") or experiencia.get("titulo")):
@@ -255,12 +271,16 @@ def extraer_experiencia_linkedin(driver):
                 
             except Exception as e:
                 print(f"  ⚠️ Error extrayendo experiencia {i+1}: {str(e)}")
+                import traceback
+                traceback.print_exc()
                 continue
         
         print(f"🎯 Total de experiencias extraídas: {len(experiencias)}")
         
     except Exception as e:
         print(f"❌ Error extrayendo experiencia: {str(e)}")
+        import traceback
+        traceback.print_exc()
     
     return experiencias
 
@@ -279,41 +299,55 @@ def extraer_educacion_linkedin(driver):
         
         # Scroll a la sección
         driver.execute_script("arguments[0].scrollIntoView();", edu_section)
-        time.sleep(3)
+        time.sleep(2)
         
         # Buscar elementos de educación
-        edu_items = driver.find_elements(By.CSS_SELECTOR, "li.artdeco-list__item")
+        edu_items = driver.find_elements(By.XPATH, "//section[descendant::div[@id='education']]//li[contains(@class, 'artdeco-list__item')]")
+        
+        print(f"📋 Encontrados {len(edu_items)} elementos de educación")
         
         for item in edu_items:
             try:
+                texto_completo = item.text
+                
+                if not texto_completo or len(texto_completo) < 10 or "Educación" in texto_completo:
+                    continue
+                
+                print(f"  📄 Procesando: {texto_completo[:100]}...")
+                
                 educacion = {}
+                lineas = [line.strip() for line in texto_completo.split('\n') if line.strip()]
                 
-                # Buscar institución
-                institucion_elements = item.find_elements(By.CSS_SELECTOR, ".hoverable-link-text.t-bold span[aria-hidden='true']")
-                if institucion_elements:
-                    institucion_text = institucion_elements[0].text.strip()
-                    if institucion_text and institucion_text not in ["Educación"]:
-                        educacion["institucion"] = institucion_text
-                        print(f"  🎓 Institución: {institucion_text}")
+                # La primera línea suele ser la institución
+                if len(lineas) > 0:
+                    educacion["institucion"] = lineas[0]
+                    print(f"  🎓 Institución: {lineas[0]}")
                 
-                # Buscar grado/carrera
-                if len(institucion_elements) > 1:
-                    grado_text = institucion_elements[1].text.strip()
-                    if grado_text and grado_text != educacion.get("institucion", ""):
-                        educacion["grado"] = grado_text
-                        print(f"  📚 Grado: {grado_text}")
+                # La segunda línea puede ser el grado/carrera
+                if len(lineas) > 1:
+                    educacion["grado"] = lineas[1]
+                    print(f"  📚 Grado: {lineas[1]}")
                 
                 # Buscar fechas
-                fecha_elements = item.find_elements(By.CSS_SELECTOR, ".pvs-entity__caption-wrapper span[aria-hidden='true']")
-                if fecha_elements:
-                    fecha_text = fecha_elements[0].text.strip()
-                    educacion["fechas"] = fecha_text
-                    print(f"  📅 Fechas: {fecha_text}")
+                for linea in lineas:
+                    if any(palabra in linea for palabra in ["año", "mes", "actualidad", "2024", "2023", "ago.", "sept."]):
+                        educacion["fechas"] = linea
+                        print(f"  📅 Fechas: {linea}")
+                        break
+                
+                # Buscar calificaciones
+                for linea in lineas:
+                    if any(palabra in linea.lower() for palabra in ["promedio", "gpa", "mencion", "honor"]):
+                        educacion["calificaciones"] = linea
+                        print(f"  📊 Calificaciones: {linea}")
+                        break
                 
                 if educacion and educacion.get("institucion"):
                     educaciones.append(educacion)
+                    print(f"  ✅ Educación {len(educaciones)} extraída correctamente")
                 
-            except:
+            except Exception as e:
+                print(f"  ⚠️ Error extrayendo educación: {str(e)}")
                 continue
         
         print(f"🎯 Total de educaciones extraídas: {len(educaciones)}")
@@ -323,40 +357,78 @@ def extraer_educacion_linkedin(driver):
     
     return educaciones
 
-def extraer_habilidades_linkedin(driver):
+def extraer_licencias_certificaciones_linkedin(driver):
     """
-    Extrae habilidades basándose en la estructura HTML real de LinkedIn
+    Extrae licencias y certificaciones basándose en la estructura HTML real de LinkedIn
     """
-    habilidades = []
+    licencias = []
     
     try:
-        print("🔍 Buscando sección de habilidades...")
+        print("🔍 Buscando sección de licencias y certificaciones...")
         
-        # Buscar la sección de habilidades
-        skills_section = driver.find_element(By.ID, "skills")
-        print("✅ Sección de habilidades encontrada")
+        # Buscar la sección de licencias y certificaciones
+        lic_section = driver.find_element(By.ID, "licenses_and_certifications")
+        print("✅ Sección de licencias y certificaciones encontrada")
         
         # Scroll a la sección
-        driver.execute_script("arguments[0].scrollIntoView();", skills_section)
-        time.sleep(3)
+        driver.execute_script("arguments[0].scrollIntoView();", lic_section)
+        time.sleep(2)
         
-        # Buscar elementos de habilidades
-        skill_elements = driver.find_elements(By.CSS_SELECTOR, ".skill-category-entity__name")
+        # Buscar elementos
+        lic_items = driver.find_elements(By.XPATH, "//section[descendant::div[@id='licenses_and_certifications']]//li[contains(@class, 'artdeco-list__item')]")
         
-        for skill_elem in skill_elements:
+        print(f"📋 Encontrados {len(lic_items)} elementos de licencias y certificaciones")
+        
+        for item in lic_items:
             try:
-                skill_text = skill_elem.text.strip()
-                if skill_text:
-                    habilidades.append(skill_text)
-            except:
+                texto_completo = item.text
+                
+                if not texto_completo or len(texto_completo) < 5 or "licencias" in texto_completo.lower():
+                    continue
+                
+                print(f"  📄 Procesando: {texto_completo[:100]}...")
+                
+                licencia = {}
+                lineas = [line.strip() for line in texto_completo.split('\n') if line.strip()]
+                
+                # La primera línea suele ser el nombre de la certificación
+                if len(lineas) > 0:
+                    licencia["nombre"] = lineas[0]
+                    print(f"  🎓 Certificado: {lineas[0]}")
+                
+                # La segunda línea puede ser la organización emisora
+                if len(lineas) > 1:
+                    licencia["organizacion"] = lineas[1]
+                    print(f"  🏢 Organización: {lineas[1]}")
+                
+                # Buscar fecha de emisión
+                for linea in lineas:
+                    if any(palabra in linea for palabra in ["2024", "2023", "mar.", "abr.", "jul.", "nov.", "dic."]):
+                        licencia["fecha_emision"] = linea
+                        print(f"  📅 Fecha: {linea}")
+                        break
+                
+                # Buscar ID de credencial
+                for linea in lineas:
+                    if "ID" in linea or "Credential" in linea:
+                        licencia["id_credencial"] = linea
+                        print(f"  🔑 ID: {linea}")
+                        break
+                
+                if licencia and licencia.get("nombre"):
+                    licencias.append(licencia)
+                    print(f"  ✅ Certificado {len(licencias)} extraído correctamente")
+                
+            except Exception as e:
+                print(f"  ⚠️ Error extrayendo licencia: {str(e)}")
                 continue
         
-        print(f"🎯 Total de habilidades extraídas: {len(habilidades)}")
+        print(f"🎯 Total de licencias y certificaciones extraídas: {len(licencias)}")
         
     except Exception as e:
-        print(f"❌ Error extrayendo habilidades: {str(e)}")
+        print(f"❌ Error extrayendo licencias y certificaciones: {str(e)}")
     
-    return habilidades
+    return licencias
 
 def main():
     """
@@ -366,7 +438,7 @@ def main():
     print("=" * 60)
     
     # Credenciales
-    email = "phishingintel@gmail.com"
+    email = "phishintel02@gmail.com"
     password = "Phishintel2025."
     
     print(f"📧 Email: {email}")
@@ -405,7 +477,7 @@ def main():
             "informacion_personal": {},
             "experiencia": [],
             "educacion": [],
-            "habilidades": []
+            "licencias_certificaciones": []
         }
         
         # Información personal
@@ -423,9 +495,9 @@ def main():
         info["educacion"] = extraer_educacion_linkedin(driver)
         print()
         
-        # Habilidades
-        print("🛠️ EXTRAYENDO HABILIDADES...")
-        info["habilidades"] = extraer_habilidades_linkedin(driver)
+        # Licencias y Certificaciones
+        print("📜 EXTRAYENDO LICENCIAS Y CERTIFICACIONES...")
+        info["licencias_certificaciones"] = extraer_licencias_certificaciones_linkedin(driver)
         print()
         
         # Mostrar resumen completo
@@ -436,7 +508,10 @@ def main():
         if info["informacion_personal"]:
             print("👤 INFORMACIÓN PERSONAL:")
             for key, value in info["informacion_personal"].items():
-                print(f"  • {key.title()}: {value}")
+                if key == "acerca_de" and isinstance(value, str) and len(value) > 100:
+                    print(f"  • {key.replace('_', ' ').title()}: {value[:100]}...")
+                else:
+                    print(f"  • {key.replace('_', ' ').title()}: {value}")
             print()
         
         if info["experiencia"]:
@@ -459,12 +534,21 @@ def main():
                 print(f"  {i}. {edu.get('grado', 'N/A')} - {edu.get('institucion', 'N/A')}")
                 if edu.get('fechas'):
                     print(f"     📅 {edu['fechas']}")
+                if edu.get('calificaciones'):
+                    print(f"     📊 {edu['calificaciones']}")
                 print()
         
-        if info["habilidades"]:
-            print(f"🛠️ HABILIDADES ({len(info['habilidades'])}):")
-            print(f"  {', '.join(info['habilidades'])}")
-            print()
+        if info["licencias_certificaciones"]:
+            print(f"📜 LICENCIAS Y CERTIFICACIONES ({len(info['licencias_certificaciones'])}):")
+            for i, lic in enumerate(info["licencias_certificaciones"], 1):
+                print(f"  {i}. {lic.get('nombre', 'N/A')}")
+                if lic.get('organizacion'):
+                    print(f"     🏢 {lic['organizacion']}")
+                if lic.get('fecha_emision'):
+                    print(f"     📅 {lic['fecha_emision']}")
+                if lic.get('id_credencial'):
+                    print(f"     🔑 {lic['id_credencial']}")
+                print()
         
         # Guardar resultado completo
         with open('../ignacio_cv_completo.json', 'w', encoding='utf-8') as f:

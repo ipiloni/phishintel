@@ -381,7 +381,8 @@
                 La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. 
                 Pone un tono mas corporativo para que no llegue a spam.`,
                 formato: "html",
-                nivel: this.nivel
+                nivel: this.nivel,
+                idUsuarioDestinatario: this.filtroUsuario.idUsuario  // ← Agregamos el ID del destinatario
               })
             });
 
@@ -419,7 +420,8 @@
               body: JSON.stringify({
                 contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam.`,
                 formato: "html",
-                nivel: this.nivel
+                nivel: this.nivel,
+                idUsuarioDestinatario: this.filtroUsuario.idUsuario  // ← Agregamos el ID del destinatario
               })
             });
 

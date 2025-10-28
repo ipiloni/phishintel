@@ -2281,7 +2281,8 @@ def openapi_spec():
                         "correo": {"type": "string", "nullable": True},
                         "telefono": {"type": "string", "nullable": True},
                         "esAdministrador": {"type": "boolean", "nullable": True},
-                        "idArea": {"type": "integer", "nullable": True}
+                        "idArea": {"type": "integer", "nullable": True},
+                        "perfilLinkedin": {"type": "string", "nullable": True}
                     }
                 },
                 "EmpleadoFalla": {
@@ -2340,7 +2341,8 @@ def openapi_spec():
                         "correo": {"type": "string"},
                         "direccion": {"type": "string"},
                         "esAdministrador": {"type": "boolean"},
-                        "idArea": {"type": "integer"}
+                        "idArea": {"type": "integer"},
+                        "perfilLinkedin": {"type": "string"}
                     }
                 },
                 "UsuarioUpdate": {
@@ -2353,7 +2355,8 @@ def openapi_spec():
                         "correo": {"type": "string"},
                         "direccion": {"type": "string"},
                         "esAdministrador": {"type": "boolean"},
-                        "idArea": {"type": "integer"}
+                        "idArea": {"type": "integer"},
+                        "perfilLinkedin": {"type": "string"}
                     }
                 },
                 "Error": {

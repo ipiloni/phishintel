@@ -16,6 +16,7 @@ class Usuario(Base):
     esAdministrador = Column(Boolean, nullable=True)
     idArea = Column(Integer, ForeignKey('areas.idArea'), nullable=True)
     idVoz = Column(String, nullable=True)
+    perfilLinkedin = Column(String, nullable=True)
 
     area = relationship("Area", back_populates="usuarios")
 
@@ -35,5 +36,6 @@ class Usuario(Base):
             "telefono": self.telefono,
             "esAdministrador": self.esAdministrador,
             "idArea": self.idArea,
-            "idVoz": self.idVoz
+            "idVoz": self.idVoz,
+            "perfilLinkedin": self.perfilLinkedin
         }

@@ -28,13 +28,19 @@ class AIController:
             formato = "Quiero que el cuerpo del email sea en formato " + data["formato"]
 
         if "nivel" in data:
-            if data["nivel"] not in [1, 2, 3]:
-                contexto = (
-                          "Armá un email del estilo Phishing. Necesito que la respuesta que me brindes sea sólamente 'asunto' y 'cuerpo', en formato JSON. El contexto es el siguiente: "
-                        + data["contexto"]
-                        + ". Supone una escala de dificultad de la simulacion del 1 al 3, siendo 1 el más básico y 3 el más difícil o realista, este email debe generarse con dificultad " + data["nivel"])
-            else:
+            # Convertir nivel de string a número si es necesario
+            nivel = data["nivel"]
+            if isinstance(nivel, str):
+                nivel_map = {"Fácil": 1, "Medio": 2, "Difícil": 3}
+                nivel = nivel_map.get(nivel, 1)
+            
+            if nivel not in [1, 2, 3]:
                 return responseError("CAMPOS_OBLIGATORIOS", "El campo 'nivel' solo puede tener los valores 1, 2 o 3", 400)
+            
+            contexto = (
+                      "Armá un email del estilo Phishing. Necesito que la respuesta que me brindes sea sólamente 'asunto' y 'cuerpo', en formato JSON. El contexto es el siguiente: "
+                    + data["contexto"]
+                    + ". Supone una escala de dificultad de la simulacion del 1 al 3, siendo 1 el más básico y 3 el más difícil o realista, este email debe generarse con dificultad " + str(nivel))
 
         try:
             response = AIController.enviarPrompt(contexto + ". " + formato, modelAI)
@@ -43,6 +49,102 @@ class AIController:
     
         except Exception as e:
             return responseError("ERROR_API", str(e), 500)
+
+    @staticmethod
+    def obtenerInfoLinkedinUsuario(id_usuario):
+        """
+        Obtiene información completa de LinkedIn de un usuario si tiene perfil cargado
+        Realiza web scraping con Selenium para extraer: experiencia, educación, certificaciones, etc.
+        """
+        from app.config.db_config import SessionLocal
+        from app.backend.models import Usuario
+        
+        session = SessionLocal()
+        try:
+            usuario = session.query(Usuario).filter_by(idUsuario=id_usuario).first()
+            if not usuario or not usuario.perfilLinkedin:
+                return None
+            
+            log.info(f"Extrayendo información de LinkedIn para usuario {id_usuario}")
+            
+            # Importar funciones de web scraping (las tendremos en el controlador)
+            from app.controllers.linkedin_scraper import LinkedinScraper
+            
+            scraper = LinkedinScraper()
+            info_linkedin = scraper.extraer_info_completa(usuario.perfilLinkedin)
+            
+            if info_linkedin:
+                log.info(f"Info de LinkedIn extraída exitosamente para usuario {id_usuario}")
+                return info_linkedin
+            else:
+                log.warning(f"No se pudo extraer info de LinkedIn para usuario {id_usuario}")
+                return None
+            
+        except Exception as e:
+            log.error(f"Error obteniendo info de LinkedIn: {str(e)}")
+            return None
+        finally:
+            session.close()
+
+    @staticmethod
+    def construirContextoConLinkedin(contexto_base, info_linkedin):
+        """
+        Construye un contexto enriquecido con información de LinkedIn
+        """
+        if not info_linkedin:
+            return contexto_base
+        
+        # Construir string con toda la información de LinkedIn
+        info_str = "\n\n===== INFORMACIÓN PROFESIONAL DEL DESTINATARIO (LinkedIn) =====\n"
+        
+        # Información personal
+        info_personal = info_linkedin.get("informacion_personal", {})
+        if info_personal.get("nombre"):
+            info_str += f"- Nombre completo: {info_personal['nombre']}\n"
+        if info_personal.get("titulo"):
+            info_str += f"- Título profesional: {info_personal['titulo']}\n"
+        if info_personal.get("ubicacion"):
+            info_str += f"- Ubicación: {info_personal['ubicacion']}\n"
+        if info_personal.get("acerca_de"):
+            info_str += f"- Acerca de: {info_personal['acerca_de'][:200]}...\n"
+        
+        # Experiencia
+        experiencias = info_linkedin.get("experiencia", [])
+        if experiencias:
+            info_str += f"\n- Experiencia profesional ({len(experiencias)} trabajos):\n"
+            for exp in experiencias[:3]:  # Solo las 3 más recientes
+                if exp.get("empresa"):
+                    info_str += f"  • {exp.get('titulo', 'N/A')} en {exp['empresa']}"
+                    if exp.get("fechas"):
+                        info_str += f" ({exp['fechas']})"
+                    info_str += "\n"
+        
+        # Educación
+        educaciones = info_linkedin.get("educacion", [])
+        if educaciones:
+            info_str += f"\n- Educación ({len(educaciones)} estudios):\n"
+            for edu in educaciones[:2]:  # Solo las 2 más recientes
+                if edu.get("institucion"):
+                    info_str += f"  • {edu.get('grado', 'N/A')} - {edu['institucion']}"
+                    if edu.get("fechas"):
+                        info_str += f" ({edu['fechas']})"
+                    info_str += "\n"
+        
+        # Certificaciones
+        certificaciones = info_linkedin.get("licencias_certificaciones", [])
+        if certificaciones:
+            info_str += f"\n- Certificaciones ({len(certificaciones)}):\n"
+            for cert in certificaciones[:2]:  # Solo las 2 más recientes
+                if cert.get("nombre"):
+                    info_str += f"  • {cert['nombre']}"
+                    if cert.get("organizacion"):
+                        info_str += f" - {cert['organizacion']}"
+                    info_str += "\n"
+        
+        info_str += "\nUsa esta información para personalizar el email y hacerlo más creíble y relevante para esta persona, tene en cuenta que esta informacion cuenta con info pasada de la persona, ya sea lugares donde trabajo o estudio previamente. Por lo tanto por favor tene en cuenta las fechas de sus trabajos y estudios, y si vas a usar fechas dentro del asunto del mail, como por ejemplo para solicitar un archivo antes de tal fecha, por favor usa la fecha real actual, no tomes una fecha de la info de linkedin."
+        info_str += "\nMenciona detalles profesionales específicos si son relevantes para el contexto del phishing.\n"
+        
+        return contexto_base + info_str
 
     @staticmethod
     def armarMensaje(data):

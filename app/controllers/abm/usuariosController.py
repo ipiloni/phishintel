@@ -73,7 +73,8 @@ class UsuariosController:
                                telefono=data.get("telefono"),
                                correo=data.get("correo"),
                                direccion=data.get("direccion"),
-                               esAdministrador=data.get("esAdministrador"))
+                               esAdministrador=data.get("esAdministrador"),
+                               perfilLinkedin=data.get("perfilLinkedin"))
 
         if data.get("esAdministrador") is None:
             nuevoUsuario.esAdministrador = False
@@ -118,7 +119,8 @@ class UsuariosController:
                         correo=data.get("correo"),
                         direccion=data.get("direccion"),
                         esAdministrador=data.get("esAdministrador"),
-                        idArea=data.get("idArea")
+                        idArea=data.get("idArea"),
+                        perfilLinkedin=data.get("perfilLinkedin")
                     )
                     if data.get("esAdministrador") is None:
                         nuevo.esAdministrador = False
@@ -186,6 +188,8 @@ class UsuariosController:
             usuario.esAdministrador = data["esAdministrador"]
         if "idArea" in data:
             usuario.idArea = data["idArea"]
+        if "perfilLinkedin" in data:
+            usuario.perfilLinkedin = data["perfilLinkedin"]
         if "password" in data and data["password"]:
             # Hash the new password before saving
             hashedPassword = hash_password(data["password"])
