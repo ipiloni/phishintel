@@ -6,6 +6,7 @@ from app.controllers.abm.areasController import AreasController
 from app.controllers.aiController import AIController
 from app.controllers.webScrappingController import WebScrappingController
 from app.controllers.llamadas.elevenLabsController import ElevenLabsController
+from app.controllers.llamadas.audioController import AudioController
 from app.controllers.emails.emailController import EmailController
 from app.controllers.abm.eventosController import EventosController
 from app.controllers.llamadas.llamadasController import LlamadasController
@@ -58,47 +59,9 @@ def enviarAudio(nombreAudio):
 def exponerAudio(nombreAudio):  # es una funcion que nos permite reutilizarla internamente
     return send_file(f"./audios/{nombreAudio}", mimetype="audio/mpeg")
 
-@apis.route("/api/audio/upload", methods=["POST"])
+@apis.route("/api/llamadas/subir-audio", methods=["POST"])
 def subirAudio():
-    try:
-        # Verificar que se haya enviado un archivo de audio
-        if 'audio' not in request.files:
-            return jsonify({"error": "No se encontró archivo de audio"}), 400
-        
-        audio_file = request.files['audio']
-        usuario = request.form.get('usuario', 'Usuario Desconocido')
-        area = request.form.get('area', 'Área Desconocida')
-        historia = request.form.get('historia', 'Historia no especificada')
-        
-        if audio_file.filename == '':
-            return jsonify({"error": "No se seleccionó ningún archivo"}), 400
-        
-        # Generar nombre único para el archivo
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"audio_{usuario.replace(' ', '_')}_{timestamp}.webm"
-        
-        # Asegurar que la carpeta audios existe
-        audio_dir = "./app/audios"
-        os.makedirs(audio_dir, exist_ok=True)
-        
-        # Guardar el archivo
-        file_path = os.path.join(audio_dir, filename)
-        audio_file.save(file_path)
-        
-        log(f"Audio guardado: {filename} - Usuario: {usuario} - Área: {area} - Historia: {historia}")
-        
-        return jsonify({
-            "success": True,
-            "message": "Audio guardado correctamente",
-            "filename": filename,
-            "usuario": usuario,
-            "area": area,
-            "historia": historia
-        }), 200
-        
-    except Exception as e:
-        log(f"Error al subir audio: {str(e)}")
-        return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
+    return AudioController.subirAudio()
 
 @apis.route("/api/twilio/respuesta", methods=["POST"])
 def procesarRespuestaLlamada():
@@ -164,10 +127,36 @@ def enviarMensajeWhatsappGrupoWhapi():
     data = request.get_json()
     return WhatsAppController.enviarMensajeWhapiGrupo(data)
 
-@apis.route("/api/clonar", methods=["POST"])
+@apis.route("/api/llamadas/clonar", methods=["POST"])
 def clonarVoz():
     data = request.get_json()
     return ElevenLabsController.clonarVoz(data)
+
+@apis.route("/api/llamadas/check-voz/<int:idUsuario>", methods=["GET"])
+def checkVoz(idUsuario):
+    """
+    Verifica si un usuario tiene voz configurada.
+    Retorna el estado de la voz y el ID de voz si existe.
+    """
+    try:
+        session = SessionLocal()
+        usuario = session.query(Usuario).filter_by(idUsuario=idUsuario).first()
+        
+        if not usuario:
+            return responseError("USUARIO_NO_ENCONTRADO", f"Usuario con ID {idUsuario} no encontrado", 404)
+        
+        tieneVoz = usuario.idVoz is not None and usuario.idVoz.strip() != ""
+        
+        return jsonify({
+            "tieneVoz": tieneVoz,
+            "idVoz": usuario.idVoz if tieneVoz else None
+        }), 200
+        
+    except Exception as e:
+        log.error(f"Error verificando voz del usuario {idUsuario}: {str(e)}")
+        return responseError("ERROR_INTERNO", f"Error interno del servidor: {str(e)}", 500)
+    finally:
+        session.close()
 
 # ------ # REGISTROS DE EVENTOS +  # ------ #
 @apis.route("/api/sumar-falla", methods=["POST"])

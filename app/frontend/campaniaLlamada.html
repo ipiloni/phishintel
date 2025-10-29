@@ -50,7 +50,7 @@
 }
 
 .recording-modal .modal-title {
-  color: #da02e5 !important;
+  color: white !important;
 }
 
 .recording-modal .modal-body {
@@ -181,7 +181,7 @@
 }
 
 .historia-sugerida h6 {
-  color: #da02e5 !important;
+  color: white !important;
   font-weight: 600;
   margin-bottom: 10px;
 }
@@ -288,29 +288,57 @@
               </select>
             </div>
 
-            <!-- Selector de Remitente (un usuario) -->
+            <!-- Selector de Área Remitente -->
             <div class="mb-3">
-              <label for="usuarioRemitente" class="form-label">Seleccionar usuario remitente</label>
-              <select v-model="filtroUsuario" class="form-control" id="usuarioRemitente" name="usuarioRemitente" required>
-                <option value="">-- Selecciona un usuario --</option>
-                <option v-for="usuario in usuarios" :key="usuario.idUsuario" :value="usuario">
+              <label for="areaRemitenteSelect" class="form-label">Seleccione el área del remitente</label>
+              <select v-model="filtroAreaRemitente" class="form-control" id="areaRemitenteSelect" name="areaRemitente" required>
+                <option value="" disabled>-- Selecciona un área --</option>
+                <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
+                  {{ area.nombreArea }} 
+                </option>
+              </select>
+            </div>
+
+            <!-- Selector de Usuario Remitente (solo visible cuando hay área seleccionada) -->
+            <div class="mb-3" v-if="filtroAreaRemitente">
+              <label for="usuarioRemitenteSelect" class="form-label">Seleccionar usuario remitente</label>
+              <select v-model="filtroUsuarioRemitente" class="form-control" id="usuarioRemitenteSelect" name="usuarioRemitente" required>
+                <option value="" disabled>-- Selecciona un usuario --</option>
+                <option v-for="usuario in usuariosRemitentesFiltrados" :key="usuario.idUsuario" :value="usuario">
                   {{ usuario.nombre }} {{ usuario.apellido }}
                 </option>
               </select>
             </div>
 
-            <!-- Si no tiene voz configurada, deberia aparecer el boton grabar voz;
-            caso contrario, algo que diga "el usuario tiene voz configurada" -->
-            <!-- Botón para grabar voz: debe aparecer solo si el remitente NO TIENE idVoz CONFIGURADA!
-            Caso contrario mostrar un mensaje o algo que diga que el usuario ya tiene configurada la voz-->
-            <div class="mb-4" v-if="filtroRemitente">
+            <!-- Configuración de Voz del Remitente -->
+            <div class="mb-4" v-if="filtroUsuarioRemitente">
               <label class="form-label mb-3">Configuración de Voz</label>
+              
+              <div v-if="tieneVozConfigurada" class="alert alert-success text-center mb-3 mx-auto w-auto" style="background-color: #2d2d2d; border-color: var(--accent-color); color: var(--accent-color); max-width: 60%;">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <strong>✓ Voz configurada</strong> - El usuario ya tiene una voz clonada disponible
+              </div>
+
               <div class="text-center">
-                <button type="button" class="btn btn-primary px-4 py-2 rounded-pill" @click="abrirModalGrabacion">
-                  <i class="bi bi-mic"></i> Grabar voz para clonación
+                <!-- Botón Grabar Nueva Voz -->
+                <button type="button" class="btn px-4 py-2 rounded-pill me-3"
+                        :style="{ backgroundColor: 'var(--accent-color)', color: 'white', border: 'none' }"
+                        @click="abrirModalGrabacion">
+                  <i class="bi bi-mic"></i>
+                  {{ tieneVozConfigurada ? ' Grabar Nueva Voz' : ' Grabar Voz' }}
                 </button>
+                <!-- Botón Probar Voz -->
+                <button type="button" class="btn px-4 py-2 rounded-pill" 
+                        :style="tieneVozConfigurada ? 
+                          { backgroundColor: 'var(--accent-color)', color: 'white', border: 'none' } : 
+                          { backgroundColor: '#6c757d', color: 'white', border: 'none', cursor: 'not-allowed' }"
+                        :disabled="!tieneVozConfigurada"
+                        @click="abrirModalProbarVoz">
+                  <i class="bi bi-play-circle"></i> Probar Voz
+                </button>
+                
                 <p class="mt-2 text-muted" style="color: #ccc !important;">
-                  <small>Graba una historia de 30 segundos o más para clonar tu voz</small>
+                  <small> {{ tieneVozConfigurada ? 'Prueba la voz o graba una nueva si desea' : ' Graba una historia de 30 segundos a 1 minuto para clonar tu voz' }} </small>
                 </p>
               </div>
             </div>
@@ -320,21 +348,18 @@
              -->
             <div class="mb-3">
               <label for="context" class="form-label">Objetivo de la llamada</label>
-              <!--<textarea class="form-control" v-model="contexto" id="context" rows="5" placeholder="Escribe el objetivo de la llamada" required></textarea>-->
-                <select style="margin-bottom: 15px;" class="form-control" id="context">
-                  <option selected disabled>-- Selecciona un objetivo --</option>
-                  <!-- En los values está lo que le pasamos a la IA, tiene que ser algo corto, agregar más opciones -->
-                  <option value="abra un link que se le enviará por">Solicitar abrir un link</option>
-                  <option value="descargue un archivo que se le enviará por">Solicitar descargar un archivo</option>
-                  <option value="envie un archivo que se le enviará por">Solicitar enviar un archivo</option>
-                </select>
+              <select style="margin-bottom: 15px;" class="form-control" id="context" disabled>
+                <option selected disabled>Próximamente - En desarrollo</option>
+                <option value="abra un link que se le enviará por">Solicitar Actualizar sus datos</option>
+                <option value="descargue un archivo que se le enviará por">Solicitar descargar un archivo</option>
+              </select>
             </div>
 
               <!-- Evento desencadenador: aca seria un select que diga si luego se envia un email, un sms o un whatsapp -->
             <div class="mb-3">
                 <label for="eventoDesencadenador" class="form-label">Evento desencadenador</label>
-                <select style="margin-bottom: 35px;" class="form-control" id="eventoDesencadenador">
-                  <option selected disabled>-- Selecciona un evento --</option>
+                <select style="margin-bottom: 35px;" class="form-control" id="eventoDesencadenador" disabled>
+                  <option selected disabled>Próximamente - En desarrollo</option>
                   <option value="LLAMADA_CORREO">Correo</option> <!-- Los values son el TipoEvento -->
                   <option value="LLAMADA_SMS">Mensaje SMS</option>
                   <option value="LLAMADA_WPP">Mensaje WhatsApp</option>
@@ -367,11 +392,14 @@
                 </div>
                 <div class="modal-body">
                   <!-- Consentimiento -->
-                  <div class="consent-checkbox">
-                    <input type="checkbox" id="consent" v-model="consentimiento" required>
-                    <label for="consent" class="consent-text">
-                      <strong>Consentimiento:</strong> Autorizo que mi voz sea grabada y utilizada para generar una voz clonada con fines de seguridad y simulación de phishing. Entiendo que esta grabación será utilizada únicamente para propósitos de entrenamiento y concienciación en seguridad.
-                    </label>
+                  <div class="historia-sugerida">
+                    <h6><i class="bi bi-shield-check me-2"></i>Consentimiento:</h6>
+                    <div class="consent-checkbox">
+                      <input type="checkbox" id="consent" v-model="consentimiento" required>
+                      <label for="consent" class="consent-text">
+                        <strong>Autorizo</strong> que mi voz sea grabada y utilizada para generar una voz clonada con fines de seguridad y simulación de phishing. Entiendo que esta grabación será utilizada únicamente para propósitos de entrenamiento y concienciación en seguridad.
+                      </label>
+                    </div>
                   </div>
 
                    <!-- Historia sugerida -->
@@ -391,7 +419,7 @@
                        <li>Responde a la historia sugerida de manera natural</li>
                        <li>Habla de manera clara y con volumen normal</li>
                        <li>El audio se graba sin procesamiento (crudo)</li>
-                       <li>Máximo 30 segundos de grabación</li>
+                       <li>Mínimo 30 segundos, máximo 1 minuto de grabación</li>
                        <li>La grabación se detendrá automáticamente</li>
                      </ul>
                    </div>
@@ -440,11 +468,15 @@
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  
+                  <!-- Botón Guardar Audio -->
                   <button 
                     type="button" 
-                    class="btn btn-primary" 
+                    class="btn px-4 py-2 rounded-pill" 
+                    :style="{ backgroundColor: 'var(--accent-color)', color: 'white', border: 'none' }"
                     @click="guardarAudio"
                     :disabled="!audioGrabado || cargandoAudio"
+                    v-if="!mostrarBotonClonar"
                   >
                     <span v-if="cargandoAudio">
                       <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -452,6 +484,87 @@
                     </span>
                     <span v-else>
                       <i class="bi bi-save me-2"></i>Guardar Audio
+                    </span>
+                  </button>
+
+                  <!-- Botón Clonar Voz (aparece después de guardar) -->
+                  <button 
+                    type="button" 
+                    class="btn px-4 py-2 rounded-pill" 
+                    :style="{ backgroundColor: 'var(--accent-color)', color: 'white', border: 'none' }"
+                    @click="clonarVoz"
+                    :disabled="cargandoClonar"
+                    v-if="mostrarBotonClonar"
+                  >
+                    <span v-if="cargandoClonar">
+                      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Clonando...
+                    </span>
+                    <span v-else>
+                      <i class="bi bi-magic me-2"></i>Clonar Voz
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal de Probar Voz -->
+          <div class="modal fade recording-modal" id="testVoiceModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">
+                    <i class="bi bi-play-circle me-2"> </i>Probar Voz Clonada
+                  </h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <!-- Texto a reproducir -->
+                  <div class="mb-4">
+                    <label for="textoProbarVoz" class="form-label">Texto a reproducir</label>
+                    <textarea 
+                      v-model="textoProbarVoz" 
+                      class="form-control" 
+                      id="textoProbarVoz" 
+                      rows="4" 
+                      placeholder="Escribe el texto que quieres convertir a voz"
+                      style="background-color: #2d2d2d; color: #e0e0e0; border: 1px solid #da02e5;">
+                    </textarea>
+                  </div>
+
+                  <!-- Reproductor de audio -->
+                  <div v-if="audioGenerado" class="audio-preview mb-3">
+                    <h6 class="mb-2">Audio generado:</h6>
+                    <audio :src="audioGenerado" controls style="width: 100%; background-color: #2d2d2d; border-radius: 8px;"></audio>
+                  </div>
+
+                  <!-- Instrucciones -->
+                  <div class="alert alert-info" style="background-color: #2d2d2d; border-color: #da02e5; color: #e0e0e0;">
+                    <h6><i class="bi bi-info-circle me-2"></i>Instrucciones:</h6>
+                    <ul class="mb-0">
+                      <li>Escribe el texto que quieres convertir a voz</li>
+                      <li>Haz clic en "Reproducir" para generar el audio</li>
+                      <li>El audio se reproducirá automáticamente</li>
+                      <li>Puedes editar el texto y generar un nuevo audio</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button 
+                    type="button" 
+                    class="btn px-4 py-2 rounded-pill" 
+                    :style="{ backgroundColor: 'var(--accent-color)', color: 'white', border: 'none' }"
+                    @click="probarVoz"
+                    :disabled="cargandoTTS || !textoProbarVoz.trim()"
+                  >
+                    <span v-if="cargandoTTS">
+                      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Generando...
+                    </span>
+                    <span v-else>
+                      <i class="bi bi-play-fill me-2"></i>Reproducir
                     </span>
                   </button>
                 </div>
@@ -507,6 +620,16 @@
           areas: [],
           filtroArea: "",
           filtroUsuario: "",
+          filtroAreaRemitente: "",
+          filtroUsuarioRemitente: null,
+          tieneVozConfigurada: false,
+          idVozRemitente: null,
+          ubicacionAudioGrabado: null,
+          mostrarBotonClonar: false,
+          cargandoClonar: false,
+          textoProbarVoz: "Hola, buenos días",
+          audioGenerado: null,
+          cargandoTTS: false,
           contexto: "",
           cargando: false,
           cargandoAudio: false,
@@ -518,7 +641,7 @@
           mediaRecorder: null,
           audioChunks: [],
           timerInterval: null,
-          maxRecordingTime: 30, // 30 segundos máximo
+          maxRecordingTime: 60, // 1 minuto máximo
           historiaSeleccionada: "",
           historias: [
             "Cuéntame qué hiciste hoy en el trabajo",
@@ -538,15 +661,111 @@
         usuariosFiltrados() {
           const areaSeleccionada = this.areas.find(a => a.nombreArea === this.filtroArea);
           return areaSeleccionada ? areaSeleccionada.usuarios : [];
+        },
+        usuariosRemitentesFiltrados() {
+          const areaSeleccionada = this.areas.find(a => a.nombreArea === this.filtroAreaRemitente);
+          return areaSeleccionada ? areaSeleccionada.usuarios : [];
         }
       },
       watch: {
         filtroArea() {
           // Limpiar usuario seleccionado cuando cambie el área
           this.filtroUsuario = "";
+        },
+        filtroAreaRemitente() {
+          // Limpiar usuario remitente seleccionado cuando cambie el área
+          this.filtroUsuarioRemitente = null;
+          this.tieneVozConfigurada = false;
+          this.idVozRemitente = null;
+        },
+        async filtroUsuarioRemitente() {
+          // Limpiar audio generado al cambiar usuario
+          this.audioGenerado = null;
+          
+          // Verificar si el usuario remitente tiene voz configurada
+          if (this.filtroUsuarioRemitente && this.filtroUsuarioRemitente.idUsuario) {
+            await this.verificarVozUsuario();
+          } else {
+            this.tieneVozConfigurada = false;
+            this.idVozRemitente = null;
+          }
         }
       },
       methods: {
+        async verificarVozUsuario() {
+          try {
+            const response = await fetch(`http://localhost:8080/api/llamadas/check-voz/${this.filtroUsuarioRemitente.idUsuario}`);
+            const data = await response.json();
+            
+            if (response.ok) {
+              this.tieneVozConfigurada = data.tieneVoz;
+              this.idVozRemitente = data.idVoz;
+            } else {
+              console.error("Error verificando voz:", data);
+              this.tieneVozConfigurada = false;
+              this.idVozRemitente = null;
+            }
+          } catch (error) {
+            console.error("Error verificando voz del usuario:", error);
+            this.tieneVozConfigurada = false;
+            this.idVozRemitente = null;
+          }
+        },
+
+        abrirModalProbarVoz() {
+          if (!this.tieneVozConfigurada) {
+            this.mostrarToastError("El usuario no tiene voz configurada");
+            return;
+          }
+          const modal = new bootstrap.Modal(document.getElementById("testVoiceModal"));
+          modal.show();
+        },
+
+        async probarVoz() {
+          if (!this.textoProbarVoz.trim()) {
+            this.mostrarToastError("Por favor ingresa un texto para reproducir");
+            return;
+          }
+
+          this.cargandoTTS = true;
+          try {
+            const response = await fetch('http://localhost:8080/api/tts', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                idVoz: this.idVozRemitente,
+                texto: this.textoProbarVoz,
+                modelo: "eleven_multilingual_v2",
+                estabilidad: 0.6,
+                velocidad: 0.9,
+                exageracion: 0.5
+              })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+              this.audioGenerado = `http://localhost:8080/api/audios/${data.idAudio}.mp3`;
+              // Auto-reproducir el audio
+              setTimeout(() => {
+                const audioElement = document.querySelector('#testVoiceModal audio');
+                if (audioElement) {
+                  audioElement.play();
+                }
+              }, 500);
+            } else {
+              this.mostrarToastError("Error generando audio: " + (data.error || "Error desconocido"));
+            }
+          } catch (error) {
+            console.error("Error generando TTS:", error);
+            this.mostrarToastError("Error generando audio");
+          } finally {
+            this.cargandoTTS = false;
+          }
+        },
+
         async generarPreview() {
           this.cargando = true;
           try {
@@ -567,6 +786,9 @@
         },
 
         abrirModalGrabacion() {
+          // Limpiar variables del modal
+          this.limpiarModalGrabacion();
+          
           // Seleccionar una historia aleatoria
           this.historiaSeleccionada = this.historias[Math.floor(Math.random() * this.historias.length)];
           const modal = new bootstrap.Modal(document.getElementById("recordingModal"));
@@ -656,6 +878,12 @@
         async guardarAudio() {
           if (!this.audioGrabado) return;
           
+          // Validar duración mínima de 30 segundos
+          if (this.tiempoGrabacion < 30) {
+            this.mostrarToastError("La grabación debe durar al menos 30 segundos");
+            return;
+          }
+          
           this.cargandoAudio = true;
           try {
             // Convertir el blob a FormData para enviar al servidor
@@ -664,11 +892,12 @@
             
             const formData = new FormData();
             formData.append('audio', audioBlob, `audio_${Date.now()}.webm`);
-            formData.append('usuario', this.filtroUsuario.nombre + ' ' + this.filtroUsuario.apellido);
-            formData.append('area', this.filtroArea);
+            formData.append('usuario', this.filtroUsuarioRemitente.nombre + ' ' + this.filtroUsuarioRemitente.apellido);
+            formData.append('area', this.filtroAreaRemitente);
             formData.append('historia', this.historiaSeleccionada);
+            formData.append('idUsuario', this.filtroUsuarioRemitente.idUsuario);
             
-            const uploadResponse = await fetch('http://localhost:8080/api/audio/upload', {
+            const uploadResponse = await fetch('http://localhost:8080/api/llamadas/subir-audio', {
               method: 'POST',
               body: formData
             });
@@ -677,25 +906,72 @@
               throw new Error('Error al subir el audio');
             }
             
-            this.mostrarToastExito();
-            bootstrap.Modal.getInstance(document.getElementById("recordingModal")).hide();
+            const uploadData = await uploadResponse.json();
+            this.ubicacionAudioGrabado = uploadData.ubicacion;
             
-            // Limpiar variables
-            this.audioGrabado = null;
-            this.tiempoGrabacion = 0;
-            this.consentimiento = false;
-            this.historiaSeleccionada = "";
+            this.mostrarToastExito("✅ Audio guardado correctamente");
+            
+            // Mostrar botón de clonar después de guardar
+            this.mostrarBotonClonar = true;
             
           } catch (error) {
             console.error('Error al guardar audio:', error);
-            this.mostrarToastError();
+            this.mostrarToastError("Error al guardar el audio");
           } finally {
             this.cargandoAudio = false;
           }
         },
 
-        mostrarToastExito() {
+        async clonarVoz() {
+          if (!this.ubicacionAudioGrabado || !this.filtroUsuarioRemitente) return;
+          
+          this.cargandoClonar = true;
+          try {
+            const response = await fetch('http://localhost:8080/api/llamadas/clonar', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                idUsuario: this.filtroUsuarioRemitente.idUsuario,
+                ubicacionArchivo: this.ubicacionAudioGrabado
+              })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+              this.idVozRemitente = data.idVoz;
+              this.tieneVozConfigurada = true;
+              this.mostrarToastExito("🎉 Voz clonada exitosamente");
+              
+              // Cerrar modal y limpiar variables
+              bootstrap.Modal.getInstance(document.getElementById("recordingModal")).hide();
+              this.limpiarModalGrabacion();
+            } else {
+              this.mostrarToastError("Error clonando voz: " + (data.error || "Error desconocido"));
+            }
+          } catch (error) {
+            console.error('Error clonando voz:', error);
+            this.mostrarToastError("Error clonando la voz");
+          } finally {
+            this.cargandoClonar = false;
+          }
+        },
+
+        limpiarModalGrabacion() {
+          this.audioGrabado = null;
+          this.tiempoGrabacion = 0;
+          this.consentimiento = false;
+          this.historiaSeleccionada = "";
+          this.ubicacionAudioGrabado = null;
+          this.mostrarBotonClonar = false;
+        },
+
+        mostrarToastExito(mensaje = "Operación exitosa") {
           const toastElement = document.getElementById('successToast');
+          const toastBody = toastElement.querySelector('.toast-body');
+          toastBody.textContent = mensaje;
           const toast = new bootstrap.Toast(toastElement, {
             autohide: true,
             delay: 4000
@@ -703,8 +979,10 @@
           toast.show();
         },
 
-        mostrarToastError() {
+        mostrarToastError(mensaje = "Error al procesar la solicitud") {
           const toastElement = document.getElementById('errorToast');
+          const toastBody = toastElement.querySelector('.toast-body');
+          toastBody.textContent = mensaje;
           const toast = new bootstrap.Toast(toastElement, {
             autohide: true,
             delay: 5000

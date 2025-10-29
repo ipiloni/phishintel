@@ -190,6 +190,8 @@ class UsuariosController:
             usuario.idArea = data["idArea"]
         if "perfilLinkedin" in data:
             usuario.perfilLinkedin = data["perfilLinkedin"]
+        if "idVoz" in data:
+            usuario.idVoz = data["idVoz"]
         if "password" in data and data["password"]:
             # Hash the new password before saving
             hashedPassword = hash_password(data["password"])

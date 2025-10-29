@@ -21,6 +21,7 @@ def openapi_spec():
             {"name": "📊 Reportes", "description": "Reportes y métricas de fallas por área y empleado"},
             {"name": "📧 Emails", "description": "Envío de emails y notificaciones"},
             {"name": "💬 Mensajes", "description": "Envío de mensajes WhatsApp y SMS"},
+            {"name": "📞 Llamadas", "description": "Gestión de llamadas y voces"},
             {"name": "🔐 Auth", "description": "Autenticación y gestión de sesiones"},
             {"name": "🤖 Telegram Bot", "description": "Gestión del bot de Telegram"},
             {"name": "🌐 Ngrok", "description": "Gestión de túneles ngrok temporales"},
@@ -2211,6 +2212,226 @@ def openapi_spec():
                         }
                     }
                 }
+            },
+            "/api/llamadas/subir-audio": {
+                "post": {
+                    "summary": "Subir archivo de audio para clonación de voz",
+                    "tags": ["📞 Llamadas"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "multipart/form-data": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "audio": {
+                                            "type": "string",
+                                            "format": "binary",
+                                            "description": "Archivo de audio en formato webm/mp3"
+                                        },
+                                        "usuario": {
+                                            "type": "string",
+                                            "description": "Nombre del usuario"
+                                        },
+                                        "area": {
+                                            "type": "string",
+                                            "description": "Área del usuario"
+                                        },
+                                        "historia": {
+                                            "type": "string",
+                                            "description": "Historia utilizada para la grabación"
+                                        },
+                                        "idUsuario": {
+                                            "type": "string",
+                                            "description": "ID del usuario remitente"
+                                        }
+                                    },
+                                    "required": ["audio"]
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Audio subido correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "success": {"type": "boolean"},
+                                            "message": {"type": "string"},
+                                            "filename": {"type": "string"},
+                                            "ubicacion": {"type": "string"},
+                                            "usuario": {"type": "string"},
+                                            "area": {"type": "string"},
+                                            "historia": {"type": "string"},
+                                            "idUsuario": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Error en la solicitud", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+                        "500": {"description": "Error interno del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
+            },
+            "/api/llamadas/clonar": {
+                "post": {
+                    "summary": "Clonar voz usando archivo de audio",
+                    "tags": ["📞 Llamadas"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "idUsuario": {
+                                            "type": "string",
+                                            "description": "ID del usuario para asociar la voz clonada"
+                                        },
+                                        "ubicacionArchivo": {
+                                            "type": "string",
+                                            "description": "Ruta del archivo de audio a clonar"
+                                        }
+                                    },
+                                    "required": ["idUsuario", "ubicacionArchivo"],
+                                    "example": {
+                                        "idUsuario": "5",
+                                        "ubicacionArchivo": "./audios/GrabacionVozMora.mp3"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Voz clonada correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "idVoz": {"type": "string", "description": "ID de la voz clonada en ElevenLabs"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Error en la solicitud", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+                        "404": {"description": "Usuario no encontrado", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+                        "500": {"description": "Error interno del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
+            },
+            "/api/llamadas/check-voz/{idUsuario}": {
+                "get": {
+                    "summary": "Verificar si un usuario tiene voz configurada",
+                    "tags": ["📞 Llamadas"],
+                    "parameters": [
+                        {
+                            "name": "idUsuario",
+                            "in": "path",
+                            "required": True,
+                            "schema": {"type": "integer"},
+                            "description": "ID del usuario a verificar"
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Estado de la voz del usuario",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "tieneVoz": {"type": "boolean", "description": "Si el usuario tiene voz configurada"},
+                                            "idVoz": {"type": "string", "nullable": True, "description": "ID de la voz si existe"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "404": {"description": "Usuario no encontrado", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+                        "500": {"description": "Error interno del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
+            },
+            "/api/tts": {
+                "post": {
+                    "summary": "Generar audio de texto a voz usando ElevenLabs",
+                    "tags": ["📞 Llamadas"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "idVoz": {
+                                            "type": "string",
+                                            "description": "ID de la voz a utilizar"
+                                        },
+                                        "texto": {
+                                            "type": "string",
+                                            "description": "Texto a convertir a audio"
+                                        },
+                                        "modelo": {
+                                            "type": "string",
+                                            "description": "Modelo de ElevenLabs a utilizar",
+                                            "default": "eleven_multilingual_v2"
+                                        },
+                                        "estabilidad": {
+                                            "type": "number",
+                                            "description": "Estabilidad de la voz (0.0 - 1.0)",
+                                            "default": 0.6
+                                        },
+                                        "velocidad": {
+                                            "type": "number",
+                                            "description": "Velocidad de la voz (0.0 - 1.0)",
+                                            "default": 0.9
+                                        },
+                                        "exageracion": {
+                                            "type": "number",
+                                            "description": "Exageración de la voz (0.0 - 1.0)",
+                                            "default": 0.5
+                                        }
+                                    },
+                                    "required": ["idVoz", "texto"],
+                                    "example": {
+                                        "idVoz": "GHUI7Bui6hqAYVXaCoEX",
+                                        "texto": "Hola yo soy Marcos y quería avisarles que mañana les voy a mandar un mail, por favor avísenme cuando lo reciban.",
+                                        "modelo": "eleven_multilingual_v2",
+                                        "estabilidad": 0.6,
+                                        "velocidad": 0.9,
+                                        "exageracion": 0.5
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Audio generado correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "idAudio": {"type": "string"},
+                                            "ubicacion": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Error en la solicitud", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+                        "500": {"description": "Error interno del servidor", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+                    }
+                }
             }
         },
         "components": {
@@ -2282,7 +2503,8 @@ def openapi_spec():
                         "telefono": {"type": "string", "nullable": True},
                         "esAdministrador": {"type": "boolean", "nullable": True},
                         "idArea": {"type": "integer", "nullable": True},
-                        "perfilLinkedin": {"type": "string", "nullable": True}
+                        "perfilLinkedin": {"type": "string", "nullable": True},
+                        "idVoz": {"type": "string", "nullable": True, "description": "ID de la voz clonada en ElevenLabs"}
                     }
                 },
                 "EmpleadoFalla": {
@@ -2356,7 +2578,8 @@ def openapi_spec():
                         "direccion": {"type": "string"},
                         "esAdministrador": {"type": "boolean"},
                         "idArea": {"type": "integer"},
-                        "perfilLinkedin": {"type": "string"}
+                        "perfilLinkedin": {"type": "string"},
+                        "idVoz": {"type": "string", "nullable": True, "description": "ID de la voz clonada en ElevenLabs"}
                     }
                 },
                 "Error": {

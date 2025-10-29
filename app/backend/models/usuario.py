@@ -15,7 +15,7 @@ class Usuario(Base):
     correo = Column(String, nullable=True)
     esAdministrador = Column(Boolean, nullable=True)
     idArea = Column(Integer, ForeignKey('areas.idArea'), nullable=True)
-    idVoz = Column(String, nullable=True)
+    idVoz = Column(String, nullable=True) #Si este es null, entonces sacamos el boton de crear voz  (Sale el modal este) Sino ya esta creada
     perfilLinkedin = Column(String, nullable=True)
 
     area = relationship("Area", back_populates="usuarios")
