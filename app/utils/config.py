@@ -7,6 +7,6 @@ load_dotenv(dotenv_path=env_properties)
 
 def get(configuracion):
     value = os.getenv(configuracion)
-    if value is None:
-        raise ValueError(f'La configuración "{configuracion}" no está definida en el archivo .env')
+    # if value is None:
+    #     raise ValueError(f'La configuración "{configuracion}" no está definida en el archivo .env')
     return value

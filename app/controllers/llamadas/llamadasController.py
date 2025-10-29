@@ -6,7 +6,6 @@ from twilio.twiml.voice_response import Gather, VoiceResponse
 
 from app.backend.apis.elevenLabs import elevenLabs
 from app.backend.apis.twilio import twilio
-from app.backend.models import Evento
 from app.backend.models.error import responseError
 from app.controllers.abm.areasController import AreasController
 from app.controllers.abm.eventosController import EventosController
@@ -161,12 +160,12 @@ class LlamadasController:
 
             log.info(f"Se genero la siguiente respuesta: {texto}")
 
-            elevenLabsResponse = elevenLabs.tts(texto, conversacion.idVozActual, None,None)  # por el momento estabilidad y velocidad en None
+            elevenLabsResponse = elevenLabs.tts(texto, conversacion.idVozActual, "eleven_multilingual_v2",None, None, 0.5)  # por el momento estabilidad y velocidad en None
 
             idAudio = elevenLabsResponse["idAudio"]
 
             # ----- HILO EN PARALELO ----- #
-            def editar_evento_hilo():
+            def editarEventoEnParalelo():
                 try:
                     dataEvento = {
                         "registroEvento": {
@@ -181,7 +180,7 @@ class LlamadasController:
                 except Exception as e:
                     log.error(f"Error actualizando evento en hilo: {str(e)}")
 
-            hilo = threading.Thread(target=editar_evento_hilo)
+            hilo = threading.Thread(target=editarEventoEnParalelo)
             hilo.start()
             # ----- HILO EN PARALELO ----- #
 

@@ -1,4 +1,4 @@
-from flask import request, Blueprint, send_file, jsonify, session
+from flask import request, Blueprint, send_file, jsonify, session, Response
 from datetime import datetime
 import requests
 from app.backend.models.error import responseError
@@ -79,6 +79,21 @@ def generarLlamada():
 def generarAccionesEnLlamada():
     return LlamadasController.generarAccionesEnLlamada()
 
+@apis.route("/api/llamadas/conversacion", methods=["GET"])
+def obtenerConversacionLlamada():
+    import app.utils.conversacion as conversacion
+    con = conversacion.conversacionActual
+    return jsonify(con), 200
+
+# TODO: borrar este metodo, es de prueba
+@apis.route("/api/llamadas/conversacion", methods=["POST"])
+def actualizarConversacionLlamada():
+    data = request.get_json()
+    rol = data["rol"]
+    mensaje = data["mensaje"]
+    import app.utils.conversacion as conversacion
+    conversacion.conversacionActual.append({"rol": rol, "mensaje": mensaje})
+    return Response(status=201)
 
 # ------ # TRANSFORMADORES TTS Y STT # ------ #
 @apis.route("/api/tts", methods=["POST"])

@@ -3,6 +3,7 @@ from app.config.db_config import Base, engine
 from app.frontend import frontend
 from app.apis import apis
 from app.swagger import swagger
+from dotenv import load_dotenv
 import os
 
 app = Flask(__name__)
@@ -18,4 +19,5 @@ app.register_blueprint(frontend)
 app.register_blueprint(swagger)
 
 if __name__ == "__main__":
+    load_dotenv(dotenv_path="properties.env")
     app.run(debug=True, port=8080)

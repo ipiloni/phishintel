@@ -59,6 +59,8 @@ def stt(ubicacion):
         log.error("Hubo un error al generar el STT: " + str(e))
         return responseError("ERROR_ELEVENLABS", "Hubo un error en la llamada a ElevenLabs: " + str(e), 500)
 
+
+
 def tts(texto, idVoz, modelId, estabilidad, velocidad, exageracion):
 
     if estabilidad is not None and (estabilidad < 0.0 or estabilidad > 1.0):
@@ -72,7 +74,7 @@ def tts(texto, idVoz, modelId, estabilidad, velocidad, exageracion):
         estabilidad = 0.5
 
     if velocidad is None:
-        velocidad = 0.6
+        velocidad = 1.0
 
     try:
         if idVoz is None:
@@ -92,6 +94,7 @@ def tts(texto, idVoz, modelId, estabilidad, velocidad, exageracion):
                 output_format="mp3_22050_32",
                 text=texto,
                 model_id="eleven_multilingual_v2",
+                language_code="es",
 
                 voice_settings=VoiceSettings(
                     stability=estabilidad,
@@ -107,11 +110,12 @@ def tts(texto, idVoz, modelId, estabilidad, velocidad, exageracion):
                 output_format="mp3_22050_32",
                 text=texto,
                 model_id="eleven_flash_v2_5",  # use the turbo model for low latency
+                language_code="es",
 
                 voice_settings=VoiceSettings(
                     stability=estabilidad,
                     similarity_boost=1.0,
-                    style=0.0,
+                    style=exageracion,
                     use_speaker_boost=False,
                     speed=velocidad,
                 ),
@@ -146,6 +150,8 @@ def tts(texto, idVoz, modelId, estabilidad, velocidad, exageracion):
         log.error("Hubo un error en la llamada a ElevenLabs: " + str(e))
         return responseError("ERROR_ELEVENLABS", "Hubo un error en la llamada a ElevenLabs: " + str(e), 500)
 
+
+
 def clonarVoz(ubicacionArchivo, nombreUsuario):
     try:
         load_dotenv()
@@ -154,8 +160,6 @@ def clonarVoz(ubicacionArchivo, nombreUsuario):
         )
         voice = elevenlabs.voices.ivc.create(
             name=nombreUsuario,
-            # Replace with the paths to your audio files.
-            # The more files you add, the better the clone will be.
             files=[BytesIO(open(ubicacionArchivo, "rb").read())]
         )
         log.info(f"Se creo la voz bajo el ID:{voice.voice_id}")
