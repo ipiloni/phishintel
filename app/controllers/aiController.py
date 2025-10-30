@@ -25,7 +25,14 @@ class AIController:
         formato = ""
 
         if "formato" in data:
-            formato = "Quiero que el cuerpo del email sea en formato " + data["formato"]
+            if str(data["formato"]).strip().lower() == "texto":
+                # Forzar cuerpo en TEXTO PLANO para la preview editable
+                formato = (
+                    "El cuerpo del email debe ser TEXTO PLANO (sin HTML, sin Markdown, sin estilos). "
+                    "Devolveme únicamente un JSON válido con las claves 'asunto' y 'cuerpo'."
+                )
+            else:
+                formato = "Quiero que el cuerpo del email sea en formato " + data["formato"]
 
         if "nivel" in data:
             # Convertir nivel de string a número si es necesario
@@ -38,7 +45,7 @@ class AIController:
                 return responseError("CAMPOS_OBLIGATORIOS", "El campo 'nivel' solo puede tener los valores 1, 2 o 3", 400)
             
             contexto = (
-                      "Armá un email del estilo Phishing. Necesito que la respuesta que me brindes sea sólamente 'asunto' y 'cuerpo', en formato JSON. El contexto es el siguiente: "
+                      "Armá un email del estilo Phishing. Necesito que la respuesta que me brindes sea sólamente 'asunto' y 'cuerpo', en formato JSON VÁLIDO (sin texto extra). El contexto es el siguiente: "
                     + data["contexto"]
                     + ". Supone una escala de dificultad de la simulacion del 1 al 3, siendo 1 el más básico y 3 el más difícil o realista, este email debe generarse con dificultad " + str(nivel))
 

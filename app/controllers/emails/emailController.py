@@ -2,6 +2,7 @@ import datetime
 import re
 
 from flask import jsonify
+from bs4 import BeautifulSoup
 from app.backend.models import RegistroEvento, Usuario
 from app.backend.models.error import responseError
 from app.backend.models.evento import Evento
@@ -28,7 +29,7 @@ class EmailController:
         id_usuario_destinatario = data["idUsuarioDestinatario"]
         id_usuario_remitente = data.get("idUsuarioRemitente")  # Opcional, solo para dificultad Difícil
         asunto = data["asunto"]
-        cuerpo = data["cuerpo"]
+        cuerpo = data["cuerpo"]  # Texto plano desde el frontend
         dificultad = data["dificultad"]
 
         session = SessionLocal()
@@ -41,7 +42,10 @@ class EmailController:
                                      "No se encontró el usuario destinatario o no tiene correo registrado", 404)
 
             # Crear el evento y registro
-            registroEvento = RegistroEvento(asunto=asunto, cuerpo=cuerpo)
+            # Convertir texto plano a HTML básico para envío y registro
+            cuerpo_html = EmailController.text_to_html_basic(cuerpo)
+
+            registroEvento = RegistroEvento(asunto=asunto, cuerpo=cuerpo_html)
             evento = Evento(
                 tipoEvento=TipoEvento.CORREO,
                 fechaEvento=datetime.datetime.now(),
@@ -72,12 +76,12 @@ class EmailController:
             
             boton_html = (
                 f"<div style=\"margin-top:20px;text-align:center\">"
-                f"<a href=\"{link_caiste}\" style=\"background-color:#d9534f;color:#ffffff;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;font-family:Arial,Helvetica,sans-serif\">"
+                f"<a href=\"{link_caiste}\" style=\"background-color:#4898E8;color:#ffffff;padding:12px 20px;text-decoration:none;border-radius:6px;display:inline-block;font-family:Arial,Helvetica,sans-serif\">"
                 f"Ver"
                 f"</a>"
                 f"</div>"
             )
-            cuerpo_con_boton = f"{cuerpo}{boton_html}"
+            cuerpo_con_boton = f"{cuerpo_html}{boton_html}"
 
             # Obtener información del remitente para dificultad Difícil
             usuario_remitente = None
@@ -359,3 +363,65 @@ class EmailController:
             session.rollback()
             session.close()
             return responseError("ERROR", f"Hubo un error al generar y enviar el mail: {str(e)}", 500)
+
+
+    # =================== UTILIDADES =================== #
+    @staticmethod
+    def html_to_plain_text(html: str) -> str:
+        """Convierte HTML a texto plano legible para edición.
+        - Quita <style> y <script>
+        - Convierte <br> en \n
+        - Inserta saltos de línea alrededor de elementos de bloque
+        - Colapsa múltiples saltos de línea consecutivos
+        """
+        try:
+            soup = BeautifulSoup(html or "", "html.parser")
+            # Remover estilos y scripts
+            for tag in soup(["style", "script"]):
+                tag.decompose()
+
+            # Reemplazar <br> por saltos de línea
+            for br in soup.find_all("br"):
+                br.replace_with("\n")
+
+            # Elementos de bloque comunes → añadir separadores de línea
+            block_tags = [
+                "p", "div", "li", "ul", "ol",
+                "h1", "h2", "h3", "h4", "h5", "h6",
+                "section", "article", "header", "footer",
+                "table", "thead", "tbody", "tr", "td", "th"
+            ]
+            for block in soup.find_all(block_tags):
+                block.insert_before("\n")
+                block.insert_after("\n")
+
+            # Obtener texto y limpiar espacios
+            text = soup.get_text()
+            # Limpiar espacios de cada línea
+            lines = [line.strip() for line in text.splitlines()]
+            text = "\n".join(lines)
+            # Colapsar más de 2 \n a 2
+            text = re.sub(r"\n{3,}", "\n\n", text)
+            # Colapsar espacios múltiples dentro de líneas largas manteniendo saltos
+            text = "\n".join(re.sub(r"\s{2,}", " ", ln) for ln in text.split("\n"))
+            return text.strip()
+        except Exception:
+            # En caso de fallo, retornar texto simple sin procesamiento adicional
+            return (html or "").strip()
+
+    @staticmethod
+    def text_to_html_basic(text: str) -> str:
+        """Convierte texto plano a HTML simple: párrafos y <br>."""
+        if text is None:
+            return ""
+        try:
+            # Normalizar fin de línea
+            norm = text.replace("\r\n", "\n").replace("\r", "\n")
+            # Separar por párrafos (doble salto)
+            parts = [p.strip() for p in norm.split("\n\n")]
+            parts = [p for p in parts if p]
+            # Reemplazar saltos simples por <br> dentro de cada párrafo
+            html_parts = [f"<p>{p.replace('\n', '<br>')}</p>" for p in parts]
+            return "".join(html_parts) if html_parts else f"<p>{norm.replace('\n', '<br>')}</p>"
+        except Exception:
+            return f"<p>{(text or '').strip()}</p>"

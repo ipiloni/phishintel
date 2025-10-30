@@ -296,7 +296,44 @@ def llamarIAGemini():
             log.error(f"Error obteniendo info de LinkedIn: {str(e)}")
             # Continuar sin la info de LinkedIn si hay error
     
-    return AIController.armarEmail(data)
+    # Generar email con IA
+    result = AIController.armarEmail(data)
+
+    # Envolver respuesta para agregar plainText sin romper compatibilidad
+    try:
+        from flask import Response as FlaskResponse
+        from app.controllers.emails.emailController import EmailController as _EC
+
+        # Caso 1: (response, status)
+        if isinstance(result, tuple) and len(result) in (2, 3):
+            response_obj = result[0]
+            status_code = result[1]
+            headers = result[2] if len(result) == 3 else None
+            payload = response_obj.get_json() if hasattr(response_obj, 'get_json') else None
+            if isinstance(payload, dict):
+                cuerpo_html = payload.get("cuerpo", "")
+                payload["plainText"] = _EC.html_to_plain_text(cuerpo_html)
+                resp = jsonify(payload)
+                if headers:
+                    return resp, status_code, headers
+                return resp, status_code
+            return result
+
+        # Caso 2: Flask Response directo
+        if hasattr(result, 'get_json'):
+            payload = result.get_json()
+            if isinstance(payload, dict):
+                cuerpo_html = payload.get("cuerpo", "")
+                payload["plainText"] = _EC.html_to_plain_text(cuerpo_html)
+                return jsonify(payload), result.status_code
+            return result
+
+        # Fallback: devolver como vino
+        return result
+    except Exception as e:
+        # Si algo falla, devolvemos la respuesta original sin modificar
+        log.error(f"Error agregando plainText en /api/email/generar: {str(e)}")
+        return result
 
 
 @apis.route("/api/email/notificar", methods=["POST"])  # Esta ruta envia una notificacion con el email de PhishIntel

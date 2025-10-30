@@ -107,8 +107,11 @@
                        :class="{ 'seleccionado': nivel === 'Fácil' }">
                     <div class="card-body text-center p-1">
                       <div style="font-size: 1em;"><i class="bi bi-puzzle-fill"></i></div>
-                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Fácil</h6>
-                      <small class="card-text" style="font-size: 0.7em;">phishintel@gmail.com</small>
+                      <h6 class="card-title mb-0" style="font-size: 0.9em;">Fácil</h6>
+                      <small class="card-text" style="font-size: 0.75em;">Desde el dominio phishintel@gmail.com</small>
+                      <div class="mt-1" style="font-size: 0.7em; color: #bbb;">
+                        El contexto será variable en la preview.
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -119,8 +122,11 @@
                        :class="{ 'seleccionado': nivel === 'Medio' }">
                     <div class="card-body text-center p-1">
                       <div style="font-size: 1em;"><i class="bi bi-shield-fill-x"></i></div>
-                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Medio</h6>
-                      <small class="card-text" style="font-size: 0.7em;">pgcontrolcito.com</small>
+                      <h6 class="card-title mb-0" style="font-size: 0.9em;">Medio</h6>
+                      <small class="card-text" style="font-size: 0.75em;">Desde el dominio pgcontrol.lat</small>
+                      <div class="mt-1" style="font-size: 0.7em; color: #bbb;">
+                        Se enviará un formulario de login con distintos contenidos.
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -131,8 +137,11 @@
                        :class="{ 'seleccionado': nivel === 'Difícil' }">
                     <div class="card-body text-center p-1">
                       <div style="font-size: 1em;"><i class="bi bi-fire"></i></div>
-                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Difícil</h6>
-                      <small class="card-text" style="font-size: 0.7em;">pgcontrol.com.ar</small>
+                      <h6 class="card-title mb-0" style="font-size: 0.9em;">Difícil</h6>
+                      <small class="card-text" style="font-size: 0.75em;">Desde el dominio pgcontrol.com.ar</small>
+                      <div class="mt-1" style="font-size: 0.7em; color: #bbb;">
+                        Se enviará un formulario de actualización de datos con asunto atractivo.
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -265,7 +274,7 @@
                       placeholder="El contenido del email aparecerá aquí..."
                     ></textarea>
                     <small class="text-muted" style="color: #ccc !important;">
-                      <i class="bi bi-lightbulb-fill"></i> Puedes usar **texto en negrita** y *texto en cursiva*. Usa doble salto de línea para crear párrafos separados.
+                      <i class="bi bi-lightbulb-fill"></i> Usa doble salto de línea para crear párrafos separados.
                     </small>
                   </div>
                 </div>
@@ -373,14 +382,22 @@
           
           this.cargando = true;
           try {
+            // Construir contexto según dificultad (sin enlaces en el cuerpo)
+            let contextoStr = '';
+            if (this.nivel === 'Fácil') {
+              contextoStr = 'Genera un correo de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación.';
+            } else if (this.nivel === 'Medio') {
+              contextoStr = 'Se pedirá login en un formulario (como caisteLogin.html) y credenciales. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación.';
+            } else {
+              contextoStr = 'Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación.';
+            }
+
             const resp = await fetch("http://localhost:8080/api/email/generar", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, 
-                La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. 
-                Pone un tono mas corporativo para que no llegue a spam.`,
-                formato: "html",
+                contexto: contextoStr,
+                formato: "texto",
                 nivel: this.nivel,
                 idUsuarioDestinatario: this.filtroUsuario.idUsuario  // ← Agregamos el ID del destinatario
               })
@@ -390,8 +407,9 @@
 
             const data = await resp.json();
             this.modalAsunto = data.asunto || "Sin asunto";
-            this.modalCuerpo = data.cuerpo || "Sin cuerpo";
-            this.modalCuerpoTexto = this.htmlToText(data.cuerpo || "Sin cuerpo");
+            // Preview solo en TEXTO PLANO
+            this.modalCuerpo = data.cuerpo || "";
+            this.modalCuerpoTexto = data.cuerpo || "";
             
             this.emailGenerado.asunto = data.asunto;
             this.emailGenerado.cuerpo = data.cuerpo;
@@ -414,12 +432,22 @@
         async regenerarEmail() {
           this.cargandoRegenerar = true;
           try {
+            // Construir contexto según dificultad (sin enlaces en el cuerpo)
+            let contextoStr = '';
+            if (this.nivel === 'Fácil') {
+              contextoStr = 'Genera un correo de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación.';
+            } else if (this.nivel === 'Medio') {
+              contextoStr = 'Se pedirá login en un formulario (como caisteLogin.html) y credenciales. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación.';
+            } else {
+              contextoStr = 'Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación.';
+            }
+
             const resp = await fetch("http://localhost:8080/api/email/generar", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam.`,
-                formato: "html",
+                contexto: contextoStr,
+                formato: "texto",
                 nivel: this.nivel,
                 idUsuarioDestinatario: this.filtroUsuario.idUsuario  // ← Agregamos el ID del destinatario
               })
@@ -429,8 +457,9 @@
 
             const data = await resp.json();
             this.modalAsunto = data.asunto || "Sin asunto";
-            this.modalCuerpo = data.cuerpo || "Sin cuerpo";
-            this.modalCuerpoTexto = this.htmlToText(data.cuerpo || "Sin cuerpo");
+            // Preview solo en TEXTO PLANO
+            this.modalCuerpo = data.cuerpo || "";
+            this.modalCuerpoTexto = data.cuerpo || "";
             this.emailGenerado.asunto = data.asunto;
             this.emailGenerado.cuerpo = data.cuerpo;
             this.emailGenerado.idUsuarioDestinatario = this.filtroUsuario.idUsuario;
@@ -450,8 +479,8 @@
           try {
             // Actualizar los datos con los valores editados
             this.emailGenerado.asunto = this.modalAsunto;
-            // Convertir el texto editado de vuelta a HTML
-            this.emailGenerado.cuerpo = this.textToHtml(this.modalCuerpoTexto);
+            // Enviar TEXTO PLANO; el backend convertirá a HTML
+            this.emailGenerado.cuerpo = this.modalCuerpoTexto;
             // Asegurar que la dificultad esté incluida
             this.emailGenerado.dificultad = this.nivel;
             
@@ -492,39 +521,11 @@
           toast.show();
         },
 
-        // Convertir HTML a texto plano para edición
-        htmlToText(html) {
-          const temp = document.createElement('div');
-          temp.innerHTML = html;
-          
-          // Obtener el texto y limpiar espacios extra
-          let text = temp.textContent || temp.innerText || '';
-          
-          // Reemplazar múltiples espacios por uno solo
-          text = text.replace(/\s+/g, ' ');
-          
-          // Agregar saltos de línea después de saludos comunes
-          text = text.replace(/(Estimado|Estimada|Querido|Querida)\s+([A-Z][a-z]+\s+[A-Z][a-z]+),/g, '$1 $2,\n');
-          
-          // Agregar saltos de línea después de puntos seguidos de mayúscula
-          text = text.replace(/\.([A-Z])/g, '.\n$1');
-          
-          // Agregar saltos de línea después de "Atentamente," y similares
-          text = text.replace(/(Atentamente,|Saludos,|Cordialmente,|El equipo de)/g, '\n$1');
-          
-          // Limpiar espacios al inicio y final
-          text = text.trim();
-          
-          return text;
-        },
-
         // Convertir texto plano a HTML básico
         textToHtml(text) {
           return text
             .replace(/\n\n/g, '</p><p>') // Dobles saltos de línea = párrafos
             .replace(/\n/g, '<br>')      // Saltos simples = <br>
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Negrita
-            .replace(/\*(.*?)\*/g, '<em>$1</em>') // Cursiva
             .replace(/^/, '<p>')         // Agregar <p> al inicio
             .replace(/$/, '</p>');       // Agregar </p> al final
         }
