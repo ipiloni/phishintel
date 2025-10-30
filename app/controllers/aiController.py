@@ -243,8 +243,7 @@ class AIController:
         try:
             return model.generate_content(prompt)
         except Exception as ex:
-            log.warning(
-                f"Hubo un error al intentar obtener la respuesta: {str(ex)}, posiblemente no hay mas creditos de Google, cambiando el API_KEY...")
+            log.warning(f"Hubo un error al intentar obtener la respuesta: {str(ex)}, posiblemente no hay mas creditos de Google, cambiando el API_KEY...")
             genai.configure(api_key=api_key_marcos)
             return model.generate_content(prompt)
 
@@ -260,3 +259,19 @@ class AIController:
         return jsonify({
             "objetivo": response
         }), 201
+
+    @staticmethod
+    def analizarConversacionLlamada(objetivoActual, conversacionActual):
+        prompt = f"""
+        Analizá la siguiente conversación. Tu deber es retornar sólamente la palabra 'true' si la conversación cumplió el objetivo; caso contrario retorna 'false'.
+        Para saber si la conversación cumplió el objetivo, tenés que basarte en el siguiente criterio: El objetivo se considera cumplido si en la conversación la IA nombra o referencia algo similar o parecido al objetivo.
+        El objetivo de esta llamada fue el siguiente: '{objetivoActual}'.
+        La conversación resultó ser la siguiente, en formato JSON: {conversacionActual}.
+        Recordá sólamente responder con 'true' o 'false'.
+        """
+        response = AIController.enviarPrompt(prompt, modelAI)
+
+        if response.text == "true":
+            return True
+        else:
+            return False

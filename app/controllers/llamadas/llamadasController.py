@@ -31,7 +31,9 @@ class LlamadasController:
             4. Generar la conversacion
             5. Guardar en la base el evento
             6. Llamar usuario
-            7. Luego en otro metodo (al obtener la respuesta del usuario), guardar nuevamente en el evento la conversacion (actualizarla)
+            // TODO: Morita punto 7
+            7. Crear un hilo contador que, al pasar los 3/4 minutos, analice la variable conversacionActual, analice con IA si se nombro algo del objetivo y en base a eso genere un nuevo evento.
+            8. Luego en otro metodo (al obtener la respuesta del usuario), guardar nuevamente en el evento la conversacion (actualizarla)
         """
 
         response = LlamadasController.validarRequestLlamada(data)
@@ -241,3 +243,24 @@ class LlamadasController:
             return responseError("CAMPOS_OBLIGATORIOS", "El valor ingresado en 'tipoEvento' debe ser: 'LLAMADA_SMS', 'LLAMADA_WPP' o 'LLAMADA_CORREO'",400)
 
         return None
+
+    @staticmethod
+    def analizarLlamada(idEvento):
+        # 1. Iniciar el hilo contador por 3 minutos.
+
+        # Luego de los 3 minutos...
+
+        # ¡Analizar si este hilo ya no se ejecutó antes!
+        # Esto es, debido a que al apretar llamar() ya se genera este hilo, por lo que pudo haber pasado que se quiera ejecutar 2 veces para un mismo evento...
+        log.info("Empieza el analisis de la llamada para detectar si se cumplio el objetivo")
+
+        objetivo = conversacion.objetivoActual.split("intentando que el empleado")[1].split("Reglas:")[0].strip() # Obtenemos lo que hay entre estas dos oraciones
+
+        objetivoCumplido = AIController.analizarConversacionLlamada(objetivo, conversacion.conversacionActual)
+
+        if objetivoCumplido:
+            log.info("El objetivo de la llamada se ha cumplido, generando evento...")
+            # Generar el evento desencadenador...
+        else:
+            log.info("El objetivo de la llamada NO se ha cumplido, NO se genera ningun evento.")
+            # Analizar cuantos puntos suma/resta el usuario en base a lo sucedido en la llamada.
