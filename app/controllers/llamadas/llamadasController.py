@@ -186,7 +186,7 @@ class LlamadasController:
             hilo.start()
             # ----- HILO EN PARALELO ----- #
 
-            from app.apis import exponerAudio
+            from app.endpoints.apis import exponerAudio
             exponerAudio(f"{idAudio}.mp3")  # expone el archivo .mp3 a internet para que Twilio pueda reproducirlo
 
             log.info("Se expone el audio para que Twilio lo reproduzca")

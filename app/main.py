@@ -1,8 +1,8 @@
 from flask import Flask
 from app.config.db_config import Base, engine
-from app.frontend import frontend
-from app.apis import apis
-from app.swagger import swagger
+from app.endpoints.frontend import frontend
+from app.endpoints.apis import apis
+from app.endpoints.swagger import swagger
 from dotenv import load_dotenv
 import os
 

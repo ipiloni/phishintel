@@ -1,3 +1,5 @@
+import logging
+
 from flask import Blueprint, send_from_directory, request, redirect, url_for, session
 import os
 
@@ -6,62 +8,68 @@ from app.controllers.resultadoEventoController import ResultadoEventoController
 
 frontend = Blueprint("frontend", __name__, static_folder="frontend")
 
+# Obtener la ruta correcta a la carpeta frontend
+# __file__ está en app/endpoints/frontend.py, entonces:
+# os.path.dirname(__file__) = app/endpoints/
+# os.path.dirname(os.path.dirname(__file__)) = app/
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+
 # ------ # FRONTEND # ------ #
 # Ruta para servir el index.html
 # Ruta para el index
 @frontend.route("/")
 def index():
-    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "index.html")
+    return send_from_directory(FRONTEND_DIR, "index.html")
 
 @frontend.route("/login")
 def login():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "login.html")
+   return send_from_directory(FRONTEND_DIR, "login.html")
 
 @frontend.route("/registro")
 def registro():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "register.html")
+   return send_from_directory(FRONTEND_DIR, "register.html")
 
 @frontend.route("/reportes")
 def reportes():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalReportes.html")
+   return send_from_directory(FRONTEND_DIR, "principalReportes.html")
 
 @frontend.route("/abm")
 def abm():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalABM.html")
+   return send_from_directory(FRONTEND_DIR, "principalABM.html")
 
 @frontend.route("/principal")
 def principal():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principal.html")
+   return send_from_directory(FRONTEND_DIR, "principal.html")
 
 @frontend.route("/principalEmpleado")
 def principalEmpleado():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalEmpleado.html")
+   return send_from_directory(FRONTEND_DIR, "principalEmpleado.html")
 
 @frontend.route("/principalEmpleadoScoring")
 def principalEmpleadoScoring():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalEmpleadoScoring.html")
+   return send_from_directory(FRONTEND_DIR, "principalEmpleadoScoring.html")
 
 @frontend.route("/principalEmpleadoReportar")
 def principalEmpleadoReportar():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalEmpleadoReportar.html")
+   return send_from_directory(FRONTEND_DIR, "principalEmpleadoReportar.html")
 
 @frontend.route("/selectorCampania")
 def selectorCampania():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "principalSelectorCampania.html")
+   return send_from_directory(FRONTEND_DIR, "principalSelectorCampania.html")
 @frontend.route("/campania-llamada")
 def campaniaLlamada():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "campaniaLlamada.html")
+   return send_from_directory(FRONTEND_DIR, "campaniaLlamada.html")
 @frontend.route("/campania-email")
 def campaniaEmail():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "campaniaEmail.html")
+   return send_from_directory(FRONTEND_DIR, "campaniaEmail.html")
 
 @frontend.route("/campania-mensaje")
 def campaniaMensaje():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "campaniaMensajes.html")
+   return send_from_directory(FRONTEND_DIR, "campaniaMensajes.html")
 
 @frontend.route("/enConstruccion")
 def enConstruccion():
-   return send_from_directory(os.path.join(frontend.root_path, "frontend"), "enConstruccion.html")
+   return send_from_directory(FRONTEND_DIR, "enConstruccion.html")
 
 @frontend.route("/caiste")
 def caiste():
@@ -83,7 +91,7 @@ def caiste():
         # Redirigir a la misma ruta sin parámetros para limpiar la URL
         return redirect(url_for('frontend.caiste'))
     
-    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "caiste.html")
+    return send_from_directory(FRONTEND_DIR, "caiste.html")
 
 @frontend.route("/caisteLogin")
 def caisteLogin():
@@ -97,7 +105,7 @@ def caisteLogin():
         # Redirigir a la misma ruta sin parámetros para limpiar la URL
         return redirect(url_for('frontend.caisteLogin'))
     
-    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "caisteLogin.html")
+    return send_from_directory(FRONTEND_DIR, "caisteLogin.html")
 
 @frontend.route("/caisteDatos")
 def caisteDatos():
@@ -111,7 +119,7 @@ def caisteDatos():
         # Redirigir a la misma ruta sin parámetros para limpiar la URL
         return redirect(url_for('frontend.caisteDatos'))
     
-    return send_from_directory(os.path.join(frontend.root_path, "frontend"), "caisteDatos.html")
+    return send_from_directory(FRONTEND_DIR, "caisteDatos.html")
 
 @frontend.route("/verificarlogin", methods=["POST"])
 def verificarlogin():
@@ -121,4 +129,4 @@ def verificarlogin():
 # Ruta para cualquier otro archivo dentro de frontend (CSS, JS, imágenes, vendor, etc.)
 @frontend.route("/<path:filename>")
 def frontend_files(filename):
-    return send_from_directory(os.path.join(frontend.root_path, "frontend"), filename)
+    return send_from_directory(FRONTEND_DIR, filename)
