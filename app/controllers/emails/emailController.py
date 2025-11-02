@@ -14,6 +14,7 @@ from app.backend.apis.twilio.sendgrid import enviarMail as enviarMailTwilio, env
 from app.backend.apis.smtp.smtpconnection import SMTPConnection
 from app.controllers.aiController import AIController
 from app.utils.logger import log
+from app.utils.url_encoder import build_phishing_url
 
 class EmailController:
 
@@ -63,16 +64,26 @@ class EmailController:
             session.add(usuario_evento)
             session.commit()
 
-            # Construir link según dificultad
+            # Obtener URL_APP del properties.env
+            from app.utils.config import get as get_config
+            url_app = get_config("URL_APP")
+            if not url_app:
+                url_app = "http://localhost:8080"  # Fallback si no está configurado
+                log.warn("URL_APP no configurada, usando fallback: http://localhost:8080")
+
+            # Determinar ruta según dificultad
             if dificultad.lower() in ["medio", "media"]:
                 # Dificultad Media: Usar caisteLogin para mayor realismo
-                link_caiste = f"http://localhost:8080/caisteLogin?idUsuario={id_usuario_destinatario}&idEvento={evento.idEvento}"
+                ruta_interna = "caisteLogin"
             elif dificultad.lower() in ["difícil", "dificil"]:
                 # Dificultad Difícil: Usar caisteDatos para solicitar datos sensibles
-                link_caiste = f"http://localhost:8080/caisteDatos?idUsuario={id_usuario_destinatario}&idEvento={evento.idEvento}"
+                ruta_interna = "caisteDatos"
             else:
                 # Dificultad Fácil: Usar caiste directamente
-                link_caiste = f"http://localhost:8080/caiste?idUsuario={id_usuario_destinatario}&idEvento={evento.idEvento}"
+                ruta_interna = "caiste"
+
+            # Construir URL codificada para phishing (encubierta)
+            link_caiste = build_phishing_url(url_app, ruta_interna, id_usuario_destinatario, evento.idEvento)
             
             boton_html = (
                 f"<div style=\"margin-top:20px;text-align:center\">"

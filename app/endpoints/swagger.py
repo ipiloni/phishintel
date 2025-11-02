@@ -2802,7 +2802,7 @@ def swagger_ui():
 
 @swagger.route("/api/swagger-styles", methods=["GET"])
 def swagger_styles():
-    css_path = os.path.join(os.path.dirname(__file__), "frontend", "assets", "css", "estilosSwagger.css")
+    css_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "assets", "css", "estilosSwagger.css")
     return send_file(css_path, mimetype="text/css")
 
 

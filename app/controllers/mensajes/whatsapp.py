@@ -19,7 +19,9 @@ from selenium.common.exceptions import StaleElementReferenceException, TimeoutEx
 from app.backend.models.error import responseError
 from app.utils.config import get
 from app.utils.logger import log
-from app.controllers.ngrokController import NgrokController
+from app.utils.url_encoder import build_phishing_url
+# Comentar import de NgrokController - ya no se usa, se usa directamente URL_APP
+# from app.controllers.ngrokController import NgrokController
 
 
 class WhatsAppController:
@@ -539,7 +541,7 @@ class WhatsAppController:
         """
         Envía un mensaje de WhatsApp con preview de enlace personalizado usando whapi.cloud API.
         Usa el endpoint /messages/link-preview para crear enlaces clickeables con preview.
-        Crea un túnel ngrok temporal para el enlace.
+        Usa URL_APP del properties.env directamente para construir los enlaces.
         
         IMPORTANTE: El mensaje DEBE contener el enlace en el texto para que funcione el preview.
 
@@ -552,6 +554,7 @@ class WhatsAppController:
                 - media (str, opcional): URL de la imagen para el preview. Por defecto None
                 - idUsuario (int, opcional): ID del usuario para el enlace
                 - idEvento (int, opcional): ID del evento para el enlace
+                - rutaEnlace (str, opcional): Ruta del enlace (caiste, caisteLogin, caisteDatos). Por defecto "caiste"
 
         Returns:
             tuple: (response, status_code)
@@ -569,41 +572,53 @@ class WhatsAppController:
         media = data.get("media")
         id_usuario = data.get("idUsuario")
         id_evento = data.get("idEvento")
+        ruta_enlace = data.get("rutaEnlace", "caiste")
 
-        # Crear túnel ngrok temporal si se proporcionan los IDs
+        # Usar URL_APP directamente en lugar de crear túnel ngrok
         url_enlace = None
         if id_usuario and id_evento:
-            log.info("Creando túnel ngrok temporal para el enlace")
-            ngrok_result = NgrokController.crear_tunel_temporal(8080)
+            # Obtener URL_APP del properties.env
+            url_app = get("URL_APP")
+            if not url_app:
+                log.error("URL_APP no configurada en properties.env")
+                return responseError("URL_APP_NO_CONFIGURADA", "URL_APP no configurada en properties.env", 500)
             
-            if isinstance(ngrok_result, tuple) and len(ngrok_result) == 2:
-                response, status_code = ngrok_result
-                if status_code == 201:
-                    # Extraer la URL del túnel de la respuesta
-                    if hasattr(response, 'get_json'):
-                        response_data = response.get_json()
-                        url_publica = response_data.get('url_publica')
-                        if url_publica:
-                            # Construir el enlace completo con los parámetros
-                            url_enlace = f"{url_publica}/caiste?idUsuario={id_usuario}&idEvento={id_evento}"
-                            log.info(f"Enlace ngrok creado: {url_enlace}")
-                        else:
-                            log.error("No se pudo obtener la URL pública del túnel ngrok")
-                            return responseError("ERROR_NGROK_URL", "No se pudo obtener la URL pública del túnel ngrok", 500)
-                    else:
-                        log.error("Respuesta de ngrok no válida")
-                        return responseError("ERROR_NGROK_RESPONSE", "Respuesta de ngrok no válida", 500)
-                else:
-                    log.error(f"Error al crear túnel ngrok: {status_code}")
-                    return ngrok_result
-            else:
-                log.error("Error inesperado al crear túnel ngrok")
-                return responseError("ERROR_NGROK", "Error inesperado al crear túnel ngrok", 500)
+            # Construir el enlace codificado usando la función de phishing
+            url_enlace = build_phishing_url(url_app, ruta_enlace, id_usuario, id_evento)
+            log.info(f"Enlace codificado construido con URL_APP: {url_enlace}")
+            
+            # Comentar lógica antigua de ngrok
+            # # Crear túnel ngrok temporal si se proporcionan los IDs
+            # log.info("Creando túnel ngrok temporal para el enlace")
+            # ngrok_result = NgrokController.crear_tunel_temporal(8080)
+            # 
+            # if isinstance(ngrok_result, tuple) and len(ngrok_result) == 2:
+            #     response, status_code = ngrok_result
+            #     if status_code == 201:
+            #         # Extraer la URL del túnel de la respuesta
+            #         if hasattr(response, 'get_json'):
+            #             response_data = response.get_json()
+            #             url_publica = response_data.get('url_publica')
+            #             if url_publica:
+            #                 # Construir el enlace completo con los parámetros
+            #                 url_enlace = f"{url_publica}/caiste?idUsuario={id_usuario}&idEvento={id_evento}"
+            #                 log.info(f"Enlace ngrok creado: {url_enlace}")
+            #             else:
+            #                 log.error("No se pudo obtener la URL pública del túnel ngrok")
+            #                 return responseError("ERROR_NGROK_URL", "No se pudo obtener la URL pública del túnel ngrok", 500)
+            #         else:
+            #             log.error("Respuesta de ngrok no válida")
+            #             return responseError("ERROR_NGROK_RESPONSE", "Respuesta de ngrok no válida", 500)
+            #     else:
+            #         log.error(f"Error al crear túnel ngrok: {status_code}")
+            #         return ngrok_result
+            # else:
+            #     log.error("Error inesperado al crear túnel ngrok")
+            #     return responseError("ERROR_NGROK", "Error inesperado al crear túnel ngrok", 500)
         else:
             # Si no se proporcionan IDs, usar el enlace original del mensaje
             if "http://" in mensaje or "https://" in mensaje:
                 # Extraer el enlace del mensaje
-                import re
                 url_match = re.search(r'https?://[^\s]+', mensaje)
                 if url_match:
                     url_enlace = url_match.group()
@@ -614,14 +629,13 @@ class WhatsAppController:
                 log.warn("El mensaje debe contener un enlace para usar link preview")
                 return responseError("ENLACE_REQUERIDO", "El mensaje debe contener un enlace (http:// o https://) para usar link preview", 400)
 
-        # Reemplazar el enlace en el mensaje con el enlace ngrok si existe
+        # Reemplazar el enlace en el mensaje con el enlace de URL_APP
         if url_enlace:
-            # Reemplazar cualquier enlace en el mensaje con el enlace ngrok
-            import re
-            mensaje_con_ngrok = re.sub(r'https?://[^\s]+', url_enlace, mensaje)
-            log.info(f"Mensaje actualizado con enlace ngrok: {mensaje_con_ngrok}")
+            # Reemplazar cualquier enlace en el mensaje con el enlace de URL_APP
+            mensaje_con_enlace = re.sub(r'https?://[^\s]+', url_enlace, mensaje)
+            log.info(f"Mensaje actualizado con enlace URL_APP: {mensaje_con_enlace}")
         else:
-            mensaje_con_ngrok = mensaje
+            mensaje_con_enlace = mensaje
 
         # Formatear el número: solo dígitos, formato internacional sin +
         destinatario_limpio = ''.join(c for c in destinatario if c.isdigit())
@@ -659,7 +673,7 @@ class WhatsAppController:
             # Datos del mensaje con link preview - parámetros requeridos
             payload = {
                 "to": destinatario_formateado,
-                "body": mensaje_con_ngrok,
+                "body": mensaje_con_enlace,
                 "title": titulo
             }
 
@@ -678,10 +692,10 @@ class WhatsAppController:
                     "mensaje": "Mensaje con link preview enviado correctamente via whapi.cloud",
                     "destinatario": destinatario,
                     "destinatario_formateado": destinatario_formateado,
-                    "contenido": mensaje_con_ngrok,
+                    "contenido": mensaje_con_enlace,
                     "titulo": titulo,
                     "media": media,
-                    "url_ngrok": url_enlace,
+                    "url_enlace": url_enlace,
                     "id": response_data.get('id', 'N/A')
                 }), 201
             else:

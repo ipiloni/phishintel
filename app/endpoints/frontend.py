@@ -5,6 +5,7 @@ import os
 
 from app.controllers.login import AuthController
 from app.controllers.resultadoEventoController import ResultadoEventoController
+from app.utils.url_encoder import decode_phishing_params, decode_route
 
 frontend = Blueprint("frontend", __name__, static_folder="frontend")
 
@@ -22,6 +23,7 @@ def index():
     return send_from_directory(FRONTEND_DIR, "index.html")
 
 @frontend.route("/login")
+@frontend.route("/syslogin")
 def login():
    return send_from_directory(FRONTEND_DIR, "login.html")
 
@@ -72,8 +74,24 @@ def enConstruccion():
    return send_from_directory(FRONTEND_DIR, "enConstruccion.html")
 
 @frontend.route("/caiste")
+@frontend.route("/verify")
 def caiste():
-    # Primero intentar obtener parámetros de la URL (dificultad fácil/difícil)
+    """
+    Ruta para verificación (dificultad fácil).
+    Soporta tanto la ruta antigua (/caiste) como la nueva (/verify).
+    """
+    # Intentar obtener parámetros codificados primero (nueva forma)
+    encoded_params = request.args.get('t')
+    if encoded_params:
+        decoded = decode_phishing_params(encoded_params)
+        if decoded:
+            idUsuario = decoded.get('idUsuario')
+            idEvento = decoded.get('idEvento')
+            if idUsuario and idEvento:
+                ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+                return redirect(url_for('frontend.caiste'))
+    
+    # Fallback: Intentar obtener parámetros de la URL (forma antigua - compatibilidad)
     idUsuario = request.args.get('idUsuario', type=int)
     idEvento = request.args.get('idEvento', type=int)
     
@@ -94,7 +112,27 @@ def caiste():
     return send_from_directory(FRONTEND_DIR, "caiste.html")
 
 @frontend.route("/caisteLogin")
+@frontend.route("/auth")
 def caisteLogin():
+    """
+    Ruta para login de phishing (dificultad media).
+    Soporta tanto la ruta antigua (/caisteLogin) como la nueva (/auth).
+    """
+    # Intentar obtener parámetros codificados primero (nueva forma)
+    encoded_params = request.args.get('t')
+    if encoded_params:
+        decoded = decode_phishing_params(encoded_params)
+        if decoded:
+            idUsuario = decoded.get('idUsuario')
+            idEvento = decoded.get('idEvento')
+            if idUsuario and idEvento:
+                # Almacenar parámetros en sesión para usar después
+                session['caiste_idUsuario'] = idUsuario
+                session['caiste_idEvento'] = idEvento
+                # Redirigir a la misma ruta sin parámetros para limpiar la URL
+                return redirect(url_for('frontend.caisteLogin'))
+    
+    # Fallback: Intentar obtener parámetros de la URL (forma antigua - compatibilidad)
     idUsuario = request.args.get('idUsuario', type=int)
     idEvento = request.args.get('idEvento', type=int)
     
@@ -108,7 +146,27 @@ def caisteLogin():
     return send_from_directory(FRONTEND_DIR, "caisteLogin.html")
 
 @frontend.route("/caisteDatos")
+@frontend.route("/update")
 def caisteDatos():
+    """
+    Ruta para actualización de datos (dificultad difícil).
+    Soporta tanto la ruta antigua (/caisteDatos) como la nueva (/update).
+    """
+    # Intentar obtener parámetros codificados primero (nueva forma)
+    encoded_params = request.args.get('t')
+    if encoded_params:
+        decoded = decode_phishing_params(encoded_params)
+        if decoded:
+            idUsuario = decoded.get('idUsuario')
+            idEvento = decoded.get('idEvento')
+            if idUsuario and idEvento:
+                # Almacenar parámetros en sesión para usar después
+                session['caiste_idUsuario'] = idUsuario
+                session['caiste_idEvento'] = idEvento
+                # Redirigir a la misma ruta sin parámetros para limpiar la URL
+                return redirect(url_for('frontend.caisteDatos'))
+    
+    # Fallback: Intentar obtener parámetros de la URL (forma antigua - compatibilidad)
     idUsuario = request.args.get('idUsuario', type=int)
     idEvento = request.args.get('idEvento', type=int)
     

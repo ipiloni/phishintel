@@ -12,6 +12,7 @@ from app.backend.models.usuarioxevento import UsuarioxEvento
 from app.config.db_config import SessionLocal
 from app.utils.config import get
 from app.utils.logger import log
+from app.utils.url_encoder import build_phishing_url
 
 # Importar los nuevos controladores
 from app.controllers.mensajes.whatsapp import WhatsAppController
@@ -32,8 +33,9 @@ class MsjController:
                 - medio (str): Medio de comunicación ('whatsapp', 'telegram', 'sms')
                 - idUsuario (int): ID del usuario al que enviar el mensaje
                 - mensaje (str): Contenido del mensaje
-                - proveedor (str, opcional): Proveedor específico dentro del medio
-                    - Para whatsapp: 'twilio', 'selenium', 'whapi', 'whapi-link-preview'
+                - dificultad (str): Nivel de dificultad ('Fácil', 'Medio', 'Difícil')
+                - proveedor (str, opcional): Proveedor específico dentro del medio (hardcodeado según medio)
+                    - Para whatsapp: 'whapi-link-preview'
                     - Para telegram: 'bot'
                     - Para sms: 'twilio'
         """
@@ -45,6 +47,7 @@ class MsjController:
         proveedor = data.get("proveedor", "")
         id_usuario = data["idUsuario"]
         mensaje = data["mensaje"]
+        dificultad = data.get("dificultad", "Fácil")
 
         session = SessionLocal()
         try:
@@ -74,110 +77,87 @@ class MsjController:
             session.add(usuario_evento)
             session.commit()
 
-            # Construir link a caiste con parámetros y agregar al mensaje
-            link_caiste = f"http://127.0.0.1:8080/caiste?idUsuario={id_usuario}&idEvento={evento.idEvento}"
+            # Obtener URL_APP del properties.env
+            url_app = get("URL_APP")
+            if not url_app:
+                url_app = "http://localhost:8080"  # Fallback si no está configurado
+                log.warn("URL_APP no configurada, usando fallback: http://localhost:8080")
+
+            # Determinar ruta según dificultad
+            if dificultad.lower() in ["medio", "media"]:
+                # Dificultad Media: Usar caisteLogin para mayor realismo
+                ruta_interna = "caisteLogin"
+            elif dificultad.lower() in ["difícil", "dificil"]:
+                # Dificultad Difícil: Usar caisteDatos para solicitar datos sensibles
+                ruta_interna = "caisteDatos"
+            else:
+                # Dificultad Fácil: Usar caiste directamente
+                ruta_interna = "caiste"
+
+            # Construir URL codificada para phishing (encubierta)
+            link_caiste = build_phishing_url(url_app, ruta_interna, id_usuario, evento.idEvento)
+
             mensaje_con_enlace = f"{mensaje}\n\n🔗 Enlace: {link_caiste}"
             mensaje_html = f"{mensaje}\n\n🔗 <a href=\"{link_caiste}\">Click Aqui</a>"
-            print(mensaje_html)
 
-            # Enviar mensaje según el medio
+            # Enviar mensaje según el medio (con proveedor hardcodeado)
             if medio == "whatsapp":
-                if proveedor == "twilio":
-                    if not usuario.telefono:
-                        session.rollback()
-                        return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
-                    
-                    # Usar WhatsApp Twilio
-                    result = WhatsAppController.enviarMensajeTwilio({
-                        "mensaje": mensaje_con_enlace,
-                        "destinatario": usuario.telefono
-                    })
-                    
-                elif proveedor == "selenium":
-                    if not usuario.telefono:
-                        session.rollback()
-                        return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
-                    
-                    # Usar WhatsApp Selenium
-                    result = WhatsAppController.enviarMensajeSelenium({
-                        "mensaje": mensaje_con_enlace,
-                        "destinatario": usuario.telefono
-                    })
-                    
-                elif proveedor == "whapi":
-                    usuario.telefono = "+54 9 11 4163-5935"
-                    if not usuario.telefono:
-                        session.rollback()
-                        return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
-                    
-                    # Usar WhatsApp whapi
-                    result = WhatsAppController.enviarMensajeWhapi({
-                        "mensaje": mensaje_con_enlace,
-                        "destinatario": usuario.telefono
-                    })
-                    
-                elif proveedor == "whapi-link-preview":
-                    usuario.telefono = "+54 9 11 4163-5935"
-                    mensaje_con_enlace = f"{mensaje}\n\n🔗 Enlace: http://localhost:8080/caiste?idUsuario={id_usuario}&idEvento={evento.idEvento}"
-                    if not usuario.telefono:
-                        session.rollback()
-                        return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
-                    
-                    # Usar WhatsApp whapi con link preview
-                    result = WhatsAppController.enviarMensajeWhapiLinkPreview({
-                        "mensaje": mensaje_con_enlace,
-                        "destinatario": usuario.telefono,
-                        "titulo": "Enlace",
-                        "idUsuario": id_usuario,
-                        "idEvento": evento.idEvento
-                        # No pasamos media ya que el enlace debe estar en el body del mensaje
-                    })
-                    
-                else:
+                # Hardcodear proveedor para WhatsApp
+                proveedor = "whapi-link-preview"
+                
+                if not usuario.telefono:
                     session.rollback()
-                    return responseError("PROVEEDOR_INVALIDO", "Proveedor inválido para WhatsApp. Use 'twilio', 'selenium', 'whapi' o 'whapi-link-preview'", 400)
+                    return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
+                
+                # Usar WhatsApp whapi con link preview
+                # El mensaje debe contener un enlace placeholder que será reemplazado por el enlace real usando URL_APP
+                mensaje_con_enlace_placeholder = f"{mensaje}\n\n🔗 Enlace: http://placeholder.com"
+                result = WhatsAppController.enviarMensajeWhapiLinkPreview({
+                    "mensaje": mensaje_con_enlace_placeholder,
+                    "destinatario": usuario.telefono,
+                    "titulo": "Enlace",
+                    "idUsuario": id_usuario,
+                    "idEvento": evento.idEvento,
+                    "rutaEnlace": ruta_interna
+                })
 
             elif medio == "telegram":
-                if proveedor == "bot":
-                    # Usar Telegram Bot
-                    # Intentar obtener chat_id del bot, si no hay usuarios registrados usar el hardcodeado
-                    user_chat_ids = telegram_bot.get_user_chat_ids()
-                    if user_chat_ids:
-                        # Usar el primer chat_id disponible (puedes modificar esta lógica)
-                        chat_id = list(user_chat_ids.keys())[0]
-                        log.info(f"Enviando a chat_id registrado: {chat_id}")
-                    else:
-                        # Fallback al chat_id configurado si no hay usuarios registrados
-                        chat_id = get("TELEGRAM_DEFAULT_CHAT_ID")
-                        if not chat_id:
-                            session.rollback()
-                            return responseError("CHAT_ID_NO_CONFIGURADO", "No hay usuarios registrados y no se configuró TELEGRAM_DEFAULT_CHAT_ID", 500)
-                        log.info(f"No hay usuarios registrados, usando chat_id configurado: {chat_id}")
-                    
-                    result = TelegramController.enviarMensajeHTML({
-                        "mensaje": mensaje_html,
-                        "chat_id": chat_id
-                    })
-                    
+                # Hardcodear proveedor para Telegram
+                proveedor = "bot"
+                
+                # Usar Telegram Bot
+                # Intentar obtener chat_id del bot, si no hay usuarios registrados usar el hardcodeado
+                user_chat_ids = telegram_bot.get_user_chat_ids()
+                if user_chat_ids:
+                    # Usar el primer chat_id disponible (puedes modificar esta lógica)
+                    chat_id = list(user_chat_ids.keys())[0]
+                    log.info(f"Enviando a chat_id registrado: {chat_id}")
                 else:
-                    session.rollback()
-                    return responseError("PROVEEDOR_INVALIDO", "Proveedor inválido para Telegram. Use 'bot'", 400)
+                    # Fallback al chat_id configurado si no hay usuarios registrados
+                    chat_id = get("TELEGRAM_DEFAULT_CHAT_ID")
+                    if not chat_id:
+                        session.rollback()
+                        return responseError("CHAT_ID_NO_CONFIGURADO", "No hay usuarios registrados y no se configuró TELEGRAM_DEFAULT_CHAT_ID", 500)
+                    log.info(f"No hay usuarios registrados, usando chat_id configurado: {chat_id}")
+                
+                result = TelegramController.enviarMensajeHTML({
+                    "mensaje": mensaje_html,
+                    "chat_id": chat_id
+                })
 
             elif medio == "sms":
-                if proveedor == "twilio":
-                    if not usuario.telefono:
-                        session.rollback()
-                        return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
-                    
-                    # Usar SMS Twilio
-                    result = SMSController.enviarMensajeTwilio({
-                        "mensaje": mensaje_con_enlace,
-                        "destinatario": usuario.telefono
-                    })
-                    
-                else:
+                # Hardcodear proveedor para SMS
+                proveedor = "twilio"
+                
+                if not usuario.telefono:
                     session.rollback()
-                    return responseError("PROVEEDOR_INVALIDO", "Proveedor inválido para SMS. Use 'twilio'", 400)
+                    return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
+                
+                # Usar SMS Twilio
+                result = SMSController.enviarMensajeTwilio({
+                    "mensaje": mensaje_con_enlace,
+                    "destinatario": usuario.telefono
+                })
 
             else:
                 session.rollback()

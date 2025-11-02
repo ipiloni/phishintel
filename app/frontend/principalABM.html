@@ -388,6 +388,19 @@
               </div>
             </div>
           </div>
+        </form>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="loadingUsuario">Cancelar</button>
+        <button type="button" class="btn btn-primary" @click="submitUsuario" :disabled="loadingUsuario">
+          <span v-if="loadingUsuario" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <i v-else class="bi" :class="usuarioForm.idUsuario ? 'bi-save' : 'bi-plus-circle' "></i>
+          {{ loadingUsuario ? 'Procesando...' : (usuarioForm.idUsuario ? 'Guardar cambios' : 'Crear Usuario') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
         <!-- Toast de notificación -->
         <div class="toast-container position-fixed bottom-0 end-0 p-3">

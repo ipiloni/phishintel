@@ -216,104 +216,6 @@
               </div>
             </div>
 
-            <!-- Selector de Proveedor (solo visible cuando hay medio seleccionado) -->
-            <div class="mb-4" v-if="medio">
-              <label class="form-label mb-3">Proveedor</label>
-              
-              <!-- Proveedores para Telegram -->
-              <div v-if="medio === 'telegram'">
-                <div class="row g-2">
-                  <div class="col-md-6">
-                    <div class="card bloque bloque-normal"
-                         @click="proveedor = 'bot'"
-                         :style="proveedor === 'bot' ? 'border-color: var(--accent-color);' : 'bloque-normal'">
-                      <div class="card-body text-center p-1">
-                        <div style="font-size: 1em;"><i class="bi bi-robot"></i></div>
-                        <h6 class="card-title mb-0" style="font-size: 0.8em;">Bot de Telegram</h6>
-                        <small class="card-text" style="font-size: 0.7em;"><i class="bi bi-check-lg"></i> Funciona</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="card h-100 cursor-pointer border-secondary border-danger"
-                         style="cursor: not-allowed; opacity: 0.6; background-color: #2d2d2d; color: white;">
-                      <div class="card-body text-center p-1">
-                        <div style="font-size: 1em;"><i class="bi bi-send"></i></div>
-                        <h6 class="card-title mb-0" style="font-size: 0.8em;">Mensaje Directo</h6>
-                        <small class="card-text" style="font-size: 0.7em;"><i class="bi bi-ban"></i> Próximamente</small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Proveedores para WhatsApp -->
-              <div v-if="medio === 'whatsapp'">
-                <div class="row g-2">
-                  <div class="col-md-6">
-                    <div class="card bloque bloque-normal"
-                         @click="proveedor = 'whapi'"
-                         :style="proveedor === 'whapi' ? 'border-color: var(--accent-color);' : 'bloque-normal'">
-                      <div class="card-body text-center p-1">
-                        <div style="font-size: 1em;"><i class="bi bi-cloud"></i></div>
-                        <h6 class="card-title mb-0" style="font-size: 0.8em;">whapi.cloud</h6>
-                        <small class="card-text" style="font-size: 0.7em;"><i class="bi bi-check-lg"></i> Funciona</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="card bloque bloque-normal"
-                         @click="proveedor = 'whapi-link-preview'"
-                         :style="proveedor === 'whapi-link-preview' ? 'border-color: var(--accent-color);' : 'bloque-normal'">
-                      <div class="card-body text-center p-1">
-                        <div style="font-size: 1em;"><i class="bi bi-link-45deg"></i></div>
-                        <h6 class="card-title mb-0" style="font-size: 0.8em;">whapi.cloud Link Preview</h6>
-                        <small class="card-text" style="font-size: 0.7em;"><i class="bi bi-check-lg"></i> Funciona</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="card bloque bloque-normal"
-                         @click="proveedor = 'twilio'"
-                         :style="proveedor === 'twilio' ? 'border-color: var(--accent-color);' : 'bloque-normal'">
-                      <div class="card-body text-center p-1">
-                        <div style="font-size: 1em;"><i class="bi bi-telephone"></i></div>
-                        <h6 class="card-title mb-0" style="font-size: 0.8em;">Twilio</h6>
-                        <small class="card-text" style="font-size: 0.7em;"><i class="bi bi-exclamation-circle"></i> Limitado</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="card h-100 cursor-pointer border-danger" 
-                         style="cursor: not-allowed; opacity: 0.6; background-color: #2d2d2d; color: white;">
-                      <div class="card-body text-center p-1">
-                        <div style="font-size: 1em;"><i class="bi bi-robot"></i></div>
-                        <h6 class="card-title mb-0" style="font-size: 0.8em;">Selenium</h6>
-                        <small class="card-text" style="font-size: 0.7em;"><i class="bi bi-ban"></i> Próximamente</small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Proveedores para SMS -->
-              <div v-if="medio === 'sms'">
-                <div class="row g-2">
-                  <div class="col-md-6">
-                    <div class="card bloque bloque-normal"
-                         @click="proveedor = 'twilio'"
-                         :style="proveedor === 'twilio' ? 'border-color: var(--accent-color);' : 'bloque-normal'">
-                      <div class="card-body text-center p-1">
-                        <div style="font-size: 1em;"><i class="bi bi-telephone"></i></div>
-                        <h6 class="card-title mb-0" style="font-size: 0.8em;">Twilio</h6>
-                        <small class="card-text" style="font-size: 0.7em;"><i class="bi bi-exclamation-circle"></i>️ Limitado</small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Botón de enviar -->
             <div class="text-center">
               <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill" :disabled="cargando">
@@ -537,11 +439,11 @@
           this.filtroUsuario = "";
         },
         medio() {
-          // Resetear proveedor cuando cambie el medio
+          // Hardcodear proveedor según medio
           if (this.medio === 'telegram') {
             this.proveedor = 'bot';
           } else if (this.medio === 'whatsapp') {
-            this.proveedor = 'whapi';
+            this.proveedor = 'whapi-link-preview';
           } else if (this.medio === 'sms') {
             this.proveedor = 'twilio';
           }
@@ -551,11 +453,21 @@
         async generarPreview() {
           this.cargando = true;
           try {
+            // Construir contexto según dificultad
+            let contextoStr = '';
+            if (this.nivel === 'Fácil') {
+              contextoStr = 'Genera un mensaje de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación.';
+            } else if (this.nivel === 'Medio') {
+              contextoStr = 'Se pedirá login en un formulario (como caisteLogin.html) y credenciales. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación.';
+            } else {
+              contextoStr = 'Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación.';
+            }
+
             const resp = await fetch("http://localhost:8080/api/mensaje/generar", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam.`,
+                contexto: contextoStr,
                 nivel: this.nivel
               })
             });
@@ -568,6 +480,14 @@
             this.mensajeGenerado.mensaje = data.mensaje;
             this.mensajeGenerado.idUsuario = this.filtroUsuario.idUsuario;
             this.mensajeGenerado.medio = this.medio;
+            // Actualizar proveedor según medio
+            if (this.medio === 'telegram') {
+              this.proveedor = 'bot';
+            } else if (this.medio === 'whatsapp') {
+              this.proveedor = 'whapi-link-preview';
+            } else if (this.medio === 'sms') {
+              this.proveedor = 'twilio';
+            }
             this.mensajeGenerado.proveedor = this.proveedor;
 
             // Abrir modal
@@ -585,11 +505,21 @@
         async regenerarMensaje() {
           this.cargandoRegenerar = true;
           try {
+            // Construir contexto según dificultad
+            let contextoStr = '';
+            if (this.nivel === 'Fácil') {
+              contextoStr = 'Genera un mensaje de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación.';
+            } else if (this.nivel === 'Medio') {
+              contextoStr = 'Se pedirá login en un formulario (como caisteLogin.html) y credenciales. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación.';
+            } else {
+              contextoStr = 'Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación.';
+            }
+
             const resp = await fetch("http://localhost:8080/api/mensaje/generar", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                contexto: `Área: ${this.filtroArea}, Usuario: ${this.filtroUsuario.nombre} ${this.filtroUsuario.apellido}, La fecha que sea el 24/8/2025, Sin links, No le pidas informacion ni pongas un asunto en mayuscula. Pone un tono mas corporativo para que no llegue a spam.`,
+                contexto: contextoStr,
                 nivel: this.nivel
               })
             });
@@ -611,14 +541,25 @@
         async confirmarEnvio() {
           this.cargandoEnvio = true;
           try {
+            // Hardcodear proveedor según medio
+            let proveedorHardcodeado = 'bot';
+            if (this.medio === 'telegram') {
+              proveedorHardcodeado = 'bot';
+            } else if (this.medio === 'whatsapp') {
+              proveedorHardcodeado = 'whapi-link-preview';
+            } else if (this.medio === 'sms') {
+              proveedorHardcodeado = 'twilio';
+            }
+
             const resp = await fetch("http://localhost:8080/api/mensaje/enviar-id", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 medio: this.medio,
-                proveedor: this.proveedor,
+                proveedor: proveedorHardcodeado,
                 idUsuario: this.filtroUsuario.idUsuario,
-                mensaje: this.modalMensaje
+                mensaje: this.modalMensaje,
+                dificultad: this.nivel
               })
             });
 
