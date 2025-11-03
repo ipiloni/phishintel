@@ -95,6 +95,16 @@ def actualizarConversacionLlamada():
     conversacion.conversacionActual.append({"rol": rol, "mensaje": mensaje})
     return Response(status=201)
 
+@apis.route("/api/llamadas/en-ejecucion", methods=["GET"])
+def obtenerLlamadaEnEjecucion():
+    from app.backend.apis.twilio import twilio
+    import app.utils.conversacion as conversacion
+    idConversacion = conversacion.idConversacion
+    if idConversacion == "":
+        return Response(status=404)
+    estadoLlamada = twilio.obtenerEstadoLlamada(idConversacion)
+    return estadoLlamada, 200
+
 # ------ # TRANSFORMADORES TTS Y STT # ------ #
 @apis.route("/api/tts", methods=["POST"])
 def generarTTS():

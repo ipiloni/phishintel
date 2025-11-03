@@ -19,6 +19,20 @@ def llamar(destinatario, remitente, url_audio):
     )
 
     log.info(f"Resultados actuales: {call.sid} - {call.duration} - {call.status} - {call.direction}")
+    import app.utils.conversacion as conversacion
+    conversacion.idConversacion = call.sid
+
+    return jsonify({
+      'sid': call.sid,
+      'status': call.status
+    })
+
+def obtenerEstadoLlamada(sid):
+    log.info(f"Se recibio una solicitud para obtener el estado de la llamada {str(sid)}")
+
+    call = client.calls(sid).fetch()
+
+    log.info(f"Resultados actuales: {call.sid} - {call.duration} - {call.status} - {call.direction}")
 
     return jsonify({
       'sid': call.sid,
