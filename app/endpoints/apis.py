@@ -95,6 +95,15 @@ def actualizarConversacionLlamada():
     conversacion.conversacionActual.append({"rol": rol, "mensaje": mensaje})
     return Response(status=201)
 
+# TODO: borrar este metodo, es de prueba
+@apis.route("/api/llamadas/en-ejecucion", methods=["POST"])
+def actualizarIdConversacion():
+    data = request.get_json()
+    idConver = data["idConversacion"]
+    import app.utils.conversacion as conversacion
+    conversacion.idConversacion = idConver
+    return Response(status=201)
+
 @apis.route("/api/llamadas/en-ejecucion", methods=["GET"])
 def obtenerLlamadaEnEjecucion():
     from app.backend.apis.twilio import twilio
