@@ -12,8 +12,12 @@ from app.controllers.abm.areasController import AreasController
 from app.controllers.abm.eventosController import EventosController
 from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.aiController import AIController
+from app.controllers.emails.emailController import EmailController
+from app.controllers.mensajes.msjController import MsjController
+from app.controllers.resultadoEventoController import ResultadoEventoController
 from app.utils.config import get
 from app.utils import conversacion
+from app.utils.conversacion import idEvento
 from app.utils.logger import log
 import threading
 
@@ -26,17 +30,24 @@ class LlamadasController:
     @staticmethod
     def generarLlamada(data):
         """
+            recibe los siguientes valores dentro de data:
+                password
+                idUsuarioDestinatario
+                idUsuarioRemitente
+                eventoDesencadenador
+                rolAImitar
+                objetivoEspecifico
+            ===================================================================
             1. Revisar a quien estamos llamando, debe ser un usuario de la base.
             2. Crear el evento llamada
             3. Asociarlo al usuario
             4. Generar la conversacion
             5. Guardar en la base el evento
             6. Llamar usuario
-            // TODO: Morita punto 7
             7. Crear un hilo contador que, al pasar los 3/4 minutos, analice la variable conversacionActual, analice con IA si se nombro algo del objetivo y en base a eso genere un nuevo evento.
             8. Luego en otro metodo (al obtener la respuesta del usuario), guardar nuevamente en el evento la conversacion (actualizarla)
         """
-
+        conversacion.hilo=False
         response = LlamadasController.validarRequestLlamada(data)
 
         if response is not None:
@@ -44,6 +55,10 @@ class LlamadasController:
 
         idUsuarioDestinatario = data["idUsuarioDestinatario"]
         idUsuarioRemitente = data["idUsuarioRemitente"]
+
+        conversacion.destinatario = idUsuarioDestinatario
+        conversacion.remitente = idUsuarioRemitente
+        conversacion.objetivoEspecifico = data["objetivoEspecifico"]
 
         remitente, statusRemitente = UsuariosController.obtenerUsuario(idUsuarioRemitente)
         usuario, statusUsuario = UsuariosController.obtenerUsuario(idUsuarioDestinatario)
@@ -77,6 +92,7 @@ class LlamadasController:
         rolAImitar = data["rolAImitar"]
         objetivoEspecifico = data["objetivoEspecifico"]
         eventoDesencadenador = data["eventoDesencadenador"]
+        conversacion.eventoDesencadenador = eventoDesencadenador
 
         if "objetivo" not in data:
             log.warn("No se indico un Objetivo en la llamada, se utilizara uno predeterminado")
@@ -144,14 +160,16 @@ class LlamadasController:
         conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
 
         log.info(f"La URL del audio actual es: {conversacion.urlAudioActual}")
-
+        hilo = threading.Thread(target=LlamadasController.analizarLlamada, args=())
+        hilo.daemon = True  # el hilo no bloquea el cierre del programa
+        hilo.start()
         return twilio.llamar(destinatario, remitente, host + "/api/twilio/accion")
 
 
     @staticmethod
     def procesarRespuesta(speech, confidence):
         try:
-
+            conversacion.hilo=True
             log.info(f"Lo que dijo el usuario fue: {str(speech)}")
 
             conversacion.conversacionActual.append({"rol": "destinatario", "mensaje": speech})
@@ -239,28 +257,69 @@ class LlamadasController:
         if "idUsuarioRemitente" not in data:
             return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo obligatorio 'idUsuarioRemitente'",400)
 
-        if "tipoEvento" not in data or data["tipoEvento"] != "LLAMADA_SMS" and data["tipoEvento"] != "LLAMADA_WPP" and data["tipoEvento"] != "LLAMADA_CORREO":
-            return responseError("CAMPOS_OBLIGATORIOS", "El valor ingresado en 'tipoEvento' debe ser: 'LLAMADA_SMS', 'LLAMADA_WPP' o 'LLAMADA_CORREO'",400)
-
         return None
 
     @staticmethod
-    def analizarLlamada(idEvento):
-        # 1. Iniciar el hilo contador por 3 minutos.
+    def analizarLlamada():
+        import time
+        if conversacion.hilo:
+            log.info("Empieza el analisis de la llamada para detectar si se cumplio el objetivo")
+            # 1. Iniciar el hilo contador por 3 minutos.
+            time.sleep(180)
+            # Luego de los 3 minutos...
+            objetivo = conversacion.objetivoActual.split("intentando que el empleado")[1].split("Reglas:")[0].strip() # Obtenemos lo que hay entre estas dos oraciones
 
-        # Luego de los 3 minutos...
+            objetivoCumplido = AIController.analizarConversacionLlamada(objetivo, conversacion.conversacionActual)
 
-        # ¡Analizar si este hilo ya no se ejecutó antes!
-        # Esto es, debido a que al apretar llamar() ya se genera este hilo, por lo que pudo haber pasado que se quiera ejecutar 2 veces para un mismo evento...
-        log.info("Empieza el analisis de la llamada para detectar si se cumplio el objetivo")
+            if objetivoCumplido:
+                log.info("El objetivo de la llamada se ha cumplido, generando evento...")
+                ResultadoEventoController.sumarFalla(conversacion.destinatario, conversacion.idEvento)
+                if conversacion.eventoDesencadenador.lower() == "correo":
+                    contexto = "Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
+                    data = {
+                        "contexto": contexto,
+                        "nivel": 3,
+                        "formato": "texto"
+                    }
+                    respuesta, status = AIController.armarEmail(data)
+                    try:
+                        data = json.loads(respuesta)  # convertir string a JSON real
+                    except json.JSONDecodeError:
+                        log.error(f"El texto devuelto no es JSON válido: {respuesta}")
 
-        objetivo = conversacion.objetivoActual.split("intentando que el empleado")[1].split("Reglas:")[0].strip() # Obtenemos lo que hay entre estas dos oraciones
+                    dataMail = {
+                        "proveedor": "twilio",
+                        "idUsuarioDestinatario": conversacion.destinatario,
+                        "idUsuarioRemitente": conversacion.remitente,
+                        "asunto": data["asunto"],
+                        "cuerpo": data["cuerpo"],
+                        "dificultad": "dificil"
+                    }
+                    EmailController.enviarMailPorID(dataMail)
+                else:
+                    if conversacion.objetivoEspecifico == "Abra un link que se le enviara por":
+                        dificultad = "facil"
+                        contexto = "Genera un mensaje de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación."
+                    elif conversacion.objetivoEspecifico == "Abra un link para ingresar sus credenciales que se le enviara por":
+                        dificultad = "medio"
+                        contexto = "Se pedirá login en un formulario (como caisteLogin.html) y credenciales. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
+                    else:
+                        dificultad = "dificil"
+                        contexto = "Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
 
-        objetivoCumplido = AIController.analizarConversacionLlamada(objetivo, conversacion.conversacionActual)
+                    datamsj2 = {
+                        "contexto": contexto,
+                        "nivel": dificultad
+                    }
+                    respuesta, status = AIController.armarMensaje(datamsj2)
 
-        if objetivoCumplido:
-            log.info("El objetivo de la llamada se ha cumplido, generando evento...")
-            # Generar el evento desencadenador...
-        else:
-            log.info("El objetivo de la llamada NO se ha cumplido, NO se genera ningun evento.")
-            # Analizar cuantos puntos suma/resta el usuario en base a lo sucedido en la llamada.
+                    datamsj = {
+                        "medio": conversacion.eventoDesencadenador.lower(),
+                        "idUsuario": conversacion.destinatario,
+                        "mensaje": respuesta["mensaje"],
+                        "dificultad": dificultad
+                    }
+                    MsjController.enviarMensajePorID(datamsj)
+            else:
+                log.info("El objetivo de la llamada NO se ha cumplido, NO se genera ningun evento pero suma puntos")
+                ResultadoEventoController.sumarReportado(conversacion.destinatario, conversacion.idEvento)

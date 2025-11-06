@@ -44,7 +44,6 @@ class MsjController:
                                  "Faltan campos obligatorios como 'medio', 'idUsuario' o 'mensaje'", 400)
 
         medio = data["medio"]
-        proveedor = data.get("proveedor", "")
         id_usuario = data["idUsuario"]
         mensaje = data["mensaje"]
         dificultad = data.get("dificultad", "Fácil")

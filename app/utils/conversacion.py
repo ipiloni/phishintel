@@ -1,8 +1,11 @@
 remitente = ""
 destinatario = ""
 conversacionActual = []
-objetivoActual = ""
+objetivoActual = "" #Incluye todo
+objetivoEspecifico = "" #Dificultad
 idVozActual = ""
 urlAudioActual = ""
 idEvento = ""
+eventoDesencadenador = "" #CORREO / WHATSAPP / SMS
 idConversacion = ""
+hilo = False
