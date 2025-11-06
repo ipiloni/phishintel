@@ -7,6 +7,7 @@ from twilio.twiml.voice_response import Gather, VoiceResponse
 from app.backend.apis.elevenLabs import elevenLabs
 from app.backend.apis.twilio import twilio
 from app.backend.models.error import responseError
+from app.backend.models.tipoEvento import TipoEvento
 from app.controllers.abm.areasController import AreasController
 from app.controllers.abm.eventosController import EventosController
 from app.controllers.abm.usuariosController import UsuariosController
@@ -73,16 +74,16 @@ class LlamadasController:
         nombreRemitente = remitente["nombre"] + " " + remitente["apellido"]
         nombreEmpleado = usuario["nombre"] + " " + usuario["apellido"]
 
-        rolAImitar = "jefe de area" # TODO: ver donde se define!
-        objetivoEspecifico = "abra un link que se le enviará por"
-        tipoEvento = data["tipoEvento"].replace("LLAMADA_", "", 1)
+        rolAImitar = data["rolAImitar"]
+        objetivoEspecifico = data["objetivoEspecifico"]
+        eventoDesencadenador = data["eventoDesencadenador"]
 
         if "objetivo" not in data:
             log.warn("No se indico un Objetivo en la llamada, se utilizara uno predeterminado")
             conversacion.objetivoActual = f"""
                         Tienes el rol de {rolAImitar} dentro de la empresa 'PG Control'. Te llamas '{nombreRemitente}'.
                         Tu objetivo es simular un intento de phishing telefónico, como parte de un entrenamiento de seguridad.
-                        Debes hablar de manera convincente, pero sin agresividad, intentando que el empleado {objetivoEspecifico} {tipoEvento}.
+                        Debes hablar de manera convincente, pero sin agresividad, intentando que el empleado {objetivoEspecifico} {eventoDesencadenador}.
 
                         Reglas:
                         - Si la conversación esta vacía, pues comienza con un saludo. Espera a la respuesta del empleado.
@@ -106,7 +107,7 @@ class LlamadasController:
         conversacion.conversacionActual.append({"rol": "IA", "mensaje": texto})
 
         dataEvento = {
-            "tipoEvento": data["tipoEvento"],
+            "tipoEvento": TipoEvento.LLAMADA,
             "fechaEvento": datetime.now().isoformat(),
             "resultado": "PENDIENTE",
             "registroEvento": {
@@ -127,23 +128,22 @@ class LlamadasController:
 
         conversacion.idVozActual = data.get(remitente["idVoz"], "O1CnH2NGEehfL1nmYACp")  # esto es un get o default, intenta obtener la voz del remitente y si no lo pasaron toma el default
 
-        #comento para no generar TTS al pedo. Luego eliminar comentario.
-        #elevenLabsResponse = elevenLabs.tts(texto, conversacion.idVozActual, None,None)  # TODO por el momento estabilidad y velocidad en None
-        #
-        #idAudio = elevenLabsResponse["idAudio"]
-        #
-        #log.info("Ponemos en internet el audio: " + str(idAudio))
-        #
-        #from app.apis import exponerAudio
-        #exponerAudio(f"{idAudio}.mp3")  # expone el archivo .mp3 a internet para que Twilio pueda reproducirlo
+        elevenLabsResponse = elevenLabs.tts(texto, conversacion.idVozActual, "eleven_multilingual_v2",None, None, 0.5)
+
+        idAudio = elevenLabsResponse["idAudio"]
+
+        log.info("Ponemos en internet el audio: " + str(idAudio))
+
+        from app.endpoints.apis import exponerAudio
+        exponerAudio(f"{idAudio}.mp3")  # expone el archivo .mp3 a internet para que Twilio pueda reproducirlo
 
         if destinatario == remitente:
             return responseError("CAMPO_INVALIDO", "El destinatario y remitente no pueden ser iguales", 400)
 
-        #url = host
-        #conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
-        #
-        #log.info(f"La URL del audio actual es: {conversacion.urlAudioActual}")
+        url = host
+        conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
+
+        log.info(f"La URL del audio actual es: {conversacion.urlAudioActual}")
 
         return twilio.llamar(destinatario, remitente, host + "/api/twilio/accion")
 

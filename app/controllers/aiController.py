@@ -279,6 +279,8 @@ class AIController:
         response = AIController.enviarPrompt(prompt, modelAI)
 
         if response.text == "true":
+            # no suma puntos en el scoring
             return True
         else:
+            # suma puntos en el scoring
             return False
