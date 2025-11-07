@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from flask import Response
+from flask import Response, jsonify
 from twilio.twiml.voice_response import Gather, VoiceResponse
 
 from app.backend.apis.elevenLabs import elevenLabs
@@ -123,11 +123,14 @@ class LlamadasController:
 
         conversacion.conversacionActual.append({"rol": "IA", "mensaje": texto})
 
+        resp = jsonify(conversacion.conversacionActual)
+        json_str = resp.get_data(as_text=True)
+
         dataEvento = {
-            "tipoEvento": TipoEvento.LLAMADA,
+            "tipoEvento": "LLAMADA",
             "registroEvento": {
                 "objetivo": " ".join(conversacion.objetivoActual.split()).strip(),  # elimina doble espacios y \n
-                "conversacion": json.dumps(conversacion.conversacionActual) # convierte la lista conversacionActual a un string para que pueda guardarse
+                "conversacion": json_str # convierte la lista conversacionActual a un string para que pueda guardarse
             }
         }
 
