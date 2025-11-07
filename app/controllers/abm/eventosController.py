@@ -112,19 +112,18 @@ class EventosController:
         try:
             tipo_evento_val = data["tipoEvento"]
             if tipo_evento_val not in [e.value for e in TipoEvento]:
-                log.error(f"Tipo de evento no es valido")
+                log.error("Tipo de evento no es valido")
                 return responseError("TIPO_EVENTO_INVALIDO", "El tipo de evento no es válido", 400)
 
-            fecha_evento_str = data["fechaEvento"]
-            try:
-                fecha_evento = datetime.fromisoformat(fecha_evento_str)
-
-                if data["fechaEvento"] is None:
-                    fecha_evento = datetime.now().isoformat()
-
-            except ValueError:
-                log.error(f"Fecha no es valida")
-                return responseError("FECHA_INVALIDA", "El formato de la fecha no es válido", 400)
+            fecha_evento_str = data.get("fechaEvento")
+            if fecha_evento_str is None:
+                fecha_evento = datetime.now()
+            else:
+                try:
+                    fecha_evento = datetime.fromisoformat(fecha_evento_str)
+                except ValueError:
+                    log.error("Fecha no es valida")
+                    return responseError("FECHA_INVALIDA", "El formato de la fecha no es válido", 400)
 
             session = SessionLocal()
 

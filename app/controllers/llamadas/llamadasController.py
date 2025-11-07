@@ -107,12 +107,13 @@ class LlamadasController:
             Reglas:
             - Si la conversación esta vacía, pues comienza con un saludo. Espera a la respuesta del empleado.
             - No uses amenazas extremas, solo urgencia laboral.
-            - Responde **solo con una frase corta** que la persona diría en esta interacción. No digas nada de más ni avances la conversación.
             - En ningún momento digas que es un entrenamiento: eso se evalúa después.
             - Mantén la coherencia del rol de “{rolAImitar}”.
             - Solamente responde lo que el {rolAImitar} debería decir.
             - Eres de Buenos Aires, Argentina. Por lo que el dialecto es muy importante que lo mantengas.
             - El empleado se llama {nombreEmpleado}, trabaja en 'PG Control' en el area de {area["nombreArea"]}
+            - Responde **solo con una frase corta** que la persona diría en esta interacción. No digas nada de más ni avances la conversación.
+            - Debes responder SOLAMENTE lo que tiene que decir la IA en la llamada, no agregues acotaciones ni acciones narrativas.
         """
 
         log.info(f"La Conversacion actual es la siguiente: {conversacion.conversacionActual}")
@@ -123,30 +124,34 @@ class LlamadasController:
 
         conversacion.conversacionActual.append({"rol": "IA", "mensaje": texto})
 
-        resp = jsonify(conversacion.conversacionActual)
-        json_str = resp.get_data(as_text=True)
-
         dataEvento = {
             "tipoEvento": "LLAMADA",
             "registroEvento": {
                 "objetivo": " ".join(conversacion.objetivoActual.split()).strip(),  # elimina doble espacios y \n
-                "conversacion": json_str # convierte la lista conversacionActual a un string para que pueda guardarse
             }
         }
 
         log.info(f"{dataEvento}")
 
-        responseEvento, statusResponse = EventosController.crearEvento(dataEvento)
+        resp = EventosController.crearEvento(dataEvento)
+
+        if isinstance(resp, tuple):
+            responseEvento, statusResponse = resp
+        else:
+            responseEvento = resp
+            statusResponse = resp.status_code
 
         if statusResponse != 201:
-            log.error(f"Hubo un error al crear el evento: {responseEvento}")
+            log.error(f"Hubo un error al crear el evento: {responseEvento.get_data(as_text=True)}")
             return responseEvento, statusResponse
 
-        conversacion.idEvento = responseEvento["idEvento"]
+        data = responseEvento.get_json()
+        conversacion.idEvento = data["idEvento"]
 
         log.info("Evento creado correctamente, creamos el Usuario por Evento")
 
         responseUsuarioEvento, statusUsuarioEvento = EventosController.asociarUsuarioEvento(conversacion.idEvento, idUsuarioDestinatario, "PENDIENTE")
+        responseUsuarioEvento = responseUsuarioEvento.get_json()
 
         if statusUsuarioEvento != 200:
             log.error(f"Hubo un error al asociar el usuario al evento: {responseUsuarioEvento}")
