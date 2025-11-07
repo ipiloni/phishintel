@@ -17,47 +17,47 @@ from app.utils.config import get
 api_key = get("ELEVEN_LABS_IGNA")
 api_key_2 = get("API_KEY_CLONACION_VOZ")
 
-def generarVoz(texto):
-    load_dotenv()
+# def generarVoz(texto):
+#     load_dotenv()
+#
+#     elevenlabs = ElevenLabs(
+#         api_key=api_key,
+#     )
+#
+#     audio = elevenlabs.text_to_speech.convert(
+#         text=texto,
+#         voice_id="9rvdnhrYoXoUt4igKpBw",
+#         model_id="eleven_multilingual_v2",
+#         output_format="mp3_44100_128",
+#     )
+#
+#     play(audio)
 
-    elevenlabs = ElevenLabs(
-        api_key=api_key,
-    )
-
-    audio = elevenlabs.text_to_speech.convert(
-        text=texto,
-        voice_id="9rvdnhrYoXoUt4igKpBw",
-        model_id="eleven_multilingual_v2",
-        output_format="mp3_44100_128",
-    )
-
-    play(audio)
-
-def stt(ubicacion):
-    # TODO: este metodo no lo estamos usando porque Twilio nos esta brindando la respuesta en texto, lo dejamos por las dudas...
-
-    elevenlabs = ElevenLabs(
-        api_key=api_key,
-    )
-
-    try:
-        with open(ubicacion, "rb") as file:
-            audio_data = BytesIO(file.read())
-
-        transcription = elevenlabs.speech_to_text.convert(
-            file=audio_data,
-            model_id="scribe_v1",  # Model to use, for now only "scribe_v1" is supported
-            tag_audio_events=True,  # Tag audio events like laughter, applause, etc.
-            language_code="spa", # Este siempre sera espaniol porque no trabajaremos en ingles para Proyecto Final
-            diarize=True,
-        )
-        return jsonify({
-            "traduccion": transcription.dict()["text"]
-        })
-
-    except Exception as e:
-        log.error("Hubo un error al generar el STT: " + str(e))
-        return responseError("ERROR_ELEVENLABS", "Hubo un error en la llamada a ElevenLabs: " + str(e), 500)
+# def stt(ubicacion):
+#     # TODO: este metodo no lo estamos usando porque Twilio nos esta brindando la respuesta en texto, lo dejamos por las dudas...
+#
+#     elevenlabs = ElevenLabs(
+#         api_key=api_key,
+#     )
+#
+#     try:
+#         with open(ubicacion, "rb") as file:
+#             audio_data = BytesIO(file.read())
+#
+#         transcription = elevenlabs.speech_to_text.convert(
+#             file=audio_data,
+#             model_id="scribe_v1",  # Model to use, for now only "scribe_v1" is supported
+#             tag_audio_events=True,  # Tag audio events like laughter, applause, etc.
+#             language_code="spa", # Este siempre sera espaniol porque no trabajaremos en ingles para Proyecto Final
+#             diarize=True,
+#         )
+#         return jsonify({
+#             "traduccion": transcription.dict()["text"]
+#         })
+#
+#     except Exception as e:
+#         log.error("Hubo un error al generar el STT: " + str(e))
+#         return responseError("ERROR_ELEVENLABS", "Hubo un error en la llamada a ElevenLabs: " + str(e), 500)
 
 
 

@@ -47,7 +47,6 @@ class LlamadasController:
             7. Crear un hilo contador que, al pasar los 3/4 minutos, analice la variable conversacionActual, analice con IA si se nombro algo del objetivo y en base a eso genere un nuevo evento.
             8. Luego en otro metodo (al obtener la respuesta del usuario), guardar nuevamente en el evento la conversacion (actualizarla)
         """
-        conversacion.hilo=False
         response = LlamadasController.validarRequestLlamada(data)
 
         if response is not None:
@@ -56,13 +55,17 @@ class LlamadasController:
         idUsuarioDestinatario = data["idUsuarioDestinatario"]
         idUsuarioRemitente = data["idUsuarioRemitente"]
 
+        # Reinicio y seteo variables globales de la conversacion
+        conversacion.hilo = False
         conversacion.destinatario = idUsuarioDestinatario
         conversacion.remitente = idUsuarioRemitente
-        conversacion.objetivoEspecifico = data["objetivoEspecifico"]
+        conversacion.objetivoEspecifico = data["objetivoEspecifico"] # Es un TipoEvento que se usa para generar el evento posterior
 
+        # Obtengo usuarios de la base
         remitente, statusRemitente = UsuariosController.obtenerUsuario(idUsuarioRemitente)
         usuario, statusUsuario = UsuariosController.obtenerUsuario(idUsuarioDestinatario)
 
+        # Se validan las respuestas de la base
         if statusRemitente != 200:
             log.warning("No se encontro un idUsuarioRemitente existente")
             return responseError("USUARIO_INEXISTENTE", "No se encontro un idUsuarioRemitente existente", 400)
@@ -71,9 +74,11 @@ class LlamadasController:
             log.warning("No se encontro un idUsuarioDestinatario existente")
             return responseError("USUARIO_INEXISTENTE", "No se encontro un idUsuarioDestinatario existente", 400)
 
+        # Obtengo los valores de los usuarios consultados
         remitente = remitente.get_json()
         usuario = usuario.get_json()
 
+        # Se obtiene el area del usuario
         area, statusArea = AreasController.obtenerArea(usuario["idArea"])
         if statusArea != 200:
             log.warning("El usuario no pertenece a ningun Area particular")
@@ -94,25 +99,21 @@ class LlamadasController:
         eventoDesencadenador = data["eventoDesencadenador"]
         conversacion.eventoDesencadenador = eventoDesencadenador
 
-        if "objetivo" not in data:
-            log.warn("No se indico un Objetivo en la llamada, se utilizara uno predeterminado")
-            conversacion.objetivoActual = f"""
-                        Tienes el rol de {rolAImitar} dentro de la empresa 'PG Control'. Te llamas '{nombreRemitente}'.
-                        Tu objetivo es simular un intento de phishing telefónico, como parte de un entrenamiento de seguridad.
-                        Debes hablar de manera convincente, pero sin agresividad, intentando que el empleado {objetivoEspecifico} {eventoDesencadenador}.
+        conversacion.objetivoActual = f"""
+            Tienes el rol de {rolAImitar} dentro de la empresa 'PG Control'. Te llamas '{nombreRemitente}'.
+            Tu objetivo es simular un intento de phishing telefónico, como parte de un entrenamiento de seguridad.
+            Debes hablar de manera convincente, pero sin agresividad, intentando que el empleado {objetivoEspecifico} {eventoDesencadenador}.
 
-                        Reglas:
-                        - Si la conversación esta vacía, pues comienza con un saludo. Espera a la respuesta del empleado.
-                        - No uses amenazas extremas, solo urgencia laboral.
-                        - Responde **solo con una frase corta** que la persona diría en esta interacción. No digas nada de más ni avances la conversación.
-                        - En ningún momento digas que es un entrenamiento: eso se evalúa después.
-                        - Mantén la coherencia del rol de “{rolAImitar}”.
-                        - Solamente responde lo que el {rolAImitar} debería decir.
-                        - Eres de Buenos Aires, Argentina. Por lo que el dialecto es muy importante que lo mantengas.
-                        - El empleado se llama {nombreEmpleado}, trabaja en 'PG Control' en el area de {area["nombreArea"]}
-                    """
-        else:
-            conversacion.objetivoActual = data["objetivo"]
+            Reglas:
+            - Si la conversación esta vacía, pues comienza con un saludo. Espera a la respuesta del empleado.
+            - No uses amenazas extremas, solo urgencia laboral.
+            - Responde **solo con una frase corta** que la persona diría en esta interacción. No digas nada de más ni avances la conversación.
+            - En ningún momento digas que es un entrenamiento: eso se evalúa después.
+            - Mantén la coherencia del rol de “{rolAImitar}”.
+            - Solamente responde lo que el {rolAImitar} debería decir.
+            - Eres de Buenos Aires, Argentina. Por lo que el dialecto es muy importante que lo mantengas.
+            - El empleado se llama {nombreEmpleado}, trabaja en 'PG Control' en el area de {area["nombreArea"]}
+        """
 
         log.info(f"La Conversacion actual es la siguiente: {conversacion.conversacionActual}")
 
@@ -125,7 +126,6 @@ class LlamadasController:
         dataEvento = {
             "tipoEvento": TipoEvento.LLAMADA,
             "fechaEvento": datetime.now().isoformat(),
-            "resultado": "PENDIENTE",
             "registroEvento": {
                 "objetivo": " ".join(conversacion.objetivoActual.split()).strip(),  # elimina doble espacios y \n
                 "conversacion": json.dumps(conversacion.conversacionActual) # convierte la lista conversacionActual a un string para que pueda guardarse
@@ -139,6 +139,14 @@ class LlamadasController:
             return response
 
         conversacion.idEvento = response["idEvento"]
+
+        log.info("Evento creado correctamente, creamos el Usuario por Evento")
+
+        responseUsuarioEvento, statusUsuarioEvento = EventosController.asociarUsuarioEvento(conversacion.idEvento, idUsuarioDestinatario, "PENDIENTE")
+
+        if statusUsuarioEvento != 200:
+            log.error(f"Hubo un error al asociar el usuario al evento: {responseUsuarioEvento}")
+            return responseUsuarioEvento
 
         log.info(f"Ahora la conversacion actual es la siguiente: {conversacion.conversacionActual}")
 
@@ -160,9 +168,12 @@ class LlamadasController:
         conversacion.urlAudioActual = f"{url}/api/audios/{idAudio}.mp3"
 
         log.info(f"La URL del audio actual es: {conversacion.urlAudioActual}")
-        hilo = threading.Thread(target=LlamadasController.analizarLlamada, args=())
+
+        # Iniciar el hilo que analiza la llamada
+        hilo = threading.Thread(target=LlamadasController.analizarLlamada)
         hilo.daemon = True  # el hilo no bloquea el cierre del programa
         hilo.start()
+
         return twilio.llamar(destinatario, remitente, host + "/api/twilio/accion")
 
 
