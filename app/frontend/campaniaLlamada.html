@@ -343,27 +343,35 @@
               </div>
             </div>
 
-            <!-- Contexto: esto se puede cambiar por algun select porque son bastante basicos los objetivos:
-             Por ejemplo: "abrir un link que se envia por SMS", "envie un archivo por Whatsapp", "descargue un archivo por un link que envio por WPP"
-             -->
+            <!-- Objetivo de la llamada -->
             <div class="mb-3">
-              <label for="context" class="form-label">Objetivo de la llamada</label>
-              <select style="margin-bottom: 15px;" class="form-control" id="context" disabled>
-                <option selected disabled>Próximamente - En desarrollo</option>
-                <option value="abra un link que se le enviará por">Solicitar Actualizar sus datos</option>
-                <option value="descargue un archivo que se le enviará por">Solicitar descargar un archivo</option>
+              <label for="objetivoEspecifico" class="form-label">Objetivo de la llamada</label>
+              <select v-model="objetivoEspecifico" class="form-control" id="objetivoEspecifico" name="objetivoEspecifico" required>
+                <option value="" disabled>-- Selecciona un objetivo --</option>
+                <option value="Abra un link que se le enviara por">Abrir un link</option>
+                <option value="Abra un link para ingresar sus credenciales que se le enviara por">Cargar credenciales</option>
+                <option value="Abra un link para actualizar sus datos que se le enviara por">Actualizar tus datos</option>
               </select>
             </div>
 
-              <!-- Evento desencadenador: aca seria un select que diga si luego se envia un email, un sms o un whatsapp -->
+            <!-- Evento desencadenador -->
             <div class="mb-3">
                 <label for="eventoDesencadenador" class="form-label">Evento desencadenador</label>
-                <select style="margin-bottom: 35px;" class="form-control" id="eventoDesencadenador" disabled>
-                  <option selected disabled>Próximamente - En desarrollo</option>
-                  <option value="LLAMADA_CORREO">Correo</option> <!-- Los values son el TipoEvento -->
-                  <option value="LLAMADA_SMS">Mensaje SMS</option>
-                  <option value="LLAMADA_WPP">Mensaje WhatsApp</option>
+                <select v-model="eventoDesencadenador" class="form-control" id="eventoDesencadenador" name="eventoDesencadenador" required>
+                  <option value="" disabled>-- Selecciona un evento --</option>
+                  <option value="Correo">Correo</option>
+                  <option value="Whatsapp">Whatsapp</option>
+                  <option value="SMS">SMS</option>
                 </select>
+            </div>
+
+            <!-- Rol a imitar -->
+            <div class="mb-3">
+              <label for="rolAImitar" class="form-label">Rol a imitar</label>
+              <select v-model="rolAImitar" class="form-control" id="rolAImitar" name="rolAImitar" required>
+                <option value="Jefe">Jefe</option>
+                <option value="Compañero de area">Compañero de area</option>
+              </select>
             </div>
 
             <!-- Botón de enviar -->
@@ -572,6 +580,143 @@
             </div>
           </div>
 
+          <!-- Modal Preview -->
+          <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+              <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                  <h5 class="modal-title">Vista previa de la llamada</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-4">
+                    <h6 class="mb-3" style="color: white;">
+                      <i class="bi bi-gear-fill me-2"></i>Opciones Elegidas
+                    </h6>
+                    
+                    <div class="row g-3">
+                      <!-- Área Destinatario -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2"><i class="bi bi-building"></i></span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Área Destinatario</small>
+                            <strong>{{ filtroArea }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Usuario Destinatario -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2"><i class="bi bi-person-fill"></i></span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Usuario Destinatario</small>
+                            <strong v-if="filtroUsuario">{{ filtroUsuario.nombre }} {{ filtroUsuario.apellido }}</strong>
+                            <strong v-else>—</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Área Remitente -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2"><i class="bi bi-building"></i></span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Área Remitente</small>
+                            <strong>{{ filtroAreaRemitente }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Usuario Remitente -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2"><i class="bi bi-person-check-fill"></i></span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Usuario Remitente</small>
+                            <strong v-if="filtroUsuarioRemitente">{{ filtroUsuarioRemitente.nombre }} {{ filtroUsuarioRemitente.apellido }}</strong>
+                            <strong v-else>—</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Rol a imitar -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2"><i class="bi bi-person-badge"></i></span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Rol a imitar</small>
+                            <strong>{{ rolAImitar }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Objetivo específico -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2"><i class="bi bi-bullseye"></i></span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Objetivo</small>
+                            <strong>{{ objetivoEspecifico }} {{ eventoDesencadenador }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Estado de voz -->
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
+                          <span class="me-2"><i class="bi bi-mic"></i></span>
+                          <div>
+                            <small class="d-block" style="color: #ccc;">Estado de voz</small>
+                            <strong v-if="tieneVozConfigurada || vozClonadaEnPreview" >Clonada</strong>
+                            <strong v-else >Genérica </strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <hr class="my-4" style="border-color: #444;">
+                  
+                  <!-- Explicación -->
+                  <div class="alert alert-info mb-3" style="background-color: #2d2d2d; border-color: #da02e5; color: #e0e0e0;">
+                    <h6><i class="bi bi-info-circle me-2"></i>¿Cómo funciona?</h6>
+                    <p class="mb-0" style="font-size: 14px;">
+                      La llamada se generará en tiempo real usando inteligencia artificial. El sistema simulará una conversación donde el remitente <span v-if="filtroUsuarioRemitente">({{ filtroUsuarioRemitente.nombre }})</span> se hará pasar por un {{ rolAImitar }} e intentará que el destinatario {{ objetivoEspecifico ? objetivoEspecifico.toLowerCase() : '' }} {{ eventoDesencadenador ? eventoDesencadenador.toLowerCase() : '' }}. 
+                      La conversación se adaptará dinámicamente según las respuestas del destinatario.
+                    </p>
+                  </div>
+
+                  <!-- Opción para clonar voz si no está configurada -->
+                  <div v-if="!tieneVozConfigurada && !vozClonadaEnPreview" class="alert mb-3" style= border-color:#ffffff;">
+                    <h6><i class="bi bi-exclamation-triangle me-2"></i>Voz no configurada</h6>
+                    <p class="mb-2" style="font-size: 14px;">
+                      El usuario remitente no tiene una voz clonada. Se utilizará una voz predeterminada, o puedes clonar la voz ahora.
+                    </p>
+                    <button type="button" class="btn btn-sm" 
+                            :style="{ backgroundColor: 'var(--accent-color)', color: 'white', border: 'none' }"
+                            @click="abrirModalGrabacionDesdePreview">
+                      <i class="bi bi-mic me-2"></i>Clonar Voz
+                    </button>
+                  </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="button" class="btn btn-primary" @click="confirmarLlamada" :disabled="cargandoLlamada">
+                    <span v-if="cargandoLlamada">
+                      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Generando...
+                    </span>
+                    <span v-else>
+                      <i class="bi bi-telephone me-2"></i>Generar Llamada
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div><!-- End #app -->
       </div>
     </section>
@@ -633,6 +778,12 @@
           contexto: "",
           cargando: false,
           cargandoAudio: false,
+          objetivoEspecifico: "",
+          eventoDesencadenador: "",
+          rolAImitar: "Jefe",
+          vozClonadaEnPreview: false,
+          cargandoLlamada: false,
+          previewAbiertoAntesDeClonar: false,
           // Variables para grabación
           consentimiento: false,
           grabando: false,
@@ -767,21 +918,96 @@
         },
 
         async generarPreview() {
+          // Validar que todos los campos estén completos
+          if (!this.filtroArea || !this.filtroUsuario || !this.filtroAreaRemitente || !this.filtroUsuarioRemitente) {
+            this.mostrarToastError("Por favor completa todos los campos requeridos");
+            return;
+          }
+
+          if (!this.objetivoEspecifico || !this.eventoDesencadenador || !this.rolAImitar) {
+            this.mostrarToastError("Por favor selecciona el objetivo, evento desencadenador y rol a imitar");
+            return;
+          }
+
           this.cargando = true;
           try {
-            // Aquí iría la lógica para generar la llamada
-            console.log('Generando llamada con:', {
-              area: this.filtroArea,
-              usuario: this.filtroUsuario,
-              contexto: this.contexto
-            });
+            // Verificar si el remitente tiene voz configurada
+            await this.verificarVozUsuario();
             
-            this.mostrarToastExito();
+            // Abrir modal de preview
+            const modal = new bootstrap.Modal(document.getElementById("previewModal"));
+            modal.show();
           } catch (e) {
             console.error("Error:", e);
-            this.mostrarToastError();
+            this.mostrarToastError("Error al generar preview");
           } finally {
             this.cargando = false;
+          }
+        },
+
+        abrirModalGrabacionDesdePreview() {
+          // Guardar referencia para volver a abrir el preview después de clonar
+          this.previewAbiertoAntesDeClonar = true;
+          
+          // Cerrar el modal de preview temporalmente
+          const previewModal = bootstrap.Modal.getInstance(document.getElementById("previewModal"));
+          if (previewModal) {
+            previewModal.hide();
+          }
+          
+          // Abrir modal de grabación
+          this.abrirModalGrabacion();
+        },
+
+        mapearEventoDesencadenador(evento) {
+          // Mapear los valores del frontend al formato que espera el backend
+          const mapeo = {
+            "Correo": "Correo",
+            "Whatsapp": "Whatsapp",
+            "SMS": "SMS"
+          };
+          return mapeo[evento] || evento;
+        },
+
+        async confirmarLlamada() {
+          this.cargandoLlamada = true;
+          try {
+            const payload = {
+              password: "phishintel2025",
+              idUsuarioDestinatario: this.filtroUsuario.idUsuario,
+              idUsuarioRemitente: this.filtroUsuarioRemitente.idUsuario,
+              rolAImitar: this.rolAImitar,
+              objetivoEspecifico: this.objetivoEspecifico,
+              eventoDesencadenador: this.mapearEventoDesencadenador(this.eventoDesencadenador)
+            };
+
+            const response = await fetch('http://localhost:8080/api/llamadas', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error || 'Error al generar la llamada');
+            }
+
+            this.mostrarToastExito("✅ Llamada generada correctamente");
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById("previewModal"));
+            if (modal) {
+              modal.hide();
+            }
+
+          } catch (e) {
+            console.error("Error:", e);
+            this.mostrarToastError(e.message || "Error al generar la llamada");
+          } finally {
+            this.cargandoLlamada = false;
           }
         },
 
@@ -943,11 +1169,21 @@
             if (response.ok) {
               this.idVozRemitente = data.idVoz;
               this.tieneVozConfigurada = true;
+              this.vozClonadaEnPreview = true;
               this.mostrarToastExito("🎉 Voz clonada exitosamente");
               
               // Cerrar modal y limpiar variables
               bootstrap.Modal.getInstance(document.getElementById("recordingModal")).hide();
               this.limpiarModalGrabacion();
+              
+              // Si el modal de preview estaba abierto antes de clonar, volver a abrirlo
+              if (this.previewAbiertoAntesDeClonar) {
+                setTimeout(() => {
+                  const modal = new bootstrap.Modal(document.getElementById("previewModal"));
+                  modal.show();
+                  this.previewAbiertoAntesDeClonar = false;
+                }, 500);
+              }
             } else {
               this.mostrarToastError("Error clonando voz: " + (data.error || "Error desconocido"));
             }
