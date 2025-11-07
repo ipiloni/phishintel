@@ -125,20 +125,21 @@ class LlamadasController:
 
         dataEvento = {
             "tipoEvento": TipoEvento.LLAMADA,
-            "fechaEvento": datetime.now().isoformat(),
             "registroEvento": {
                 "objetivo": " ".join(conversacion.objetivoActual.split()).strip(),  # elimina doble espacios y \n
                 "conversacion": json.dumps(conversacion.conversacionActual) # convierte la lista conversacionActual a un string para que pueda guardarse
             }
         }
 
-        response, statusResponse = EventosController.crearEvento(dataEvento)
+        log.info(f"{dataEvento}")
+
+        responseEvento, statusResponse = EventosController.crearEvento(dataEvento)
 
         if statusResponse != 201:
-            log.error(f"Hubo un error al crear el evento: {response}")
-            return response
+            log.error(f"Hubo un error al crear el evento: {responseEvento}")
+            return responseEvento, statusResponse
 
-        conversacion.idEvento = response["idEvento"]
+        conversacion.idEvento = responseEvento["idEvento"]
 
         log.info("Evento creado correctamente, creamos el Usuario por Evento")
 
@@ -146,7 +147,7 @@ class LlamadasController:
 
         if statusUsuarioEvento != 200:
             log.error(f"Hubo un error al asociar el usuario al evento: {responseUsuarioEvento}")
-            return responseUsuarioEvento
+            return responseUsuarioEvento, statusUsuarioEvento
 
         log.info(f"Ahora la conversacion actual es la siguiente: {conversacion.conversacionActual}")
 
