@@ -275,17 +275,22 @@ class LlamadasController:
         import time
         if conversacion.hilo:
             log.info("Empieza el analisis de la llamada para detectar si se cumplio el objetivo")
-            # 1. Iniciar el hilo contador por 3 minutos.
+            # Iniciar el hilo contador por 3 minutos
             time.sleep(180)
-            # Luego de los 3 minutos...
-            objetivo = conversacion.objetivoActual.split("intentando que el empleado")[1].split("Reglas:")[0].strip() # Obtenemos lo que hay entre estas dos oraciones
 
+            # Luego de los 3 minutos, la IA analiza la conversacion guardada en la variable global
+            objetivo = conversacion.objetivoActual.split("intentando que el empleado")[1].split("Reglas:")[0].strip() # Obtenemos lo que hay entre estas dos oraciones
             objetivoCumplido = AIController.analizarConversacionLlamada(objetivo, conversacion.conversacionActual)
 
             if objetivoCumplido:
-                log.info("El objetivo de la llamada se ha cumplido, generando evento...")
+
+                log.info("El objetivo de la llamada se ha cumplido (IA analizó y en la conversación se nombro el objetivo), generando evento...")
                 ResultadoEventoController.sumarFalla(conversacion.destinatario, conversacion.idEvento)
+
                 if conversacion.eventoDesencadenador.lower() == "correo":
+
+                    log.info("El evento desencadenador es un corrreo, generando email...")
+
                     contexto = "Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
                     data = {
                         "contexto": contexto,
@@ -293,6 +298,11 @@ class LlamadasController:
                         "formato": "texto"
                     }
                     respuesta, status = AIController.armarEmail(data)
+
+                    if status != 201:
+                        log.error(f"La IA no pudo armar el email: {respuesta}")
+                        return
+
                     try:
                         data = json.loads(respuesta)  # convertir string a JSON real
                     except json.JSONDecodeError:
@@ -306,8 +316,13 @@ class LlamadasController:
                         "cuerpo": data["cuerpo"],
                         "dificultad": "dificil"
                     }
+
                     EmailController.enviarMailPorID(dataMail)
+
                 else:
+
+                    log.info(f"El evento desencadenador es un mensaje, generando email...")
+
                     if conversacion.objetivoEspecifico == "Abra un link que se le enviara por":
                         dificultad = "facil"
                         contexto = "Genera un mensaje de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación."
@@ -324,6 +339,10 @@ class LlamadasController:
                     }
                     respuesta, status = AIController.armarMensaje(datamsj2)
 
+                    if status != 201:
+                        log.error(f"La IA no pudo armar el mensaje: {respuesta}")
+                        return
+
                     datamsj = {
                         "medio": conversacion.eventoDesencadenador.lower(),
                         "idUsuario": conversacion.destinatario,
@@ -331,6 +350,7 @@ class LlamadasController:
                         "dificultad": dificultad
                     }
                     MsjController.enviarMensajePorID(datamsj)
+
             else:
                 log.info("El objetivo de la llamada NO se ha cumplido, NO se genera ningun evento pero suma puntos")
                 ResultadoEventoController.sumarReportado(conversacion.destinatario, conversacion.idEvento)
