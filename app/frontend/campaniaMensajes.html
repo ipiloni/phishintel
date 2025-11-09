@@ -36,6 +36,19 @@
 .custom-radio[type="radio"] {
   accent-color: #da02e5; /* Soporta Chrome/Edge/Firefox modernos */
 }
+
+/* Estilos para selectores deshabilitados */
+select:disabled {
+  background-color: #3d3d3d !important;
+  color: #6c757d !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+select:disabled option {
+  color: #6c757d !important;
+  background-color: #3d3d3d !important;
+}
 </style>
 <body class="index-page">
 
@@ -74,26 +87,28 @@
 
           <form class="php-email-form" @submit.prevent="generarPreview">
 
-            <!-- Selector de Área -->
+            <!-- Selector de Área y Usuario -->
             <div class="mb-3">
-              <label for="areaSelect" class="form-label">Seleccionar Área</label>
-              <select v-model="filtroArea" class="form-control" id="areaSelect" name="area" required>
-                <option value="">-- Selecciona un área --</option>
-                <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
-                  {{ area.nombreArea }} 
-                </option>
-              </select>
-            </div>
-
-            <!-- Selector de Usuario (solo visible cuando hay área seleccionada) -->
-            <div class="mb-3" v-if="filtroArea">
-              <label for="userSelect" class="form-label">Seleccionar Usuario</label>
-              <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" required>
-                <option value="">-- Selecciona un usuario --</option>
-                <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario">
-                  {{ usuario.nombre }} {{ usuario.apellido }}
-                </option>
-              </select>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label for="areaSelect" class="form-label">Seleccionar Área</label>
+                  <select v-model="filtroArea" class="form-control" id="areaSelect" name="area" required>
+                    <option value="">-- Selecciona un área --</option>
+                    <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
+                      {{ area.nombreArea }} 
+                    </option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label for="userSelect" class="form-label">Seleccionar Usuario</label>
+                  <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" :disabled="!filtroArea" required>
+                    <option value="" disabled>{{ filtroArea ? '-- Selecciona un usuario --' : '-- Selecciona un área primero --' }}</option>
+                    <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario">
+                      {{ usuario.nombre }} {{ usuario.apellido }}
+                    </option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             <!-- Dificultad -->

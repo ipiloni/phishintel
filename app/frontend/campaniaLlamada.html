@@ -37,6 +37,19 @@
   accent-color: #da02e5; /* Soporta Chrome/Edge/Firefox modernos */
 }
 
+/* Estilos para selectores deshabilitados */
+select:disabled {
+  background-color: #3d3d3d !important;
+  color: #6c757d !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+select:disabled option {
+  color: #6c757d !important;
+  background-color: #3d3d3d !important;
+}
+
 /* Estilos para el modal de grabación */
 .recording-modal .modal-content {
   background-color: #1a1a1a !important;
@@ -377,111 +390,183 @@
             <h3>Generación de Simulación de Llamada</h3>
             <p>Esta simulación llamará al usuario destinatario y se hará pasar por el remitente seleccionado.</p>
           </div>
-            <ul style="font-size: 14px;">Notas a tener en cuenta:
-                <li>Si el usuario no tiene una voz guardada, la puede generar ahora; en caso de no tener una voz configurada, se utilizará una predeterminada.</li>
-                <li>La charla tendrá un objetivo específico (abrir un link, enviar un documento, etc.): puede generarse uno propio, o que la IA asigne un objetivo.</li>
-                <li>La llamada desencadena otro evento a seleccionar: mensaje SMS / WhatsApp o correo.</li>
-            </ul>
 
           <form class="php-email-form" @submit.prevent="generarPreview">
 
-            <!-- Selector de Área -->
+            <!-- Selector de Área y Usuario Destinatario -->
             <div class="mb-3">
-              <label for="areaSelect" class="form-label">Seleccione el área del destinatario</label>
-              <select v-model="filtroArea" class="form-control" id="areaSelect" name="area" required>
-                <option value="" disabled>-- Selecciona un área --</option>
-                <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
-                  {{ area.nombreArea }} 
-                </option>
-              </select>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label for="areaSelect" class="form-label">Seleccione el área del destinatario</label>
+                  <select v-model="filtroArea" class="form-control" id="areaSelect" name="area" required>
+                    <option value="" disabled>-- Selecciona un área --</option>
+                    <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
+                      {{ area.nombreArea }} 
+                    </option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label for="userSelect" class="form-label">Seleccionar usuario destinatario</label>
+                  <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" :disabled="!filtroArea" required>
+                    <option value="" disabled>{{ filtroArea ? '-- Selecciona un usuario --' : '-- Selecciona un área primero --' }}</option>
+                    <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario">
+                      {{ usuario.nombre }} {{ usuario.apellido }}
+                    </option>
+                  </select>
+                </div>
+              </div>
             </div>
 
-            <!-- Selector de Usuario (solo visible cuando hay área seleccionada) -->
-            <div class="mb-3" v-if="filtroArea">
-              <label for="userSelect" class="form-label">Seleccionar usuario destinatario</label>
-              <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" required>
-                <option value="" disabled>-- Selecciona un usuario --</option>
-                <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario">
-                  {{ usuario.nombre }} {{ usuario.apellido }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Selector de Área Remitente -->
+            <!-- Selector de Área y Usuario Remitente -->
             <div class="mb-3">
-              <label for="areaRemitenteSelect" class="form-label">Seleccione el área del remitente</label>
-              <select v-model="filtroAreaRemitente" class="form-control" id="areaRemitenteSelect" name="areaRemitente" required>
-                <option value="" disabled>-- Selecciona un área --</option>
-                <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
-                  {{ area.nombreArea }} 
-                </option>
-              </select>
-            </div>
-
-            <!-- Selector de Usuario Remitente (solo visible cuando hay área seleccionada) -->
-            <div class="mb-3" v-if="filtroAreaRemitente">
-              <label for="usuarioRemitenteSelect" class="form-label">Seleccionar usuario remitente</label>
-              <select v-model="filtroUsuarioRemitente" class="form-control" id="usuarioRemitenteSelect" name="usuarioRemitente" required>
-                <option value="" disabled>-- Selecciona un usuario --</option>
-                <option v-for="usuario in usuariosRemitentesFiltrados" :key="usuario.idUsuario" :value="usuario">
-                  {{ usuario.nombre }} {{ usuario.apellido }}
-                </option>
-              </select>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label for="areaRemitenteSelect" class="form-label">Seleccione el área del remitente</label>
+                  <select v-model="filtroAreaRemitente" class="form-control" id="areaRemitenteSelect" name="areaRemitente" required>
+                    <option value="" disabled>-- Selecciona un área --</option>
+                    <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
+                      {{ area.nombreArea }} 
+                    </option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label for="usuarioRemitenteSelect" class="form-label">Seleccionar usuario remitente</label>
+                  <select v-model="filtroUsuarioRemitente" class="form-control" id="usuarioRemitenteSelect" name="usuarioRemitente" :disabled="!filtroAreaRemitente" required>
+                    <option value="" disabled>{{ filtroAreaRemitente ? '-- Selecciona un usuario --' : '-- Selecciona un área primero --' }}</option>
+                    <option v-for="usuario in usuariosRemitentesFiltrados" :key="usuario.idUsuario" :value="usuario">
+                      {{ usuario.nombre }} {{ usuario.apellido }}
+                    </option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             <!-- Configuración de Voz del Remitente -->
-            <div class="mb-4" v-if="filtroUsuarioRemitente">
+            <div class="mb-4" :style="{ opacity: filtroUsuarioRemitente ? '1' : '0.5', pointerEvents: filtroUsuarioRemitente ? 'auto' : 'none' }">
               <label class="form-label mb-3">Configuración de Voz</label>
               
-              <div v-if="tieneVozConfigurada" class="alert alert-success text-center mb-3 mx-auto w-auto" style="background-color: #2d2d2d; border-color: var(--accent-color); color: var(--accent-color); max-width: 60%;">
-              <i class="bi bi-check-circle-fill me-2"></i>
-              <strong>✓ Voz configurada</strong> - El usuario ya tiene una voz clonada disponible
+              <div v-if="!filtroUsuarioRemitente" class="alert alert-info text-center mb-3 mx-auto w-auto" style="background-color: #3d3d3d; border-color: #6c757d; color: #6c757d; max-width: 60%;">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Selecciona un usuario remitente primero</strong>
+              </div>
+              
+              <div v-if="filtroUsuarioRemitente && !tieneVozConfigurada" class="alert alert-info text-center mb-3 mx-auto w-auto" style="background-color: #3d3d3d; border-color: #6c757d; color: #6c757d; max-width: 60%;">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Voz no configurada</strong> - El usuario no tiene una voz clonada. Graba una voz para continuar.
+              </div>
+              
+              <div v-if="filtroUsuarioRemitente && tieneVozConfigurada" class="alert alert-success text-center mb-3 mx-auto w-auto" style="background-color: #2d2d2d; border-color: var(--accent-color); color: var(--accent-color); max-width: 60%;">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>✓ Voz configurada</strong> - El usuario ya tiene una voz clonada disponible
               </div>
 
               <div class="text-center">
                 <!-- Botón Grabar Nueva Voz -->
                 <button type="button" class="btn px-4 py-2 rounded-pill me-3"
-                        :style="{ backgroundColor: 'var(--accent-color)', color: 'white', border: 'none' }"
+                        :style="filtroUsuarioRemitente ? 
+                          { backgroundColor: 'var(--accent-color)', color: 'white', border: 'none' } : 
+                          { backgroundColor: '#6c757d', color: 'white', border: 'none', cursor: 'not-allowed' }"
+                        :disabled="!filtroUsuarioRemitente"
                         @click="abrirModalGrabacion">
                   <i class="bi bi-mic"></i>
                   {{ tieneVozConfigurada ? ' Grabar Nueva Voz' : ' Grabar Voz' }}
                 </button>
                 <!-- Botón Probar Voz -->
                 <button type="button" class="btn px-4 py-2 rounded-pill" 
-                        :style="tieneVozConfigurada ? 
+                        :style="(tieneVozConfigurada && filtroUsuarioRemitente) ? 
                           { backgroundColor: 'var(--accent-color)', color: 'white', border: 'none' } : 
                           { backgroundColor: '#6c757d', color: 'white', border: 'none', cursor: 'not-allowed' }"
-                        :disabled="!tieneVozConfigurada"
+                        :disabled="!tieneVozConfigurada || !filtroUsuarioRemitente"
                         @click="abrirModalProbarVoz">
                   <i class="bi bi-play-circle"></i> Probar Voz
                 </button>
                 
                 <p class="mt-2 text-muted" style="color: #ccc !important;">
-                  <small> {{ tieneVozConfigurada ? 'Prueba la voz o graba una nueva si desea' : ' Graba una historia de 30 segundos a 1 minuto para clonar tu voz' }} </small>
+                  <small v-if="!filtroUsuarioRemitente">Selecciona un usuario remitente para configurar la voz</small>
+                  <small v-else-if="tieneVozConfigurada">Prueba la voz o graba una nueva si desea</small>
+                  <small v-else>Graba una historia de 30 segundos a 1 minuto para clonar tu voz</small>
                 </p>
               </div>
             </div>
 
             <!-- Objetivo de la llamada -->
-            <div class="mb-3">
-              <label for="objetivoEspecifico" class="form-label">Objetivo de la llamada</label>
-              <select v-model="objetivoEspecifico" class="form-control" id="objetivoEspecifico" name="objetivoEspecifico" required>
-                <option value="" disabled>-- Selecciona un objetivo --</option>
-                <option value="Abra un link que se le enviara por">Abrir un link</option>
-                <option value="Abra un link para ingresar sus credenciales que se le enviara por">Cargar credenciales</option>
-                <option value="Abra un link para actualizar sus datos que se le enviara por">Actualizar tus datos</option>
-              </select>
+            <div class="mb-4">
+              <label class="form-label mb-3">Objetivo de la llamada</label>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <div class="card bloque bloque-normal"
+                       @click="objetivoEspecifico = 'Abra un link que se le enviara por'"
+                       :style="objetivoEspecifico === 'Abra un link que se le enviara por' ? 'border-color: var(--accent-color);' : ''">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;"><i class="bi bi-link-45deg"></i></div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Abrir un link</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Enlace directo</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card bloque bloque-normal"
+                       @click="objetivoEspecifico = 'Abra un link para ingresar sus credenciales que se le enviara por'"
+                       :style="objetivoEspecifico === 'Abra un link para ingresar sus credenciales que se le enviara por' ? 'border-color: var(--accent-color);' : ''">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;"><i class="bi bi-key-fill"></i></div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Cargar credenciales</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Login y contraseña</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card bloque bloque-normal"
+                       @click="objetivoEspecifico = 'Abra un link para actualizar sus datos que se le enviara por'"
+                       :style="objetivoEspecifico === 'Abra un link para actualizar sus datos que se le enviara por' ? 'border-color: var(--accent-color);' : ''">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;"><i class="bi bi-person-badge"></i></div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Actualizar tus datos</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Información personal</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Evento desencadenador -->
-            <div class="mb-3">
-                <label for="eventoDesencadenador" class="form-label">Evento desencadenador</label>
-                <select v-model="eventoDesencadenador" class="form-control" id="eventoDesencadenador" name="eventoDesencadenador" required>
-                  <option value="" disabled>-- Selecciona un evento --</option>
-                  <option value="Correo">Correo</option>
-                  <option value="Whatsapp">Whatsapp</option>
-                  <option value="SMS">SMS</option>
-                </select>
+            <div class="mb-4">
+              <label class="form-label mb-3">Evento desencadenador</label>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <div class="card bloque bloque-normal"
+                       @click="eventoDesencadenador = 'Correo'"
+                       :style="eventoDesencadenador === 'Correo' ? 'border-color: var(--accent-color);' : ''">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;"><i class="bi bi-envelope"></i></div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Correo</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Email electrónico</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card bloque bloque-normal"
+                       @click="eventoDesencadenador = 'Whatsapp'"
+                       :style="eventoDesencadenador === 'Whatsapp' ? 'border-color: var(--accent-color);' : ''">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;"><i class="bi bi-whatsapp"></i></div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">WhatsApp</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Mensajería popular</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card bloque bloque-normal"
+                       @click="eventoDesencadenador = 'SMS'"
+                       :style="eventoDesencadenador === 'SMS' ? 'border-color: var(--accent-color);' : ''">
+                    <div class="card-body text-center p-1">
+                      <div style="font-size: 1em;"><i class="bi bi-send"></i></div>
+                      <h6 class="card-title mb-0" style="font-size: 0.8em;">SMS</h6>
+                      <small class="card-text" style="font-size: 0.7em;">Mensaje de texto</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Rol a imitar -->
@@ -990,7 +1075,7 @@
           filtroArea: "",
           filtroUsuario: "",
           filtroAreaRemitente: "",
-          filtroUsuarioRemitente: null,
+          filtroUsuarioRemitente: "",
           tieneVozConfigurada: false,
           idVozRemitente: null,
           ubicacionAudioGrabado: null,
@@ -1049,7 +1134,7 @@
         },
         filtroAreaRemitente() {
           // Limpiar usuario remitente seleccionado cuando cambie el área
-          this.filtroUsuarioRemitente = null;
+          this.filtroUsuarioRemitente = "";
           this.tieneVozConfigurada = false;
           this.idVozRemitente = null;
         },
