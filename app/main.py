@@ -6,6 +6,8 @@ from app.endpoints.swagger import swagger
 from dotenv import load_dotenv
 import os
 
+load_dotenv(dotenv_path="properties.env")
+
 app = Flask(__name__)
 
 # Configuración de sesión
