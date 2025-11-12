@@ -10,6 +10,7 @@ from app.controllers.llamadas.audioController import AudioController
 from app.controllers.emails.emailController import EmailController
 from app.controllers.abm.eventosController import EventosController
 from app.controllers.llamadas.llamadasController import LlamadasController
+from app.controllers.llamadas.llamadaControllerMentira import LlamadaControllerMentira
 from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.resultadoEventoController import ResultadoEventoController
 from app.controllers.kpiController import KpiController
@@ -75,6 +76,11 @@ def generarLlamada():
     data = request.get_json()
     return LlamadasController.generarLlamada(data)
 
+@apis.route("/api/llamadas/simulada", methods=["POST"])
+def generarLlamadaSimulada():
+    data = request.get_json()
+    return LlamadaControllerMentira.generarLlamadaSimulada(data)
+
 @apis.route("/api/twilio/accion", methods=["POST"])
 def generarAccionesEnLlamada():
     return LlamadasController.generarAccionesEnLlamada()
@@ -111,8 +117,17 @@ def obtenerLlamadaEnEjecucion():
     idConversacion = conversacion.idConversacion
     if idConversacion == "":
         return Response(status=404)
-    estadoLlamada = twilio.obtenerEstadoLlamada(idConversacion)
-    return estadoLlamada, 200
+    
+    # Detectar si es llamada simulada (prefijo SIM_)
+    if idConversacion.startswith("SIM_"):
+        estado_simulado = LlamadaControllerMentira.obtenerEstadoLlamadaSimulada()
+        if estado_simulado is None:
+            return Response(status=404)
+        return jsonify(estado_simulado), 200
+    else:
+        # Llamada real
+        estadoLlamada = twilio.obtenerEstadoLlamada(idConversacion)
+        return estadoLlamada, 200
 
 # ------ # TRANSFORMADORES TTS Y STT # ------ #
 @apis.route("/api/tts", methods=["POST"])

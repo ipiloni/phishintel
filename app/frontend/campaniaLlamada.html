@@ -343,10 +343,12 @@ select:disabled option {
 
 .message.ai .message-label {
   color: #da02e5;
+  font-weight: 700;
 }
 
 .message.recipient .message-label {
-  color: #6c757d;
+  color: #e0e0e0;
+  font-weight: 700;
 }
 
 .message-text {
@@ -578,8 +580,18 @@ select:disabled option {
               </select>
             </div>
 
-            <!-- Botón de enviar -->
-            <div class="text-center">
+            <!-- Modo de llamada y botones -->
+            <div class="text-center mb-3">
+              <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
+                <label class="form-label mb-0" style="color: #e0e0e0;">Modo:</label>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="modoSimulado" v-model="modoSimulado" 
+                         style="width: 50px; height: 25px; cursor: pointer;">
+                  <label class="form-check-label ms-2" for="modoSimulado" style="color: #e0e0e0;">
+                    {{ modoSimulado ? 'Simulado' : 'Real' }}
+                  </label>
+                </div>
+              </div>
               <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill me-2" :disabled="cargando">
                 <span v-if="cargando">
                   <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -588,11 +600,6 @@ select:disabled option {
                 <span v-else>
                   <i class="bi bi-telephone"></i> Generar Llamada
                 </span>
-              </button>
-              <button type="button" class="btn px-4 py-2 rounded-pill" 
-                      :style="{ backgroundColor: 'var(--accent-color)', color: 'white', border: 'none' }"
-                      @click="abrirModalEjemploLlamada">
-                <i class="bi bi-eye"></i> Ver Ejemplo
               </button>
             </div>
           </form>
@@ -1026,6 +1033,67 @@ select:disabled option {
             </div>
           </div>
 
+          <!-- Modal de Llamada en Progreso -->
+          <div class="modal fade call-example-modal" id="callInProgressModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">
+                    <i class="bi bi-telephone me-2"></i>Llamada en Tiempo Real
+                  </h5>
+                  <button type="button" class="btn-close btn-close-white" @click="cerrarModalLlamada" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <!-- Indicador de estado -->
+                  <br>
+                  <div class="text-center mb-3" v-if="estadoLlamada">
+                    <div class="d-inline-block p-3 rounded" 
+                         style="background-color: #1a1a1a; border: 2px solid var(--accent-color); color: white;">
+                      <i :class="getEstadoIcon(estadoLlamada.status)" class="me-2"></i>
+                      <strong  >{{ getEstadoTexto(estadoLlamada.status) }}</strong>
+                    </div>
+                  </div>
+                  
+                  <div class="conversation-container" ref="conversationContainer">
+                    <div v-for="(msg, index) in conversacionLlamada" :key="index" 
+                         :class="['message', msg.rol === 'IA' ? 'ai' : 'recipient']">
+                      <div class="message-content">
+                        <div class="message-label">
+                          <span v-if="msg.rol === 'IA'">
+                            {{ filtroUsuarioRemitente ? `${filtroUsuarioRemitente.nombre} ${filtroUsuarioRemitente.apellido}` : 'IA' }} (IA)
+                          </span>
+                          <span v-else>
+                            {{ filtroUsuario ? `${filtroUsuario.nombre} ${filtroUsuario.apellido}` : 'Destinatario' }} (Destinatario)
+                          </span>
+                        </div>
+                        <p class="message-text">{{ msg.mensaje }}</p>
+                      </div>
+                    </div>
+                    
+                    <!-- Mensaje de llamada finalizada -->
+                    <div v-if="estadoLlamada && estadoLlamada.status === 'completed'" class="text-center mt-4">
+                      <div class="alert" style="background-color: #1a1a1a; border: 2px solid var(--accent-color); color: white;">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Llamada finalizada</strong>
+                      </div>
+                    </div>
+                    
+                    <!-- Mensajes de error/cancelación -->
+                    <div v-if="estadoLlamada && ['failed', 'busy', 'no-answer', 'canceled'].includes(estadoLlamada.status)" class="text-center mt-4">
+                      <div class="alert" style="background-color: #1a1a1a; border: 2px solid var(--accent-color); color: var(--accent-color);">
+                        <i class="bi bi-x-circle-fill me-2"></i>
+                        <strong>{{ getEstadoTexto(estadoLlamada.status) }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" @click="cerrarModalLlamada">Cerrar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div><!-- End #app -->
       </div>
     </section>
@@ -1093,6 +1161,12 @@ select:disabled option {
           vozClonadaEnPreview: false,
           cargandoLlamada: false,
           previewAbiertoAntesDeClonar: false,
+          modoSimulado: false,
+          // Variables para monitoreo de llamada
+          llamadaEnProgreso: false,
+          estadoLlamada: null,
+          conversacionLlamada: [],
+          intervaloMonitoreo: null,
           // Variables para grabación
           consentimiento: false,
           grabando: false,
@@ -1295,7 +1369,12 @@ select:disabled option {
               eventoDesencadenador: this.mapearEventoDesencadenador(this.eventoDesencadenador)
             };
 
-            const response = await fetch('http://localhost:8080/api/llamadas', {
+            // Determinar endpoint según el modo
+            const endpoint = this.modoSimulado 
+              ? 'http://localhost:8080/api/llamadas/simulada'
+              : 'http://localhost:8080/api/llamadas';
+
+            const response = await fetch(endpoint, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -1311,11 +1390,23 @@ select:disabled option {
 
             this.mostrarToastExito("✅ Llamada generada correctamente");
             
-            // Cerrar modal
+            // Cerrar modal de preview
             const modal = bootstrap.Modal.getInstance(document.getElementById("previewModal"));
             if (modal) {
               modal.hide();
             }
+
+            // Inicializar variables de monitoreo
+            this.conversacionLlamada = [];
+            this.estadoLlamada = data;
+            this.llamadaEnProgreso = true;
+
+            // Abrir modal de llamada en progreso
+            const modalLlamada = new bootstrap.Modal(document.getElementById("callInProgressModal"));
+            modalLlamada.show();
+
+            // Iniciar monitoreo
+            this.iniciarMonitoreo();
 
           } catch (e) {
             console.error("Error:", e);
@@ -1324,6 +1415,124 @@ select:disabled option {
             this.cargandoLlamada = false;
           }
         },
+
+        iniciarMonitoreo() {
+          // Limpiar intervalo anterior si existe
+          if (this.intervaloMonitoreo) {
+            clearInterval(this.intervaloMonitoreo);
+          }
+
+          // Consultar inmediatamente
+          this.monitorearLlamada();
+
+          // Configurar polling cada 3 segundos
+          this.intervaloMonitoreo = setInterval(() => {
+            this.monitorearLlamada();
+          }, 3000);
+        },
+
+        async monitorearLlamada() {
+          try {
+            // Consultar estado de la llamada
+            const estadoResponse = await fetch('http://localhost:8080/api/llamadas/en-ejecucion');
+            
+            if (estadoResponse.status === 404) {
+              // No hay llamada en ejecución
+              this.detenerMonitoreo();
+              return;
+            }
+
+            if (!estadoResponse.ok) {
+              console.error("Error consultando estado de llamada");
+              return;
+            }
+
+            const estadoData = await estadoResponse.json();
+            this.estadoLlamada = estadoData;
+
+            // Consultar conversación
+            const conversacionResponse = await fetch('http://localhost:8080/api/llamadas/conversacion');
+            
+            if (conversacionResponse.ok) {
+              const conversacionData = await conversacionResponse.json();
+              const longitudAnterior = this.conversacionLlamada.length;
+              this.conversacionLlamada = conversacionData;
+
+              // Scroll automático si hay nuevos mensajes
+              if (this.conversacionLlamada.length > longitudAnterior) {
+                this.$nextTick(() => {
+                  this.scrollToBottom();
+                });
+              }
+            }
+
+            // Detener monitoreo si la llamada terminó
+            const estadosFinales = ['completed', 'failed', 'busy', 'no-answer', 'canceled'];
+            if (estadosFinales.includes(estadoData.status)) {
+              this.detenerMonitoreo();
+            }
+
+          } catch (error) {
+            console.error("Error monitoreando llamada:", error);
+          }
+        },
+
+        detenerMonitoreo() {
+          if (this.intervaloMonitoreo) {
+            clearInterval(this.intervaloMonitoreo);
+            this.intervaloMonitoreo = null;
+          }
+          this.llamadaEnProgreso = false;
+        },
+
+        cerrarModalLlamada() {
+          this.detenerMonitoreo();
+          const modal = bootstrap.Modal.getInstance(document.getElementById("callInProgressModal"));
+          if (modal) {
+            modal.hide();
+          }
+          // Limpiar variables
+          this.conversacionLlamada = [];
+          this.estadoLlamada = null;
+        },
+
+        scrollToBottom() {
+          const container = this.$refs.conversationContainer;
+          if (container) {
+            container.scrollTop = container.scrollHeight;
+          }
+        },
+
+        getEstadoTexto(status) {
+          const estados = {
+            'queued': 'En cola',
+            'initiated': 'Iniciando',
+            'ringing': 'Sonando',
+            'in-progress': 'En curso',
+            'completed': 'Completada',
+            'busy': 'Ocupado',
+            'no-answer': 'Sin respuesta',
+            'failed': 'Fallida',
+            'canceled': 'Cancelada'
+          };
+          return estados[status] || status;
+        },
+
+        getEstadoIcon(status) {
+          const iconos = {
+            'queued': 'bi bi-hourglass-split',
+            'initiated': 'bi bi-play-circle',
+            'ringing': 'bi bi-telephone',
+            'in-progress': 'bi bi-telephone-fill',
+            'completed': 'bi bi-check-circle-fill',
+            'busy': 'bi bi-telephone-x',
+            'no-answer': 'bi bi-telephone-x',
+            'failed': 'bi bi-x-circle-fill',
+            'canceled': 'bi bi-x-circle-fill'
+          };
+          return iconos[status] || 'bi bi-question-circle';
+        },
+
 
         abrirModalGrabacion() {
           // Limpiar variables del modal
@@ -1557,6 +1766,8 @@ select:disabled option {
         if (this.audioGrabado) {
           URL.revokeObjectURL(this.audioGrabado);
         }
+        // Limpiar intervalo de monitoreo
+        this.detenerMonitoreo();
       }
     }).mount("#app");
   </script>
