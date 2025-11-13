@@ -6,6 +6,9 @@ from app.endpoints.swagger import swagger
 from dotenv import load_dotenv
 import os
 
+# Importar modelos para que se registren en Base.metadata
+from app.backend.models import TelethonSession  # noqa: F401
+
 load_dotenv(dotenv_path="properties.env")
 
 app = Flask(__name__)

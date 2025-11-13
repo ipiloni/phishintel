@@ -1,14 +1,21 @@
 import asyncio
 import threading
 import requests
+import os
+from datetime import datetime
 
 from flask import jsonify
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from telegram import Bot
+from telethon import TelegramClient
+from telethon.sessions import StringSession
+from telethon.errors import SessionPasswordNeededError
 
 from app.backend.models.error import responseError
 from app.utils.logger import log
 from app.utils.config import get
+from app.config.db_config import SessionLocal
+from app.backend.models.telethonSession import TelethonSession
 
 
 class TelegramController:
@@ -310,6 +317,652 @@ class TelegramController:
             log.error(error_msg)
             return responseError("ERROR_TELEGRAM", error_msg, 500)
 
+    @staticmethod
+    def _obtenerClienteTelethon():
+        """
+        Obtiene un cliente Telethon configurado desde la sesión guardada en BD.
+        
+        Returns:
+            TelegramClient o None si no hay sesión válida
+        """
+        api_id = get("TELEGRAM_APP_ID")
+        api_hash = get("TELEGRAM_API_HASH")
+        
+        if not api_id or not api_hash:
+            log.error("TELEGRAM_APP_ID o TELEGRAM_API_HASH no configurados")
+            return None
+        
+        try:
+            session_db = SessionLocal()
+            try:
+                # Buscar sesión activa en BD
+                session_record = session_db.query(TelethonSession).filter_by(estaActiva=True).first()
+                
+                if not session_record or not session_record.sessionData:
+                    log.warn("No hay sesión de Telethon activa en BD")
+                    return None
+                
+                # Crear StringSession desde datos de BD
+                session_string = session_record.sessionData.decode('utf-8')
+                session = StringSession(session_string)
+                
+                # Crear cliente con configuración DC 2
+                client = TelegramClient(
+                    session,
+                    int(api_id),
+                    api_hash,
+                    connection_retries=3,
+                    retry_delay=1,
+                    timeout=10
+                )
+                
+                log.info("Cliente Telethon creado desde sesión de BD")
+                return client
+                
+            finally:
+                session_db.close()
+                
+        except Exception as e:
+            log.error(f"Error al obtener cliente Telethon: {str(e)}")
+            return None
+    
+    @staticmethod
+    def enviarMensajeTelethon(data):
+        """
+        Envía un mensaje SMS usando Telethon (cuenta propia de Telegram).
+        
+        Args:
+            data (dict): Diccionario con los siguientes campos:
+                - mensaje (str): Mensaje a enviar (puede contener HTML)
+                - destinatario (str): Número de teléfono del destinatario
+                
+        Returns:
+            tuple: (response, status_code)
+        """
+        log.info("Se recibió una solicitud para enviar mensaje via Telegram con Telethon")
+
+        if not data or "mensaje" not in data or "destinatario" not in data:
+            log.warn("Faltan campos obligatorios")
+            return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios (mensaje o destinatario)", 400)
+
+        mensaje = data["mensaje"]
+        destinatario = data["destinatario"]
+
+        try:
+            # Obtener cliente Telethon
+            client = TelegramController._obtenerClienteTelethon()
+            
+            if not client:
+                return responseError(
+                    "SESION_NO_CONFIGURADA",
+                    "No hay sesión de Telethon activa. Por favor, autentícate primero usando el endpoint /api/telegram/telethon/auth",
+                    401
+                )
+            
+            # Conectar cliente si no está conectado
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            try:
+                if not client.is_connected():
+                    loop.run_until_complete(client.connect())
+                
+                # Verificar si está autorizado
+                if not loop.run_until_complete(client.is_user_authorized()):
+                    return responseError(
+                        "SESION_NO_AUTORIZADA",
+                        "La sesión de Telethon no está autorizada. Por favor, autentícate nuevamente usando el endpoint /api/telegram/telethon/auth",
+                        401
+                    )
+                
+                # Enviar mensaje
+                # Telethon requiere que el número esté en contactos o buscar el usuario primero
+                try:
+                    # Normalizar el número - Remover el 9 después del código de país para Argentina
+                    phone_normalized = destinatario
+                    if not phone_normalized.startswith('+'):
+                        phone_normalized = '+' + phone_normalized
+                    
+                    # Si es un número argentino con formato +549, remover el 9 para que coincida con contactos
+                    # Formato BD: +5491141635935 -> Formato Telegram: +541141635935
+                    if phone_normalized.startswith('+549') and len(phone_normalized) > 4:
+                        # Remover el 9 después de +54
+                        phone_normalized = '+54' + phone_normalized[4:]
+                        log.info(f"Número normalizado de {destinatario} a {phone_normalized} (removido 9 móvil)")
+                    
+                    # Intentar enviar directamente primero
+                    try:
+                        loop.run_until_complete(
+                            client.send_message(phone_normalized, mensaje, parse_mode='HTML')
+                        )
+                    except ValueError as e:
+                        # Si falla porque no encuentra la entidad, intentar agregar como contacto
+                        if "Cannot find any entity" in str(e) or "entity" in str(e).lower():
+                            log.info(f"Usuario {phone_normalized} no encontrado, intentando agregar como contacto")
+                            
+                            # Agregar contacto temporalmente
+                            contact = InputPhoneContact(
+                                client_id=0,
+                                phone=phone_normalized,
+                                first_name="Usuario",
+                                last_name="PhishIntel"
+                            )
+                            
+                            result = loop.run_until_complete(
+                                client(ImportContactsRequest([contact]))
+                            )
+                            
+                            # Intentar enviar nuevamente después de agregar contacto
+                            loop.run_until_complete(
+                                client.send_message(phone_normalized, mensaje, parse_mode='HTML')
+                            )
+                        else:
+                            raise
+                    
+                except Exception as send_error:
+                    error_msg = f"Error al enviar mensaje: {str(send_error)}"
+                    log.error(error_msg)
+                    raise
+                
+                log.info(f"Mensaje Telethon enviado a {destinatario}")
+                
+                return jsonify({
+                    "mensaje": "Mensaje enviado correctamente via Telethon",
+                    "destinatario": destinatario,
+                    "contenido": mensaje
+                }), 201
+                
+            finally:
+                # Desconectar el cliente correctamente antes de cerrar el loop
+                try:
+                    if client.is_connected():
+                        # Desconectar y esperar a que termine
+                        loop.run_until_complete(client.disconnect())
+                        # Dar un pequeño delay para que las tareas se cancelen apropiadamente
+                        import time
+                        time.sleep(0.5)
+                except Exception as disconnect_error:
+                    log.warn(f"Error al desconectar cliente Telethon: {str(disconnect_error)}")
+                finally:
+                    # Cerrar todas las tareas pendientes antes de cerrar el loop
+                    try:
+                        # Cancelar todas las tareas pendientes
+                        pending = asyncio.all_tasks(loop)
+                        for task in pending:
+                            task.cancel()
+                        # Esperar a que se cancelen
+                        if pending:
+                            loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+                    except Exception as task_error:
+                        log.warn(f"Error al cancelar tareas: {str(task_error)}")
+                    finally:
+                        loop.close()
+                
+        except Exception as e:
+            error_msg = f"Error al enviar mensaje via Telethon: {str(e)}"
+            log.error(error_msg)
+            return responseError("ERROR_TELETHON", error_msg, 500)
+    
+    @staticmethod
+    def autenticarTelethon(data):
+        """
+        Maneja el flujo de autenticación de Telethon en etapas.
+        
+        Args:
+            data (dict): Diccionario con campos opcionales:
+                - phone (str): Número de teléfono
+                - code (str): Código de verificación recibido
+                - password (str): Contraseña 2FA (si aplica)
+                
+        Returns:
+            tuple: (response, status_code)
+        """
+        log.info("Se recibió solicitud de autenticación Telethon")
+        
+        api_id = get("TELEGRAM_APP_ID")
+        api_hash = get("TELEGRAM_API_HASH")
+        
+        if not api_id or not api_hash:
+            return responseError(
+                "CREDENCIALES_NO_CONFIGURADAS",
+                "TELEGRAM_APP_ID o TELEGRAM_API_HASH no configurados en properties.env",
+                500
+            )
+        
+        phone = data.get("phone")
+        code = data.get("code")
+        password = data.get("password")
+        
+        try:
+            # Crear cliente temporal para autenticación
+            temp_session = StringSession()
+            client = TelegramClient(
+                temp_session,
+                int(api_id),
+                api_hash,
+                connection_retries=3,
+                retry_delay=1,
+                timeout=10
+            )
+            
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            try:
+                # Conectar cliente
+                loop.run_until_complete(client.connect())
+                
+                # Etapa 1: Enviar teléfono
+                if phone and not code and not password:
+                    if not phone.startswith('+'):
+                        phone = '+' + phone
+                    
+                    # Enviar código y obtener phone_code_hash
+                    result = loop.run_until_complete(client.send_code_request(phone))
+                    phone_code_hash = result.phone_code_hash
+                    
+                    # Guardar solo los datos necesarios (NO el cliente)
+                    session_string = temp_session.save()
+                    
+                    # Guardar estado en BD para persistencia
+                    TelegramController._guardarEstadoAuthEnBD(phone, phone_code_hash, session_string)
+                    
+                    # También guardar en memoria por si acaso
+                    _telethon_auth_state['phone'] = phone
+                    _telethon_auth_state['session_string'] = session_string
+                    _telethon_auth_state['phone_code_hash'] = phone_code_hash
+                    
+                    # Desconectar y cerrar el cliente
+                    try:
+                        if client.is_connected():
+                            loop.run_until_complete(client.disconnect())
+                    except Exception as e:
+                        log.warn(f"Error al desconectar cliente: {str(e)}")
+                    finally:
+                        loop.close()
+                    
+                    log.info(f"Código de verificación enviado a {phone}")
+                    
+                    return jsonify({
+                        "status": "code_sent",
+                        "message": f"Código de verificación enviado a {phone}. Por favor, envía el código recibido.",
+                        "phone": phone
+                    }), 200
+                
+                # Etapa 2: Verificar código
+                if phone and code and not password:
+                    # Normalizar el teléfono antes de comparar
+                    if not phone.startswith('+'):
+                        phone = '+' + phone
+                    
+                    # Intentar obtener estado de memoria primero, si no de BD
+                    stored_phone = _telethon_auth_state.get('phone')
+                    stored_hash = _telethon_auth_state.get('phone_code_hash')
+                    stored_session_string = _telethon_auth_state.get('session_string')
+                    
+                    # Si no hay estado en memoria, intentar cargar desde BD
+                    if not stored_phone or not stored_hash or not stored_session_string:
+                        estado_bd = TelegramController._obtenerEstadoAuthDesdeBD()
+                        if estado_bd:
+                            stored_phone = estado_bd.get('phone')
+                            stored_hash = estado_bd.get('phone_code_hash')
+                            stored_session_string = estado_bd.get('session_string')
+                            # Actualizar memoria también
+                            _telethon_auth_state.update(estado_bd)
+                    
+                    if stored_phone != phone:
+                        loop.close()
+                        log.error(f"Teléfono no coincide: almacenado='{stored_phone}', recibido='{phone}'")
+                        return responseError(
+                            "TELEFONO_NO_COINCIDE",
+                            f"El teléfono no coincide con la solicitud anterior. Almacenado: {stored_phone}, Recibido: {phone}",
+                            400
+                        )
+                    
+                    if not stored_hash or not stored_session_string:
+                        loop.close()
+                        return responseError(
+                            "ESTADO_PERDIDO",
+                            "No se encontró el estado de autenticación. Por favor, inicia el proceso nuevamente.",
+                            400
+                        )
+                    
+                    # Crear nuevo cliente desde la sesión guardada (con nuevo event loop)
+                    restored_session = StringSession(stored_session_string)
+                    restored_client = TelegramClient(
+                        restored_session,
+                        int(api_id),
+                        api_hash,
+                        connection_retries=3,
+                        retry_delay=1,
+                        timeout=10
+                    )
+                    
+                    try:
+                        # Conectar con el nuevo event loop
+                        loop.run_until_complete(restored_client.connect())
+                        
+                        # Intentar iniciar sesión con código y hash
+                        loop.run_until_complete(
+                            restored_client.sign_in(phone, code, phone_code_hash=stored_hash)
+                        )
+                        
+                        # Si llegamos aquí, autenticación exitosa (sin 2FA)
+                        final_session_string = restored_session.save()
+                        
+                        # Guardar sesión en BD
+                        TelegramController._guardarSesionEnBD(final_session_string)
+                        
+                        # Limpiar estado temporal
+                        _telethon_auth_state.clear()
+                        
+                        # Desconectar
+                        try:
+                            if restored_client.is_connected():
+                                loop.run_until_complete(restored_client.disconnect())
+                        except Exception as e:
+                            log.warn(f"Error al desconectar cliente: {str(e)}")
+                        finally:
+                            loop.close()
+                        
+                        log.info("Autenticación Telethon exitosa")
+                        
+                        return jsonify({
+                            "status": "authenticated",
+                            "message": "Autenticación exitosa. Sesión guardada."
+                        }), 200
+                        
+                    except SessionPasswordNeededError:
+                        # Requiere contraseña 2FA - guardar el cliente actualizado
+                        updated_session_string = restored_session.save()
+                        _telethon_auth_state['session_string'] = updated_session_string
+                        
+                        # Actualizar estado en BD
+                        TelegramController._actualizarEstadoAuthEnBD(phone, stored_hash, updated_session_string)
+                        
+                        # Desconectar pero mantener el estado
+                        try:
+                            if restored_client.is_connected():
+                                loop.run_until_complete(restored_client.disconnect())
+                        except Exception as e:
+                            log.warn(f"Error al desconectar cliente: {str(e)}")
+                        finally:
+                            loop.close()
+                        
+                        log.info("Se requiere contraseña 2FA")
+                        
+                        return jsonify({
+                            "status": "password_required",
+                            "message": "Se requiere contraseña de autenticación de dos factores. Por favor, envía la contraseña.",
+                            "phone": phone
+                        }), 200
+                    
+                    except Exception as e:
+                        try:
+                            if restored_client.is_connected():
+                                loop.run_until_complete(restored_client.disconnect())
+                        except Exception as disconnect_error:
+                            log.warn(f"Error al desconectar cliente: {str(disconnect_error)}")
+                        finally:
+                            loop.close()
+                        raise
+                
+                # Etapa 3: Verificar contraseña 2FA
+                if phone and code and password:
+                    # Normalizar el teléfono antes de comparar
+                    if not phone.startswith('+'):
+                        phone = '+' + phone
+                    
+                    # Intentar obtener estado de memoria primero, si no de BD
+                    stored_phone = _telethon_auth_state.get('phone')
+                    stored_hash = _telethon_auth_state.get('phone_code_hash')
+                    stored_session_string = _telethon_auth_state.get('session_string')
+                    
+                    # Si no hay estado en memoria, intentar cargar desde BD
+                    if not stored_phone or not stored_hash or not stored_session_string:
+                        estado_bd = TelegramController._obtenerEstadoAuthDesdeBD()
+                        if estado_bd:
+                            stored_phone = estado_bd.get('phone')
+                            stored_hash = estado_bd.get('phone_code_hash')
+                            stored_session_string = estado_bd.get('session_string')
+                            # Actualizar memoria también
+                            _telethon_auth_state.update(estado_bd)
+                    
+                    if stored_phone != phone:
+                        loop.close()
+                        log.error(f"Teléfono no coincide: almacenado='{stored_phone}', recibido='{phone}'")
+                        return responseError(
+                            "TELEFONO_NO_COINCIDE",
+                            f"El teléfono no coincide con la solicitud anterior. Almacenado: {stored_phone}, Recibido: {phone}",
+                            400
+                        )
+                    
+                    if not stored_hash or not stored_session_string:
+                        loop.close()
+                        return responseError(
+                            "ESTADO_PERDIDO",
+                            "No se encontró el estado de autenticación. Por favor, inicia el proceso nuevamente.",
+                            400
+                        )
+                    
+                    # Crear nuevo cliente desde la sesión guardada
+                    restored_session = StringSession(stored_session_string)
+                    restored_client = TelegramClient(
+                        restored_session,
+                        int(api_id),
+                        api_hash,
+                        connection_retries=3,
+                        retry_delay=1,
+                        timeout=10
+                    )
+                    
+                    try:
+                        # Conectar con el nuevo event loop
+                        loop.run_until_complete(restored_client.connect())
+                        
+                        loop.run_until_complete(
+                            restored_client.sign_in(phone, code, phone_code_hash=stored_hash, password=password)
+                        )
+                        
+                        # Autenticación exitosa con 2FA
+                        final_session_string = restored_session.save()
+                        
+                        # Guardar sesión en BD
+                        TelegramController._guardarSesionEnBD(final_session_string)
+                        
+                        # Limpiar estado temporal
+                        _telethon_auth_state.clear()
+                        
+                        # Desconectar
+                        try:
+                            if restored_client.is_connected():
+                                loop.run_until_complete(restored_client.disconnect())
+                        except Exception as e:
+                            log.warn(f"Error al desconectar cliente: {str(e)}")
+                        finally:
+                            loop.close()
+                        
+                        log.info("Autenticación Telethon exitosa con 2FA")
+                        
+                        return jsonify({
+                            "status": "authenticated",
+                            "message": "Autenticación exitosa con 2FA. Sesión guardada."
+                        }), 200
+                        
+                    except Exception as e:
+                        try:
+                            if restored_client.is_connected():
+                                loop.run_until_complete(restored_client.disconnect())
+                        except Exception as disconnect_error:
+                            log.warn(f"Error al desconectar cliente: {str(disconnect_error)}")
+                        finally:
+                            loop.close()
+                        return responseError(
+                            "ERROR_AUTENTICACION",
+                            f"Error al verificar contraseña 2FA: {str(e)}",
+                            400
+                        )
+                
+                # Si no hay datos suficientes
+                loop.close()
+                return responseError(
+                    "DATOS_INSUFICIENTES",
+                    "Proporciona 'phone' para iniciar, luego 'phone' y 'code' para verificar, y 'password' si se requiere 2FA",
+                    400
+                )
+                
+            except Exception as e:
+                loop.close()
+                raise
+                
+        except Exception as e:
+            error_msg = f"Error en autenticación Telethon: {str(e)}"
+            log.error(error_msg)
+            _telethon_auth_state.clear()
+            return responseError("ERROR_TELETHON_AUTH", error_msg, 500)
+    
+    @staticmethod
+    def _guardarEstadoAuthEnBD(phone, phone_code_hash, session_string):
+        """
+        Guarda el estado de autenticación en proceso en la BD.
+        
+        Args:
+            phone (str): Número de teléfono
+            phone_code_hash (str): Hash del código de verificación
+            session_string (str): String de sesión temporal
+        """
+        session_db = SessionLocal()
+        try:
+            # Limpiar estados anteriores de autenticación
+            session_db.query(TelethonSession).filter(
+                TelethonSession.sessionData.is_(None)
+            ).delete()
+            
+            # Crear nuevo registro de estado temporal
+            estado_auth = TelethonSession(
+                phone=phone,
+                phoneCodeHash=phone_code_hash,
+                tempSessionString=session_string.encode('utf-8'),
+                estaActiva=False,  # No está activa hasta completar autenticación
+                fechaCreacion=datetime.now(),
+                fechaActualizacion=datetime.now()
+            )
+            
+            session_db.add(estado_auth)
+            session_db.commit()
+            
+            log.info(f"Estado de autenticación guardado en BD para {phone}")
+            
+        except Exception as e:
+            session_db.rollback()
+            log.error(f"Error al guardar estado de auth en BD: {str(e)}")
+            raise
+        finally:
+            session_db.close()
+    
+    @staticmethod
+    def _obtenerEstadoAuthDesdeBD():
+        """
+        Obtiene el estado de autenticación en proceso desde la BD.
+        
+        Returns:
+            dict con phone, phone_code_hash, session_string o None
+        """
+        session_db = SessionLocal()
+        try:
+            estado = session_db.query(TelethonSession).filter(
+                TelethonSession.sessionData.is_(None),
+                TelethonSession.phone.isnot(None)
+            ).order_by(TelethonSession.fechaCreacion.desc()).first()
+            
+            if estado and estado.tempSessionString:
+                return {
+                    'phone': estado.phone,
+                    'phone_code_hash': estado.phoneCodeHash,
+                    'session_string': estado.tempSessionString.decode('utf-8')
+                }
+            
+            return None
+            
+        except Exception as e:
+            log.error(f"Error al obtener estado de auth desde BD: {str(e)}")
+            return None
+        finally:
+            session_db.close()
+    
+    @staticmethod
+    def _actualizarEstadoAuthEnBD(phone, phone_code_hash, session_string):
+        """
+        Actualiza el estado de autenticación en BD.
+        
+        Args:
+            phone (str): Número de teléfono
+            phone_code_hash (str): Hash del código de verificación
+            session_string (str): String de sesión actualizado
+        """
+        session_db = SessionLocal()
+        try:
+            estado = session_db.query(TelethonSession).filter(
+                TelethonSession.phone == phone,
+                TelethonSession.sessionData.is_(None)
+            ).first()
+            
+            if estado:
+                estado.tempSessionString = session_string.encode('utf-8')
+                estado.phoneCodeHash = phone_code_hash
+                estado.fechaActualizacion = datetime.now()
+                session_db.commit()
+                log.info(f"Estado de autenticación actualizado en BD para {phone}")
+            
+        except Exception as e:
+            session_db.rollback()
+            log.error(f"Error al actualizar estado de auth en BD: {str(e)}")
+        finally:
+            session_db.close()
+    
+    @staticmethod
+    def _guardarSesionEnBD(session_string):
+        """
+        Guarda la sesión de Telethon autenticada en la base de datos.
+        
+        Args:
+            session_string (str): String de sesión serializado
+        """
+        session_db = SessionLocal()
+        try:
+            # Limpiar estados temporales de autenticación
+            session_db.query(TelethonSession).filter(
+                TelethonSession.sessionData.is_(None)
+            ).delete()
+            
+            # Marcar sesiones anteriores como inactivas
+            session_db.query(TelethonSession).filter(
+                TelethonSession.sessionData.isnot(None)
+            ).update({"estaActiva": False})
+            
+            # Crear nueva sesión autenticada
+            nueva_sesion = TelethonSession(
+                sessionData=session_string.encode('utf-8'),
+                estaActiva=True,
+                fechaCreacion=datetime.now(),
+                fechaActualizacion=datetime.now()
+            )
+            
+            session_db.add(nueva_sesion)
+            session_db.commit()
+            
+            log.info("Sesión de Telethon guardada en BD")
+            
+        except Exception as e:
+            session_db.rollback()
+            log.error(f"Error al guardar sesión en BD: {str(e)}")
+            raise
+        finally:
+            session_db.close()
+
+
+# Diccionario para almacenar estado de autenticación en proceso
+_telethon_auth_state = {}
 
 # Instancia global del bot
 telegram_bot = TelegramController()

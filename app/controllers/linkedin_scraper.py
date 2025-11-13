@@ -12,6 +12,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 import os
+from app.utils.config import get
 
 
 class LinkedinScraper:
@@ -19,8 +20,8 @@ class LinkedinScraper:
     def __init__(self):
         self.driver = None
         self.credentials = {
-            "email": "phishintel02@gmail.com",
-            "password": "Phishintel2025."
+            "email": get("LINKEDIN_EMAIL"),
+            "password": get("LINKEDIN_PASSWORD")
         }
     
     def setup_driver(self):

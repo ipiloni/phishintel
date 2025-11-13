@@ -15,7 +15,7 @@ from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.resultadoEventoController import ResultadoEventoController
 from app.controllers.kpiController import KpiController
 from app.controllers.mensajes.msjController import MsjController
-from app.controllers.mensajes.telegram import telegram_bot
+from app.controllers.mensajes.telegram import telegram_bot, TelegramController
 from app.controllers.mensajes.whatsapp import WhatsAppController
 from app.controllers.mensajes.sms import SMSController
 from app.controllers.ngrokController import NgrokController
@@ -315,6 +315,7 @@ def llamarIAGemini():
     data = request.get_json()
     
     # Si se proporciona idUsuarioDestinatario, enriquecer el contexto con info de LinkedIn
+    # Optimizado: verificación rápida antes de hacer scraping pesado
     if "idUsuarioDestinatario" in data and data["idUsuarioDestinatario"]:
         try:
             info_linkedin = AIController.obtenerInfoLinkedinUsuario(data["idUsuarioDestinatario"])
@@ -325,10 +326,10 @@ def llamarIAGemini():
                 contexto_enriquecido = AIController.construirContextoConLinkedin(data["contexto"], info_linkedin)
                 data["contexto"] = contexto_enriquecido
             else:
-                log.info(f"Usuario {data['idUsuarioDestinatario']} no tiene perfil de LinkedIn")
+                log.info(f"Usuario {data['idUsuarioDestinatario']} no tiene perfil de LinkedIn - continuando sin enriquecimiento")
         except Exception as e:
             log.error(f"Error obteniendo info de LinkedIn: {str(e)}")
-            # Continuar sin la info de LinkedIn si hay error
+            # Continuar sin la info de LinkedIn si hay error - no bloquear la generación
     
     # Generar email con IA
     result = AIController.armarEmail(data)
@@ -426,6 +427,20 @@ def detenerBotTelegram():
     except Exception as e:
         log.error(f"Error en endpoint /api/telegram/stop: {str(e)}", exc_info=True)
         return jsonify({"mensaje": f"Error al detener el bot: {str(e)}", "status": "error"}), 500
+
+
+@apis.route("/api/telegram/telethon/auth", methods=["POST"])  # Autentica Telethon (cuenta propia)
+def autenticarTelethon():
+    """
+    Endpoint para autenticar Telethon en etapas.
+    Flujo: 1) Enviar teléfono → 2) Recibir código → 3) Enviar código → 4) (Opcional) Enviar contraseña 2FA
+    """
+    try:
+        data = request.get_json()
+        return TelegramController.autenticarTelethon(data)
+    except Exception as e:
+        log.error(f"Error en endpoint /api/telegram/telethon/auth: {str(e)}", exc_info=True)
+        return responseError("ERROR", f"Error en autenticación Telethon: {str(e)}", 500)
 
 
 @apis.route("/api/telegram/status", methods=["GET"])  # Obtiene el estado del bot y usuarios registrados

@@ -318,18 +318,21 @@ select:disabled option {
                         <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
                           <span class="me-2">
                               <i v-if="proveedor === 'bot' || proveedor === 'selenium'" class="bi bi-robot"></i>
+                              <i v-else-if="proveedor === 'telethon'" class="bi bi-telegram"></i>
                               <i v-else-if="proveedor === 'whapi'" class="bi bi-cloud"></i>
                               <i v-else-if="proveedor === 'whapi-link-preview'" class="bi bi-link-45deg"></i>
-                              <i v-else-if="proveedor === 'twilio'" class="bi bi-telephone"></i>
+                              <i v-else-if="proveedor === 'twilio' || proveedor === 'textBee'" class="bi bi-telephone"></i>
                               <i v-else class="bi bi-phone"></i>
                           </span>
                           <div>
                             <small class="d-block" style="color: #ccc;">Proveedor</small>
                             <strong>
                               {{ proveedor === 'bot' ? 'Bot de Telegram' : 
+                                 proveedor === 'telethon' ? 'Telethon (Cuenta Propia)' :
                                  proveedor === 'whapi' ? 'whapi.cloud' : 
                                  proveedor === 'whapi-link-preview' ? 'whapi.cloud Link Preview' : 
                                  proveedor === 'twilio' ? 'Twilio' : 
+                                 proveedor === 'textBee' ? 'TextBee' :
                                  proveedor === 'selenium' ? 'Selenium' : proveedor }}
                             </strong>
                           </div>
@@ -429,14 +432,14 @@ select:disabled option {
           filtroUsuario: "",
           nivel: "Fácil",
           medio: "telegram",
-          proveedor: "bot",
+          proveedor: "telethon",
           modalMensaje: "",
           cargando: false,
           cargandoRegenerar: false,
           cargandoEnvio: false,
           mensajeGenerado: {
             medio: "telegram",
-            proveedor: "bot",
+            proveedor: "telethon",
             idUsuario: null, 
             mensaje: ""
           }
@@ -456,11 +459,11 @@ select:disabled option {
         medio() {
           // Hardcodear proveedor según medio
           if (this.medio === 'telegram') {
-            this.proveedor = 'bot';
+            this.proveedor = 'telethon';
           } else if (this.medio === 'whatsapp') {
             this.proveedor = 'whapi-link-preview';
           } else if (this.medio === 'sms') {
-            this.proveedor = 'twilio';
+            this.proveedor = 'textBee';
           }
         }
       },
@@ -497,11 +500,11 @@ select:disabled option {
             this.mensajeGenerado.medio = this.medio;
             // Actualizar proveedor según medio
             if (this.medio === 'telegram') {
-              this.proveedor = 'bot';
+              this.proveedor = 'telethon';
             } else if (this.medio === 'whatsapp') {
               this.proveedor = 'whapi-link-preview';
             } else if (this.medio === 'sms') {
-              this.proveedor = 'twilio';
+              this.proveedor = 'textBee';
             }
             this.mensajeGenerado.proveedor = this.proveedor;
 
@@ -557,13 +560,13 @@ select:disabled option {
           this.cargandoEnvio = true;
           try {
             // Hardcodear proveedor según medio
-            let proveedorHardcodeado = 'bot';
+            let proveedorHardcodeado = 'telethon';
             if (this.medio === 'telegram') {
-              proveedorHardcodeado = 'bot';
+              proveedorHardcodeado = 'telethon';
             } else if (this.medio === 'whatsapp') {
               proveedorHardcodeado = 'whapi-link-preview';
             } else if (this.medio === 'sms') {
-              proveedorHardcodeado = 'twilio';
+              proveedorHardcodeado = 'textBee';
             }
 
             const resp = await fetch("http://localhost:8080/api/mensaje/enviar-id", {

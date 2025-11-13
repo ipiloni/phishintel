@@ -36,7 +36,7 @@ class MsjController:
                 - dificultad (str): Nivel de dificultad ('Fácil', 'Medio', 'Difícil')
                 - proveedor (str, opcional): Proveedor específico dentro del medio (hardcodeado según medio)
                     - Para whatsapp: 'whapi-link-preview'
-                    - Para telegram: 'bot'
+                    - Para telegram: 'telethon'
                     - Para sms: 'textBee'
         """
         if not data or "medio" not in data or "idUsuario" not in data or "mensaje" not in data:
@@ -48,14 +48,17 @@ class MsjController:
         mensaje = data["mensaje"]
         dificultad = data.get("dificultad", "Fácil")
 
+        log.info(f"Enviando mensaje por ID - Medio: {medio}, ID Usuario: {id_usuario}, Dificultad: {dificultad}")
+
         session = SessionLocal()
         try:
             # Buscar el usuario en la BD
             usuario = session.query(Usuario).filter_by(idUsuario=id_usuario).first()
             if not usuario:
                 session.close()
+                log.error(f"Usuario no encontrado con ID: {id_usuario}")
                 return responseError("USUARIO_NO_ENCONTRADO",
-                                     "No se encontró el usuario", 404)
+                                     f"No se encontró el usuario con ID {id_usuario}", 404)
 
             # Crear el evento y registro
             registroEvento = RegistroEvento(asunto="Mensaje de Phishing", cuerpo=mensaje)
@@ -122,26 +125,19 @@ class MsjController:
 
             elif medio == "telegram":
                 # Hardcodear proveedor para Telegram
-                proveedor = "bot"
+                proveedor = "telethon"
                 
-                # Usar Telegram Bot
-                # Intentar obtener chat_id del bot, si no hay usuarios registrados usar el hardcodeado
-                user_chat_ids = telegram_bot.get_user_chat_ids()
-                if user_chat_ids:
-                    # Usar el primer chat_id disponible (puedes modificar esta lógica)
-                    chat_id = list(user_chat_ids.keys())[0]
-                    log.info(f"Enviando a chat_id registrado: {chat_id}")
-                else:
-                    # Fallback al chat_id configurado si no hay usuarios registrados
-                    chat_id = get("TELEGRAM_DEFAULT_CHAT_ID")
-                    if not chat_id:
-                        session.rollback()
-                        return responseError("CHAT_ID_NO_CONFIGURADO", "No hay usuarios registrados y no se configuró TELEGRAM_DEFAULT_CHAT_ID", 500)
-                    log.info(f"No hay usuarios registrados, usando chat_id configurado: {chat_id}")
+                log.info(f"Enviando mensaje Telegram con Telethon para usuario {usuario.nombre} {usuario.apellido}")
                 
-                result = TelegramController.enviarMensajeHTML({
+                if not usuario.telefono:
+                    session.rollback()
+                    log.error(f"Usuario {id_usuario} ({usuario.nombre} {usuario.apellido}) no tiene teléfono registrado")
+                    return responseError("TELEFONO_NO_REGISTRADO", f"El usuario {usuario.nombre} {usuario.apellido} no tiene teléfono registrado", 404)
+                
+                # Usar Telegram Telethon (cuenta propia)
+                result = TelegramController.enviarMensajeTelethon({
                     "mensaje": mensaje_html,
-                    "chat_id": chat_id
+                    "destinatario": usuario.telefono
                 })
 
             elif medio == "sms":

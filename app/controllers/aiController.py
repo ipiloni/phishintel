@@ -62,19 +62,27 @@ class AIController:
         """
         Obtiene información completa de LinkedIn de un usuario si tiene perfil cargado
         Realiza web scraping con Selenium para extraer: experiencia, educación, certificaciones, etc.
+        Optimizado para verificar rápidamente si hay perfilLinkedin antes de hacer scraping.
         """
         from app.config.db_config import SessionLocal
         from app.backend.models import Usuario
         
         session = SessionLocal()
         try:
+            # Verificación rápida: primero verificar si el usuario tiene perfilLinkedin
             usuario = session.query(Usuario).filter_by(idUsuario=id_usuario).first()
-            if not usuario or not usuario.perfilLinkedin:
+            if not usuario:
+                log.info(f"Usuario {id_usuario} no encontrado")
+                return None
+            
+            # Si no tiene perfilLinkedin, retornar inmediatamente sin hacer scraping
+            if not usuario.perfilLinkedin:
+                log.info(f"Usuario {id_usuario} no tiene perfilLinkedin configurado - saltando scraping")
                 return None
             
             log.info(f"Extrayendo información de LinkedIn para usuario {id_usuario}")
             
-            # Importar funciones de web scraping (las tendremos en el controlador)
+            # Importar funciones de web scraping
             from app.controllers.linkedin_scraper import LinkedinScraper
             
             scraper = LinkedinScraper()

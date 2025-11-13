@@ -65,6 +65,7 @@ PySocks==1.7.1
 python-dotenv==1.1.1
 python-http-client==3.3.7
 python-telegram-bot==21.0.1
+telethon==1.40.0
 PyYAML==6.0.2
 requests==2.32.4
 rsa==4.9.1

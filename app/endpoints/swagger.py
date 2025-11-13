@@ -24,6 +24,7 @@ def openapi_spec():
             {"name": "📞 Llamadas", "description": "Gestión de llamadas y voces"},
             {"name": "🔐 Auth", "description": "Autenticación y gestión de sesiones"},
             {"name": "🤖 Telegram Bot", "description": "Gestión del bot de Telegram"},
+            {"name": "📱 Telegram Account", "description": "Autenticación y envío de mensajes con cuenta propia de Telegram"},
             {"name": "🌐 Ngrok", "description": "Gestión de túneles ngrok temporales"},
             {"name": "⚠️ PELIGRO", "description": "Operaciones destructivas - USAR CON EXTREMA PRECAUCIÓN"}
         ],
@@ -1613,6 +1614,122 @@ def openapi_spec():
                             }
                         },
                         "500": {"description": "Error al obtener el estado"}
+                    }
+                }
+            },
+            "/api/telegram/telethon/auth": {
+                "post": {
+                    "summary": "📱 Autenticar Telethon (Cuenta Propia)",
+                    "description": "Autentica Telethon para usar tu cuenta personal de Telegram. El flujo es en etapas: 1) Enviar teléfono → 2) Recibir código en Telegram → 3) Enviar código → 4) (Opcional) Enviar contraseña 2FA. La sesión se guarda en la base de datos para uso futuro.",
+                    "tags": ["📱 Telegram Account"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "phone": {
+                                            "type": "string",
+                                            "description": "Número de teléfono con código de país (ej: +5491168148355). Requerido en etapa 1.",
+                                            "example": "+5491168148355"
+                                        },
+                                        "code": {
+                                            "type": "string",
+                                            "description": "Código de verificación recibido en Telegram. Requerido en etapa 2.",
+                                            "example": "12345"
+                                        },
+                                        "password": {
+                                            "type": "string",
+                                            "description": "Contraseña de autenticación de dos factores (2FA). Requerido solo si se activó 2FA en la cuenta.",
+                                            "example": "mi_password_2fa"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "etapa1": {
+                                        "summary": "Etapa 1: Enviar teléfono",
+                                        "value": {"phone": "+5491168148355"}
+                                    },
+                                    "etapa2": {
+                                        "summary": "Etapa 2: Enviar código",
+                                        "value": {"phone": "+5491168148355", "code": "12345"}
+                                    },
+                                    "etapa3": {
+                                        "summary": "Etapa 3: Enviar contraseña 2FA (si aplica)",
+                                        "value": {"phone": "+5491168148355", "code": "12345", "password": "mi_password_2fa"}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Respuesta según etapa de autenticación",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "status": {
+                                                "type": "string",
+                                                "enum": ["code_sent", "password_required", "authenticated"],
+                                                "description": "Estado de la autenticación"
+                                            },
+                                            "message": {
+                                                "type": "string",
+                                                "description": "Mensaje descriptivo del estado"
+                                            },
+                                            "phone": {
+                                                "type": "string",
+                                                "description": "Teléfono utilizado (solo en algunas respuestas)"
+                                            }
+                                        }
+                                    },
+                                    "examples": {
+                                        "code_sent": {
+                                            "summary": "Código enviado",
+                                            "value": {
+                                                "status": "code_sent",
+                                                "message": "Código de verificación enviado a +5491168148355. Por favor, envía el código recibido.",
+                                                "phone": "+5491168148355"
+                                            }
+                                        },
+                                        "password_required": {
+                                            "summary": "Se requiere contraseña 2FA",
+                                            "value": {
+                                                "status": "password_required",
+                                                "message": "Se requiere contraseña de autenticación de dos factores. Por favor, envía la contraseña.",
+                                                "phone": "+5491168148355"
+                                            }
+                                        },
+                                        "authenticated": {
+                                            "summary": "Autenticación exitosa",
+                                            "value": {
+                                                "status": "authenticated",
+                                                "message": "Autenticación exitosa. Sesión guardada."
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {
+                            "description": "Error en la solicitud (datos insuficientes, teléfono no coincide, etc.)",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/Error"}
+                                }
+                            }
+                        },
+                        "500": {
+                            "description": "Error en el servidor o credenciales no configuradas",
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/Error"}
+                                }
+                            }
+                        }
                     }
                 }
             },
