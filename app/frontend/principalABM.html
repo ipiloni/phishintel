@@ -485,11 +485,15 @@
     AOS.init();
   </script>
 
+  <!-- Script de configuración para obtener URL del backend -->
+  <script src="assets/js/config.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
   <script>
     const { createApp } = Vue;
 
-    const API = 'http://localhost:8080';
+    // Usar API_BASE_URL del script de configuración
+    const API = API_BASE_URL;
 
     createApp({
       data() {

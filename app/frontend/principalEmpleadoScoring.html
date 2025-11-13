@@ -85,6 +85,9 @@
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
+  
+  <!-- Script de configuración para obtener URL del backend -->
+  <script src="assets/js/config.js"></script>
   <script>
     AOS.init();
   </script>
@@ -97,7 +100,7 @@
     });
 
     function loadUserInfo() {
-      fetch('/api/auth/current-user')
+      fetch(`${API_BASE_URL}/api/auth/current-user`)
         .then(response => response.json())
         .then(data => {
           if (data.usuario) {
@@ -116,7 +119,7 @@
     async function loadScoring() {
       try {
         // Obtener el ID del usuario logueado
-        const userResponse = await fetch('/api/auth/current-user');
+        const userResponse = await fetch(`${API_BASE_URL}/api/auth/current-user`);
         const userData = await userResponse.json();
         
         if (!userData.usuario) {
@@ -128,7 +131,7 @@
         console.log('🔍 Obteniendo scoring para usuario:', idUsuario);
         
         // Usar el mismo endpoint que principalReportes
-        const response = await fetch(`/api/scoring/empleado/${idUsuario}`);
+        const response = await fetch(`${API_BASE_URL}/api/scoring/empleado/${idUsuario}`);
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);
         }
@@ -372,7 +375,7 @@
     }
 
     function logout() {
-      fetch('/api/auth/logout', {
+      fetch(`${API_BASE_URL}/api/auth/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

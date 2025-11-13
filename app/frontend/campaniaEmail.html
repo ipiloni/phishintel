@@ -359,6 +359,9 @@ select:disabled option {
     AOS.init();
   </script>
 
+  <!-- Script de configuración para obtener URL del backend -->
+  <script src="assets/js/config.js"></script>
+
   <!-- Vue 3 -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <script>
@@ -450,7 +453,7 @@ select:disabled option {
               contextoStr = 'Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación.';
             }
 
-            const resp = await fetch("http://localhost:8080/api/email/generar", {
+            const resp = await fetch(`${API_BASE_URL}/api/email/generar`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -500,7 +503,7 @@ select:disabled option {
               contextoStr = 'Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación.';
             }
 
-            const resp = await fetch("http://localhost:8080/api/email/generar", {
+            const resp = await fetch(`${API_BASE_URL}/api/email/generar`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -542,7 +545,7 @@ select:disabled option {
             // Asegurar que la dificultad esté incluida
             this.emailGenerado.dificultad = this.nivel;
             
-            const resp = await fetch("http://localhost:8080/api/email/enviar-id", {
+            const resp = await fetch(`${API_BASE_URL}/api/email/enviar-id`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(this.emailGenerado)
@@ -590,7 +593,7 @@ select:disabled option {
       },
       async mounted() {
         try {
-          const resp = await fetch("http://localhost:8080/api/areas");
+          const resp = await fetch(`${API_BASE_URL}/api/areas`);
           const data = await resp.json();
           this.areas = data.areas || [];
         } catch (e) {

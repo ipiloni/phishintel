@@ -135,6 +135,9 @@
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
+  
+  <!-- Script de configuración para obtener URL del backend -->
+  <script src="assets/js/config.js"></script>
   <script>
     AOS.init();
   </script>
@@ -146,7 +149,7 @@
     });
 
     function loadUserInfo() {
-      fetch('/api/auth/current-user')
+      fetch(`${API_BASE_URL}/api/auth/current-user`)
         .then(response => response.json())
         .then(data => {
           if (data.usuario) {
@@ -163,7 +166,7 @@
     }
 
     function logout() {
-      fetch('/api/auth/logout', {
+      fetch(`${API_BASE_URL}/api/auth/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

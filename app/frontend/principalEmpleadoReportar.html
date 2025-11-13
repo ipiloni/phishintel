@@ -284,6 +284,10 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
+  
+  <!-- Script de configuración para obtener URL del backend -->
+  <script src="assets/js/config.js"></script>
+  
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script>
     AOS.init();
@@ -358,7 +362,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
               fechaFin: new Date(this.fechaFin).toISOString()
             };
             
-            const response = await fetch('/api/empleado/reportar-evento', {
+            const response = await fetch(`${API_BASE_URL}/api/empleado/reportar-evento`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -416,7 +420,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
         
         async loadReports() {
           try {
-            const response = await fetch('/api/empleado/mis-reportes');
+            const response = await fetch(`${API_BASE_URL}/api/empleado/mis-reportes`);
             const data = await response.json();
             
             const container = document.getElementById('reports-container');
@@ -464,7 +468,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
     });
 
     function loadUserInfo() {
-      fetch('/api/auth/current-user')
+      fetch(`${API_BASE_URL}/api/auth/current-user`)
         .then(response => response.json())
         .then(data => {
           if (data.usuario) {
@@ -481,7 +485,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
     }
 
     function logout() {
-      fetch('/api/auth/logout', {
+      fetch(`${API_BASE_URL}/api/auth/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

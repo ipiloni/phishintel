@@ -40,6 +40,27 @@ CORS(apis, resources={r"/api/*": {"origins": "*"}},
 
 
 # =================== ENDPOINTS =================== #
+@apis.route("/api/config/url", methods=["GET"])
+def get_api_url():
+    """Endpoint que devuelve la URL completa del backend desde properties.env"""
+    url_app = get("URL_APP")
+    if not url_app:
+        # Fallback a localhost si no está configurado
+        url_app = "http://localhost:8080"
+    else:
+        # Si no tiene protocolo, agregarlo
+        if not url_app.startswith("http://") and not url_app.startswith("https://"):
+            # Si es localhost, usar http, sino https
+            if "localhost" in url_app.lower() or "127.0.0.1" in url_app:
+                url_app = f"http://{url_app}"
+            else:
+                url_app = f"https://{url_app}"
+        # Si no tiene puerto y es localhost, agregar puerto 8080
+        if "localhost" in url_app.lower() and ":8080" not in url_app:
+            url_app = url_app.replace("localhost", "localhost:8080")
+    
+    return jsonify({"url": url_app})
+
 @apis.route("/api/ia/objetivo", methods=["POST"])
 def generarObjetivo():
     return AIController.crearObjetivoLlamada()

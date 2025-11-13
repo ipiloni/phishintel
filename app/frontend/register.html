@@ -117,6 +117,9 @@
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
+  
+  <!-- Script de configuración para obtener URL del backend -->
+  <script src="assets/js/config.js"></script>
   <script>
     AOS.init();
   </script>
@@ -138,7 +141,7 @@
       };
 
       // Hacer POST a la API
-      fetch("http://localhost:8080/api/usuarios", {
+      fetch(`${API_BASE_URL}/api/usuarios`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

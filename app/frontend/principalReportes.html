@@ -1268,6 +1268,10 @@
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
   <script> AOS.init(); </script>
+  
+  <!-- Script de configuración para obtener URL del backend -->
+  <script src="assets/js/config.js"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
   <script>
@@ -1275,7 +1279,7 @@
 
     async function cargarFallasPorArea(tiposEvento = []) {
       try {
-        let url = '/api/areas/fallas';
+        let url = `${API_BASE_URL}/api/areas/fallas`;
         if (tiposEvento.length > 0) {
           const params = new URLSearchParams();
           tiposEvento.forEach(tipo => params.append('tipo_evento', tipo));
@@ -1570,7 +1574,7 @@
      // Función para cargar fallas por tipo de campaña
      async function cargarFallasPorCampania(areas = []) {
        try {
-         let url = '/api/areas/fallas-campania';
+         let url = `${API_BASE_URL}/api/areas/fallas-campania`;
          if (areas.length > 0) {
            const params = new URLSearchParams();
            areas.forEach(area => params.append('area', area));
@@ -2287,7 +2291,7 @@
           </div>
         `;
 
-        const url = '/api/areas/fallas-empleados-scoring';
+        const url = `${API_BASE_URL}/api/areas/fallas-empleados-scoring`;
 
          console.log('📡 Haciendo petición a:', url);
          const resp = await fetch(url);
@@ -2650,7 +2654,7 @@
      // Función para cargar el KPI de tiempo de respuesta
      async function cargarKPITiempoRespuesta() {
        try {
-         const resp = await fetch('/api/kpis/tiempo-respuesta');
+         const resp = await fetch(`${API_BASE_URL}/api/kpis/tiempo-respuesta`);
          if (!resp.ok) throw new Error('Error al obtener datos del KPI');
          const data = await resp.json();
 
@@ -2860,7 +2864,7 @@
      // Función para cargar el KPI de tasa de fallas
      async function cargarKPITasaFallas() {
        try {
-         const resp = await fetch('/api/kpis/tasa-fallas');
+         const resp = await fetch(`${API_BASE_URL}/api/kpis/tasa-fallas`);
          if (!resp.ok) throw new Error('Error al obtener datos del KPI');
          const data = await resp.json();
 
@@ -3068,7 +3072,7 @@
      // Función para cargar el KPI de promedio de scoring
      async function cargarKPIPromedioScoring() {
        try {
-         const resp = await fetch('/api/kpis/promedio-scoring');
+         const resp = await fetch(`${API_BASE_URL}/api/kpis/promedio-scoring`);
          if (!resp.ok) throw new Error('Error al obtener datos del KPI');
          const data = await resp.json();
 
@@ -3223,7 +3227,7 @@
        console.log('🔍 Obteniendo detalle de eventos para usuario:', idUsuario);
 
        try {
-         const response = await fetch(`/api/scoring/empleado/${idUsuario}`);
+         const response = await fetch(`${API_BASE_URL}/api/scoring/empleado/${idUsuario}`);
          if (!response.ok) {
            throw new Error(`Error: ${response.status}`);
          }

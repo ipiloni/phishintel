@@ -1135,6 +1135,9 @@ select:disabled option {
     AOS.init();
   </script>
 
+  <!-- Script de configuración para obtener URL del backend -->
+  <script src="assets/js/config.js"></script>
+
   <!-- Vue 3 -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <script>
@@ -1247,7 +1250,7 @@ select:disabled option {
       methods: {
         async verificarVozUsuario() {
           try {
-            const response = await fetch(`http://localhost:8080/api/llamadas/check-voz/${this.filtroUsuarioRemitente.idUsuario}`);
+            const response = await fetch(`${API_BASE_URL}/api/llamadas/check-voz/${this.filtroUsuarioRemitente.idUsuario}`);
             const data = await response.json();
             
             if (response.ok) {
@@ -1287,7 +1290,7 @@ select:disabled option {
 
           this.cargandoTTS = true;
           try {
-            const response = await fetch('http://localhost:8080/api/tts', {
+            const response = await fetch(`${API_BASE_URL}/api/tts`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -1305,7 +1308,7 @@ select:disabled option {
             const data = await response.json();
             
             if (response.ok) {
-              this.audioGenerado = `http://localhost:8080/api/audios/${data.idAudio}.mp3`;
+              this.audioGenerado = `${API_BASE_URL}/api/audios/${data.idAudio}.mp3`;
               // Auto-reproducir el audio
               setTimeout(() => {
                 const audioElement = document.querySelector('#testVoiceModal audio');
@@ -1390,8 +1393,8 @@ select:disabled option {
 
             // Determinar endpoint según el modo
             const endpoint = this.modoSimulado 
-              ? 'http://localhost:8080/api/llamadas/simulada'
-              : 'http://localhost:8080/api/llamadas';
+              ? `${API_BASE_URL}/api/llamadas/simulada`
+              : `${API_BASE_URL}/api/llamadas`;
 
             const response = await fetch(endpoint, {
               method: 'POST',
@@ -1453,7 +1456,7 @@ select:disabled option {
         async monitorearLlamada() {
           try {
             // Consultar estado de la llamada
-            const estadoResponse = await fetch('http://localhost:8080/api/llamadas/en-ejecucion');
+            const estadoResponse = await fetch(`${API_BASE_URL}/api/llamadas/en-ejecucion`);
             
             if (estadoResponse.status === 404) {
               // No hay llamada en ejecución
@@ -1470,7 +1473,7 @@ select:disabled option {
             this.estadoLlamada = estadoData;
 
             // Consultar conversación
-            const conversacionResponse = await fetch('http://localhost:8080/api/llamadas/conversacion');
+            const conversacionResponse = await fetch(`${API_BASE_URL}/api/llamadas/conversacion`);
             
             if (conversacionResponse.ok) {
               const conversacionData = await conversacionResponse.json();
@@ -1665,7 +1668,7 @@ select:disabled option {
             formData.append('historia', this.historiaSeleccionada);
             formData.append('idUsuario', this.filtroUsuarioRemitente.idUsuario);
             
-            const uploadResponse = await fetch('http://localhost:8080/api/llamadas/subir-audio', {
+            const uploadResponse = await fetch(`${API_BASE_URL}/api/llamadas/subir-audio`, {
               method: 'POST',
               body: formData
             });
@@ -1695,7 +1698,7 @@ select:disabled option {
           
           this.cargandoClonar = true;
           try {
-            const response = await fetch('http://localhost:8080/api/llamadas/clonar', {
+            const response = await fetch(`${API_BASE_URL}/api/llamadas/clonar`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -1770,7 +1773,7 @@ select:disabled option {
       },
       async mounted() {
         try {
-          const resp = await fetch("http://localhost:8080/api/areas");
+          const resp = await fetch(`${API_BASE_URL}/api/areas`);
           const data = await resp.json();
           this.areas = data.areas || [];
         } catch (e) {

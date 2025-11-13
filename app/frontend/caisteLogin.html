@@ -89,6 +89,10 @@
             </div>
         </div>
     </div>
+    
+    <!-- Script de configuración para obtener URL del backend -->
+    <script src="assets/js/config.js"></script>
+    
     <script>
         document.getElementById("loginForm").addEventListener("submit", async function(e) {
             e.preventDefault();
@@ -112,7 +116,7 @@
                     
                     if (idUsuario && idEvento) {
                         console.log('[JS_CAISTE_LOGIN] Registrando falla grave para usuario:', idUsuario, 'evento:', idEvento);
-                        const fallaResponse = await fetch('/api/sumar-falla-grave', {
+                        const fallaResponse = await fetch(`${API_BASE_URL}/api/sumar-falla-grave`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'

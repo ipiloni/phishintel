@@ -104,6 +104,9 @@
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
+  
+  <!-- Script de configuración para obtener URL del backend -->
+  <script src="assets/js/config.js"></script>
   <meta name="google-signin-client_id" content="387090655276-8f9s91d8ir0go3ujuspnu6kc78d2ti6h.apps.googleusercontent.com">
   <script>
     AOS.init();
@@ -203,7 +206,7 @@ function initializeGoogleLogin() {
 
 function handleCredentialResponse(response) {
   // Este callback se ejecuta cuando Google responde con el token
-  fetch("/api/google/login", {
+  fetch(`${API_BASE_URL}/api/google/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token: response.code }) // ahora es "code" (authorization code)
