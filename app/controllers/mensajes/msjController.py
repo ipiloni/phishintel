@@ -37,7 +37,7 @@ class MsjController:
                 - proveedor (str, opcional): Proveedor específico dentro del medio (hardcodeado según medio)
                     - Para whatsapp: 'whapi-link-preview'
                     - Para telegram: 'bot'
-                    - Para sms: 'twilio'
+                    - Para sms: 'textBee'
         """
         if not data or "medio" not in data or "idUsuario" not in data or "mensaje" not in data:
             return responseError("CAMPOS_OBLIGATORIOS",
@@ -146,14 +146,14 @@ class MsjController:
 
             elif medio == "sms":
                 # Hardcodear proveedor para SMS
-                proveedor = "twilio"
+                proveedor = "textBee"
                 
                 if not usuario.telefono:
                     session.rollback()
                     return responseError("TELEFONO_NO_REGISTRADO", "El usuario no tiene teléfono registrado", 404)
                 
-                # Usar SMS Twilio
-                result = SMSController.enviarMensajeTwilio({
+                # Usar SMS TextBee
+                result = SMSController.enviarMensajeTextBee({
                     "mensaje": mensaje_con_enlace,
                     "destinatario": usuario.telefono
                 })

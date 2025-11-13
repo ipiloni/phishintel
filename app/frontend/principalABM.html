@@ -55,8 +55,20 @@
 }
 
 /* Table dark tweaks */
-.table-dark th, .table-dark td { color: #f8f9fa; }
-.table-dark thead th { border-bottom: 1px solid #3a3a3a; }
+.table-dark {
+  background-color: #1a1a1a !important;
+}
+.table-dark th, .table-dark td { 
+  color: #f8f9fa; 
+  background-color: #1a1a1a !important;
+}
+.table-dark thead th { 
+  border-bottom: 1px solid #3a3a3a; 
+  background-color: #111111 !important;
+}
+.table-dark tbody tr:hover {
+  background-color: #2d2d2d !important;
+}
 
 /* Brand color accents (rosa) */
 .btn-outline-primary {
@@ -128,128 +140,123 @@
   <main class="main">
     <div class="page-title py-5"></div>
 
-    <section class="section">
-      <div id="app" class="container" data-aos="fade-up" data-aos-delay="100">
+    <section class="contact section">
+      <div class="col-lg-8 mx-auto" data-aos="fade-left" data-aos-delay="200">
+        <div id="app" class="contact-form-wrapper">
+          <div class="form-header">
+            <h3>Administración de Datos</h3>
+            <p>Gestiona áreas y usuarios del sistema.</p>
+          </div>
 
-        <!-- Tabs -->
-        <ul class="nav nav-tabs mb-4" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" :class="{active: activeTab==='areas'}" @click="activeTab='areas'" type="button" role="tab">
-              <i class="bi bi-building"></i> Áreas
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" :class="{active: activeTab==='usuarios'}" @click="activeTab='usuarios'" type="button" role="tab">
-              <i class="bi bi-people"></i> Usuarios
-            </button>
-          </li>
-        </ul>
+          <!-- Tabs -->
+          <ul class="nav nav-tabs mb-4" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" :class="{active: activeTab==='areas'}" @click="activeTab='areas'" type="button" role="tab">
+                <i class="bi bi-building"></i> Áreas
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" :class="{active: activeTab==='usuarios'}" @click="activeTab='usuarios'" type="button" role="tab">
+                <i class="bi bi-people"></i> Usuarios
+              </button>
+            </li>
+          </ul>
 
-        <!-- ÁREAS -->
-        <div v-show="activeTab==='areas'">
-          <div class="row g-4">
-            <!-- Lista de Áreas -->
-            <div class="col-12">
-              <div class="card h-100 bg-dark text-white">
-                <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
-                  <h5 class="mb-0">Áreas</h5>
-                  <div>
-                    <button class="btn btn-outline-primary btn-sm me-2" @click="abrirModalArea()">
-                      <i class="bi bi-plus-circle"></i> Crear Área
-                    </button>
-                    <button class="btn btn-outline-primary btn-sm" @click="cargarAreas"><i class="bi bi-arrow-clockwise"></i></button>
-                  </div>
+          <!-- ÁREAS -->
+          <div v-show="activeTab==='areas'">
+            <div class="card h-100 bg-dark text-white">
+              <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
+                <h5 class="mb-0">Áreas</h5>
+                <div>
+                  <button class="btn btn-primary btn-sm me-2" @click="abrirModalArea()">
+                    <i class="bi bi-plus-circle"></i> Crear Área
+                  </button>
+                  <button class="btn btn-primary btn-sm" @click="cargarAreas"><i class="bi bi-arrow-clockwise"></i></button>
                 </div>
-                <div class="table-responsive">
-                  <table class="table table-hover table-dark mb-0">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Nombre</th>
-                        <th>Datos</th>
-                        <th>Usuarios</th>
-                        <th class="text-end">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="a in areas" :key="a.idArea">
-                        <td>{{ a.idArea }}</td>
-                        <td>{{ a.nombreArea }}</td>
-                        <td>
-                          <span v-if="a.datosDelArea && a.datosDelArea.length > 0" class="badge bg-secondary me-1" v-for="dato in a.datosDelArea" :key="dato">
-                            {{ dato }}
-                          </span>
-                          <span v-else class="text-light">Sin datos</span>
-                        </td>
-                        <td>{{ (a.usuarios||[]).length }}</td>
-                        <td class="text-end">
-                          <button class="btn btn-sm btn-outline-secondary me-2" @click="editarArea(a)"><i class="bi bi-pencil"></i></button>
-                          <button class="btn btn-sm btn-outline-danger" @click="eliminarArea(a)"><i class="bi bi-trash"></i></button>
-                        </td>
-                      </tr>
-                      <tr v-if="areas.length===0">
-                        <td colspan="5" style="color:#b0b0b0;" class="text-center">Sin áreas</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover table-dark mb-0">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Nombre</th>
+                      <th>Datos</th>
+                      <th>Usuarios</th>
+                      <th class="text-end">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="a in areas" :key="a.idArea">
+                      <td>{{ a.idArea }}</td>
+                      <td>{{ a.nombreArea }}</td>
+                      <td>
+                        <span v-if="a.datosDelArea && a.datosDelArea.length > 0" class="badge bg-secondary me-1" v-for="dato in a.datosDelArea" :key="dato">
+                          {{ dato }}
+                        </span>
+                        <span v-else class="text-light">Sin datos</span>
+                      </td>
+                      <td>{{ (a.usuarios||[]).length }}</td>
+                      <td class="text-end">
+                        <button class="btn btn-sm btn-primary me-2" @click="editarArea(a)"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-primary" @click="eliminarArea(a)"><i class="bi bi-trash"></i></button>
+                      </td>
+                    </tr>
+                    <tr v-if="areas.length===0">
+                      <td colspan="5" style="color:#b0b0b0;" class="text-center">Sin áreas</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- USUARIOS -->
-        <div v-show="activeTab==='usuarios'">
-          <div class="row g-4">
-            <!-- Lista de Usuarios -->
-            <div class="col-12">
-              <div class="card h-100 bg-dark text-white">
-                <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
-                  <h5 class="mb-0">Usuarios</h5>
-                  <div>
-                    <button class="btn btn-outline-primary btn-sm me-2" @click="abrirModalUsuario()">
-                      <i class="bi bi-plus-circle"></i> Crear Usuario
-                    </button>
-                    <button class="btn btn-outline-primary btn-sm" @click="cargarUsuarios"><i class="bi bi-arrow-clockwise"></i></button>
-                  </div>
+          <!-- USUARIOS -->
+          <div v-show="activeTab==='usuarios'">
+            <div class="card h-100 bg-dark text-white">
+              <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
+                <h5 class="mb-0">Usuarios</h5>
+                <div>
+                  <button class="btn btn-primary btn-sm me-2" @click="abrirModalUsuario()">
+                    <i class="bi bi-plus-circle"></i> Crear Usuario
+                  </button>
+                  <button class="btn btn-primary btn-sm" @click="cargarUsuarios"><i class="bi bi-arrow-clockwise"></i></button>
                 </div>
-                <div class="table-responsive">
-                  <table class="table table-hover table-dark mb-0">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Usuario</th>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
-                        <th>Área</th>
-                        <th class="text-end">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="u in usuarios" :key="u.idUsuario">
-                        <td>{{ u.idUsuario }}</td>
-                        <td>{{ u.nombreUsuario }}</td>
-                        <td>{{ u.nombre }}</td>
-                        <td>{{ u.apellido }}</td>
-                        <td>{{ nombreArea(u.idArea) }}</td>
-                        <td class="text-end">
-                          <button class="btn btn-sm btn-outline-secondary me-2" @click="editarUsuario(u)"><i class="bi bi-pencil"></i></button>
-                          <button class="btn btn-sm btn-outline-danger" @click="eliminarUsuario(u)"><i class="bi bi-trash"></i></button>
-                        </td>
-                      </tr>
-                      <tr v-if="usuarios.length===0">
-                        <td colspan="6" class="text-center" style="color:#b0b0b0;">Sin usuarios</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover table-dark mb-0">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Usuario</th>
+                      <th>Nombre</th>
+                      <th>Apellido</th>
+                      <th>Área</th>
+                      <th class="text-end">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="u in usuarios" :key="u.idUsuario">
+                      <td>{{ u.idUsuario }}</td>
+                      <td>{{ u.nombreUsuario }}</td>
+                      <td>{{ u.nombre }}</td>
+                      <td>{{ u.apellido }}</td>
+                      <td>{{ nombreArea(u.idArea) }}</td>
+                      <td class="text-end">
+                        <button class="btn btn-sm btn-primary me-2" @click="editarUsuario(u)"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-primary" @click="eliminarUsuario(u)"><i class="bi bi-trash"></i></button>
+                      </td>
+                    </tr>
+                    <tr v-if="usuarios.length===0">
+                      <td colspan="6" class="text-center" style="color:#b0b0b0;">Sin usuarios</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Modal para Áreas -->
-        <div class="modal fade" id="modalArea" tabindex="-1" aria-labelledby="modalAreaLabel" aria-hidden="true">
+          <!-- Modal para Áreas -->
+          <div class="modal fade" id="modalArea" tabindex="-1" aria-labelledby="modalAreaLabel" aria-hidden="true">
           <div class="modal-dialog modal-lg">
             <div class="modal-content bg-dark text-white">
               <div class="modal-header border-secondary">
@@ -285,8 +292,8 @@
                       </select>
                     </div>
                     <div class="col-2 d-flex flex-column align-items-center gap-2">
-                      <button type="button" class="btn btn-outline-primary btn-sm" @click="agregarSeleccion"><i class="bi bi-chevron-right"></i></button>
-                      <button type="button" class="btn btn-outline-primary btn-sm" @click="quitarSeleccion"><i class="bi bi-chevron-left"></i></button>
+                      <button type="button" class="btn btn-primary btn-sm" @click="agregarSeleccion"><i class="bi bi-chevron-right"></i></button>
+                      <button type="button" class="btn btn-primary btn-sm" @click="quitarSeleccion"><i class="bi bi-chevron-left"></i></button>
                     </div>
                     <div class="col-5">
                       <div class="small text-muted mb-1">Asignados</div>
@@ -311,123 +318,164 @@
           </div>
         </div>
 
-        <div class="modal fade" id="modalUsuario" tabindex="-1" aria-labelledby="modalUsuarioLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content bg-dark text-white">
-      <div class="modal-header border-secondary">
-        <h5 class="modal-title" id="modalUsuarioLabel">{{ usuarioForm.idUsuario ? 'Editar Usuario' : 'Crear Usuario' }}</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form @submit.prevent="submitUsuario" class="php-email-form">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label">Nombre de usuario</label>
-                <input class="form-control" v-model="usuarioForm.nombreUsuario" :required="!usuarioForm.idUsuario">
-              </div>
-              <div class="mb-3" v-if="!usuarioForm.idUsuario">
-                <label class="form-label">Password</label>
-                <input type="password" class="form-control" v-model="usuarioForm.password" :required="!usuarioForm.idUsuario">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Nombre</label>
-                <input class="form-control" v-model="usuarioForm.nombre" required>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Apellido</label>
-                <input class="form-control" v-model="usuarioForm.apellido" required>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label">Correo</label>
-                <input type="email" class="form-control" v-model="usuarioForm.correo">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Teléfono</label>
-                <input class="form-control" v-model="usuarioForm.telefono">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Dirección</label>
-                <input class="form-control" v-model="usuarioForm.direccion" placeholder="Dirección del usuario">
-              </div>
-              </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label">ID de Voz</label>
-                <input class="form-control" v-model="usuarioForm.idVoz" placeholder="ID de voz de ElevenLabs">
-                <small style="color:#b0b0b0;">ID de la voz creada en ElevenLabs (opcional)</small>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Perfil LinkedIn</label>
-                <input class="form-control" v-model="usuarioForm.perfilLinkedin" placeholder="URL del perfil de LinkedIn">
-                <small style="color:#b0b0b0;">URL completa del perfil de LinkedIn (opcional)</small>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label">Área</label>
-                <select class="form-select" v-model.number="usuarioForm.idArea">
-                  <option :value="null">Sin área</option>
-                  <option v-for="a in areas" :key="a.idArea" :value="a.idArea">{{ a.nombreArea }}</option>
-                </select>
-                <small style="color:#b0b0b0;">Para crear, el área se asignará luego de la creación.</small>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Rol</label>
-                <div class="form-check form-switch mt-2">
-                  <input class="form-check-input" type="checkbox" id="checkAdministrador" v-model="usuarioForm.esAdministrador">
-                  <label class="form-check-label" for="checkAdministrador">
-                    Es Administrador
-                  </label>
+          <!-- Modal para Usuario -->
+          <div class="modal fade" id="modalUsuario" tabindex="-1" aria-labelledby="modalUsuarioLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                  <h5 class="modal-title" id="modalUsuarioLabel">{{ usuarioForm.idUsuario ? 'Editar Usuario' : 'Crear Usuario' }}</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <small style="color:#b0b0b0;">Marcar si el usuario tiene permisos de administrador</small>
+                <div class="modal-body">
+                  <form @submit.prevent="submitUsuario" class="php-email-form">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="mb-3">
+                          <label class="form-label">Nombre de usuario</label>
+                          <input class="form-control" v-model="usuarioForm.nombreUsuario" :required="!usuarioForm.idUsuario">
+                        </div>
+                        <div class="mb-3" v-if="!usuarioForm.idUsuario">
+                          <label class="form-label">Password</label>
+                          <input type="password" class="form-control" v-model="usuarioForm.password" :required="!usuarioForm.idUsuario">
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label">Nombre</label>
+                          <input class="form-control" v-model="usuarioForm.nombre" required>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label">Apellido</label>
+                          <input class="form-control" v-model="usuarioForm.apellido" required>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="mb-3">
+                          <label class="form-label">Correo</label>
+                          <input type="email" class="form-control" v-model="usuarioForm.correo">
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label">Teléfono</label>
+                          <input class="form-control" v-model="usuarioForm.telefono">
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label">Dirección</label>
+                          <input class="form-control" v-model="usuarioForm.direccion" placeholder="Dirección del usuario">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="mb-3">
+                          <label class="form-label">ID de Voz</label>
+                          <input class="form-control" v-model="usuarioForm.idVoz" placeholder="ID de voz de ElevenLabs">
+                          <small style="color:#b0b0b0;">ID de la voz creada en ElevenLabs (opcional)</small>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label">Perfil LinkedIn</label>
+                          <input class="form-control" v-model="usuarioForm.perfilLinkedin" placeholder="URL del perfil de LinkedIn">
+                          <small style="color:#b0b0b0;">URL completa del perfil de LinkedIn (opcional)</small>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="mb-3">
+                          <label class="form-label">Área</label>
+                          <select class="form-select" v-model.number="usuarioForm.idArea">
+                            <option :value="null">Sin área</option>
+                            <option v-for="a in areas" :key="a.idArea" :value="a.idArea">{{ a.nombreArea }}</option>
+                          </select>
+                          <small style="color:#b0b0b0;">Para crear, el área se asignará luego de la creación.</small>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label">Rol</label>
+                          <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" id="checkAdministrador" v-model="usuarioForm.esAdministrador">
+                            <label class="form-check-label" for="checkAdministrador">
+                              Es Administrador
+                            </label>
+                          </div>
+                          <small style="color:#b0b0b0;">Marcar si el usuario tiene permisos de administrador</small>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer border-secondary">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="loadingUsuario">Cancelar</button>
+                  <button type="button" class="btn btn-primary" @click="submitUsuario" :disabled="loadingUsuario">
+                    <span v-if="loadingUsuario" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <i v-else class="bi" :class="usuarioForm.idUsuario ? 'bi-save' : 'bi-plus-circle' "></i>
+                    {{ loadingUsuario ? 'Procesando...' : (usuarioForm.idUsuario ? 'Guardar cambios' : 'Crear Usuario') }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </form>
-      </div>
-      <div class="modal-footer border-secondary">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="loadingUsuario">Cancelar</button>
-        <button type="button" class="btn btn-primary" @click="submitUsuario" :disabled="loadingUsuario">
-          <span v-if="loadingUsuario" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-          <i v-else class="bi" :class="usuarioForm.idUsuario ? 'bi-save' : 'bi-plus-circle' "></i>
-          {{ loadingUsuario ? 'Procesando...' : (usuarioForm.idUsuario ? 'Guardar cambios' : 'Crear Usuario') }}
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
-        <!-- Toast de notificación -->
-        <div class="toast-container position-fixed bottom-0 end-0 p-3">
-          <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #da02e5;">
-            <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #da02e5;">
-              <i class="bi bi-check-circle-fill me-2" style="color: #da02e5;"></i>
-              <strong class="me-auto">Éxito</strong>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body" style="background-color: #1a1a1a; color: white;">
-              <span id="successMessage">Operación completada correctamente ✅</span>
+          <!-- Modal de Confirmación de Eliminación -->
+          <div class="modal fade" id="modalConfirmarEliminacion" tabindex="-1" aria-labelledby="modalConfirmarEliminacionLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content bg-dark text-white" style="border: 2px solid #da02e5;">
+                <div class="modal-header border-secondary" style="background-color: #1a1a1a; border-bottom: 2px solid #da02e5;">
+                  <h5 class="modal-title" id="modalConfirmarEliminacionLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2" style="color: #da02e5;"></i>
+                    Confirmar Eliminación
+                  </h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="background-color: #1a1a1a;">
+                  <div class="text-center mb-3">
+                    <i class="bi bi-trash-fill" style="font-size: 3rem; color: #da02e5;"></i>
+                  </div>
+                  <p class="text-center mb-3" style="font-size: 1.1rem; color: #e0e0e0;">
+                    {{ confirmacionEliminacion.mensaje }}
+                  </p>
+                  <div class="alert alert-warning" style="background-color: #2d2d2d; border-color: #da02e5; color: #ffc107;">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Esta acción es destructiva y no se puede deshacer.</strong>
+                  </div>
+                </div>
+                <div class="modal-footer border-secondary" style="background-color: #1a1a1a; border-top: 2px solid #da02e5;">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Cancelar
+                  </button>
+                  <button type="button" class="btn btn-primary" @click="confirmarEliminacion" :disabled="eliminando">
+                    <span v-if="eliminando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <i v-else class="bi bi-trash-fill me-2"></i>
+                    {{ eliminando ? 'Eliminando...' : 'Eliminar' }}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #dc3545;">
-            <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #dc3545;">
-              <i class="bi bi-exclamation-triangle-fill me-2" style="color: #dc3545;"></i>
-              <strong class="me-auto">Error</strong>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+
+          <!-- Toast de notificación -->
+          <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #da02e5;">
+              <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #da02e5;">
+                <i class="bi bi-check-circle-fill me-2" style="color: #da02e5;"></i>
+                <strong class="me-auto">Éxito</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+              <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+                <span id="successMessage">Operación completada correctamente ✅</span>
+              </div>
             </div>
-            <div class="toast-body" style="background-color: #1a1a1a; color: white;">
-              <span id="errorMessage">No se pudo completar la operación</span>
+            
+            <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #1a1a1a; border: 1px solid #dc3545;">
+              <div class="toast-header" style="background-color: #2d2d2d; color: white; border-bottom: 1px solid #dc3545;">
+                <i class="bi bi-exclamation-triangle-fill me-2" style="color: #dc3545;"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+              <div class="toast-body" style="background-color: #1a1a1a; color: white;">
+                <span id="errorMessage">No se pudo completar la operación</span>
+              </div>
             </div>
           </div>
-        </div>
 
-      </div>
+        </div><!-- End contact-form-wrapper -->
+
+      </div><!-- End col-lg-8 mx-auto -->
+
     </section>
   </main>
 
@@ -453,6 +501,12 @@
           seleccionAsignados: [],
           loadingArea: false,
           loadingUsuario: false,
+          eliminando: false,
+          confirmacionEliminacion: {
+            tipo: null, // 'area' o 'usuario'
+            item: null,
+            mensaje: ''
+          },
           areaForm: {
             idArea: null,
             nombreArea: '',
@@ -637,12 +691,47 @@
             this.loadingArea = false;
           }
         },
-        async eliminarArea(area) {
-          if (!confirm(`¿Eliminar el área "${area.nombreArea}"?`)) return;
-          const resp = await fetch(`${API}/api/areas/${area.idArea}`, { method: 'DELETE' });
-          if (!resp.ok) { alert('No se pudo eliminar el área'); return; }
-          await this.cargarAreas();
-          await this.cargarUsuarios();
+        eliminarArea(area) {
+          this.confirmacionEliminacion.tipo = 'area';
+          this.confirmacionEliminacion.item = area;
+          this.confirmacionEliminacion.mensaje = `¿Estás seguro de que deseas eliminar el área "${area.nombreArea}"?`;
+          const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminacion'));
+          modal.show();
+        },
+        async confirmarEliminacion() {
+          this.eliminando = true;
+          try {
+            if (this.confirmacionEliminacion.tipo === 'area') {
+              const area = this.confirmacionEliminacion.item;
+              const resp = await fetch(`${API}/api/areas/${area.idArea}`, { method: 'DELETE' });
+              if (!resp.ok) {
+                this.showToast('error', 'No se pudo eliminar el área');
+                return;
+              }
+              this.showToast('success', `Área "${area.nombreArea}" eliminada correctamente ✅`);
+              await this.cargarAreas();
+              await this.cargarUsuarios();
+            } else if (this.confirmacionEliminacion.tipo === 'usuario') {
+              const usuario = this.confirmacionEliminacion.item;
+              const resp = await fetch(`${API}/api/usuarios/${usuario.idUsuario}`, { method: 'DELETE' });
+              if (!resp.ok) {
+                this.showToast('error', 'No se pudo eliminar el usuario');
+                return;
+              }
+              this.showToast('success', `Usuario "${usuario.nombre} ${usuario.apellido}" eliminado correctamente ✅`);
+              await this.cargarUsuarios();
+              await this.cargarAreas();
+            }
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminacion'));
+            if (modal) modal.hide();
+            // Limpiar confirmación
+            this.confirmacionEliminacion = { tipo: null, item: null, mensaje: '' };
+          } catch (e) {
+            this.showToast('error', e.message || 'Error al eliminar');
+          } finally {
+            this.eliminando = false;
+          }
         },
 
         // ------- USUARIOS -------
@@ -750,12 +839,12 @@
             this.loadingUsuario = false;
           }
         },
-        async eliminarUsuario(usuario) {
-          if (!confirm(`¿Eliminar al usuario ${usuario.nombre} ${usuario.apellido}?`)) return;
-          const resp = await fetch(`${API}/api/usuarios/${usuario.idUsuario}`, { method: 'DELETE' });
-          if (!resp.ok) { alert('No se pudo eliminar el usuario'); return; }
-          await this.cargarUsuarios();
-          await this.cargarAreas();
+        eliminarUsuario(usuario) {
+          this.confirmacionEliminacion.tipo = 'usuario';
+          this.confirmacionEliminacion.item = usuario;
+          this.confirmacionEliminacion.mensaje = `¿Estás seguro de que deseas eliminar al usuario "${usuario.nombre} ${usuario.apellido}"?`;
+          const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminacion'));
+          modal.show();
         }
       },
       async mounted() {

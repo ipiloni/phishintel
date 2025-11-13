@@ -111,6 +111,33 @@ select:disabled option {
               </div>
             </div>
 
+            <!-- Selector de Área y Usuario Remitente -->
+            <div class="mb-3" v-if="nivel === 'Difícil'">
+              <div class="row g-2">
+                <div class="col-6">
+                  <label for="areaRemitenteSelect" class="form-label">Seleccionar Área Remitente</label>
+                  <select v-model="filtroAreaRemitente" class="form-control" id="areaRemitenteSelect" name="areaRemitente" required>
+                    <option value="">-- Selecciona un área --</option>
+                    <option v-for="area in areas" :key="area.idArea" :value="area.nombreArea">
+                      {{ area.nombreArea }} 
+                    </option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label for="remitenteSelect" class="form-label">Seleccionar Usuario Remitente</label>
+                  <select v-model="filtroUsuarioRemitente" class="form-control" id="remitenteSelect" name="remitente" :disabled="!filtroAreaRemitente" required>
+                    <option value="" disabled>{{ filtroAreaRemitente ? '-- Selecciona un usuario remitente --' : '-- Selecciona un área primero --' }}</option>
+                    <template v-for="usuario in usuariosRemitentesFiltrados" :key="usuario.idUsuario">
+                      <option :value="usuario" v-if="!filtroUsuario || usuario.idUsuario !== filtroUsuario.idUsuario">
+                        {{ usuario.nombre }} {{ usuario.apellido }}
+                      </option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+              <small class="form-text" style="color: #ffffff;">DISCLAIMER: Suplantarás la identidad de un compañero de trabajo del individuo seleccionado. Declaras que no usarás este correo para ningún otro propósito que una simulación de phishing.</small>
+            </div>
+
             <!-- Dificultad -->
             <div class="mb-4">
               <label class="form-label mb-3">Nivel de Dificultad</label>
@@ -162,20 +189,6 @@ select:disabled option {
                 </div>
 
               </div>
-            </div>
-
-            <!-- Selector de Remitente (solo para dificultad Difícil) -->
-            <div class="mb-3" v-if="nivel === 'Difícil' && filtroUsuario">
-              <label for="remitenteSelect" class="form-label">Seleccionar Usuario Remitente</label>
-              <select v-model="filtroUsuarioRemitente" class="form-control" id="remitenteSelect" name="remitente" required>
-                <option value="">-- Selecciona un usuario remitente --</option>
-                <template v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario">
-                  <option :value="usuario" v-if="usuario.idUsuario !== filtroUsuario.idUsuario">
-                    {{ usuario.nombre }} {{ usuario.apellido }}
-                  </option>
-                </template>
-              </select>
-              <small class="form-text" style="color: #ffffff;">DISCLAIMER: Suplantarás la identidad de un compañero de trabajo del individuo seleccionado. Declaras que no usarás este correo para ningún otro propósito que una simulación de phishing.</small>
             </div>
 
             <!-- Botón de enviar -->
@@ -357,6 +370,7 @@ select:disabled option {
           areas: [],
           filtroArea: "",
           filtroUsuario: "",
+          filtroAreaRemitente: "",
           filtroUsuarioRemitente: "",
           nivel: "Fácil",
           modalAsunto: "",
@@ -379,19 +393,48 @@ select:disabled option {
         usuariosFiltrados() {
           const areaSeleccionada = this.areas.find(a => a.nombreArea === this.filtroArea);
           return areaSeleccionada ? areaSeleccionada.usuarios : [];
+        },
+        usuariosRemitentesFiltrados() {
+          const areaSeleccionada = this.areas.find(a => a.nombreArea === this.filtroAreaRemitente);
+          return areaSeleccionada ? areaSeleccionada.usuarios : [];
         }
       },
       watch: {
         filtroArea() {
           // Limpiar usuario seleccionado cuando cambie el área
           this.filtroUsuario = "";
+        },
+        filtroAreaRemitente() {
+          // Limpiar usuario remitente seleccionado cuando cambie el área
+          this.filtroUsuarioRemitente = "";
+        },
+        nivel() {
+          // Limpiar remitente cuando cambie la dificultad si no es Difícil
+          if (this.nivel !== 'Difícil') {
+            this.filtroAreaRemitente = "";
+            this.filtroUsuarioRemitente = "";
+          }
+        },
+        filtroUsuario() {
+          // Si el destinatario seleccionado es el mismo que el remitente, limpiar remitente
+          if (this.filtroUsuario && this.filtroUsuarioRemitente && 
+              this.filtroUsuario.idUsuario === this.filtroUsuarioRemitente.idUsuario) {
+            this.filtroUsuarioRemitente = "";
+          }
+        },
+        filtroUsuarioRemitente() {
+          // Si el remitente seleccionado es el mismo que el destinatario, limpiar destinatario
+          if (this.filtroUsuarioRemitente && this.filtroUsuario && 
+              this.filtroUsuarioRemitente.idUsuario === this.filtroUsuario.idUsuario) {
+            this.filtroUsuario = "";
+          }
         }
       },
       methods: {
         async generarPreview() {
           // Validar que se haya seleccionado remitente para dificultad Difícil
-          if (this.nivel === 'Difícil' && !this.filtroUsuarioRemitente) {
-            alert('Debe seleccionar un usuario remitente para la dificultad Difícil');
+          if (this.nivel === 'Difícil' && (!this.filtroAreaRemitente || !this.filtroUsuarioRemitente)) {
+            alert('Debe seleccionar un área y usuario remitente para la dificultad Difícil');
             return;
           }
           

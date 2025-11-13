@@ -411,9 +411,11 @@ select:disabled option {
                   <label for="userSelect" class="form-label">Seleccionar usuario destinatario</label>
                   <select v-model="filtroUsuario" class="form-control" id="userSelect" name="usuario" :disabled="!filtroArea" required>
                     <option value="" disabled>{{ filtroArea ? '-- Selecciona un usuario --' : '-- Selecciona un área primero --' }}</option>
-                    <option v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario" :value="usuario">
-                      {{ usuario.nombre }} {{ usuario.apellido }}
-                    </option>
+                    <template v-for="usuario in usuariosFiltrados" :key="usuario.idUsuario">
+                      <option :value="usuario" v-if="!filtroUsuarioRemitente || usuario.idUsuario !== filtroUsuarioRemitente.idUsuario">
+                        {{ usuario.nombre }} {{ usuario.apellido }}
+                      </option>
+                    </template>
                   </select>
                 </div>
               </div>
@@ -435,9 +437,11 @@ select:disabled option {
                   <label for="usuarioRemitenteSelect" class="form-label">Seleccionar usuario remitente</label>
                   <select v-model="filtroUsuarioRemitente" class="form-control" id="usuarioRemitenteSelect" name="usuarioRemitente" :disabled="!filtroAreaRemitente" required>
                     <option value="" disabled>{{ filtroAreaRemitente ? '-- Selecciona un usuario --' : '-- Selecciona un área primero --' }}</option>
-                    <option v-for="usuario in usuariosRemitentesFiltrados" :key="usuario.idUsuario" :value="usuario">
-                      {{ usuario.nombre }} {{ usuario.apellido }}
-                    </option>
+                    <template v-for="usuario in usuariosRemitentesFiltrados" :key="usuario.idUsuario">
+                      <option :value="usuario" v-if="!filtroUsuario || usuario.idUsuario !== filtroUsuario.idUsuario">
+                        {{ usuario.nombre }} {{ usuario.apellido }}
+                      </option>
+                    </template>
                   </select>
                 </div>
               </div>
@@ -1212,7 +1216,22 @@ select:disabled option {
           this.tieneVozConfigurada = false;
           this.idVozRemitente = null;
         },
+        filtroUsuario() {
+          // Si el destinatario seleccionado es el mismo que el remitente, limpiar remitente
+          if (this.filtroUsuario && this.filtroUsuarioRemitente && 
+              this.filtroUsuario.idUsuario === this.filtroUsuarioRemitente.idUsuario) {
+            this.filtroUsuarioRemitente = "";
+            this.tieneVozConfigurada = false;
+            this.idVozRemitente = null;
+          }
+        },
         async filtroUsuarioRemitente() {
+          // Si el remitente seleccionado es el mismo que el destinatario, limpiar destinatario
+          if (this.filtroUsuarioRemitente && this.filtroUsuario && 
+              this.filtroUsuarioRemitente.idUsuario === this.filtroUsuario.idUsuario) {
+            this.filtroUsuario = "";
+          }
+          
           // Limpiar audio generado al cambiar usuario
           this.audioGenerado = null;
           
