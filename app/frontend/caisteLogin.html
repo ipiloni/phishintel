@@ -16,6 +16,7 @@
             </div>
             
             <form class="login-form" id="loginForm" novalidate>
+                <!-- Campos ocultos para almacenar idUsuario e idEvento (se agregan dinámicamente cuando hay parámetros en la URL) -->
                 <div class="form-group">
                     <div class="input-wrapper">
                         <input type="email" id="email" name="email" required autocomplete="email">
@@ -56,7 +57,7 @@
                     <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
                 </div>
 
-                <button type="button" class="login-btn material-btn" onclick="window.location.href='/caiste'">
+                <button type="submit" class="login-btn material-btn" id="loginButton">
                     <div class="btn-ripple"></div>
                     <span class="btn-text">INICIAR SESIÓN</span>
                     <div class="btn-loader">
@@ -88,5 +89,61 @@
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            try {
+                console.log('[JS_CAISTE_LOGIN] Formulario enviado - Iniciando registro de falla grave');
+                // Obtener los parámetros de los campos ocultos del formulario
+                const idUsuarioInput = document.getElementById('caiste_idUsuario');
+                const idEventoInput = document.getElementById('caiste_idEvento');
+                
+                console.log('[JS_CAISTE_LOGIN] Campos ocultos encontrados:', {
+                    idUsuarioInput: idUsuarioInput ? 'Sí' : 'No',
+                    idEventoInput: idEventoInput ? 'Sí' : 'No'
+                });
+                
+                if (idUsuarioInput && idEventoInput) {
+                    const idUsuario = idUsuarioInput.value;
+                    const idEvento = idEventoInput.value;
+                    
+                    console.log('[JS_CAISTE_LOGIN] Valores de campos ocultos:', { idUsuario, idEvento });
+                    
+                    if (idUsuario && idEvento) {
+                        console.log('[JS_CAISTE_LOGIN] Registrando falla grave para usuario:', idUsuario, 'evento:', idEvento);
+                        const fallaResponse = await fetch('/api/sumar-falla-grave', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({
+                                idUsuario: parseInt(idUsuario),
+                                idEvento: parseInt(idEvento)
+                            })
+                        });
+                        
+                        if (fallaResponse.ok) {
+                            const fallaData = await fallaResponse.json();
+                            console.log('[JS_CAISTE_LOGIN] ✅ Falla grave registrada exitosamente:', fallaData);
+                        } else {
+                            const errorData = await fallaResponse.json();
+                            console.error('[JS_CAISTE_LOGIN] ❌ Error al registrar falla grave - Status:', fallaResponse.status, 'Error:', errorData);
+                        }
+                    } else {
+                        console.warn('[JS_CAISTE_LOGIN] ⚠️ Campos ocultos encontrados pero sin valores');
+                    }
+                } else {
+                    console.warn('[JS_CAISTE_LOGIN] ⚠️ No se encontraron campos ocultos (idUsuario o idEvento) - probablemente dificultad fácil');
+                }
+            } catch (error) {
+                console.error('[JS_CAISTE_LOGIN] ❌ Excepción al registrar falla grave:', error);
+            }
+            
+            // Redirigir a /caiste
+            window.location.href = '/caiste';
+        });
+    </script>
 </body>
 </html>

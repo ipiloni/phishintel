@@ -528,7 +528,7 @@ def openapi_spec():
             "/api/areas/fallas-empleados-scoring": {
                 "get": {
                     "summary": "🎯 Obtener Fallas por Empleado con Sistema de Scoring Invertido",
-                    "description": "Obtiene un listado completo de todos los empleados con sistema de scoring invertido (100-0 puntos) y niveles de riesgo. Incluye empleados sin fallas. Los empleados empiezan con 100 puntos y van perdiendo por fallas: Correos = -10 pts, Mensajes = -15 pts, Llamadas/VideoLlamadas = -20 pts. Penalización adicional por haber fallado en el pasado: -10 pts. Pueden recuperar puntos reportando eventos: +5 pts por evento reportado. Clasifica en niveles de riesgo: Sin riesgo (100), Bajo (90-99), Medio (75-89), Alto (50-74), Máximo (0-49). El área muestra promedio de puntos de empleados. Implementado en ResultadoEventoController.",
+                    "description": "Obtiene un listado completo de todos los empleados con sistema de scoring invertido (100-0 puntos) y niveles de riesgo. Incluye empleados sin fallas. Los empleados empiezan con 100 puntos y van perdiendo por fallas: Falla simple = -5 pts, Falla grave = -10 pts (independiente del tipo de evento). Penalización adicional por haber fallado en el pasado basada en el tipo de falla. Pueden recuperar puntos reportando eventos: +5 pts por evento reportado. Clasifica en niveles de riesgo: Sin riesgo (100), Bajo (90-99), Medio (75-89), Alto (50-74), Máximo (0-49). El área muestra promedio de puntos de empleados. Implementado en ResultadoEventoController.",
                     "tags": ["📊 Reportes"],
                     "parameters": [
                         {
@@ -576,9 +576,9 @@ def openapi_spec():
                                                                     "nombre": {"type": "string"},
                                                                     "apellido": {"type": "string"},
                                                                     "puntos_restantes": {"type": "integer", "description": "Puntos restantes del empleado (100 - puntos perdidos - penalizacion_falla_pasado + puntos ganados)"},
-                                                                    "puntos_perdidos": {"type": "integer", "description": "Puntos perdidos por fallas del empleado"},
+                                                                    "puntos_perdidos": {"type": "integer", "description": "Puntos perdidos por fallas del empleado (5 pts por falla simple, 10 pts por falla grave)"},
                                                                     "puntos_ganados": {"type": "integer", "description": "Puntos ganados por eventos reportados (5 pts por reporte)"},
-                                                                    "penalizacion_falla_pasado": {"type": "integer", "description": "Penalización por haber fallado en el pasado (10 pts)"},
+                                                                    "penalizacion_falla_pasado": {"type": "integer", "description": "Penalización por haber fallado en el pasado (basada en tipo de falla: 5 pts por simple, 10 pts por grave)"},
                                                                     "ha_fallado_en_pasado": {"type": "boolean", "description": "Indica si el empleado ha fallado en el pasado en algún evento"},
                                                                     "total_fallas": {"type": "integer", "description": "Total de fallas del empleado"},
                                                                     "total_reportados": {"type": "integer", "description": "Total de eventos reportados del empleado"},
@@ -586,8 +586,11 @@ def openapi_spec():
                                                                     "nivel_riesgo": {"type": "string", "enum": ["Sin riesgo", "Riesgo bajo", "Riesgo medio", "Riesgo alto", "Riesgo máximo"], "description": "Nivel de riesgo basado en puntos"},
                                                                     "fallas_por_tipo": {
                                                                         "type": "object",
-                                                                        "description": "Desglose de fallas por tipo de evento",
-                                                                        "additionalProperties": {"type": "integer"}
+                                                                        "description": "Desglose de fallas por tipo de falla (simples/graves)",
+                                                                        "properties": {
+                                                                            "fallas_simples": {"type": "integer", "description": "Cantidad de fallas simples"},
+                                                                            "fallas_graves": {"type": "integer", "description": "Cantidad de fallas graves"}
+                                                                        }
                                                                     }
                                                                 }
                                                             }
@@ -607,7 +610,7 @@ def openapi_spec():
             "/api/scoring/empleado/{idUsuario}": {
                 "get": {
                     "summary": "🎯 Obtener Scoring Individual de Empleado (Sistema Invertido)",
-                    "description": "Calcula el scoring individual de un empleado específico con sistema invertido (100-0 puntos). El empleado empieza con 100 puntos y va perdiendo por fallas. Penalización adicional por haber fallado en el pasado: -10 pts. Puede recuperar puntos reportando eventos: +5 pts por evento reportado. Clasifica en niveles de riesgo: Sin riesgo (100), Bajo (90-99), Medio (75-89), Alto (50-74), Máximo (0-49). Incluye puntos restantes, puntos perdidos, puntos ganados, penalización por falla en el pasado y desglose detallado por tipo de evento. Implementado en ResultadoEventoController.",
+                    "description": "Calcula el scoring individual de un empleado específico con sistema invertido (100-0 puntos). El empleado empieza con 100 puntos y va perdiendo por fallas: Falla simple = -5 pts, Falla grave = -10 pts (independiente del tipo de evento). Penalización adicional por haber fallado en el pasado basada en el tipo de falla. Puede recuperar puntos reportando eventos: +5 pts por evento reportado. Clasifica en niveles de riesgo: Sin riesgo (100), Bajo (90-99), Medio (75-89), Alto (50-74), Máximo (0-49). Incluye puntos restantes, puntos perdidos, puntos ganados, penalización por falla en el pasado y desglose detallado por tipo de falla (simples/graves). Implementado en ResultadoEventoController.",
                     "tags": ["📊 Reportes"],
                     "parameters": [
                         {
@@ -630,9 +633,9 @@ def openapi_spec():
                                             "nombre": {"type": "string"},
                                             "apellido": {"type": "string"},
                                             "puntos_restantes": {"type": "integer", "description": "Puntos restantes del empleado (100 - puntos perdidos - penalizacion_falla_pasado + puntos ganados)"},
-                                            "puntos_perdidos": {"type": "integer", "description": "Puntos perdidos por fallas"},
+                                            "puntos_perdidos": {"type": "integer", "description": "Puntos perdidos por fallas (5 pts por falla simple, 10 pts por falla grave)"},
                                             "puntos_ganados": {"type": "integer", "description": "Puntos ganados por eventos reportados (5 pts por reporte)"},
-                                            "penalizacion_falla_pasado": {"type": "integer", "description": "Penalización por haber fallado en el pasado (10 pts)"},
+                                            "penalizacion_falla_pasado": {"type": "integer", "description": "Penalización por haber fallado en el pasado (basada en tipo de falla: 5 pts por simple, 10 pts por grave)"},
                                             "ha_fallado_en_pasado": {"type": "boolean", "description": "Indica si el empleado ha fallado en el pasado en algún evento"},
                                             "puntaje_inicial": {"type": "integer", "description": "Puntaje inicial (100 puntos)"},
                                             "total_fallas": {"type": "integer", "description": "Total de fallas"},
@@ -640,34 +643,56 @@ def openapi_spec():
                                             "nivel_riesgo": {"type": "string", "enum": ["Sin riesgo", "Riesgo bajo", "Riesgo medio", "Riesgo alto", "Riesgo máximo"]},
                                             "desglose_por_tipo": {
                                                 "type": "object",
-                                                "description": "Desglose detallado por tipo de evento",
+                                                "description": "Desglose detallado por tipo de falla",
                                                 "properties": {
-                                                    "CORREO": {
+                                                    "fallas_simples": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "cantidad": {"type": "integer"},
+                                                            "puntos_perdidos": {"type": "integer", "description": "Cantidad × 5 puntos perdidos"}
+                                                        }
+                                                    },
+                                                    "fallas_graves": {
                                                         "type": "object",
                                                         "properties": {
                                                             "cantidad": {"type": "integer"},
                                                             "puntos_perdidos": {"type": "integer", "description": "Cantidad × 10 puntos perdidos"}
                                                         }
-                                                    },
-                                                    "MENSAJE": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "cantidad": {"type": "integer"},
-                                                            "puntos_perdidos": {"type": "integer", "description": "Cantidad × 15 puntos perdidos"}
+                                                    }
+                                                }
+                                            },
+                                            "eventos_detalle": {
+                                                "type": "object",
+                                                "description": "Detalle de eventos con información de esFallaGrave",
+                                                "properties": {
+                                                    "activos": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "idEvento": {"type": "integer"},
+                                                                "titulo": {"type": "string"},
+                                                                "tipoEvento": {"type": "string"},
+                                                                "fechaCreacion": {"type": "string", "format": "date-time"},
+                                                                "puntos": {"type": "integer", "description": "5 para falla simple, 10 para falla grave"},
+                                                                "esFallaGrave": {"type": "boolean"}
+                                                            }
                                                         }
                                                     },
-                                                    "LLAMADA": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "cantidad": {"type": "integer"},
-                                                            "puntos_perdidos": {"type": "integer", "description": "Cantidad × 20 puntos perdidos"}
-                                                        }
-                                                    },
-                                                    "VIDEOLLAMADA": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "cantidad": {"type": "integer"},
-                                                            "puntos_perdidos": {"type": "integer", "description": "Cantidad × 20 puntos perdidos"}
+                                                    "reportados": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "idEvento": {"type": "integer"},
+                                                                "titulo": {"type": "string"},
+                                                                "tipoEvento": {"type": "string"},
+                                                                "fechaCreacion": {"type": "string", "format": "date-time"},
+                                                                "puntos": {"type": "integer", "description": "5 puntos por reporte"},
+                                                                "haFalladoEnElPasado": {"type": "boolean"},
+                                                                "puntosFallaPasada": {"type": "integer", "description": "5 para falla simple pasada, 10 para falla grave pasada"},
+                                                                "esFallaGrave": {"type": "boolean"}
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -1030,7 +1055,8 @@ def openapi_spec():
             },
             "/api/sumar-falla": {
                 "post": {
-                    "summary": "Marcar evento como falla (usa fecha actual por defecto)",
+                    "summary": "Marcar evento como falla simple (resta 5 puntos, usa fecha actual por defecto)",
+                    "description": "Registra una falla simple para un usuario en un evento. Las fallas simples restan 5 puntos del scoring del empleado, independientemente del tipo de evento (correo, mensaje, llamada).",
                     "tags": ["📅 Eventos"],
                     "requestBody": {
                         "required": True,
@@ -1059,7 +1085,7 @@ def openapi_spec():
                     },
                     "responses": {
                         "200": {
-                            "description": "Falla registrada correctamente",
+                            "description": "Falla simple registrada correctamente",
                             "content": {
                                 "application/json": {
                                     "schema": {
@@ -1068,7 +1094,8 @@ def openapi_spec():
                                             "mensaje": {"type": "string"},
                                             "idUsuario": {"type": "integer"},
                                             "idEvento": {"type": "integer"},
-                                            "fechaFalla": {"type": "string", "format": "date-time"}
+                                            "fechaFalla": {"type": "string", "format": "date-time"},
+                                            "esFallaGrave": {"type": "boolean", "description": "Indica si es falla grave (siempre false para este endpoint)"}
                                         }
                                     }
                                 }
@@ -1076,6 +1103,60 @@ def openapi_spec():
                         },
                         "400": {"description": "Solicitud inválida - Faltan parámetros o fecha inválida"},
                         "404": {"description": "No existe relación entre el usuario y el evento"}
+                    }
+                }
+            },
+            "/api/sumar-falla-grave": {
+                "post": {
+                    "summary": "Marcar evento como falla grave (resta 10 puntos, usa fecha actual por defecto)",
+                    "description": "Registra una falla grave para un usuario en un evento. Las fallas graves restan 10 puntos del scoring del empleado, independientemente del tipo de evento (correo, mensaje, llamada). Se registra cuando el usuario ingresa credenciales en formularios de phishing.",
+                    "tags": ["📅 Eventos"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {"$ref": "#/components/schemas/SumarFallaGrave"},
+                                "examples": {
+                                    "01_sin_fecha": {
+                                        "summary": "Sin fecha (usa fecha actual)",
+                                        "value": {
+                                            "idUsuario": 1,
+                                            "idEvento": 1
+                                        }
+                                    },
+                                    "02_con_fecha": {
+                                        "summary": "Con fecha específica",
+                                        "value": {
+                                            "idUsuario": 1,
+                                            "idEvento": 1,
+                                            "fechaFalla": "2025-01-15T10:30:00"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Falla grave registrada correctamente",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "mensaje": {"type": "string"},
+                                            "idUsuario": {"type": "integer"},
+                                            "idEvento": {"type": "integer"},
+                                            "fechaFalla": {"type": "string", "format": "date-time"},
+                                            "esFallaGrave": {"type": "boolean", "description": "Indica si es falla grave (siempre true para este endpoint)"}
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "400": {"description": "Solicitud inválida - Faltan parámetros o fecha inválida"},
+                        "404": {"description": "No existe relación entre el usuario y el evento"},
+                        "500": {"description": "Error del servidor"}
                     }
                 }
             },
@@ -1824,7 +1905,7 @@ def openapi_spec():
             "/api/eventos/batch-prueba": {
                 "post": {
                     "summary": "Crear batch de eventos de prueba",
-                    "description": "Crea un conjunto de eventos de phishing de prueba para los empleados especificados. Los eventos incluyen diferentes tipos (correo, mensaje, llamada, videollamada) con fechas personalizables. Los usuarios 1-6 tienen distribución normal (40% fallas activas, 20% reportados, 40% pendientes). Los usuarios 7-9 tienen mayor probabilidad de reportar eventos (10% fallas activas, 20% reportados con falla previa, 50% reportados sin falla previa, 20% pendientes) para ganar puntos.",
+                    "description": "Crea un conjunto de eventos de phishing de prueba para los empleados especificados. Los eventos incluyen diferentes tipos (correo, mensaje, llamada, videollamada) con fechas personalizables. Los usuarios 1-6 tienen distribución normal (40% fallas activas, 20% reportados, 40% pendientes). Los usuarios 7-9 tienen mayor probabilidad de reportar eventos (10% fallas activas, 20% reportados con falla previa, 50% reportados sin falla previa, 20% pendientes) para ganar puntos. Aproximadamente el 50% de las fallas creadas serán fallas graves (esFallaGrave=true), que restan 10 puntos en lugar de 5.",
                     "tags": ["📅 Eventos"],
                     "requestBody": {
                         "required": True,
@@ -1935,9 +2016,13 @@ def openapi_spec():
                                             "resumen_resultados": {
                                                 "type": "object",
                                                 "properties": {
-                                                    "fallas_activas": {"type": "integer", "description": "Cantidad de fallas activas"},
+                                                    "fallas_activas": {"type": "integer", "description": "Cantidad total de fallas activas"},
+                                                    "fallas_activas_simples": {"type": "integer", "description": "Cantidad de fallas activas simples (restan 5 puntos)"},
+                                                    "fallas_activas_graves": {"type": "integer", "description": "Cantidad de fallas activas graves (restan 10 puntos)"},
                                                     "reportados": {"type": "integer", "description": "Cantidad de eventos reportados"},
-                                                    "fallas_pasadas": {"type": "integer", "description": "Cantidad de fallas pasadas"},
+                                                    "fallas_pasadas": {"type": "integer", "description": "Cantidad total de fallas pasadas"},
+                                                    "fallas_pasadas_simples": {"type": "integer", "description": "Cantidad de fallas pasadas simples (penalización de 5 puntos)"},
+                                                    "fallas_pasadas_graves": {"type": "integer", "description": "Cantidad de fallas pasadas graves (penalización de 10 puntos)"},
                                                     "pendientes": {"type": "integer", "description": "Cantidad de eventos pendientes sin falla"}
                                                 }
                                             }
@@ -2586,7 +2671,8 @@ def openapi_spec():
                                     "resultado": {"$ref": "#/components/schemas/ResultadoEvento"},
                                     "fechaReporte": {"type": "string", "format": "date-time", "description": "Fecha del reporte (si existe)"},
                                     "fechaFalla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (si existe)"},
-                                    "haFalladoEnElPasado": {"type": "boolean", "description": "Indica si el usuario ha fallado en el pasado en algún evento"}
+                                    "haFalladoEnElPasado": {"type": "boolean", "description": "Indica si el usuario ha fallado en el pasado en algún evento"},
+                                    "esFallaGrave": {"type": "boolean", "description": "Indica si la falla fue grave (resta 10 puntos) o simple (resta 5 puntos)"}
                                 }
                             }
                         }
@@ -2809,6 +2895,15 @@ def openapi_spec():
                         "idUsuario": {"type": "integer", "description": "ID del usuario"},
                         "idEvento": {"type": "integer", "description": "ID del evento"},
                         "fechaFalla": {"type": "string", "format": "date-time", "description": "Fecha de la falla (OPCIONAL - si no se proporciona se usa la fecha y hora actual automáticamente)"}
+                    }
+                },
+                "SumarFallaGrave": {
+                    "type": "object",
+                    "required": ["idUsuario", "idEvento"],
+                    "properties": {
+                        "idUsuario": {"type": "integer", "description": "ID del usuario"},
+                        "idEvento": {"type": "integer", "description": "ID del evento"},
+                        "fechaFalla": {"type": "string", "format": "date-time", "description": "Fecha de la falla grave (OPCIONAL - si no se proporciona se usa la fecha y hora actual automáticamente)"}
                     }
                 },
                 "SumarReportado": {

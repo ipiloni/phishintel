@@ -29,7 +29,8 @@ class EventosController:
                         "idUsuario": ux.usuario.idUsuario,
                         "nombreUsuario": ux.usuario.nombreUsuario,
                         "resultado": ux.resultado.value,
-                        "haFalladoEnElPasado": ux.haFalladoEnElPasado
+                        "haFalladoEnElPasado": ux.haFalladoEnElPasado,
+                        "esFallaGrave": ux.esFallaGrave
                     }
                     # Agregar fechas si existen
                     if ux.fechaReporte:
@@ -76,7 +77,8 @@ class EventosController:
                     "idUsuario": ux.usuario.idUsuario,
                     "nombreUsuario": ux.usuario.nombreUsuario,
                     "resultado": ux.resultado.value,
-                    "haFalladoEnElPasado": ux.haFalladoEnElPasado
+                    "haFalladoEnElPasado": ux.haFalladoEnElPasado,
+                    "esFallaGrave": ux.esFallaGrave
                 }
                 # Agregar fechas si existen
                 if ux.fechaReporte:
@@ -338,6 +340,9 @@ class EventosController:
                     # Determinar resultado basado en probabilidades o configuración
                     rand = random.random()
                     
+                    # Variable para determinar si es falla grave (50% de probabilidad cuando hay falla)
+                    esFallaGrave = False
+                    
                     # Usuarios 7, 8, 9 tienen más probabilidad de reportar eventos
                     if idUsuario in [7, 8, 9]:
                         if rand < 0.1:  # 10% falla activa
@@ -345,11 +350,15 @@ class EventosController:
                             fechaFalla = evento.fechaEvento + timedelta(minutes=random.randint(5, 60))
                             fechaReporte = None
                             haFalladoEnElPasado = True
+                            # 50% de probabilidad de que sea falla grave
+                            esFallaGrave = random.random() < 0.5
                         elif rand < 0.3:  # 20% reportado con falla previa
                             resultado = ResultadoEvento.REPORTADO
                             fechaFalla = evento.fechaEvento + timedelta(minutes=random.randint(5, 30))
                             fechaReporte = evento.fechaEvento + timedelta(minutes=random.randint(10, 120))
                             haFalladoEnElPasado = True
+                            # 50% de probabilidad de que la falla previa haya sido grave
+                            esFallaGrave = random.random() < 0.5
                         elif rand < 0.8:  # 50% reportado SIN falla previa - muy probable
                             resultado = ResultadoEvento.REPORTADO
                             fechaFalla = None
@@ -367,11 +376,15 @@ class EventosController:
                             fechaFalla = evento.fechaEvento + timedelta(minutes=random.randint(5, 60))
                             fechaReporte = None
                             haFalladoEnElPasado = True
+                            # 50% de probabilidad de que sea falla grave
+                            esFallaGrave = random.random() < 0.5
                         elif rand < 0.6:  # 20% reportado (falla pasada)
                             resultado = ResultadoEvento.REPORTADO
                             fechaFalla = evento.fechaEvento + timedelta(minutes=random.randint(5, 30))
                             fechaReporte = evento.fechaEvento + timedelta(minutes=random.randint(10, 120))
                             haFalladoEnElPasado = True
+                            # 50% de probabilidad de que la falla previa haya sido grave
+                            esFallaGrave = random.random() < 0.5
                         else:  # 40% pendiente (sin falla)
                             resultado = ResultadoEvento.PENDIENTE
                             fechaFalla = None
@@ -385,7 +398,8 @@ class EventosController:
                         resultado=resultado,
                         fechaFalla=fechaFalla,
                         fechaReporte=fechaReporte,
-                        haFalladoEnElPasado=haFalladoEnElPasado
+                        haFalladoEnElPasado=haFalladoEnElPasado,
+                        esFallaGrave=esFallaGrave
                     )
                     session.add(usuario_evento)
                     
@@ -395,7 +409,8 @@ class EventosController:
                         "resultado": resultado.value,
                         "fechaFalla": fechaFalla.isoformat() if fechaFalla else None,
                         "fechaReporte": fechaReporte.isoformat() if fechaReporte else None,
-                        "haFalladoEnElPasado": haFalladoEnElPasado
+                        "haFalladoEnElPasado": haFalladoEnElPasado,
+                        "esFallaGrave": esFallaGrave
                     })
                 
                 eventos_creados.append({
@@ -417,8 +432,12 @@ class EventosController:
                 "eventos": eventos_creados,
                 "resumen_resultados": {
                     "fallas_activas": len([r for r in resultados_creados if r["resultado"] == "FALLA"]),
+                    "fallas_activas_simples": len([r for r in resultados_creados if r["resultado"] == "FALLA" and not r.get("esFallaGrave", False)]),
+                    "fallas_activas_graves": len([r for r in resultados_creados if r["resultado"] == "FALLA" and r.get("esFallaGrave", False)]),
                     "reportados": len([r for r in resultados_creados if r["resultado"] == "REPORTADO"]),
                     "fallas_pasadas": len([r for r in resultados_creados if r["haFalladoEnElPasado"] and r["resultado"] != "FALLA"]),
+                    "fallas_pasadas_simples": len([r for r in resultados_creados if r["haFalladoEnElPasado"] and r["resultado"] != "FALLA" and not r.get("esFallaGrave", False)]),
+                    "fallas_pasadas_graves": len([r for r in resultados_creados if r["haFalladoEnElPasado"] and r["resultado"] != "FALLA" and r.get("esFallaGrave", False)]),
                     "pendientes": len([r for r in resultados_creados if r["resultado"] == "PENDIENTE" and not r["haFalladoEnElPasado"]])
                 }
             }), 200

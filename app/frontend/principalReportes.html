@@ -1241,6 +1241,9 @@
                       <i class="bi bi-person-badge me-2" style="color: #da02e5;"></i>
                       Fallas por Empleado con Scoring
                             </h5>
+                            <button class="btn btn-sm" onclick="recargarEmpleados()" title="Recargar datos de empleados" style="background: linear-gradient(135deg, #da02e5, #e533f0); color: white; border: none; font-weight: 600;">
+                              <i class="bi bi-arrow-clockwise me-1"></i>Recargar
+                            </button>
                           </div>
 
 
@@ -2262,6 +2265,12 @@
 
       filas.sort(comparar).forEach(fila => tbody.appendChild(fila));
     }
+    
+    function recargarEmpleados() {
+      console.log('🔄 Recargando datos de empleados...');
+      cargarFallasPorEmpleado();
+    }
+    
     async function cargarFallasPorEmpleado() {
       console.log('🚀 Iniciando carga de fallas por empleado...');
 
@@ -2403,15 +2412,24 @@
                  }
 
                 const desgloseBadges = (() => {
-                  const porTipo = (empleado.total_fallas || 0) > 0 && empleado.fallas_por_tipo ?
-                    Object.entries(empleado.fallas_por_tipo).map(([tipo, cantidad]) => {
-                      const iconos = { 'CORREO': '📧', 'MENSAJE': '💬', 'LLAMADA': '📞', 'VIDEOLLAMADA': '📹' };
-                      const nombres = { 'CORREO': 'Correo', 'MENSAJE': 'Mensaje', 'LLAMADA': 'Llamada', 'VIDEOLLAMADA': 'Videollamada' };
-                      const puntos = { 'CORREO': 10, 'MENSAJE': 15, 'LLAMADA': 20, 'VIDEOLLAMADA': 20 };
-                      return `<span class=\"badge\" style=\"background: #540E59; color: white; font-size: 0.7rem;\">${iconos[tipo] || '❓'} ${cantidad} ${nombres[tipo] || tipo} (-${cantidad * (puntos[tipo] || 0)} pts)</span>`;
-                    }).join('') : '';
+                  const iconos = { 'CORREO': '📧', 'MENSAJE': '💬', 'LLAMADA': '📞', 'VIDEOLLAMADA': '📹' };
+                  const nombres = { 'CORREO': 'Correo', 'MENSAJE': 'Mensaje', 'LLAMADA': 'Llamada', 'VIDEOLLAMADA': 'Videollamada' };
+                  
+                  let badges = '';
+                  
+                  // Mostrar fallas por tipo de evento como estaba antes
+                  if (empleado.fallas_por_tipo) {
+                    Object.entries(empleado.fallas_por_tipo).forEach(([tipo, info]) => {
+                      if (info && info.cantidad > 0) {
+                        const cantidad = info.cantidad || 0;
+                        const puntos = info.puntos_perdidos || 0;
+                        badges += `<span class=\"badge\" style=\"background: #540E59; color: white; font-size: 0.7rem;\">${iconos[tipo] || '❓'} ${cantidad} ${nombres[tipo] || tipo} (-${puntos} pts)</span>`;
+                      }
+                    });
+                  }
+                  
                   const reportados = (empleado.total_reportados || 0) > 0 ? `<span class=\"badge\" style=\"background: rgba(255,51,255,0.8); color: white; font-size: 0.7rem;\"><i class=\"bi bi-check-circle-fill me-1\"></i> Reportados: +${empleado.puntos_ganados || 0} pts</span>` : '';
-                  return `${porTipo} ${reportados}`;
+                  return `${badges} ${reportados}`;
                 })();
 
                 html += `
@@ -3312,7 +3330,7 @@
                      <strong>${evento.titulo}</strong>
                    </div>
                    <div class="small" style="color: #999;">
-                     ID: ${evento.idEvento} | ${fechaFormateada}
+                     ID: ${evento.idEvento} | ${fechaFormateada}${evento.esFallaGrave ? ' | <span style="color: #dc3545;">Falla Grave</span>' : ' | <span style="color: #6c757d;">Falla Simple</span>'}
                    </div>
                  </div>
                </div>
@@ -3364,7 +3382,7 @@
                          <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
                          <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
                        </div>
-                       <div class="d-flex gap-1">
+                       <div class="d-flex gap-1 flex-wrap">
                          <span class="badge" style="background: #28a745; color: white; font-weight: bold;">Reportado +${evento.puntos}</span>
                          <span class="badge" style="background: #ffc107; color: #000; font-weight: bold;">Fallado -${evento.puntosFallaPasada}</span>
                        </div>
@@ -3373,7 +3391,7 @@
                        <strong>${evento.titulo}</strong>
                      </div>
                      <div class="small" style="color: #999;">
-                       ID: ${evento.idEvento} | ${fechaFormateada}
+                       ID: ${evento.idEvento} | ${fechaFormateada}${evento.esFallaGrave ? ' | <span style="color: #dc3545;">Falla Grave</span>' : ' | <span style="color: #6c757d;">Falla Simple</span>'}
                      </div>
                    </div>
                  </div>

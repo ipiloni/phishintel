@@ -55,7 +55,12 @@
       <div class="col-lg-10 mx-auto" data-aos="fade-up" data-aos-delay="200">
         <div class="contact-form-wrapper">
           <div class="form-header">
-            <h3><i class="bi bi-graph-up me-2" style="color: #da02e5;"></i>Mi Scoring de Seguridad</h3>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h3 class="mb-0"><i class="bi bi-graph-up me-2" style="color: #da02e5;"></i>Mi Scoring de Seguridad</h3>
+              <button class="btn" onclick="recargarScoring()" title="Recargar scoring" style="background: linear-gradient(135deg, #da02e5, #e533f0); color: white; border: none; font-weight: 600;">
+                <i class="bi bi-arrow-clockwise me-1"></i>Recargar
+              </button>
+            </div>
             <p>Detalle completo de tu puntuación y rendimiento en eventos de phishing.</p>
           </div>
           
@@ -151,6 +156,21 @@
       }
     }
 
+    function recargarScoring() {
+      // Ocultar contenido y mostrar loading
+      document.getElementById('scoring-content').style.display = 'none';
+      document.getElementById('loading-container').style.display = 'block';
+      document.getElementById('loading-container').innerHTML = `
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2">Recargando tu scoring...</p>
+      `;
+      
+      // Recargar los datos
+      loadScoring();
+    }
+
     // Función para generar el contenido del scoring (copiada de principalReportes)
     function generarContenidoDetalleEventos(data) {
       const eventos = data.eventos_detalle || {};
@@ -233,7 +253,7 @@
                     <strong>${evento.titulo}</strong>
                   </div>
                   <div class="small" style="color: #999;">
-                    ID: ${evento.idEvento} | ${fechaFormateada}
+                    ID: ${evento.idEvento} | ${fechaFormateada}${evento.esFallaGrave ? ' | <span style="color: #dc3545;">Falla Grave</span>' : ' | <span style="color: #6c757d;">Falla Simple</span>'}
                   </div>
                 </div>
               </div>
@@ -285,7 +305,7 @@
                         <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
                         <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
                       </div>
-                      <div class="d-flex gap-1">
+                      <div class="d-flex gap-1 flex-wrap">
                         <span class="badge" style="background: #28a745; color: white; font-weight: bold;">Reportado +${evento.puntos}</span>
                         <span class="badge" style="background: #ffc107; color: #000; font-weight: bold;">Fallado -${evento.puntosFallaPasada}</span>
                       </div>
@@ -294,7 +314,7 @@
                       <strong>${evento.titulo}</strong>
                     </div>
                     <div class="small" style="color: #999;">
-                      ID: ${evento.idEvento} | ${fechaFormateada}
+                      ID: ${evento.idEvento} | ${fechaFormateada}${evento.esFallaGrave ? ' | <span style="color: #dc3545;">Falla Grave</span>' : ' | <span style="color: #6c757d;">Falla Simple</span>'}
                     </div>
                   </div>
                 </div>

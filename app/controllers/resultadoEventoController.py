@@ -12,12 +12,11 @@ from app.utils.logger import log
 # Variable global para contar fallas
 conteo_fallas = {"total": 0}
 
-# Puntos de falla por tipo de evento (se RESTAN del puntaje inicial de 100)
-PUNTOS_FALLA = {
-    TipoEvento.CORREO: 10,
-    TipoEvento.MENSAJE: 15,
-    TipoEvento.LLAMADA: 20
-}
+# Puntos de falla simple (se RESTAN del puntaje inicial de 100)
+PUNTOS_FALLA_SIMPLE = 5
+
+# Puntos de falla grave (se RESTAN del puntaje inicial de 100)
+PUNTOS_FALLA_GRAVE = 10
 
 # Puntos por evento reportado (se SUMAN al puntaje)
 PUNTOS_REPORTADO = 5
@@ -28,7 +27,8 @@ PUNTAJE_INICIAL = 100
 class ResultadoEventoController:
 
     @staticmethod
-    def sumarFalla(idUsuario, idEvento, fechaFalla=None):
+    def sumarFalla(idUsuario, idEvento, fechaFalla=None, esFallaGrave=False):
+        log.info(f"[SUMAR_FALLA] Iniciando - idUsuario: {idUsuario}, idEvento: {idEvento}, fechaFalla: {fechaFalla}, esFallaGrave: {esFallaGrave}")
         session = SessionLocal()
         try:
             # Buscar relación usuario-evento
@@ -38,8 +38,11 @@ class ResultadoEventoController:
             ).first()
 
             if not usuario_evento:
+                log.error(f"[SUMAR_FALLA] ERROR - No existe relación Usuario {idUsuario} - Evento {idEvento}")
                 session.close()
                 return responseError("RELACION_NO_ENCONTRADA", "No existe relación entre el usuario y el evento", 404)
+
+            log.info(f"[SUMAR_FALLA] Relación encontrada - Estado anterior: resultado={usuario_evento.resultado.value}, esFallaGrave={usuario_evento.esFallaGrave}")
 
             # Actualizar a FALLA
             usuario_evento.resultado = ResultadoEvento.FALLA
@@ -47,21 +50,79 @@ class ResultadoEventoController:
             if fechaFalla is None:
                 fechaFalla = datetime.now()
             usuario_evento.fechaFalla = fechaFalla
+            # Marcar si es falla grave
+            usuario_evento.esFallaGrave = esFallaGrave
             # Marcar que ha fallado en el pasado
             usuario_evento.haFalladoEnElPasado = True
+            
+            log.info(f"[SUMAR_FALLA] Antes de commit - resultado={usuario_evento.resultado.value}, esFallaGrave={usuario_evento.esFallaGrave}, fechaFalla={usuario_evento.fechaFalla}")
             session.commit()
+            log.info(f"[SUMAR_FALLA] Commit exitoso - Falla registrada correctamente")
 
             return jsonify({
                 "mensaje": "Falla registrada", 
                 "idUsuario": idUsuario, 
                 "idEvento": idEvento,
-                "fechaFalla": fechaFalla.isoformat()
+                "fechaFalla": fechaFalla.isoformat(),
+                "esFallaGrave": esFallaGrave
             }), 200
 
         except Exception as e:
-            log.error("Hubo un error al intentar sumar la falla: " + str(e))
+            log.error(f"[SUMAR_FALLA] ERROR - Excepción al intentar sumar la falla: {str(e)}", exc_info=True)
             session.rollback()
             return responseError("ERROR", f"No se pudo registrar la falla: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def sumarFallaGrave(idUsuario, idEvento, fechaFalla=None):
+        """
+        Registra una falla grave. Actualiza el campo esFallaGrave a True.
+        Si el evento aún no está marcado como FALLA, también lo marca como tal.
+        """
+        log.info(f"[SUMAR_FALLA_GRAVE] Iniciando - idUsuario: {idUsuario}, idEvento: {idEvento}, fechaFalla: {fechaFalla}")
+        session = SessionLocal()
+        try:
+            # Buscar relación usuario-evento
+            usuario_evento = session.query(UsuarioxEvento).filter_by(
+                idUsuario=idUsuario,
+                idEvento=idEvento
+            ).first()
+
+            if not usuario_evento:
+                log.error(f"[SUMAR_FALLA_GRAVE] ERROR - No existe relación Usuario {idUsuario} - Evento {idEvento}")
+                session.close()
+                return responseError("RELACION_NO_ENCONTRADA", "No existe relación entre el usuario y el evento", 404)
+
+            log.info(f"[SUMAR_FALLA_GRAVE] Relación encontrada - Estado anterior: resultado={usuario_evento.resultado.value}, esFallaGrave={usuario_evento.esFallaGrave}")
+
+            # Actualizar a FALLA si no lo está ya
+            usuario_evento.resultado = ResultadoEvento.FALLA
+            # Si no se proporciona fecha, usar la fecha actual
+            if fechaFalla is None:
+                fechaFalla = datetime.now()
+            usuario_evento.fechaFalla = fechaFalla
+            # Marcar como falla grave
+            usuario_evento.esFallaGrave = True
+            # Marcar que ha fallado en el pasado
+            usuario_evento.haFalladoEnElPasado = True
+            
+            log.info(f"[SUMAR_FALLA_GRAVE] Antes de commit - resultado={usuario_evento.resultado.value}, esFallaGrave={usuario_evento.esFallaGrave}, fechaFalla={usuario_evento.fechaFalla}")
+            session.commit()
+            log.info(f"[SUMAR_FALLA_GRAVE] Commit exitoso - Falla grave registrada correctamente")
+
+            return jsonify({
+                "mensaje": "Falla grave registrada", 
+                "idUsuario": idUsuario, 
+                "idEvento": idEvento,
+                "fechaFalla": fechaFalla.isoformat(),
+                "esFallaGrave": True
+            }), 200
+
+        except Exception as e:
+            log.error(f"[SUMAR_FALLA_GRAVE] ERROR - Excepción al intentar sumar la falla grave: {str(e)}", exc_info=True)
+            session.rollback()
+            return responseError("ERROR", f"No se pudo registrar la falla grave: {str(e)}", 500)
         finally:
             session.close()
 
@@ -119,16 +180,11 @@ class ResultadoEventoController:
             if not empleado:
                 return responseError("USUARIO_NO_ENCONTRADO", "Usuario no encontrado", 404)
 
-            # Obtener fallas del empleado
-            fallas = (
-                session.query(
-                    Evento.tipoEvento,
-                    func.count(UsuarioxEvento.idEvento).label("cantidad_fallas")
-                )
-                .join(UsuarioxEvento, UsuarioxEvento.idEvento == Evento.idEvento)
+            # Obtener fallas del empleado con información de esFallaGrave
+            fallas_query = (
+                session.query(UsuarioxEvento)
                 .filter(UsuarioxEvento.idUsuario == idUsuario)
                 .filter(UsuarioxEvento.resultado == ResultadoEvento.FALLA)
-                .group_by(Evento.tipoEvento)
                 .all()
             )
 
@@ -142,47 +198,57 @@ class ResultadoEventoController:
                 .scalar()
             ) or 0
 
-            # Calcular puntos perdidos por fallas
+            # Calcular puntos perdidos por fallas (basado en esFallaGrave)
             puntos_perdidos = 0
             total_fallas = 0
-            desglose_por_tipo = {}
-
-            for falla in fallas:
-                cantidad = int(falla.cantidad_fallas)
-                puntos_tipo = PUNTOS_FALLA.get(falla.tipoEvento, 0)
-                puntos_perdidos += cantidad * puntos_tipo
-                total_fallas += cantidad
-                desglose_por_tipo[falla.tipoEvento.value] = {
-                    "cantidad": cantidad,
-                    "puntos_perdidos": cantidad * puntos_tipo
+            total_fallas_simples = 0
+            total_fallas_graves = 0
+            desglose_por_tipo = {
+                "fallas_simples": {
+                    "cantidad": 0,
+                    "puntos_perdidos": 0
+                },
+                "fallas_graves": {
+                    "cantidad": 0,
+                    "puntos_perdidos": 0
                 }
+            }
+
+            for usuario_evento in fallas_query:
+                total_fallas += 1
+                if usuario_evento.esFallaGrave:
+                    puntos_perdidos += PUNTOS_FALLA_GRAVE
+                    total_fallas_graves += 1
+                    desglose_por_tipo["fallas_graves"]["cantidad"] += 1
+                    desglose_por_tipo["fallas_graves"]["puntos_perdidos"] += PUNTOS_FALLA_GRAVE
+                else:
+                    puntos_perdidos += PUNTOS_FALLA_SIMPLE
+                    total_fallas_simples += 1
+                    desglose_por_tipo["fallas_simples"]["cantidad"] += 1
+                    desglose_por_tipo["fallas_simples"]["puntos_perdidos"] += PUNTOS_FALLA_SIMPLE
 
             # Calcular puntos ganados por reportes
             puntos_ganados = int(reportados) * PUNTOS_REPORTADO
 
-            # Calcular penalización por fallas en el pasado basada en el tipo de evento
+            # Calcular penalización por fallas en el pasado (basado en esFallaGrave)
             penalizacion_falla_pasado = 0
             ha_fallado_en_pasado = False
             
-            # Obtener fallas del pasado por tipo de evento (incluyendo las que fueron reportadas después)
+            # Obtener fallas del pasado (incluyendo las que fueron reportadas después)
             fallas_pasado = (
-                session.query(
-                    Evento.tipoEvento,
-                    func.count(UsuarioxEvento.idEvento).label("cantidad_fallas_pasado")
-                )
-                .join(UsuarioxEvento, UsuarioxEvento.idEvento == Evento.idEvento)
+                session.query(UsuarioxEvento)
                 .filter(UsuarioxEvento.idUsuario == idUsuario)
                 .filter(UsuarioxEvento.haFalladoEnElPasado == True)
                 .filter(UsuarioxEvento.resultado != ResultadoEvento.FALLA)  # Excluir solo fallas activas
-                .group_by(Evento.tipoEvento)
                 .all()
             )
             
             # Calcular penalización total por fallas en el pasado
-            for falla_pasado in fallas_pasado:
-                cantidad = int(falla_pasado.cantidad_fallas_pasado)
-                puntos_tipo = PUNTOS_FALLA.get(falla_pasado.tipoEvento, 0)
-                penalizacion_falla_pasado += cantidad * puntos_tipo
+            for usuario_evento in fallas_pasado:
+                if usuario_evento.esFallaGrave:
+                    penalizacion_falla_pasado += PUNTOS_FALLA_GRAVE
+                else:
+                    penalizacion_falla_pasado += PUNTOS_FALLA_SIMPLE
                 ha_fallado_en_pasado = True
 
             # Calcular puntos restantes (100 - puntos_perdidos - penalizacion_falla_pasado + puntos_ganados)
@@ -194,9 +260,9 @@ class ResultadoEventoController:
             # Obtener eventos específicos para el desglose detallado
             from app.backend.models.registroEvento import RegistroEvento
             
-            # 1. Fallas activas (sin reportar)
+            # 1. Fallas activas (sin reportar) - incluir UsuarioxEvento para obtener esFallaGrave
             eventos_activos = (
-                session.query(Evento, RegistroEvento)
+                session.query(Evento, RegistroEvento, UsuarioxEvento)
                 .join(UsuarioxEvento, UsuarioxEvento.idEvento == Evento.idEvento)
                 .outerjoin(RegistroEvento, RegistroEvento.idEvento == Evento.idEvento)
                 .filter(UsuarioxEvento.idUsuario == idUsuario)
@@ -245,9 +311,10 @@ class ResultadoEventoController:
                             "titulo": registro.asunto if registro and registro.asunto else f"Evento {evento.tipoEvento.value}",
                             "tipoEvento": evento.tipoEvento.value,
                             "fechaCreacion": evento.fechaEvento.isoformat() if evento.fechaEvento else None,
-                            "puntos": PUNTOS_FALLA.get(evento.tipoEvento, 0),
+                            "puntos": PUNTOS_FALLA_GRAVE if usuario_evento.esFallaGrave else PUNTOS_FALLA_SIMPLE,
+                            "esFallaGrave": usuario_evento.esFallaGrave,
                             "tipo": "falla_activa"
-                        } for evento, registro in eventos_activos
+                        } for evento, registro, usuario_evento in eventos_activos
                     ],
                     "reportados": [
                         {
@@ -257,7 +324,8 @@ class ResultadoEventoController:
                             "fechaCreacion": evento.fechaEvento.isoformat() if evento.fechaEvento else None,
                             "puntos": PUNTOS_REPORTADO,
                             "haFalladoEnElPasado": usuario_evento.haFalladoEnElPasado,
-                            "puntosFallaPasada": PUNTOS_FALLA.get(evento.tipoEvento, 0) if usuario_evento.haFalladoEnElPasado else 0,
+                            "puntosFallaPasada": (PUNTOS_FALLA_GRAVE if usuario_evento.esFallaGrave else PUNTOS_FALLA_SIMPLE) if usuario_evento.haFalladoEnElPasado else 0,
+                            "esFallaGrave": usuario_evento.esFallaGrave if usuario_evento.haFalladoEnElPasado else False,
                             "tipo": "falla_reportada" if usuario_evento.haFalladoEnElPasado else "reportado"
                         } for evento, registro, usuario_evento in eventos_reportados
                     ],
@@ -326,7 +394,7 @@ class ResultadoEventoController:
                     'fallas_por_tipo': {}
                 }
             
-            # Ahora obtener las fallas de los empleados que las tienen
+            # Ahora obtener las fallas de los empleados agrupadas por tipo de evento (con información de esFallaGrave)
             query_fallas = (
                 session.query(
                     Area.idArea,
@@ -335,12 +403,14 @@ class ResultadoEventoController:
                     Usuario.nombre,
                     Usuario.apellido,
                     Evento.tipoEvento,
-                    func.count(UsuarioxEvento.idEvento).label("cantidad_fallas")
+                    UsuarioxEvento.esFallaGrave,
+                    func.count(UsuarioxEvento.idEvento).label("cantidad")
                 )
                 .join(Usuario, Usuario.idArea == Area.idArea)
                 .join(UsuarioxEvento, UsuarioxEvento.idUsuario == Usuario.idUsuario)
                 .join(Evento, Evento.idEvento == UsuarioxEvento.idEvento)
                 .filter(UsuarioxEvento.resultado == ResultadoEvento.FALLA)
+                .group_by(Area.idArea, Area.nombreArea, Usuario.idUsuario, Usuario.nombre, Usuario.apellido, Evento.tipoEvento, UsuarioxEvento.esFallaGrave)
             )
             
             # Obtener eventos reportados por empleado
@@ -361,17 +431,7 @@ class ResultadoEventoController:
             if tipos_evento and len(tipos_evento) > 0:
                 query_fallas = query_fallas.filter(Evento.tipoEvento.in_(tipos_evento))
             
-            resultados_fallas = (
-                query_fallas.group_by(
-                    Area.idArea,
-                    Area.nombreArea,
-                    Usuario.idUsuario,
-                    Usuario.nombre,
-                    Usuario.apellido,
-                    Evento.tipoEvento
-                )
-                .all()
-            )
+            resultados_fallas = query_fallas.all()
             
             # Procesar las fallas y actualizar el diccionario de empleados
             for r in resultados_fallas:
@@ -379,13 +439,32 @@ class ResultadoEventoController:
                 
                 if empleado_key in empleados_dict:
                     empleado = empleados_dict[empleado_key]
-                    cantidad_fallas = int(r.cantidad_fallas)
-                    puntos_tipo = PUNTOS_FALLA.get(r.tipoEvento, 0)
-                    puntos_perdidos = cantidad_fallas * puntos_tipo
+                    cantidad = int(r.cantidad)
+                    
+                    if r.esFallaGrave:
+                        puntos_perdidos = cantidad * PUNTOS_FALLA_GRAVE
+                    else:
+                        puntos_perdidos = cantidad * PUNTOS_FALLA_SIMPLE
                     
                     empleado['puntos_perdidos'] += puntos_perdidos
-                    empleado['total_fallas'] += cantidad_fallas
-                    empleado['fallas_por_tipo'][r.tipoEvento.value] = cantidad_fallas
+                    empleado['total_fallas'] += cantidad
+                    
+                    # Agrupar por tipo de evento con información de simples/graves
+                    tipo_evento_key = r.tipoEvento.value
+                    if tipo_evento_key not in empleado['fallas_por_tipo']:
+                        empleado['fallas_por_tipo'][tipo_evento_key] = {
+                            'cantidad': 0,
+                            'simples': 0,
+                            'graves': 0,
+                            'puntos_perdidos': 0
+                        }
+                    
+                    empleado['fallas_por_tipo'][tipo_evento_key]['cantidad'] += cantidad
+                    if r.esFallaGrave:
+                        empleado['fallas_por_tipo'][tipo_evento_key]['graves'] += cantidad
+                    else:
+                        empleado['fallas_por_tipo'][tipo_evento_key]['simples'] += cantidad
+                    empleado['fallas_por_tipo'][tipo_evento_key]['puntos_perdidos'] += puntos_perdidos
             
             # Procesar eventos reportados y actualizar el diccionario de empleados
             for r in query_reportados:
@@ -399,30 +478,28 @@ class ResultadoEventoController:
                     empleado['puntos_ganados'] = puntos_ganados
                     empleado['total_reportados'] = cantidad_reportados
             
-            # Obtener fallas del pasado por tipo de evento para todos los empleados (incluyendo las que fueron reportadas después)
+            # Obtener fallas del pasado para todos los empleados (incluyendo las que fueron reportadas después)
             query_falla_pasado = (
                 session.query(
                     Area.idArea,
                     Usuario.idUsuario,
-                    Evento.tipoEvento,
-                    func.count(UsuarioxEvento.idEvento).label("cantidad_fallas_pasado")
+                    UsuarioxEvento.esFallaGrave
                 )
                 .join(Usuario, Usuario.idArea == Area.idArea)
                 .join(UsuarioxEvento, UsuarioxEvento.idUsuario == Usuario.idUsuario)
-                .join(Evento, Evento.idEvento == UsuarioxEvento.idEvento)
                 .filter(UsuarioxEvento.haFalladoEnElPasado == True)
                 .filter(UsuarioxEvento.resultado != ResultadoEvento.FALLA)  # Excluir solo fallas activas
-                .group_by(Area.idArea, Usuario.idUsuario, Evento.tipoEvento)
                 .all()
             )
             
-            # Procesar fallas del pasado por tipo de evento
+            # Procesar fallas del pasado (basado en esFallaGrave)
             for r in query_falla_pasado:
                 empleado_key = f"{r.idArea}_{r.idUsuario}"
                 if empleado_key in empleados_dict:
-                    cantidad = int(r.cantidad_fallas_pasado)
-                    puntos_tipo = PUNTOS_FALLA.get(r.tipoEvento, 0)
-                    penalizacion = cantidad * puntos_tipo
+                    if r.esFallaGrave:
+                        penalizacion = PUNTOS_FALLA_GRAVE
+                    else:
+                        penalizacion = PUNTOS_FALLA_SIMPLE
                     
                     empleados_dict[empleado_key]['ha_fallado_en_pasado'] = True
                     empleados_dict[empleado_key]['penalizacion_falla_pasado'] += penalizacion

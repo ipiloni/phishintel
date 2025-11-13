@@ -6,6 +6,7 @@ import os
 from app.controllers.login import AuthController
 from app.controllers.resultadoEventoController import ResultadoEventoController
 from app.utils.url_encoder import decode_phishing_params, decode_route
+from app.utils.logger import log
 
 frontend = Blueprint("frontend", __name__, static_folder="frontend")
 
@@ -120,28 +121,65 @@ def caisteLogin():
     """
     # Intentar obtener parámetros codificados primero (nueva forma)
     encoded_params = request.args.get('t')
+    log.info(f"[CAISTE_LOGIN] Iniciando - URL params: {dict(request.args)}, encoded_params presente: {encoded_params is not None}")
+    
     if encoded_params:
         decoded = decode_phishing_params(encoded_params)
+        log.info(f"[CAISTE_LOGIN] Parámetros decodificados: {decoded}")
         if decoded:
             idUsuario = decoded.get('idUsuario')
             idEvento = decoded.get('idEvento')
+            log.info(f"[CAISTE_LOGIN] idUsuario: {idUsuario}, idEvento: {idEvento}")
             if idUsuario and idEvento:
-                # Almacenar parámetros en sesión para usar después
-                session['caiste_idUsuario'] = idUsuario
-                session['caiste_idEvento'] = idEvento
-                # Redirigir a la misma ruta sin parámetros para limpiar la URL
-                return redirect(url_for('frontend.caisteLogin'))
+                # Registrar FALLA inmediatamente al hacer clic en el link
+                log.info(f"[CAISTE_LOGIN] Registrando FALLA SIMPLE - Usuario: {idUsuario}, Evento: {idEvento}")
+                resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+                log.info(f"[CAISTE_LOGIN] Resultado de sumarFalla: {resultado}")
+                # Leer el HTML y agregar campos ocultos al formulario
+                html_path = os.path.join(FRONTEND_DIR, "caisteLogin.html")
+                with open(html_path, 'r', encoding='utf-8') as f:
+                    html_content = f.read()
+                # Agregar campos ocultos al formulario antes del botón de submit
+                campos_ocultos = f'''<input type="hidden" id="caiste_idUsuario" name="caiste_idUsuario" value="{idUsuario}">
+                <input type="hidden" id="caiste_idEvento" name="caiste_idEvento" value="{idEvento}">'''
+                html_content = html_content.replace('<button type="submit"', campos_ocultos + '\n                <button type="submit"')
+                # Limpiar la URL sin recargar la página
+                script_tag = f'''<script>
+                    if (window.history.replaceState) {{
+                        window.history.replaceState(null, null, window.location.pathname);
+                    }}
+                </script>'''
+                html_content = html_content.replace('</body>', script_tag + '</body>')
+                from flask import Response
+                return Response(html_content, mimetype='text/html')
     
     # Fallback: Intentar obtener parámetros de la URL (forma antigua - compatibilidad)
     idUsuario = request.args.get('idUsuario', type=int)
     idEvento = request.args.get('idEvento', type=int)
+    log.info(f"[CAISTE_LOGIN] Fallback - idUsuario: {idUsuario}, idEvento: {idEvento}")
     
     if idUsuario and idEvento:
-        # Almacenar parámetros en sesión para usar después
-        session['caiste_idUsuario'] = idUsuario
-        session['caiste_idEvento'] = idEvento
-        # Redirigir a la misma ruta sin parámetros para limpiar la URL
-        return redirect(url_for('frontend.caisteLogin'))
+        # Registrar FALLA inmediatamente al hacer clic en el link
+        log.info(f"[CAISTE_LOGIN] Registrando FALLA SIMPLE (fallback) - Usuario: {idUsuario}, Evento: {idEvento}")
+        resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+        log.info(f"[CAISTE_LOGIN] Resultado de sumarFalla (fallback): {resultado}")
+        # Leer el HTML y agregar campos ocultos al formulario
+        html_path = os.path.join(FRONTEND_DIR, "caisteLogin.html")
+        with open(html_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        # Agregar campos ocultos al formulario antes del botón de submit
+        campos_ocultos = f'''<input type="hidden" id="caiste_idUsuario" name="caiste_idUsuario" value="{idUsuario}">
+        <input type="hidden" id="caiste_idEvento" name="caiste_idEvento" value="{idEvento}">'''
+        html_content = html_content.replace('<button type="submit"', campos_ocultos + '\n                <button type="submit"')
+        # Limpiar la URL sin recargar la página
+        script_tag = f'''<script>
+            if (window.history.replaceState) {{
+                window.history.replaceState(null, null, window.location.pathname);
+            }}
+        </script>'''
+        html_content = html_content.replace('</body>', script_tag + '</body>')
+        from flask import Response
+        return Response(html_content, mimetype='text/html')
     
     return send_from_directory(FRONTEND_DIR, "caisteLogin.html")
 
@@ -154,28 +192,65 @@ def caisteDatos():
     """
     # Intentar obtener parámetros codificados primero (nueva forma)
     encoded_params = request.args.get('t')
+    log.info(f"[CAISTE_DATOS] Iniciando - URL params: {dict(request.args)}, encoded_params presente: {encoded_params is not None}")
+    
     if encoded_params:
         decoded = decode_phishing_params(encoded_params)
+        log.info(f"[CAISTE_DATOS] Parámetros decodificados: {decoded}")
         if decoded:
             idUsuario = decoded.get('idUsuario')
             idEvento = decoded.get('idEvento')
+            log.info(f"[CAISTE_DATOS] idUsuario: {idUsuario}, idEvento: {idEvento}")
             if idUsuario and idEvento:
-                # Almacenar parámetros en sesión para usar después
-                session['caiste_idUsuario'] = idUsuario
-                session['caiste_idEvento'] = idEvento
-                # Redirigir a la misma ruta sin parámetros para limpiar la URL
-                return redirect(url_for('frontend.caisteDatos'))
+                # Registrar FALLA inmediatamente al hacer clic en el link
+                log.info(f"[CAISTE_DATOS] Registrando FALLA SIMPLE - Usuario: {idUsuario}, Evento: {idEvento}")
+                resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+                log.info(f"[CAISTE_DATOS] Resultado de sumarFalla: {resultado}")
+                # Leer el HTML y agregar campos ocultos al formulario
+                html_path = os.path.join(FRONTEND_DIR, "caisteDatos.html")
+                with open(html_path, 'r', encoding='utf-8') as f:
+                    html_content = f.read()
+                # Agregar campos ocultos al formulario antes del botón de submit
+                campos_ocultos = f'''<input type="hidden" id="caiste_idUsuario" name="caiste_idUsuario" value="{idUsuario}">
+                <input type="hidden" id="caiste_idEvento" name="caiste_idEvento" value="{idEvento}">'''
+                html_content = html_content.replace('<button type="submit"', campos_ocultos + '\n                <button type="submit"')
+                # Limpiar la URL sin recargar la página
+                script_tag = f'''<script>
+                    if (window.history.replaceState) {{
+                        window.history.replaceState(null, null, window.location.pathname);
+                    }}
+                </script>'''
+                html_content = html_content.replace('</body>', script_tag + '</body>')
+                from flask import Response
+                return Response(html_content, mimetype='text/html')
     
     # Fallback: Intentar obtener parámetros de la URL (forma antigua - compatibilidad)
     idUsuario = request.args.get('idUsuario', type=int)
     idEvento = request.args.get('idEvento', type=int)
+    log.info(f"[CAISTE_DATOS] Fallback - idUsuario: {idUsuario}, idEvento: {idEvento}")
     
     if idUsuario and idEvento:
-        # Almacenar parámetros en sesión para usar después
-        session['caiste_idUsuario'] = idUsuario
-        session['caiste_idEvento'] = idEvento
-        # Redirigir a la misma ruta sin parámetros para limpiar la URL
-        return redirect(url_for('frontend.caisteDatos'))
+        # Registrar FALLA inmediatamente al hacer clic en el link
+        log.info(f"[CAISTE_DATOS] Registrando FALLA SIMPLE (fallback) - Usuario: {idUsuario}, Evento: {idEvento}")
+        resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+        log.info(f"[CAISTE_DATOS] Resultado de sumarFalla (fallback): {resultado}")
+        # Leer el HTML y agregar campos ocultos al formulario
+        html_path = os.path.join(FRONTEND_DIR, "caisteDatos.html")
+        with open(html_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        # Agregar campos ocultos al formulario antes del botón de submit
+        campos_ocultos = f'''<input type="hidden" id="caiste_idUsuario" name="caiste_idUsuario" value="{idUsuario}">
+        <input type="hidden" id="caiste_idEvento" name="caiste_idEvento" value="{idEvento}">'''
+        html_content = html_content.replace('<button type="submit"', campos_ocultos + '\n                <button type="submit"')
+        # Limpiar la URL sin recargar la página
+        script_tag = f'''<script>
+            if (window.history.replaceState) {{
+                window.history.replaceState(null, null, window.location.pathname);
+            }}
+        </script>'''
+        html_content = html_content.replace('</body>', script_tag + '</body>')
+        from flask import Response
+        return Response(html_content, mimetype='text/html')
     
     return send_from_directory(FRONTEND_DIR, "caisteDatos.html")
 
@@ -183,6 +258,7 @@ def caisteDatos():
 def verificarlogin():
     data = request.get_json()
     return AuthController.login(data)
+
 
 # Ruta para cualquier otro archivo dentro de frontend (CSS, JS, imágenes, vendor, etc.)
 @frontend.route("/<path:filename>")

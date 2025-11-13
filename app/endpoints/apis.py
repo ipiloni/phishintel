@@ -211,22 +211,77 @@ def checkVoz(idUsuario):
 @apis.route("/api/sumar-falla", methods=["POST"])
 def sumarFalla():
     data = request.get_json()
+    log.info(f"[API_SUMAR_FALLA] Request recibido - Data: {data}")
     idUsuario = data.get("idUsuario")
     idEvento = data.get("idEvento")
     fechaFalla = data.get("fechaFalla")
     
+    log.info(f"[API_SUMAR_FALLA] Parámetros extraídos - idUsuario: {idUsuario}, idEvento: {idEvento}, fechaFalla: {fechaFalla}")
+    
     if not idUsuario or not idEvento:
+        log.error(f"[API_SUMAR_FALLA] ERROR - Faltan parámetros obligatorios")
         return responseError("CAMPOS_OBLIGATORIOS", "Faltan parámetros 'idUsuario' o 'idEvento'", 400)
     
     # Convertir fechaFalla a datetime si se proporciona
     if fechaFalla:
         try:
             fechaFalla = datetime.fromisoformat(fechaFalla.replace('Z', '+00:00'))
-        except ValueError:
+            log.info(f"[API_SUMAR_FALLA] Fecha convertida: {fechaFalla}")
+        except ValueError as e:
+            log.error(f"[API_SUMAR_FALLA] ERROR - Formato de fecha inválido: {fechaFalla}, error: {str(e)}")
             return responseError("FECHA_INVALIDA", "Formato de fecha inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
     
-    log.info(f"se sumará una falla al usuario '{str(idUsuario)}' del evento '{str(idEvento)}'")
-    return ResultadoEventoController.sumarFalla(idUsuario, idEvento, fechaFalla)
+    log.info(f"[API_SUMAR_FALLA] Llamando a ResultadoEventoController.sumarFalla - Usuario: {idUsuario}, Evento: {idEvento}")
+    resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento, fechaFalla)
+    log.info(f"[API_SUMAR_FALLA] Resultado del controller: {resultado}")
+    return resultado
+
+@apis.route("/api/sumar-falla-grave", methods=["POST"])
+def sumarFallaGrave():
+    data = request.get_json()
+    log.info(f"[API_SUMAR_FALLA_GRAVE] Request recibido - Data: {data}")
+    idUsuario = data.get("idUsuario")
+    idEvento = data.get("idEvento")
+    fechaFalla = data.get("fechaFalla")
+    
+    log.info(f"[API_SUMAR_FALLA_GRAVE] Parámetros extraídos - idUsuario: {idUsuario}, idEvento: {idEvento}, fechaFalla: {fechaFalla}")
+    
+    if not idUsuario or not idEvento:
+        log.error(f"[API_SUMAR_FALLA_GRAVE] ERROR - Faltan parámetros obligatorios")
+        return responseError("CAMPOS_OBLIGATORIOS", "Faltan parámetros 'idUsuario' o 'idEvento'", 400)
+    
+    # Convertir fechaFalla a datetime si se proporciona
+    if fechaFalla:
+        try:
+            fechaFalla = datetime.fromisoformat(fechaFalla.replace('Z', '+00:00'))
+            log.info(f"[API_SUMAR_FALLA_GRAVE] Fecha convertida: {fechaFalla}")
+        except ValueError as e:
+            log.error(f"[API_SUMAR_FALLA_GRAVE] ERROR - Formato de fecha inválido: {fechaFalla}, error: {str(e)}")
+            return responseError("FECHA_INVALIDA", "Formato de fecha inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
+    
+    log.info(f"[API_SUMAR_FALLA_GRAVE] Llamando a ResultadoEventoController.sumarFallaGrave - Usuario: {idUsuario}, Evento: {idEvento}")
+    resultado = ResultadoEventoController.sumarFallaGrave(idUsuario, idEvento, fechaFalla)
+    log.info(f"[API_SUMAR_FALLA_GRAVE] Resultado del controller: {resultado}")
+    return resultado
+
+@apis.route("/api/get-caiste-session", methods=["GET"])
+def getCaisteSession():
+    """Endpoint para obtener los parámetros de caiste almacenados en la sesión"""
+    idUsuario = session.get('caiste_idUsuario')
+    idEvento = session.get('caiste_idEvento')
+    
+    log.info(f"getCaisteSession llamado - idUsuario: {idUsuario}, idEvento: {idEvento}, session keys: {list(session.keys())}")
+    
+    if idUsuario and idEvento:
+        return jsonify({
+            "idUsuario": idUsuario,
+            "idEvento": idEvento
+        }), 200
+    else:
+        return jsonify({
+            "idUsuario": None,
+            "idEvento": None
+        }), 200
 
 
 @apis.route("/api/sumar-reportado", methods=["POST"])
