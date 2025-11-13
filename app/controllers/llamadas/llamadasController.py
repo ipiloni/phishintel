@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from flask import Response, jsonify
+from flask import Response, jsonify, current_app
 from twilio.twiml.voice_response import Gather, VoiceResponse
 
 from app.backend.apis.elevenLabs import elevenLabs
@@ -22,7 +22,20 @@ from app.utils.logger import log
 import threading
 
 password = get("LLAMAR_PASSWORD")
-host = get("URL_APP")
+host_raw = get("URL_APP")
+
+# Normalizar la URL para asegurar que tenga protocolo
+if host_raw:
+    host = host_raw.strip()
+    if not host.startswith("http://") and not host.startswith("https://"):
+        # Si es localhost o 127.0.0.1, usar http, sino https
+        if "localhost" in host.lower() or "127.0.0.1" in host:
+            host = f"http://{host}"
+        else:
+            host = f"https://{host}"
+else:
+    host = "http://localhost:8080"  # fallback
+
 nroRemitente = get("NRO_REMITENTE")
 
 class LlamadasController:
@@ -87,6 +100,11 @@ class LlamadasController:
         area = area.get_json()
 
         destinatario = usuario["telefono"]
+        
+        # Validar que el destinatario tenga un número de teléfono válido
+        if not destinatario or not str(destinatario).strip():
+            log.warning(f"El usuario {idUsuarioDestinatario} no tiene un número de teléfono válido")
+            return responseError("TELEFONO_INVALIDO", f"El usuario de id: {idUsuarioDestinatario} no tiene un número de teléfono válido", 400)
 
         # Elimino de la variable global la conversacion anterior
         conversacion.conversacionActual.clear()
@@ -159,7 +177,14 @@ class LlamadasController:
 
         log.info(f"Ahora la conversacion actual es la siguiente: {conversacion.conversacionActual}")
 
-        conversacion.idVozActual = data.get(remitente["idVoz"], "O1CnH2NGEehfL1nmYACp")  # esto es un get o default, intenta obtener la voz del remitente y si no lo pasaron toma el default
+        # Obtener el ID de voz del remitente, con log si se usa default
+        idVozRemitente = remitente.get("idVoz")
+        if idVozRemitente:
+            conversacion.idVozActual = idVozRemitente
+            log.info(f"Usando ID de voz del remitente: {idVozRemitente}")
+        else:
+            conversacion.idVozActual = "O1CnH2NGEehfL1nmYACp"
+            log.warning(f"No se encontró ID de voz para el remitente {idUsuarioRemitente}, usando voz default: {conversacion.idVozActual}")
 
         elevenLabsResponse = elevenLabs.tts(texto, conversacion.idVozActual, "eleven_multilingual_v2",None, None, 0.5)
 
@@ -178,12 +203,36 @@ class LlamadasController:
 
         log.info(f"La URL del audio actual es: {conversacion.urlAudioActual}")
 
-        # Iniciar el hilo que analiza la llamada
-        hilo = threading.Thread(target=LlamadasController.analizarLlamada)
+        # Iniciar el hilo que analiza la llamada después de 2 minutos
+        # Capturar el contexto de la aplicación antes de crear el hilo
+        try:
+            # Intentar obtener el contexto desde current_app si está disponible
+            app_context = current_app._get_current_object().app_context()
+        except RuntimeError:
+            # Si no hay contexto activo, importar la app directamente
+            from app.main import app
+            app_context = app.app_context()
+        
+        def iniciarAnalisisDespues():
+            import time
+            # Usar el contexto de la aplicación dentro del hilo
+            with app_context:
+                log.info(f"[HILO ANÁLISIS] Hilo de análisis iniciado para evento ID: {conversacion.idEvento}, destinatario: {conversacion.destinatario}")
+                log.info(f"[HILO ANÁLISIS] Esperando 2 minutos (120 segundos) antes de analizar la llamada...")
+                time.sleep(120)  # Esperar 2 minutos (120 segundos)
+                log.info(f"[HILO ANÁLISIS] Tiempo de espera completado, iniciando análisis de la llamada...")
+                try:
+                    LlamadasController.analizarLlamada()
+                    log.info(f"[HILO ANÁLISIS] Análisis de llamada completado exitosamente para evento ID: {conversacion.idEvento}")
+                except Exception as e:
+                    log.error(f"[HILO ANÁLISIS] Error durante el análisis de la llamada: {str(e)}", exc_info=True)
+        
+        hilo = threading.Thread(target=iniciarAnalisisDespues)
         hilo.daemon = True  # el hilo no bloquea el cierre del programa
         hilo.start()
+        log.info(f"[HILO ANÁLISIS] Hilo de análisis creado y ejecutándose en segundo plano")
 
-        return twilio.llamar(destinatario, remitente, host + "/api/twilio/accion")
+        return twilio.llamar(destinatario, nroRemitente, host + "/api/twilio/accion")
 
 
     @staticmethod
@@ -281,85 +330,135 @@ class LlamadasController:
 
     @staticmethod
     def analizarLlamada():
-        import time
-        if conversacion.hilo:
-            log.info("Empieza el analisis de la llamada para detectar si se cumplio el objetivo")
-            # Iniciar el hilo contador por 3 minutos
-            time.sleep(180)
-
-            # Luego de los 3 minutos, la IA analiza la conversacion guardada en la variable global
+        log.info(f"[ANÁLISIS] ========== INICIANDO ANÁLISIS DE LLAMADA ==========")
+        log.info(f"[ANÁLISIS] Evento ID: {conversacion.idEvento}, Destinatario: {conversacion.destinatario}, Remitente: {conversacion.remitente}")
+        log.info(f"[ANÁLISIS] Objetivo específico: {conversacion.objetivoEspecifico}")
+        log.info(f"[ANÁLISIS] Evento desencadenador: {conversacion.eventoDesencadenador}")
+        log.info(f"[ANÁLISIS] Conversación actual tiene {len(conversacion.conversacionActual)} mensajes")
+        
+        # Luego de los 2 minutos, la IA analiza la conversacion guardada en la variable global
+        try:
             objetivo = conversacion.objetivoActual.split("intentando que el empleado")[1].split("Reglas:")[0].strip() # Obtenemos lo que hay entre estas dos oraciones
-            objetivoCumplido = AIController.analizarConversacionLlamada(objetivo, conversacion.conversacionActual)
+            log.info(f"[ANÁLISIS] Objetivo extraído para análisis: '{objetivo}'")
+        except Exception as e:
+            log.error(f"[ANÁLISIS] Error al extraer el objetivo: {str(e)}")
+            log.error(f"[ANÁLISIS] Objetivo actual completo: {conversacion.objetivoActual}")
+            return
+        
+        log.info(f"[ANÁLISIS] Llamando a IA para analizar si se cumplió el objetivo...")
+        log.info(f"[ANÁLISIS] Conversación a analizar: {json.dumps(conversacion.conversacionActual, ensure_ascii=False)}")
+        
+        objetivoCumplido = AIController.analizarConversacionLlamada(objetivo, conversacion.conversacionActual)
+        
+        log.info(f"[ANÁLISIS] Resultado del análisis de IA: {'OBJETIVO CUMPLIDO' if objetivoCumplido else 'OBJETIVO NO CUMPLIDO'}")
 
-            if objetivoCumplido:
+        if objetivoCumplido:
 
-                log.info("El objetivo de la llamada se ha cumplido (IA analizó y en la conversación se nombro el objetivo), generando evento...")
-                ResultadoEventoController.sumarFalla(conversacion.destinatario, conversacion.idEvento)
+            log.info(f"[ANÁLISIS] ✓ El objetivo de la llamada se ha cumplido (IA analizó y en la conversación se nombró el objetivo)")
+            log.info(f"[ANÁLISIS] Sumando falla para destinatario {conversacion.destinatario} en evento {conversacion.idEvento}...")
+            ResultadoEventoController.sumarFalla(conversacion.destinatario, conversacion.idEvento)
+            log.info(f"[ANÁLISIS] Falla sumada correctamente")
 
-                if conversacion.eventoDesencadenador.lower() == "correo":
+            if conversacion.eventoDesencadenador.lower() == "correo":
 
-                    log.info("El evento desencadenador es un corrreo, generando email...")
+                log.info(f"[ANÁLISIS] El evento desencadenador es un CORREO, generando email...")
 
-                    contexto = "Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
-                    data = {
-                        "contexto": contexto,
-                        "nivel": 3,
-                        "formato": "texto"
-                    }
-                    respuesta, status = AIController.armarEmail(data)
-
-                    if status != 201:
-                        log.error(f"La IA no pudo armar el email: {respuesta}")
-                        return
-
-                    try:
-                        data = json.loads(respuesta)  # convertir string a JSON real
-                    except json.JSONDecodeError:
-                        log.error(f"El texto devuelto no es JSON válido: {respuesta}")
-
-                    dataMail = {
-                        "proveedor": "twilio",
-                        "idUsuarioDestinatario": conversacion.destinatario,
-                        "idUsuarioRemitente": conversacion.remitente,
-                        "asunto": data["asunto"],
-                        "cuerpo": data["cuerpo"],
-                        "dificultad": "dificil"
-                    }
-
-                    EmailController.enviarMailPorID(dataMail)
-
+                # Determinar dificultad basándose en objetivoEspecifico (igual que para mensajes)
+                if conversacion.objetivoEspecifico == "Abra un link que se le enviara por":
+                    dificultad = "facil"
+                    contexto = "Genera un email de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación."
+                    log.info(f"[ANÁLISIS] Dificultad determinada: FÁCIL (objetivo: abrir link)")
+                elif conversacion.objetivoEspecifico == "Abra un link para ingresar sus credenciales que se le enviara por":
+                    dificultad = "medio"
+                    contexto = "Se pedirá login en un formulario (como caisteLogin.html) y credenciales. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
+                    log.info(f"[ANÁLISIS] Dificultad determinada: MEDIO (objetivo: ingresar credenciales)")
                 else:
+                    dificultad = "dificil"
+                    contexto = "Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
+                    log.info(f"[ANÁLISIS] Dificultad determinada: DIFÍCIL (objetivo por defecto)")
 
-                    log.info(f"El evento desencadenador es un mensaje, generando email...")
+                nivel = 3 if dificultad == "dificil" else (2 if dificultad == "medio" else 1)
+                log.info(f"[ANÁLISIS] Nivel numérico para IA: {nivel}")
+                
+                data = {
+                    "contexto": contexto,
+                    "nivel": nivel,
+                    "formato": "texto"
+                }
+                
+                log.info(f"[ANÁLISIS] Generando email con IA usando contexto y nivel {nivel}...")
+                respuesta, status = AIController.armarEmail(data)
 
-                    if conversacion.objetivoEspecifico == "Abra un link que se le enviara por":
-                        dificultad = "facil"
-                        contexto = "Genera un mensaje de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación."
-                    elif conversacion.objetivoEspecifico == "Abra un link para ingresar sus credenciales que se le enviara por":
-                        dificultad = "medio"
-                        contexto = "Se pedirá login en un formulario (como caisteLogin.html) y credenciales. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
-                    else:
-                        dificultad = "dificil"
-                        contexto = "Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
+                if status != 201:
+                    log.error(f"[ANÁLISIS] ✗ La IA no pudo armar el email. Status: {status}, Respuesta: {respuesta}")
+                    return
 
-                    datamsj2 = {
-                        "contexto": contexto,
-                        "nivel": dificultad
-                    }
-                    respuesta, status = AIController.armarMensaje(datamsj2)
+                log.info(f"[ANÁLISIS] Email generado por IA exitosamente, parseando respuesta...")
+                try:
+                    data = json.loads(respuesta)  # convertir string a JSON real
+                    log.info(f"[ANÁLISIS] Email parseado correctamente. Asunto: {data.get('asunto', 'N/A')}")
+                except json.JSONDecodeError as e:
+                    log.error(f"[ANÁLISIS] ✗ El texto devuelto no es JSON válido: {respuesta}, Error: {str(e)}")
+                    return
 
-                    if status != 201:
-                        log.error(f"La IA no pudo armar el mensaje: {respuesta}")
-                        return
+                dataMail = {
+                    "proveedor": "twilio",
+                    "idUsuarioDestinatario": conversacion.destinatario,
+                    "idUsuarioRemitente": conversacion.remitente,
+                    "asunto": data["asunto"],
+                    "cuerpo": data["cuerpo"],
+                    "dificultad": dificultad
+                }
 
-                    datamsj = {
-                        "medio": conversacion.eventoDesencadenador.lower(),
-                        "idUsuario": conversacion.destinatario,
-                        "mensaje": respuesta["mensaje"],
-                        "dificultad": dificultad
-                    }
-                    MsjController.enviarMensajePorID(datamsj)
+                log.info(f"[ANÁLISIS] Enviando email usando enviarMailPorID con dificultad '{dificultad}'...")
+                EmailController.enviarMailPorID(dataMail)
+                log.info(f"[ANÁLISIS] ✓ Email enviado correctamente")
 
             else:
-                log.info("El objetivo de la llamada NO se ha cumplido, NO se genera ningun evento pero suma puntos")
-                ResultadoEventoController.sumarReportado(conversacion.destinatario, conversacion.idEvento)
+
+                log.info(f"[ANÁLISIS] El evento desencadenador es un MENSAJE ({conversacion.eventoDesencadenador}), generando mensaje...")
+
+                if conversacion.objetivoEspecifico == "Abra un link que se le enviara por":
+                    dificultad = "facil"
+                    contexto = "Genera un mensaje de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación."
+                    log.info(f"[ANÁLISIS] Dificultad determinada: FÁCIL (objetivo: abrir link)")
+                elif conversacion.objetivoEspecifico == "Abra un link para ingresar sus credenciales que se le enviara por":
+                    dificultad = "medio"
+                    contexto = "Se pedirá login en un formulario (como caisteLogin.html) y credenciales. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
+                    log.info(f"[ANÁLISIS] Dificultad determinada: MEDIO (objetivo: ingresar credenciales)")
+                else:
+                    dificultad = "dificil"
+                    contexto = "Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
+                    log.info(f"[ANÁLISIS] Dificultad determinada: DIFÍCIL (objetivo por defecto)")
+
+                datamsj2 = {
+                    "contexto": contexto,
+                    "nivel": dificultad
+                }
+                
+                log.info(f"[ANÁLISIS] Generando mensaje con IA usando contexto y nivel '{dificultad}'...")
+                respuesta, status = AIController.armarMensaje(datamsj2)
+
+                if status != 201:
+                    log.error(f"[ANÁLISIS] ✗ La IA no pudo armar el mensaje. Status: {status}, Respuesta: {respuesta}")
+                    return
+
+                log.info(f"[ANÁLISIS] Mensaje generado por IA exitosamente")
+                datamsj = {
+                    "medio": conversacion.eventoDesencadenador.lower(),
+                    "idUsuario": conversacion.destinatario,
+                    "mensaje": respuesta["mensaje"],
+                    "dificultad": dificultad
+                }
+                
+                log.info(f"[ANÁLISIS] Enviando mensaje usando enviarMensajePorID con medio '{datamsj['medio']}' y dificultad '{dificultad}'...")
+                MsjController.enviarMensajePorID(datamsj)
+                log.info(f"[ANÁLISIS] ✓ Mensaje enviado correctamente")
+
+        else:
+            log.info(f"[ANÁLISIS] ✗ El objetivo de la llamada NO se ha cumplido, NO se genera ningún evento posterior")
+            log.info(f"[ANÁLISIS] Sumando puntos de reportado para destinatario {conversacion.destinatario} en evento {conversacion.idEvento}...")
+            ResultadoEventoController.sumarReportado(conversacion.destinatario, conversacion.idEvento)
+            log.info(f"[ANÁLISIS] Puntos de reportado sumados correctamente")
+        
+        log.info(f"[ANÁLISIS] ========== ANÁLISIS DE LLAMADA COMPLETADO ==========")
