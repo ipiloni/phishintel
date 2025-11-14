@@ -191,10 +191,18 @@ function resetearBoton() {
 let googleClient;
 
 function initializeGoogleLogin() {
+  // Construir redirect_uri dinámicamente basado en la URL actual
+  const currentProtocol = window.location.protocol;
+  const currentHost = window.location.host;
+  const redirectUri = `${currentProtocol}//${currentHost}/login`;
+  
+  console.log('Google OAuth redirect_uri:', redirectUri);
+  
   googleClient = google.accounts.oauth2.initCodeClient({
     client_id: "387090655276-8f9s91d8ir0go3ujuspnu6kc78d2ti6h.apps.googleusercontent.com",
     scope: "email profile",
     ux_mode: "popup",
+    redirect_uri: redirectUri,
     callback: handleCredentialResponse
   });
 

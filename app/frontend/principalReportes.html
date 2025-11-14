@@ -1297,7 +1297,7 @@
 
         // Calcular porcentajes y crear datos en formato correcto
         const datosTorta = areas.map((area, index) => {
-          const porcentaje = total > 0 ? parseFloat(((area.totalFallas / total) * 100).toFixed(1)) : 0;
+          const porcentaje = total > 0 ? Math.round((area.totalFallas / total) * 100) : 0;
           return {
             name: area.nombreArea,
             value: porcentaje,
@@ -1312,7 +1312,35 @@
             type: 'pie',
             height: 420,
             toolbar: { show: false },
-            foreColor: '#f1f1f1'
+            foreColor: '#f1f1f1',
+            events: {
+              dataPointMouseEnter: function(event, chartContext, config) {
+                chartContext.updateOptions({
+                  plotOptions: {
+                    pie: {
+                      donut: {
+                        labels: {
+                          show: false
+                        }
+                      }
+                    }
+                  }
+                });
+              },
+              dataPointMouseLeave: function(event, chartContext, config) {
+                chartContext.updateOptions({
+                  plotOptions: {
+                    pie: {
+                      donut: {
+                        labels: {
+                          show: true
+                        }
+                      }
+                    }
+                  }
+                });
+              }
+            }
           },
           theme: { mode: 'dark' },
           plotOptions: {
@@ -1330,11 +1358,11 @@
                   },
                   value: {
                     show: true,
-                    fontSize: '14px',
+                    fontSize: '18px',
                     fontWeight: 400,
                     color: '#f1f1f1',
                     formatter: function (val) {
-                      return val + '%'
+                      return Math.round(val) + '%'
                     }
                   },
                   total: {
@@ -1348,12 +1376,12 @@
             enabled: true,
             style: {
               colors: ['#ffffff'],
-              fontSize: '12px',
+              fontSize: '16px',
               fontWeight: 600
             },
             formatter: (val, opts) => {
               const dataPoint = datosTorta[opts.seriesIndex];
-              return `${dataPoint.name}\n${val}% (${dataPoint.cantidad})`;
+              return `${dataPoint.name}\n${Math.round(val)}% (${dataPoint.cantidad})`;
             }
           },
           series: datosTorta.map(item => item.value),
@@ -1362,7 +1390,7 @@
           tooltip: {
             theme: 'dark',
             style: {
-              fontSize: '14px',
+              fontSize: '16px',
               fontFamily: 'Arial, sans-serif'
             },
             fillSeriesColor: false,
@@ -1372,7 +1400,7 @@
             y: {
               formatter: (val, { seriesIndex, dataPointIndex }) => {
                 const dataPoint = datosTorta[dataPointIndex];
-                return `${dataPoint.name}: ${val}% (${dataPoint.cantidad} fallas)`;
+                return `${dataPoint.name}: ${Math.round(val)}% (${dataPoint.cantidad} fallas)`;
               }
             }
           },

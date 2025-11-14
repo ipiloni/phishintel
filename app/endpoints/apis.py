@@ -29,7 +29,30 @@ import os
 
 GOOGLE_CLIENT_ID = get("GOOGLE_AUTH_CLIENT")
 GOOGLE_CLIENT_SECRET = get("GOOGLE_AUTH_SECRET")
-GOOGLE_REDIRECT_URI = "postmessage"
+
+def get_google_redirect_uri():
+    """Obtiene el redirect_uri dinámicamente basado en la URL de la aplicación"""
+    url_app = get("URL_APP")
+    if url_app:
+        # Normalizar la URL
+        url_app = url_app.strip()
+        if not url_app.startswith("http://") and not url_app.startswith("https://"):
+            # Si es localhost o 127.0.0.1, usar http, sino https
+            if "localhost" in url_app.lower() or "127.0.0.1" in url_app:
+                url_app = f"http://{url_app}"
+            else:
+                url_app = f"https://{url_app}"
+        # Agregar /login al final si no está presente
+        if not url_app.endswith("/login"):
+            url_app = url_app.rstrip("/") + "/login"
+        return url_app
+    # Fallback: usar la URL de la request actual
+    from flask import request
+    if request:
+        scheme = request.scheme
+        host = request.host
+        return f"{scheme}://{host}/login"
+    return "postmessage"  # Último fallback
 
 # Flask es la libreria que vamos a usar para generar los Endpoints
 apis = Blueprint("apis", __name__)
@@ -842,11 +865,13 @@ def googleLogin():
             return jsonify({"error": "Falta el código de autorización"}), 400
 
         token_url = "https://oauth2.googleapis.com/token"
+        redirect_uri = get_google_redirect_uri()
+        log.info(f"Usando redirect_uri para Google OAuth: {redirect_uri}")
         token_data = {
             "code": auth_code,
             "client_id": GOOGLE_CLIENT_ID,
             "client_secret": GOOGLE_CLIENT_SECRET,
-            "redirect_uri": GOOGLE_REDIRECT_URI,
+            "redirect_uri": redirect_uri,
             "grant_type": "authorization_code",
         }
 

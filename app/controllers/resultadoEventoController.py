@@ -257,6 +257,38 @@ class ResultadoEventoController:
             # Determinar nivel de riesgo basado en puntos restantes
             nivel_riesgo = ResultadoEventoController._determinarNivelRiesgo(puntos_restantes)
 
+            # Función auxiliar para obtener el título del evento
+            def obtener_titulo_evento(evento, registro):
+                """Obtiene el título del evento. Para MENSAJE, muestra los primeros 40 caracteres del mensaje."""
+                if not registro:
+                    return f"Evento {evento.tipoEvento.value}"
+                
+                # Para eventos de tipo MENSAJE, usar el contenido del mensaje
+                if evento.tipoEvento == TipoEvento.MENSAJE:
+                    # El mensaje puede estar en registro.mensaje o registro.cuerpo
+                    mensaje_texto = None
+                    if registro.mensaje:
+                        mensaje_texto = registro.mensaje.strip()
+                    elif registro.cuerpo:
+                        mensaje_texto = registro.cuerpo.strip()
+                    
+                    if mensaje_texto:
+                        # Limpiar saltos de línea y espacios múltiples
+                        mensaje_texto = ' '.join(mensaje_texto.split())
+                        # Remover HTML tags si existen
+                        import re
+                        mensaje_texto = re.sub(r'<[^>]+>', '', mensaje_texto)
+                        # Tomar primeros 40 caracteres y agregar ... si es más largo
+                        preview = mensaje_texto[:40] + ('...' if len(mensaje_texto) > 40 else '')
+                        return preview
+                    elif registro.asunto:
+                        return registro.asunto
+                    else:
+                        return f"Evento {evento.tipoEvento.value}"
+                else:
+                    # Para otros tipos de evento, usar el asunto
+                    return registro.asunto if registro.asunto else f"Evento {evento.tipoEvento.value}"
+
             # Obtener eventos específicos para el desglose detallado
             from app.backend.models.registroEvento import RegistroEvento
             
@@ -308,7 +340,7 @@ class ResultadoEventoController:
                     "activos": [
                         {
                             "idEvento": evento.idEvento,
-                            "titulo": registro.asunto if registro and registro.asunto else f"Evento {evento.tipoEvento.value}",
+                            "titulo": obtener_titulo_evento(evento, registro),
                             "tipoEvento": evento.tipoEvento.value,
                             "fechaCreacion": evento.fechaEvento.isoformat() if evento.fechaEvento else None,
                             "puntos": PUNTOS_FALLA_GRAVE if usuario_evento.esFallaGrave else PUNTOS_FALLA_SIMPLE,
@@ -319,7 +351,7 @@ class ResultadoEventoController:
                     "reportados": [
                         {
                             "idEvento": evento.idEvento,
-                            "titulo": registro.asunto if registro and registro.asunto else f"Evento {evento.tipoEvento.value}",
+                            "titulo": obtener_titulo_evento(evento, registro),
                             "tipoEvento": evento.tipoEvento.value,
                             "fechaCreacion": evento.fechaEvento.isoformat() if evento.fechaEvento else None,
                             "puntos": PUNTOS_REPORTADO,
@@ -332,7 +364,7 @@ class ResultadoEventoController:
                     "pendientes": [
                         {
                             "idEvento": evento.idEvento,
-                            "titulo": registro.asunto if registro and registro.asunto else f"Evento {evento.tipoEvento.value}",
+                            "titulo": obtener_titulo_evento(evento, registro),
                             "tipoEvento": evento.tipoEvento.value,
                             "fechaCreacion": evento.fechaEvento.isoformat() if evento.fechaEvento else None,
                             "puntos": 0,
