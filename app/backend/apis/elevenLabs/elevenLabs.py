@@ -74,7 +74,7 @@ def tts(texto, idVoz, modelId, estabilidad, velocidad, exageracion):
         estabilidad = 0.5
 
     if velocidad is None:
-        velocidad = 1.0
+        velocidad = 1.1
 
     try:
         if idVoz is None:
