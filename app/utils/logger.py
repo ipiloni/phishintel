@@ -20,3 +20,7 @@ logging.basicConfig(
 )
 
 log = logging.getLogger("PhishIntel")
+
+# Suprimir logs de telethon sobre SSL
+logging.getLogger("telethon.crypto.libssl").setLevel(logging.ERROR)
+logging.getLogger("telethon.crypto.aes").setLevel(logging.ERROR)

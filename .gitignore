@@ -1,6 +1,7 @@
 app/properties.env
 app/app.log
 app/audios
+app/cloudflared/
 phishintel.db
 
 # Byte-compiled / optimized / DLL files
