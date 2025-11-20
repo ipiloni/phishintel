@@ -236,7 +236,7 @@ select:disabled option {
               <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill" :disabled="cargando">
                 <span v-if="cargando">
                   <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  Generando...
+                  {{ mensajeCargando }}
                 </span>
                 <span v-else>
                   <i class="bi bi-chat-dots"></i> Ver Preview
@@ -349,7 +349,7 @@ select:disabled option {
                     <button type="button" class="btn btn-sm" @click="regenerarMensaje" :disabled="cargandoRegenerar" style="border-color: #da02e5; color: #da02e5;">
                       <span v-if="cargandoRegenerar">
                         <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                        Regenerando...
+                        {{ mensajeRegenerando }}
                       </span>
                       <span v-else>
                         <i class="bi bi-arrow-clockwise"></i> Regenerar
@@ -440,6 +440,24 @@ select:disabled option {
           cargando: false,
           cargandoRegenerar: false,
           cargandoEnvio: false,
+          mensajeCargando: "Generando preview",
+          mensajeRegenerando: "Regenerando...",
+          intervaloCargando: null,
+          intervaloRegenerando: null,
+          mensajesRotacion: [
+            "Generando preview",
+            "Sugiriendo mensaje de IA",
+            "Procesando solicitud",
+            "Analizando contexto",
+            "Preparando contenido"
+          ],
+          mensajesRegeneracion: [
+            "Regenerando...",
+            "Sugiriendo nuevo mensaje",
+            "Procesando regeneración",
+            "Optimizando mensaje",
+            "Generando alternativa"
+          ],
           mensajeGenerado: {
             medio: "telegram",
             proveedor: "telethon",
@@ -471,8 +489,41 @@ select:disabled option {
         }
       },
       methods: {
+        iniciarRotacionMensajes() {
+          // Detener cualquier rotación existente
+          this.detenerRotacionMensajes();
+          let indice = 0;
+          this.mensajeCargando = this.mensajesRotacion[0];
+          this.intervaloCargando = setInterval(() => {
+            indice = (indice + 1) % this.mensajesRotacion.length;
+            this.mensajeCargando = this.mensajesRotacion[indice];
+          }, 3000);
+        },
+        detenerRotacionMensajes() {
+          if (this.intervaloCargando) {
+            clearInterval(this.intervaloCargando);
+            this.intervaloCargando = null;
+          }
+        },
+        iniciarRotacionRegeneracion() {
+          // Detener cualquier rotación existente
+          this.detenerRotacionRegeneracion();
+          let indice = 0;
+          this.mensajeRegenerando = this.mensajesRegeneracion[0];
+          this.intervaloRegenerando = setInterval(() => {
+            indice = (indice + 1) % this.mensajesRegeneracion.length;
+            this.mensajeRegenerando = this.mensajesRegeneracion[indice];
+          }, 3000);
+        },
+        detenerRotacionRegeneracion() {
+          if (this.intervaloRegenerando) {
+            clearInterval(this.intervaloRegenerando);
+            this.intervaloRegenerando = null;
+          }
+        },
         async generarPreview() {
           this.cargando = true;
+          this.iniciarRotacionMensajes();
           try {
             // Construir contexto según dificultad
             let contextoStr = '';
@@ -519,12 +570,14 @@ select:disabled option {
             console.error("Error:", e);
             this.mostrarToastError();
           } finally {
+            this.detenerRotacionMensajes();
             this.cargando = false;
           }
         },
 
         async regenerarMensaje() {
           this.cargandoRegenerar = true;
+          this.iniciarRotacionRegeneracion();
           try {
             // Construir contexto según dificultad
             let contextoStr = '';
@@ -555,6 +608,7 @@ select:disabled option {
             console.error("Error:", e);
             this.mostrarToastError();
           } finally {
+            this.detenerRotacionRegeneracion();
             this.cargandoRegenerar = false;
           }
         },

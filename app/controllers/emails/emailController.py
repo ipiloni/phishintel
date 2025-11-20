@@ -50,6 +50,7 @@ class EmailController:
             evento = Evento(
                 tipoEvento=TipoEvento.CORREO,
                 fechaEvento=datetime.datetime.now(),
+                dificultad=dificultad,
                 registroEvento=registroEvento
             )
             session.add(evento)

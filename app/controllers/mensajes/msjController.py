@@ -65,6 +65,8 @@ class MsjController:
             evento = Evento(
                 tipoEvento=TipoEvento.MENSAJE,
                 fechaEvento=datetime.datetime.now(),
+                dificultad=dificultad,
+                medio=medio,
                 registroEvento=registroEvento
             )
             session.add(evento)

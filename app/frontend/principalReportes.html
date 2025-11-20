@@ -3415,7 +3415,7 @@
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
                       <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
-                      <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                      <strong style="color: white;">${evento.tipoEvento === 'MENSAJE' && evento.medio ? `${nombres[evento.tipoEvento] || evento.tipoEvento} ${evento.medio.charAt(0).toUpperCase() + evento.medio.slice(1)}` : (nombres[evento.tipoEvento] || evento.tipoEvento)}${(evento.tipoEvento === 'MENSAJE' || evento.tipoEvento === 'CORREO') && evento.dificultad ? ` | Nivel ${evento.dificultad}` : ''}</strong>
                     </div>
                     <span class="badge" style="background: #ff6b6b; color: white; font-weight: bold;">-${evento.puntos} pts</span>
                   </div>
@@ -3499,7 +3499,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
                         <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
-                        <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                        <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}${(evento.tipoEvento === 'MENSAJE' || evento.tipoEvento === 'CORREO') && evento.dificultad ? ` | Nivel ${evento.dificultad}` : ''}</strong>
                       </div>
                       <div class="d-flex gap-1 flex-wrap">
                         <span class="badge" style="background: #28a745; color: white; font-weight: bold;">Reportado +${evento.puntos}</span>
@@ -3525,7 +3525,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
                         <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
-                        <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                        <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}${(evento.tipoEvento === 'MENSAJE' || evento.tipoEvento === 'CORREO') && evento.dificultad ? ` | Nivel ${evento.dificultad}` : ''}</strong>
                       </div>
                       <span class="badge" style="background: #28a745; color: white; font-weight: bold;">+${evento.puntos} pts</span>
                     </div>
@@ -3596,7 +3596,7 @@
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
                       <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
-                      <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                      <strong style="color: white;">${evento.tipoEvento === 'MENSAJE' && evento.medio ? `${nombres[evento.tipoEvento] || evento.tipoEvento} ${evento.medio.charAt(0).toUpperCase() + evento.medio.slice(1)}` : (nombres[evento.tipoEvento] || evento.tipoEvento)}${(evento.tipoEvento === 'MENSAJE' || evento.tipoEvento === 'CORREO') && evento.dificultad ? ` | Nivel ${evento.dificultad}` : ''}</strong>
                     </div>
                     <span class="badge" style="background: #6c757d; color: white; font-weight: bold;">0 pts</span>
                   </div>
@@ -3605,6 +3605,7 @@
                   </div>
                   <div class="small" style="color: #999;">
                     ID: ${evento.idEvento} | ${fechaFormateada}
+                    ${evento.tipoEvento === 'MENSAJE' && evento.medio ? ` | Medio: ${evento.medio.charAt(0).toUpperCase() + evento.medio.slice(1)}` : ''}
                   </div>
                 </div>
               </div>

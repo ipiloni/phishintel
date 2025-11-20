@@ -384,6 +384,8 @@ class ResultadoEventoController:
                             "fechaFalla": usuario_evento.fechaFalla.isoformat() if usuario_evento.fechaFalla else None,
                             "puntos": PUNTOS_FALLA_GRAVE if usuario_evento.esFallaGrave else PUNTOS_FALLA_SIMPLE,
                             "esFallaGrave": usuario_evento.esFallaGrave,
+                            "dificultad": evento.dificultad if evento.tipoEvento in [TipoEvento.MENSAJE, TipoEvento.CORREO] else None,
+                            "medio": evento.medio if evento.tipoEvento == TipoEvento.MENSAJE else None,
                             "tipo": "falla_activa"
                         } for evento, registro, usuario_evento in eventos_activos
                     ],
@@ -397,6 +399,8 @@ class ResultadoEventoController:
                             "haFalladoEnElPasado": usuario_evento.haFalladoEnElPasado,
                             "puntosFallaPasada": (PUNTOS_FALLA_GRAVE if usuario_evento.esFallaGrave else PUNTOS_FALLA_SIMPLE) if usuario_evento.haFalladoEnElPasado else 0,
                             "esFallaGrave": usuario_evento.esFallaGrave if usuario_evento.haFalladoEnElPasado else False,
+                            "dificultad": evento.dificultad if evento.tipoEvento in [TipoEvento.MENSAJE, TipoEvento.CORREO] else None,
+                            "medio": evento.medio if evento.tipoEvento == TipoEvento.MENSAJE else None,
                             "tipo": "falla_reportada" if usuario_evento.haFalladoEnElPasado else "reportado"
                         } for evento, registro, usuario_evento in eventos_reportados
                     ],
@@ -407,6 +411,8 @@ class ResultadoEventoController:
                             "tipoEvento": evento.tipoEvento.value,
                             "fechaCreacion": evento.fechaEvento.isoformat() if evento.fechaEvento else None,
                             "puntos": 0,
+                            "dificultad": evento.dificultad if evento.tipoEvento in [TipoEvento.MENSAJE, TipoEvento.CORREO] else None,
+                            "medio": evento.medio if evento.tipoEvento == TipoEvento.MENSAJE else None,
                             "tipo": "pendiente"
                         } for evento, registro, usuario_evento in eventos_pendientes
                     ]

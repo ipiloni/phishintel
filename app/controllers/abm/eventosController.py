@@ -44,6 +44,8 @@ class EventosController:
                     "idEvento": evento.idEvento,
                     "tipoEvento": evento.tipoEvento.value,
                     "fechaEvento": evento.fechaEvento.isoformat(),
+                    "dificultad": evento.dificultad,
+                    "medio": evento.medio,
                     "registroEvento": {
                         "idRegistroEvento": evento.registroEvento.idRegistroEvento,
                         "asunto": evento.registroEvento.asunto,
@@ -93,6 +95,8 @@ class EventosController:
                 "idEvento": evento.idEvento,
                 "tipoEvento": evento.tipoEvento.value,
                 "fechaEvento": evento.fechaEvento.isoformat(),
+                "dificultad": evento.dificultad,
+                "medio": evento.medio,
                 "registroEvento": {
                     "idRegistroEvento": evento.registroEvento.idRegistroEvento,
                     "asunto": evento.registroEvento.asunto,
@@ -130,9 +134,17 @@ class EventosController:
 
             session = SessionLocal()
 
+            # Asignar dificultad aleatoria solo para MENSAJE y CORREO
+            dificultad = None
+            if tipo_evento_val in [TipoEvento.MENSAJE.value, TipoEvento.CORREO.value]:
+                import random
+                dificultades = ["Fácil", "Medio", "Difícil"]
+                dificultad = random.choice(dificultades)
+
             nuevo_evento = Evento(
                 tipoEvento=tipo_evento_val,
-                fechaEvento=fecha_evento
+                fechaEvento=fecha_evento,
+                dificultad=dificultad
             )
 
             if "registroEvento" in data:
@@ -323,10 +335,24 @@ class EventosController:
                 
                 tipo_evento = TipoEvento(evento_data["tipoEvento"])
                 
+                # Asignar dificultad aleatoria solo para MENSAJE y CORREO
+                dificultad = None
+                if tipo_evento in [TipoEvento.MENSAJE, TipoEvento.CORREO]:
+                    dificultades = ["Fácil", "Medio", "Difícil"]
+                    dificultad = random.choice(dificultades)
+                
+                # Asignar medio aleatorio solo para MENSAJE
+                medio = None
+                if tipo_evento == TipoEvento.MENSAJE:
+                    medios = ["whatsapp", "telegram", "sms"]
+                    medio = random.choice(medios)
+                
                 # Crear evento
                 evento = Evento(
                     tipoEvento=tipo_evento,
-                    fechaEvento=datetime.fromisoformat(evento_data["fechaEvento"])
+                    fechaEvento=datetime.fromisoformat(evento_data["fechaEvento"]),
+                    dificultad=dificultad,
+                    medio=medio
                 )
                 session.add(evento)
                 session.flush()  # Para obtener el ID

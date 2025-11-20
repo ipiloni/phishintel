@@ -16,6 +16,33 @@ frontend = Blueprint("frontend", __name__, static_folder="frontend")
 # os.path.dirname(os.path.dirname(__file__)) = app/
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 
+def _es_bot(user_agent):
+    """
+    Detecta si un User-Agent pertenece a un bot/crawler/link preview.
+    
+    Args:
+        user_agent (str): User-Agent string del request
+        
+    Returns:
+        bool: True si es un bot, False si es un navegador legítimo
+    """
+    if not user_agent:
+        return False
+    
+    user_agent_lower = user_agent.lower()
+    
+    # Lista de User-Agents conocidos de bots/crawlers/link previews
+    bot_indicators = [
+        'bot', 'crawler', 'spider', 'scraper', 'curl', 'wget', 'python-requests',
+        'go-http-client', 'java/', 'okhttp', 'apache-httpclient', 'httpclient',
+        'facebookexternalhit', 'twitterbot', 'linkedinbot', 'slackbot',
+        'whatsapp', 'telegram', 'discordbot', 'skypebot', 'viberbot',
+        'textbee', 'linkpreview', 'preview', 'fetch', 'axios', 'node-fetch',
+        'postman', 'insomnia', 'httpie', 'rest-client', 'urllib'
+    ]
+    
+    return any(indicator in user_agent_lower for indicator in bot_indicators)
+
 # ------ # FRONTEND # ------ #
 # Ruta para servir el index.html
 # Ruta para el index
@@ -81,6 +108,13 @@ def caiste():
     Ruta para verificación (dificultad fácil).
     Soporta tanto la ruta antigua (/caiste) como la nueva (/verify).
     """
+    # Obtener User-Agent para detectar bots/crawlers
+    user_agent = request.headers.get('User-Agent', '')
+    is_bot = _es_bot(user_agent)
+    
+    if is_bot:
+        log.warning(f"[CAISTE] 🤖 BOT DETECTADO - User-Agent: {user_agent} - NO se registrará falla automática")
+    
     # Intentar obtener parámetros codificados primero (nueva forma)
     encoded_params = request.args.get('t')
     if encoded_params:
@@ -89,7 +123,12 @@ def caiste():
             idUsuario = decoded.get('idUsuario')
             idEvento = decoded.get('idEvento')
             if idUsuario and idEvento:
-                ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+                # Solo registrar FALLA si NO es un bot (acceso legítimo del usuario)
+                if not is_bot:
+                    log.info(f"[CAISTE] Registrando FALLA SIMPLE - Usuario: {idUsuario}, Evento: {idEvento}")
+                    ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+                else:
+                    log.warning(f"[CAISTE] 🤖 BOT DETECTADO - Acceso bloqueado para Usuario: {idUsuario}, Evento: {idEvento} - User-Agent: {user_agent}")
                 return redirect(url_for('frontend.caiste'))
     
     # Fallback: Intentar obtener parámetros de la URL (forma antigua - compatibilidad)
@@ -106,7 +145,12 @@ def caiste():
             session.pop('caiste_idEvento', None)
     
     if idUsuario and idEvento:
-        ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+        # Solo registrar FALLA si NO es un bot (acceso legítimo del usuario)
+        if not is_bot:
+            log.info(f"[CAISTE] Registrando FALLA SIMPLE (fallback) - Usuario: {idUsuario}, Evento: {idEvento}")
+            ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+        else:
+            log.warning(f"[CAISTE] 🤖 BOT DETECTADO (fallback) - Acceso bloqueado para Usuario: {idUsuario}, Evento: {idEvento} - User-Agent: {user_agent}")
         # Redirigir a la misma ruta sin parámetros para limpiar la URL
         return redirect(url_for('frontend.caiste'))
     
@@ -123,6 +167,15 @@ def caisteLogin():
     encoded_params = request.args.get('t')
     log.info(f"[CAISTE_LOGIN] Iniciando - URL params: {dict(request.args)}, encoded_params presente: {encoded_params is not None}")
     
+    # Obtener User-Agent para detectar bots/crawlers
+    user_agent = request.headers.get('User-Agent', '')
+    is_bot = _es_bot(user_agent)
+    
+    if is_bot:
+        log.warning(f"[CAISTE_LOGIN] 🤖 BOT DETECTADO - User-Agent: {user_agent} - NO se registrará falla automática")
+    else:
+        log.info(f"[CAISTE_LOGIN] Acceso legítimo detectado - User-Agent: {user_agent}")
+    
     if encoded_params:
         decoded = decode_phishing_params(encoded_params)
         log.info(f"[CAISTE_LOGIN] Parámetros decodificados: {decoded}")
@@ -131,10 +184,13 @@ def caisteLogin():
             idEvento = decoded.get('idEvento')
             log.info(f"[CAISTE_LOGIN] idUsuario: {idUsuario}, idEvento: {idEvento}")
             if idUsuario and idEvento:
-                # Registrar FALLA inmediatamente al hacer clic en el link
-                log.info(f"[CAISTE_LOGIN] Registrando FALLA SIMPLE - Usuario: {idUsuario}, Evento: {idEvento}")
-                resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
-                log.info(f"[CAISTE_LOGIN] Resultado de sumarFalla: {resultado}")
+                # Solo registrar FALLA si NO es un bot (acceso legítimo del usuario)
+                if not is_bot:
+                    log.info(f"[CAISTE_LOGIN] Registrando FALLA SIMPLE - Usuario: {idUsuario}, Evento: {idEvento}")
+                    resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+                    log.info(f"[CAISTE_LOGIN] Resultado de sumarFalla: {resultado}")
+                else:
+                    log.warning(f"[CAISTE_LOGIN] 🤖 BOT DETECTADO - Acceso bloqueado para Usuario: {idUsuario}, Evento: {idEvento} - User-Agent: {user_agent}")
                 # Leer el HTML y agregar campos ocultos al formulario
                 html_path = os.path.join(FRONTEND_DIR, "caisteLogin.html")
                 with open(html_path, 'r', encoding='utf-8') as f:
@@ -159,10 +215,13 @@ def caisteLogin():
     log.info(f"[CAISTE_LOGIN] Fallback - idUsuario: {idUsuario}, idEvento: {idEvento}")
     
     if idUsuario and idEvento:
-        # Registrar FALLA inmediatamente al hacer clic en el link
-        log.info(f"[CAISTE_LOGIN] Registrando FALLA SIMPLE (fallback) - Usuario: {idUsuario}, Evento: {idEvento}")
-        resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
-        log.info(f"[CAISTE_LOGIN] Resultado de sumarFalla (fallback): {resultado}")
+        # Solo registrar FALLA si NO es un bot (acceso legítimo del usuario)
+        if not is_bot:
+            log.info(f"[CAISTE_LOGIN] Registrando FALLA SIMPLE (fallback) - Usuario: {idUsuario}, Evento: {idEvento}")
+            resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+            log.info(f"[CAISTE_LOGIN] Resultado de sumarFalla (fallback): {resultado}")
+        else:
+            log.warning(f"[CAISTE_LOGIN] 🤖 BOT DETECTADO (fallback) - Acceso bloqueado para Usuario: {idUsuario}, Evento: {idEvento} - User-Agent: {user_agent}")
         # Leer el HTML y agregar campos ocultos al formulario
         html_path = os.path.join(FRONTEND_DIR, "caisteLogin.html")
         with open(html_path, 'r', encoding='utf-8') as f:
@@ -194,6 +253,15 @@ def caisteDatos():
     encoded_params = request.args.get('t')
     log.info(f"[CAISTE_DATOS] Iniciando - URL params: {dict(request.args)}, encoded_params presente: {encoded_params is not None}")
     
+    # Obtener User-Agent para detectar bots/crawlers
+    user_agent = request.headers.get('User-Agent', '')
+    is_bot = _es_bot(user_agent)
+    
+    if is_bot:
+        log.warning(f"[CAISTE_DATOS] 🤖 BOT DETECTADO - User-Agent: {user_agent} - NO se registrará falla automática")
+    else:
+        log.info(f"[CAISTE_DATOS] Acceso legítimo detectado - User-Agent: {user_agent}")
+    
     if encoded_params:
         decoded = decode_phishing_params(encoded_params)
         log.info(f"[CAISTE_DATOS] Parámetros decodificados: {decoded}")
@@ -202,10 +270,13 @@ def caisteDatos():
             idEvento = decoded.get('idEvento')
             log.info(f"[CAISTE_DATOS] idUsuario: {idUsuario}, idEvento: {idEvento}")
             if idUsuario and idEvento:
-                # Registrar FALLA inmediatamente al hacer clic en el link
-                log.info(f"[CAISTE_DATOS] Registrando FALLA SIMPLE - Usuario: {idUsuario}, Evento: {idEvento}")
-                resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
-                log.info(f"[CAISTE_DATOS] Resultado de sumarFalla: {resultado}")
+                # Solo registrar FALLA si NO es un bot (acceso legítimo del usuario)
+                if not is_bot:
+                    log.info(f"[CAISTE_DATOS] Registrando FALLA SIMPLE - Usuario: {idUsuario}, Evento: {idEvento}")
+                    resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+                    log.info(f"[CAISTE_DATOS] Resultado de sumarFalla: {resultado}")
+                else:
+                    log.warning(f"[CAISTE_DATOS] 🤖 BOT DETECTADO - Acceso bloqueado para Usuario: {idUsuario}, Evento: {idEvento} - User-Agent: {user_agent}")
                 # Leer el HTML y agregar campos ocultos al formulario
                 html_path = os.path.join(FRONTEND_DIR, "caisteDatos.html")
                 with open(html_path, 'r', encoding='utf-8') as f:
@@ -230,10 +301,13 @@ def caisteDatos():
     log.info(f"[CAISTE_DATOS] Fallback - idUsuario: {idUsuario}, idEvento: {idEvento}")
     
     if idUsuario and idEvento:
-        # Registrar FALLA inmediatamente al hacer clic en el link
-        log.info(f"[CAISTE_DATOS] Registrando FALLA SIMPLE (fallback) - Usuario: {idUsuario}, Evento: {idEvento}")
-        resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
-        log.info(f"[CAISTE_DATOS] Resultado de sumarFalla (fallback): {resultado}")
+        # Solo registrar FALLA si NO es un bot (acceso legítimo del usuario)
+        if not is_bot:
+            log.info(f"[CAISTE_DATOS] Registrando FALLA SIMPLE (fallback) - Usuario: {idUsuario}, Evento: {idEvento}")
+            resultado = ResultadoEventoController.sumarFalla(idUsuario, idEvento)
+            log.info(f"[CAISTE_DATOS] Resultado de sumarFalla (fallback): {resultado}")
+        else:
+            log.warning(f"[CAISTE_DATOS] 🤖 BOT DETECTADO (fallback) - Acceso bloqueado para Usuario: {idUsuario}, Evento: {idEvento} - User-Agent: {user_agent}")
         # Leer el HTML y agregar campos ocultos al formulario
         html_path = os.path.join(FRONTEND_DIR, "caisteDatos.html")
         with open(html_path, 'r', encoding='utf-8') as f:

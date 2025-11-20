@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, DateTime, Enum as SQLEnum
+from sqlalchemy import Column, Integer, DateTime, Enum as SQLEnum, String
 from sqlalchemy.orm import relationship
 from app.config.db_config import Base
 
@@ -10,6 +10,8 @@ class Evento(Base):
     idEvento = Column(Integer, primary_key=True, autoincrement=True)
     tipoEvento = Column(SQLEnum(TipoEvento), nullable=False)
     fechaEvento = Column(DateTime, nullable=False)
+    dificultad = Column(String(20), nullable=True)  # 'Fácil', 'Medio', 'Difícil' - solo para MENSAJE y CORREO
+    medio = Column(String(20), nullable=True)  # 'whatsapp', 'telegram', 'sms' - solo para MENSAJE
 
     # Relación con Registro (uno a uno)
     registroEvento = relationship("RegistroEvento", uselist=False, back_populates="evento")
