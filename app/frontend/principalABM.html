@@ -141,7 +141,7 @@
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="/principal" class="btn-getstarted btn-login">Home</a></li>
+          <li><a href="/principal" class="btn-getstarted btn-login">Volver a Home</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -166,6 +166,11 @@
                 <i class="bi bi-people"></i> Gestionar Empleados
               </button>
             </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" :class="{active: activeTab==='eventos'}" @click="activeTab='eventos'" type="button" role="tab">
+                <i class="bi bi-calendar-event"></i> Gestionar Eventos
+              </button>
+            </li>
           </ul>
 
           <!-- ÁREAS -->
@@ -181,13 +186,13 @@
                 </div>
               </div>
               <div class="table-responsive">
-                <table class="table table-hover table-dark mb-0">
+                <table id="tablaAreas" class="table table-hover table-dark mb-0">
                   <thead>
                     <tr>
-                      <th>#</th>
-                      <th>Nombre</th>
+                      <th class="sortable" data-col="0" style="cursor:pointer;"># <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="1" style="cursor:pointer;">Nombre <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                       <th>Datos</th>
-                      <th>Usuarios</th>
+                      <th class="sortable" data-col="3" style="cursor:pointer;">Usuarios <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                       <th class="text-end">Acciones</th>
                     </tr>
                   </thead>
@@ -229,14 +234,14 @@
                 </div>
               </div>
               <div class="table-responsive">
-                <table class="table table-hover table-dark mb-0">
+                <table id="tablaUsuarios" class="table table-hover table-dark mb-0">
                   <thead>
                     <tr>
-                      <th>#</th>
-                      <th>Usuario</th>
-                      <th>Nombre</th>
-                      <th>Apellido</th>
-                      <th>Área</th>
+                      <th class="sortable" data-col="0" style="cursor:pointer;"># <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="1" style="cursor:pointer;">Usuario <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="2" style="cursor:pointer;">Nombre <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="3" style="cursor:pointer;">Apellido <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="4" style="cursor:pointer;">Área <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                       <th class="text-end">Acciones</th>
                     </tr>
                   </thead>
@@ -254,6 +259,58 @@
                     </tr>
                     <tr v-if="usuarios.length===0">
                       <td colspan="6" class="text-center" style="color:#b0b0b0;">Sin usuarios</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- EVENTOS -->
+          <div v-show="activeTab==='eventos'">
+            <div class="card h-100 bg-dark text-white">
+              <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
+                <h5 class="mb-0">Eventos</h5>
+                <div>
+                  <button class="btn btn-primary btn-sm" @click="cargarEventos"><i class="bi bi-arrow-clockwise"></i></button>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table id="tablaEventos" class="table table-hover table-dark mb-0">
+                  <thead>
+                    <tr>
+                      <th class="sortable" data-col="0" style="cursor:pointer;"># <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="1" style="cursor:pointer;">Tipo <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="2" style="cursor:pointer;">Fecha <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="3" style="cursor:pointer;">Dificultad <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="4" style="cursor:pointer;">Medio <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="5" style="cursor:pointer;">Usuarios <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="text-end">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="e in eventos" :key="e.idEvento">
+                      <td>{{ e.idEvento }}</td>
+                      <td>
+                        <span class="badge" :class="{
+                          'bg-info': e.tipoEvento === 'CORREO',
+                          'bg-success': e.tipoEvento === 'MENSAJE',
+                          'bg-warning': e.tipoEvento === 'LLAMADA'
+                        }">
+                          {{ e.tipoEvento }}
+                        </span>
+                      </td>
+                      <td>{{ formatearFecha(e.fechaEvento) }}</td>
+                      <td>{{ e.dificultad || '—' }}</td>
+                      <td>{{ e.medio || '—' }}</td>
+                      <td>{{ (e.usuarios || []).length }}</td>
+                      <td class="text-end">
+                        <button class="btn btn-sm btn-primary me-2" @click="editarEvento(e)"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-primary" @click="eliminarEvento(e)"><i class="bi bi-trash"></i></button>
+                      </td>
+                    </tr>
+                    <tr v-if="eventos.length===0">
+                      <td colspan="7" class="text-center" style="color:#b0b0b0;">Sin eventos</td>
                     </tr>
                   </tbody>
                 </table>
@@ -416,6 +473,112 @@
             </div>
           </div>
 
+          <!-- Modal para Eventos -->
+          <div class="modal fade" id="modalEvento" tabindex="-1" aria-labelledby="modalEventoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+              <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                  <h5 class="modal-title" id="modalEventoLabel">Editar Evento #{{ eventoForm.idEvento }}</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <strong>Tipo:</strong> {{ eventoForm.tipoEvento }}
+                    </div>
+                    <div class="col-md-6">
+                      <strong>Fecha:</strong> {{ formatearFecha(eventoForm.fechaEvento) }}
+                    </div>
+                    <div class="col-md-6" v-if="eventoForm.dificultad">
+                      <strong>Dificultad:</strong> {{ eventoForm.dificultad }}
+                    </div>
+                    <div class="col-md-6" v-if="eventoForm.medio">
+                      <strong>Medio:</strong> {{ eventoForm.medio }}
+                    </div>
+                  </div>
+
+                  <hr class="border-secondary">
+
+                  <div class="mb-3">
+                    <label class="form-label mb-2"><strong>Gestionar Usuarios Asociados</strong></label>
+                    <div class="row g-2 align-items-center">
+                      <div class="col-5">
+                        <div class="small text-muted mb-1">Disponibles</div>
+                        <select class="form-select" size="8" multiple v-model="seleccionUsuariosDisponibles">
+                          <option v-for="u in usuariosDisponiblesEvento" :key="u.idUsuario" :value="u.idUsuario">
+                            {{ u.nombre }} {{ u.apellido }} ({{ u.nombreUsuario }})
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-2 d-flex flex-column align-items-center gap-2">
+                        <button type="button" class="btn btn-primary btn-sm" @click="agregarUsuarioEvento"><i class="bi bi-chevron-right"></i></button>
+                        <button type="button" class="btn btn-primary btn-sm" @click="quitarUsuarioEvento"><i class="bi bi-chevron-left"></i></button>
+                      </div>
+                      <div class="col-5">
+                        <div class="small text-muted mb-1">Asociados</div>
+                        <select class="form-select" size="8" multiple v-model="seleccionUsuariosAsociados">
+                          <option v-for="u in usuariosAsociadosEvento" :key="u.idUsuario" :value="u.idUsuario">
+                            {{ u.nombre }} {{ u.apellido }} ({{ u.nombreUsuario }})
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <hr class="border-secondary">
+
+                  <div class="mb-3">
+                    <label class="form-label mb-2"><strong>Gestionar Estado de Usuarios</strong></label>
+                    <div class="table-responsive">
+                      <table class="table table-sm table-dark">
+                        <thead>
+                          <tr>
+                            <th>Usuario</th>
+                            <th>Estado</th>
+                            <th>Falla Grave</th>
+                            <th>Falló en el Pasado</th>
+                            <th>Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="ux in eventoForm.usuariosAsociados" :key="ux.idUsuario">
+                            <td>{{ nombreUsuario(ux.idUsuario) }}</td>
+                            <td>
+                              <select class="form-select form-select-sm" v-model="ux.resultado" @change="actualizarEstadoUsuarioEvento(ux)">
+                                <option value="PENDIENTE">Pendiente</option>
+                                <option value="REPORTADO">Reportado</option>
+                                <option value="FALLA">Falla</option>
+                              </select>
+                            </td>
+                            <td>
+                              <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" v-model="ux.esFallaGrave" @change="actualizarFallaGrave(ux)">
+                              </div>
+                            </td>
+                            <td>
+                              <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" v-model="ux.haFalladoEnElPasado" @change="actualizarHaFalladoPasado(ux)">
+                              </div>
+                            </td>
+                            <td>
+                              <button class="btn btn-sm btn-danger" @click="desasociarUsuarioEvento(ux.idUsuario)"><i class="bi bi-x-circle"></i></button>
+                            </td>
+                          </tr>
+                          <tr v-if="eventoForm.usuariosAsociados.length === 0">
+                            <td colspan="5" class="text-center" style="color:#b0b0b0;">No hay usuarios asociados</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Modal de Confirmación de Eliminación -->
           <div class="modal fade" id="modalConfirmarEliminacion" tabindex="-1" aria-labelledby="modalConfirmarEliminacionLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -511,9 +674,20 @@
           loadingUsuario: false,
           eliminando: false,
           confirmacionEliminacion: {
-            tipo: null, // 'area' o 'usuario'
+            tipo: null, // 'area', 'usuario' o 'evento'
             item: null,
             mensaje: ''
+          },
+          eventos: [],
+          seleccionUsuariosDisponibles: [],
+          seleccionUsuariosAsociados: [],
+          eventoForm: {
+            idEvento: null,
+            tipoEvento: '',
+            fechaEvento: '',
+            dificultad: '',
+            medio: '',
+            usuariosAsociados: []
           },
           areaForm: {
             idArea: null,
@@ -564,6 +738,14 @@
                 .filter(item => item.length > 0);
             }
           }
+        },
+        usuariosAsociadosEvento() {
+          const asociados = new Set((this.eventoForm.usuariosAsociados || []).map(ux => Number(ux.idUsuario)));
+          return this.usuarios.filter(u => asociados.has(Number(u.idUsuario)));
+        },
+        usuariosDisponiblesEvento() {
+          const asociados = new Set((this.eventoForm.usuariosAsociados || []).map(ux => Number(ux.idUsuario)));
+          return this.usuarios.filter(u => !asociados.has(Number(u.idUsuario)));
         }
       },
       methods: {
@@ -609,6 +791,13 @@
             const idArea = this.areaForm.idArea;
             this.areaForm.usuariosSeleccionados = this.usuarios.filter(u => u.idArea === idArea).map(u => u.idUsuario);
           }
+          // Reinicializar ordenamiento después de cargar
+          this.$nextTick(() => {
+            const tablaAreas = document.getElementById('tablaAreas');
+            if (tablaAreas) {
+              this.configurarOrdenamientoTabla(tablaAreas);
+            }
+          });
         },
         abrirModalArea() {
           this.resetAreaForm();
@@ -729,6 +918,15 @@
               this.showToast('success', `Usuario "${usuario.nombre} ${usuario.apellido}" eliminado correctamente ✅`);
               await this.cargarUsuarios();
               await this.cargarAreas();
+            } else if (this.confirmacionEliminacion.tipo === 'evento') {
+              const evento = this.confirmacionEliminacion.item;
+              const resp = await fetch(`${API}/api/eventos/${evento.idEvento}`, { method: 'DELETE' });
+              if (!resp.ok) {
+                this.showToast('error', 'No se pudo eliminar el evento');
+                return;
+              }
+              this.showToast('success', `Evento #${evento.idEvento} eliminado correctamente ✅`);
+              await this.cargarEventos();
             }
             // Cerrar modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminacion'));
@@ -747,6 +945,13 @@
           const resp = await fetch(`${API}/api/usuarios`);
           const data = await resp.json();
           this.usuarios = data.usuarios || [];
+          // Reinicializar ordenamiento después de cargar
+          this.$nextTick(() => {
+            const tablaUsuarios = document.getElementById('tablaUsuarios');
+            if (tablaUsuarios) {
+              this.configurarOrdenamientoTabla(tablaUsuarios);
+            }
+          });
         },
         abrirModalUsuario() {
           this.resetUsuarioForm();
@@ -853,10 +1058,303 @@
           this.confirmacionEliminacion.mensaje = `¿Estás seguro de que deseas eliminar al usuario "${usuario.nombre} ${usuario.apellido}"?`;
           const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminacion'));
           modal.show();
+        },
+
+        // ------- EVENTOS -------
+        async cargarEventos() {
+          try {
+            const resp = await fetch(`${API}/api/eventos`);
+            if (!resp.ok) throw new Error('Error al cargar eventos');
+            const data = await resp.json();
+            this.eventos = data.eventos || [];
+            // Reinicializar ordenamiento después de cargar
+            this.$nextTick(() => {
+              const tablaEventos = document.getElementById('tablaEventos');
+              if (tablaEventos) {
+                this.configurarOrdenamientoTabla(tablaEventos);
+              }
+            });
+          } catch (e) {
+            this.showToast('error', e.message || 'Error al cargar eventos');
+          }
+        },
+        formatearFecha(fechaStr) {
+          if (!fechaStr) return '—';
+          const fecha = new Date(fechaStr);
+          return fecha.toLocaleString('es-ES', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          });
+        },
+        nombreUsuario(idUsuario) {
+          const u = this.usuarios.find(x => x.idUsuario === idUsuario);
+          return u ? `${u.nombre} ${u.apellido} (${u.nombreUsuario})` : '—';
+        },
+        editarEvento(evento) {
+          this.eventoForm = {
+            idEvento: evento.idEvento,
+            tipoEvento: evento.tipoEvento,
+            fechaEvento: evento.fechaEvento,
+            dificultad: evento.dificultad || '',
+            medio: evento.medio || '',
+            usuariosAsociados: (evento.usuarios || []).map(u => ({
+              idUsuario: u.idUsuario,
+              resultado: u.resultado,
+              esFallaGrave: u.esFallaGrave || false,
+              haFalladoEnElPasado: u.haFalladoEnElPasado || false,
+              fechaReporte: u.fechaReporte || null,
+              fechaFalla: u.fechaFalla || null
+            }))
+          };
+          this.seleccionUsuariosDisponibles = [];
+          this.seleccionUsuariosAsociados = [];
+          const modalElement = document.getElementById('modalEvento');
+          
+          // Limpiar cualquier backdrop existente
+          const existingBackdrops = document.querySelectorAll('.modal-backdrop');
+          existingBackdrops.forEach(backdrop => backdrop.remove());
+          document.body.classList.remove('modal-open');
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+          
+          let modal = bootstrap.Modal.getInstance(modalElement);
+          if (!modal) {
+            modal = new bootstrap.Modal(modalElement, {
+              backdrop: true,
+              keyboard: true
+            });
+          }
+          
+          // Agregar listener para limpiar backdrop al cerrar
+          modalElement.addEventListener('hidden.bs.modal', () => {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+          }, { once: true });
+          
+          modal.show();
+        },
+        actualizarDatosEventoEnModal() {
+          const eventoActualizado = this.eventos.find(e => e.idEvento === this.eventoForm.idEvento);
+          if (eventoActualizado) {
+            this.eventoForm.usuariosAsociados = (eventoActualizado.usuarios || []).map(u => ({
+              idUsuario: u.idUsuario,
+              resultado: u.resultado,
+              esFallaGrave: u.esFallaGrave || false,
+              haFalladoEnElPasado: u.haFalladoEnElPasado || false,
+              fechaReporte: u.fechaReporte || null,
+              fechaFalla: u.fechaFalla || null
+            }));
+          }
+        },
+        eliminarEvento(evento) {
+          this.confirmacionEliminacion.tipo = 'evento';
+          this.confirmacionEliminacion.item = evento;
+          this.confirmacionEliminacion.mensaje = `¿Estás seguro de que deseas eliminar el evento #${evento.idEvento} (${evento.tipoEvento})? Esta acción eliminará todas las asociaciones con usuarios.`;
+          const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminacion'));
+          modal.show();
+        },
+        async agregarUsuarioEvento() {
+          if (this.seleccionUsuariosDisponibles.length === 0) return;
+          for (const idUsuario of this.seleccionUsuariosDisponibles) {
+            const usuario = this.usuarios.find(u => u.idUsuario === idUsuario);
+            if (usuario && !this.eventoForm.usuariosAsociados.find(ux => ux.idUsuario === idUsuario)) {
+              try {
+                const resp = await fetch(`${API}/api/eventos/${this.eventoForm.idEvento}/usuarios/${idUsuario}`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ resultado: 'PENDIENTE' })
+                });
+                if (!resp.ok) throw new Error('Error al asociar usuario');
+                this.eventoForm.usuariosAsociados.push({
+                  idUsuario: idUsuario,
+                  resultado: 'PENDIENTE',
+                  esFallaGrave: false,
+                  haFalladoEnElPasado: false
+                });
+              } catch (e) {
+                this.showToast('error', `Error al asociar usuario: ${e.message}`);
+              }
+            }
+          }
+          this.seleccionUsuariosDisponibles = [];
+          await this.cargarEventos();
+          this.actualizarDatosEventoEnModal();
+        },
+        async quitarUsuarioEvento() {
+          if (this.seleccionUsuariosAsociados.length === 0) return;
+          await this.desasociarUsuarioEvento(this.seleccionUsuariosAsociados[0]);
+          this.seleccionUsuariosAsociados = [];
+        },
+        async desasociarUsuarioEvento(idUsuario) {
+          try {
+            const resp = await fetch(`${API}/api/eventos/${this.eventoForm.idEvento}/usuarios/${idUsuario}`, {
+              method: 'DELETE'
+            });
+            if (!resp.ok) throw new Error('Error al desasociar usuario');
+            this.showToast('success', 'Usuario desasociado correctamente');
+            await this.cargarEventos();
+            this.actualizarDatosEventoEnModal();
+          } catch (e) {
+            this.showToast('error', `Error al desasociar usuario: ${e.message}`);
+          }
+        },
+        async actualizarEstadoUsuarioEvento(ux) {
+          try {
+            const fechaReporte = ux.resultado === 'REPORTADO' ? new Date().toISOString() : null;
+            const fechaFalla = ux.resultado === 'FALLA' ? new Date().toISOString() : null;
+            const resp = await fetch(`${API}/api/eventos/${this.eventoForm.idEvento}/usuarios/${ux.idUsuario}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                resultado: ux.resultado,
+                fechaReporte: fechaReporte,
+                fechaFalla: fechaFalla
+              })
+            });
+            if (!resp.ok) throw new Error('Error al actualizar estado');
+            await this.cargarEventos();
+            this.actualizarDatosEventoEnModal();
+            this.showToast('success', 'Estado actualizado correctamente');
+          } catch (e) {
+            this.showToast('error', `Error al actualizar estado: ${e.message}`);
+          }
+        },
+        async actualizarFallaGrave(ux) {
+          try {
+            // Necesitamos crear un endpoint PUT para actualizar estos campos
+            // Por ahora, usamos el endpoint de asociación con los datos actuales
+            const fechaReporte = ux.fechaReporte ? new Date(ux.fechaReporte).toISOString() : null;
+            const fechaFalla = ux.fechaFalla ? new Date(ux.fechaFalla).toISOString() : null;
+            const resp = await fetch(`${API}/api/eventos/${this.eventoForm.idEvento}/usuarios/${ux.idUsuario}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                resultado: ux.resultado,
+                fechaReporte: fechaReporte,
+                fechaFalla: fechaFalla,
+                esFallaGrave: ux.esFallaGrave,
+                haFalladoEnElPasado: ux.haFalladoEnElPasado
+              })
+            });
+            if (!resp.ok) throw new Error('Error al actualizar falla grave');
+            await this.cargarEventos();
+            this.actualizarDatosEventoEnModal();
+            this.showToast('success', 'Falla grave actualizada correctamente');
+          } catch (e) {
+            this.showToast('error', `Error al actualizar falla grave: ${e.message}`);
+          }
+        },
+        async actualizarHaFalladoPasado(ux) {
+          try {
+            const fechaReporte = ux.fechaReporte ? new Date(ux.fechaReporte).toISOString() : null;
+            const fechaFalla = ux.fechaFalla ? new Date(ux.fechaFalla).toISOString() : null;
+            const resp = await fetch(`${API}/api/eventos/${this.eventoForm.idEvento}/usuarios/${ux.idUsuario}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                resultado: ux.resultado,
+                fechaReporte: fechaReporte,
+                fechaFalla: fechaFalla,
+                esFallaGrave: ux.esFallaGrave,
+                haFalladoEnElPasado: ux.haFalladoEnElPasado
+              })
+            });
+            if (!resp.ok) throw new Error('Error al actualizar ha fallado en el pasado');
+            await this.cargarEventos();
+            this.actualizarDatosEventoEnModal();
+            this.showToast('success', 'Estado de falla pasada actualizado correctamente');
+          } catch (e) {
+            this.showToast('error', `Error al actualizar estado: ${e.message}`);
+          }
+        },
+        inicializarOrdenamientoTablas() {
+          // Inicializar ordenamiento para tabla de áreas
+          const tablaAreas = document.getElementById('tablaAreas');
+          if (tablaAreas) {
+            this.configurarOrdenamientoTabla(tablaAreas);
+          }
+
+          // Inicializar ordenamiento para tabla de usuarios
+          const tablaUsuarios = document.getElementById('tablaUsuarios');
+          if (tablaUsuarios) {
+            this.configurarOrdenamientoTabla(tablaUsuarios);
+          }
+
+          // Inicializar ordenamiento para tabla de eventos
+          const tablaEventos = document.getElementById('tablaEventos');
+          if (tablaEventos) {
+            this.configurarOrdenamientoTabla(tablaEventos);
+          }
+        },
+        configurarOrdenamientoTabla(tabla) {
+          // Eliminar listeners anteriores si existen
+          const headers = tabla.querySelectorAll('thead th.sortable');
+          headers.forEach((th) => {
+            // Clonar el elemento para eliminar todos los listeners
+            const newTh = th.cloneNode(true);
+            th.parentNode.replaceChild(newTh, th);
+          });
+          
+          // Agregar nuevos listeners
+          const newHeaders = tabla.querySelectorAll('thead th.sortable');
+          newHeaders.forEach((th) => {
+            let asc = false;
+            th.addEventListener('click', () => {
+              const colIndex = parseInt(th.getAttribute('data-col'), 10);
+              asc = !asc;
+              this.ordenarTablaPorColumna(tabla, colIndex, asc);
+              // Actualizar iconos del header clickeado
+              newHeaders.forEach(h => {
+                const icon = h.querySelector('.sort-icon');
+                if (!icon) return;
+                if (h === th) {
+                  icon.classList.remove('bi-caret-down', 'bi-caret-up-fill', 'bi-caret-down-fill');
+                  icon.classList.add(asc ? 'bi-caret-up-fill' : 'bi-caret-down-fill');
+                } else {
+                  icon.classList.remove('bi-caret-up-fill', 'bi-caret-down-fill');
+                  icon.classList.add('bi-caret-down');
+                }
+              });
+            });
+          });
+        },
+        ordenarTablaPorColumna(tabla, indiceColumna, ascendente) {
+          const tbody = tabla.querySelector('tbody');
+          const filas = Array.from(tbody.querySelectorAll('tr'));
+
+          const comparar = (a, b) => {
+            const celdaA = a.children[indiceColumna]?.textContent.trim() || '';
+            const celdaB = b.children[indiceColumna]?.textContent.trim() || '';
+            
+            // Para columnas numéricas (ID, cantidad de usuarios, etc.)
+            const numA = parseFloat(celdaA.replace(/[^0-9.-]+/g, ''));
+            const numB = parseFloat(celdaB.replace(/[^0-9.-]+/g, ''));
+            const esNumeroA = !isNaN(numA);
+            const esNumeroB = !isNaN(numB);
+
+            let res = 0;
+            if (esNumeroA && esNumeroB) {
+              res = numA - numB;
+            } else {
+              res = celdaA.localeCompare(celdaB, 'es', { sensitivity: 'base' });
+            }
+            return ascendente ? res : -res;
+          };
+
+          filas.sort(comparar).forEach(fila => tbody.appendChild(fila));
         }
       },
       async mounted() {
-        await Promise.all([this.cargarAreas(), this.cargarUsuarios()]);
+        await Promise.all([this.cargarAreas(), this.cargarUsuarios(), this.cargarEventos()]);
+        this.$nextTick(() => {
+          this.inicializarOrdenamientoTablas();
+        });
       }
     }).mount('#app');
   </script>

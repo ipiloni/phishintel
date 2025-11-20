@@ -782,7 +782,7 @@
       </a>
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="/principal" class="btn-getstarted btn-login">Home</a></li>
+          <li><a href="/principal" class="btn-getstarted btn-login">Volver a Home</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -3517,41 +3517,6 @@
        `;
        
        if (eventos.reportados && eventos.reportados.length > 0) {
-         html += `
-           <div class="mb-4">
-             <div class="d-flex justify-content-between align-items-center mb-2" data-bs-toggle="collapse" data-bs-target="#collapseEventosReportados" aria-expanded="false" aria-controls="collapseEventosReportados" style="cursor: pointer;">
-               <h6 class="mb-0" style="color: #28a745; font-weight: bold;">
-                 <i class="bi bi-check-circle-fill me-2"></i>
-                 Eventos Reportados (${eventos.reportados.length})
-               </h6>
-               <i class="bi bi-chevron-down" style="color: #da02e5;"></i>
-             </div>
-             <div class="collapse" id="collapseEventosReportados">
-               <div class="d-flex justify-content-between align-items-center mb-2">
-                 <div class="d-flex gap-2 align-items-center">
-                   <label class="text-white-50 small me-2">Filtrar por tipo:</label>
-                   <div style="position: relative; width: 150px;">
-                     <select id="filtroTipoEventosReportados" class="form-select form-select-sm" style="width: 100%; background: #2d2d2d; color: white; border: 1px solid #da02e5;" onchange="filtrarEventosReportados();">
-                       <option value="">Todos</option>
-                       <option value="LLAMADA">📞 Llamada</option>
-                       <option value="MENSAJE">💬 Mensaje</option>
-                       <option value="CORREO">📧 Correo</option>
-                     </select>
-                     <i class="bi bi-chevron-down filter-dropdown-icon"></i>
-                   </div>
-                 </div>
-                 <div class="d-flex gap-2 align-items-center">
-                   <button class="btn btn-sm sort-btn-fecha-reportados" data-sort="fecha" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarEventosReportados('fecha', this);">
-                     <i class="bi sort-icon-fecha-reportados bi-caret-down" style="color: #da02e5;"></i> Fecha
-                   </button>
-                   <button class="btn btn-sm sort-btn-dificultad-reportados" data-sort="dificultad" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarEventosReportados('dificultad', this);">
-                     <i class="bi sort-icon-dificultad-reportados bi-caret-down" style="color: #da02e5;"></i> Dificultad
-                   </button>
-                 </div>
-               </div>
-               <div class="row" id="contenedorEventosReportados">
-         `;
-
          eventos.reportados.forEach(evento => {
            const iconos = {
              'CORREO': '📧',
@@ -3642,16 +3607,18 @@
           }
          });
 
-        html += `</div></div></div>`;
+        html += `</div>`;
       } else {
         // No hay eventos reportados
         html += `
           <div class="text-center py-4">
             <i class="bi bi-info-circle me-2" style="color: #28a745;"></i>
             <span style="color: #ccc;">No hay eventos reportados registrados.</span>
-          </div>
-        </div></div></div>`;
+          </div>`;
       }
+      
+      // Cerrar el contenedor row, el collapse y la sección mb-4
+      html += `</div></div></div>`;
 
       // Eventos pendientes - SIEMPRE mostrar el título
       html += `

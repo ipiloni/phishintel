@@ -226,7 +226,7 @@ class EventosController:
 
 
     @staticmethod
-    def asociarUsuarioEvento(idEvento, idUsuario, resultado_val, fechaReporte=None, fechaFalla=None):
+    def asociarUsuarioEvento(idEvento, idUsuario, resultado_val, fechaReporte=None, fechaFalla=None, esFallaGrave=None, haFalladoEnElPasado=None):
         if resultado_val not in [r.value for r in ResultadoEvento]:
             return responseError("RESULTADO_INVALIDO", "El resultado del evento no es válido", 400)
 
@@ -252,8 +252,13 @@ class EventosController:
                     usuario_evento.fechaReporte = fechaReporte
                 if fechaFalla:
                     usuario_evento.fechaFalla = fechaFalla
-                # Marcar haFalladoEnElPasado si el resultado es FALLA
-                if ResultadoEvento(resultado_val) == ResultadoEvento.FALLA:
+                # Actualizar esFallaGrave si se proporciona
+                if esFallaGrave is not None:
+                    usuario_evento.esFallaGrave = esFallaGrave
+                # Actualizar haFalladoEnElPasado si se proporciona, o marcar automáticamente si el resultado es FALLA
+                if haFalladoEnElPasado is not None:
+                    usuario_evento.haFalladoEnElPasado = haFalladoEnElPasado
+                elif ResultadoEvento(resultado_val) == ResultadoEvento.FALLA:
                     usuario_evento.haFalladoEnElPasado = True
             else:
                 usuario_evento = UsuarioxEvento(
@@ -262,7 +267,8 @@ class EventosController:
                     resultado=ResultadoEvento(resultado_val),
                     fechaReporte=fechaReporte,
                     fechaFalla=fechaFalla,
-                    haFalladoEnElPasado=(ResultadoEvento(resultado_val) == ResultadoEvento.FALLA)
+                    esFallaGrave=esFallaGrave if esFallaGrave is not None else False,
+                    haFalladoEnElPasado=haFalladoEnElPasado if haFalladoEnElPasado is not None else (ResultadoEvento(resultado_val) == ResultadoEvento.FALLA)
                 )
                 session.add(usuario_evento)
 
@@ -273,6 +279,29 @@ class EventosController:
         except Exception as e:
             session.close()
             return responseError("ERROR_ASOCIAR_USUARIO_EVENTO", f"Error al asociar usuario al evento: {str(e)}", 500)
+
+
+    @staticmethod
+    def desasociarUsuarioEvento(idEvento, idUsuario):
+        session = SessionLocal()
+        try:
+            usuario_evento = session.query(UsuarioxEvento).filter_by(
+                idEvento=idEvento,
+                idUsuario=idUsuario
+            ).first()
+
+            if not usuario_evento:
+                return responseError("ASOCIACION_NO_ENCONTRADA", "No se encontró la asociación entre el usuario y el evento", 404)
+
+            session.delete(usuario_evento)
+            session.commit()
+            session.close()
+            return jsonify({"mensaje": "Usuario desasociado del evento correctamente"}), 200
+
+        except Exception as e:
+            session.rollback()
+            session.close()
+            return responseError("ERROR_DESASOCIAR_USUARIO_EVENTO", f"Error al desasociar usuario del evento: {str(e)}", 500)
 
 
     @staticmethod

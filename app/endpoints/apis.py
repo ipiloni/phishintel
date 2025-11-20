@@ -377,6 +377,8 @@ def asociarUsuarioEvento(idEvento, idUsuario):
     resultado_val = data.get("resultado")
     fechaReporte = data.get("fechaReporte")
     fechaFalla = data.get("fechaFalla")
+    esFallaGrave = data.get("esFallaGrave")
+    haFalladoEnElPasado = data.get("haFalladoEnElPasado")
     
     if not resultado_val:
         return responseError("CAMPOS_OBLIGATORIOS", "Falta el campo 'resultado'", 400)
@@ -394,7 +396,12 @@ def asociarUsuarioEvento(idEvento, idUsuario):
         except ValueError:
             return responseError("FECHA_INVALIDA", "Formato de fechaFalla inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
     
-    return EventosController.asociarUsuarioEvento(idEvento, idUsuario, resultado_val, fechaReporte, fechaFalla)
+    return EventosController.asociarUsuarioEvento(idEvento, idUsuario, resultado_val, fechaReporte, fechaFalla, esFallaGrave, haFalladoEnElPasado)
+
+
+@apis.route("/api/eventos/<int:idEvento>/usuarios/<int:idUsuario>", methods=["DELETE"])
+def desasociarUsuarioEvento(idEvento, idUsuario):
+    return EventosController.desasociarUsuarioEvento(idEvento, idUsuario)
 
 
 @apis.route("/api/eventos/<int:idEvento>", methods=["DELETE"])
