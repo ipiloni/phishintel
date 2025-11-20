@@ -54,18 +54,15 @@ def init_tunnel():
     # Solo ejecutar en el proceso principal o cuando no está en modo debug
     if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
         print_banner()
-        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
         log.info("Iniciando aplicación PhishIntel...")
-        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         
         tunnel_started = tunnel_manager.start_tunnel()
         if not tunnel_started:
             log.info("La aplicación se iniciará sin túnel Cloudflare")
-        
-        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
         log.info("Iniciando servidor Flask en puerto 8080...")
-        log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        
+
         _tunnel_started = True
 
 if __name__ == "__main__":

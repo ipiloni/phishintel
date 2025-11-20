@@ -6,6 +6,8 @@ import os
 import subprocess
 import threading
 import time
+import sys
+import re
 from pathlib import Path
 from app.utils.config import get
 from app.utils.logger import log
@@ -42,6 +44,73 @@ class CloudflareTunnel:
         """Verifica si el archivo de configuración existe"""
         return self.config_file.exists()
     
+    def _extract_hostname_from_url(self, url):
+        """Extrae el hostname de una URL"""
+        if not url:
+            return None
+        
+        # Remover protocolo http:// o https://
+        url = url.replace('http://', '').replace('https://', '')
+        
+        # Remover cualquier ruta después del dominio
+        url = url.split('/')[0]
+        
+        # Remover puerto si existe
+        url = url.split(':')[0]
+        
+        return url.strip()
+    
+    def _get_hostname_from_config(self):
+        """Obtiene el hostname del archivo config.yml"""
+        try:
+            with open(self.config_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+                for i, line in enumerate(lines):
+                    if 'hostname:' in line:
+                        hostname = line.split('hostname:', 1)[1].strip()
+                        return hostname
+            return None
+        except Exception as e:
+            log.warning(f"No se pudo leer el hostname del config.yml: {e}")
+            return None
+    
+    def validate_hostname(self):
+        """Valida que el hostname del túnel coincida con URL_APP. Si no coincide, cierra la aplicación."""
+        url_app = get('URL_APP')
+        if not url_app:
+            log.error("URL_APP no está configurado en properties.env")
+            log.error("La aplicación se cerrará debido a la configuración incorrecta.")
+            sys.exit(1)
+        
+        expected_hostname = self._extract_hostname_from_url(url_app)
+        if not expected_hostname:
+            log.error(f"No se pudo extraer el hostname de URL_APP: {url_app}")
+            log.error("La aplicación se cerrará debido a la configuración incorrecta.")
+            sys.exit(1)
+        
+        current_hostname = self._get_hostname_from_config()
+        
+        if not current_hostname:
+            log.error("No se pudo leer el hostname del archivo config.yml")
+            log.error("La aplicación se cerrará debido a la configuración incorrecta.")
+            sys.exit(1)
+        
+        if current_hostname != expected_hostname:
+            log.error("=" * 70)
+            log.error("ERROR: El hostname en config.yml NO coincide con URL_APP")
+            log.error("=" * 70)
+            log.error(f"Hostname en config.yml: {current_hostname}")
+            log.error(f"Hostname esperado (URL_APP): {expected_hostname}")
+            log.error("=" * 70)
+            log.error("Por favor, actualiza manualmente el hostname en app/cloudflared/config.yml")
+            log.error("para que coincida con el valor de URL_APP en app/properties.env")
+            log.error("=" * 70)
+            log.error("La aplicación se cerrará debido a esta inconsistencia.")
+            sys.exit(1)
+        else:
+            log.info(f"Hostname verificado correctamente: {expected_hostname}")
+            return True
+    
     def start_tunnel(self):
         """Inicia el túnel de Cloudflare en un proceso separado"""
         if not self.is_enabled():
@@ -60,6 +129,9 @@ class CloudflareTunnel:
             log.error(f"No se encontró el archivo de configuración: {self.config_file}")
             log.info("   Asegúrate de que config.yml existe en la carpeta cloudflared/")
             return False
+        
+        # Validar que el hostname coincida con URL_APP (si no coincide, cierra la aplicación)
+        self.validate_hostname()
         
         try:
             # Leer el nombre del túnel del config.yml
