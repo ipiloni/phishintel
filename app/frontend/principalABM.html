@@ -45,8 +45,20 @@
 .small.text-muted { color: #b0b0b0 !important; }
 
 /* Tabs in dark */
-.nav-tabs { border-bottom: 1px solid #3a3a3a; }
-.nav-tabs .nav-link { color: #dddddd; }
+.nav-tabs { 
+  border-bottom: 1px solid #3a3a3a; 
+  display: flex;
+  width: 100%;
+}
+.nav-tabs .nav-item {
+  flex: 1;
+  display: flex;
+}
+.nav-tabs .nav-link { 
+  color: #dddddd; 
+  flex: 1;
+  text-align: center;
+}
 .nav-tabs .nav-link:hover { color: #ffffff; }
 .nav-tabs .nav-link.active {
   color: #ffffff;
@@ -141,23 +153,17 @@
     <div class="page-title py-5"></div>
 
     <section class="contact section">
-      <div class="col-lg-8 mx-auto" data-aos="fade-left" data-aos-delay="200">
-        <div id="app" class="contact-form-wrapper">
-          <div class="form-header">
-            <h3>Administración de Datos</h3>
-            <p>Gestiona áreas y usuarios del sistema.</p>
-          </div>
-
+      <div id="app" class="col-lg-8 mx-auto" data-aos="fade-left" data-aos-delay="200">
           <!-- Tabs -->
           <ul class="nav nav-tabs mb-4" role="tablist">
             <li class="nav-item" role="presentation">
               <button class="nav-link" :class="{active: activeTab==='areas'}" @click="activeTab='areas'" type="button" role="tab">
-                <i class="bi bi-building"></i> Áreas
+                <i class="bi bi-building"></i> Gestionar Áreas
               </button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" :class="{active: activeTab==='usuarios'}" @click="activeTab='usuarios'" type="button" role="tab">
-                <i class="bi bi-people"></i> Usuarios
+                <i class="bi bi-people"></i> Gestionar Empleados
               </button>
             </li>
           </ul>
@@ -471,8 +477,6 @@
               </div>
             </div>
           </div>
-
-        </div><!-- End contact-form-wrapper -->
 
       </div><!-- End col-lg-8 mx-auto -->
 

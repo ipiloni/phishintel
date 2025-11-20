@@ -20,8 +20,20 @@
       .card.bg-dark .card-header { background-color: #1f1f1f; border-bottom: 1px solid #3a3a3a; }
       .card.bg-dark .card-body { background-color: #1b1b1b; }
       .card.bg-dark, .card.bg-dark .card-body, .card.bg-dark .card-header { color: #f1f1f1; }
-      .nav-tabs { border-bottom: 1px solid #3a3a3a; }
-      .nav-tabs .nav-link { color: #dddddd; }
+      .nav-tabs { 
+        border-bottom: 1px solid #3a3a3a; 
+        display: flex;
+        width: 100%;
+      }
+      .nav-tabs .nav-item {
+        flex: 1;
+        display: flex;
+      }
+      .nav-tabs .nav-link { 
+        color: #dddddd; 
+        flex: 1;
+        text-align: center;
+      }
       .nav-tabs .nav-link:hover { color: #ffffff; }
 
       /* Estilos para select múltiple mejorados - Oculto por defecto */
@@ -445,13 +457,13 @@
 
       @keyframes pulse-grave {
         0% {
-          box-shadow: 0 0 20px rgba(220,53,69,0.6), 0 0 40px rgba(220,53,69,0.4), inset 0 0 20px rgba(220,53,69,0.1);
+          box-shadow: 0 0 12px rgba(220,53,69,0.35), 0 0 24px rgba(220,53,69,0.25), inset 0 0 12px rgba(220,53,69,0.08);
         }
         50% {
-          box-shadow: 0 0 30px rgba(220,53,69,0.8), 0 0 60px rgba(220,53,69,0.6), inset 0 0 30px rgba(220,53,69,0.2);
+          box-shadow: 0 0 18px rgba(220,53,69,0.5), 0 0 36px rgba(220,53,69,0.35), inset 0 0 18px rgba(220,53,69,0.12);
         }
         100% {
-          box-shadow: 0 0 20px rgba(220,53,69,0.6), 0 0 40px rgba(220,53,69,0.4), inset 0 0 20px rgba(220,53,69,0.1);
+          box-shadow: 0 0 12px rgba(220,53,69,0.35), 0 0 24px rgba(220,53,69,0.25), inset 0 0 12px rgba(220,53,69,0.08);
         }
       }
 
@@ -785,7 +797,7 @@
            <ul class="nav nav-tabs" role="tablist">
              <li class="nav-item" role="presentation">
                <button class="nav-link active" id="tab-kpis" data-bs-toggle="tab" data-bs-target="#panel-kpis" type="button" role="tab">
-                 <i class="bi bi-speedometer2"></i> KPIs
+                 <i class="bi bi-speedometer2"></i> KPIs (Indicadores clave de rendimiento)
                </button>
              </li>
              <li class="nav-item" role="presentation">
@@ -935,7 +947,7 @@
                             <div class="d-flex align-items-center">
                               <i class="bi bi-info-circle me-2" style="color: #17a2b8; cursor: pointer;"
                                  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-                                 title="<strong>Promedio de Scoring</strong><br/>Sistema de puntuación que evalúa el comportamiento de seguridad de los empleados.<br/><strong>Fórmula:</strong> 100 - Fallas Activas - Fallas Pasadas + Eventos Reportados"></i>
+                                 title="<strong>Promedio de Scoring</strong><br/>Sistema de puntuación que evalúa el comportamiento de seguridad de los empleados.<br/><strong>Fórmula:</strong> 100 (base) - 5 x Fallas Simples - 10 x Falla Grave + 5 x Reporte"></i>
                               <span id="kpiPromedioScoring" class="display-4 fw-bold" style="color: #17a2b8;">0</span>
                               <span class="ms-2 fs-5 text-white">pts</span>
                             </div>
@@ -1150,7 +1162,6 @@
                             <option value="CORREO">📧 Correo</option>
                             <option value="MENSAJE">💬 Mensaje</option>
                             <option value="LLAMADA">📞 Llamada</option>
-                            <option value="VIDEOLLAMADA">📹 Videollamada</option>
                           </select>
                           <div class="filter-placeholder" id="filtroTipoFechaPlaceholder">Seleccionar tipos...</div>
                           <i class="bi bi-chevron-down filter-dropdown-icon"></i>
@@ -1190,7 +1201,6 @@
                             <option value="CORREO">📧 Correo</option>
                             <option value="MENSAJE">💬 Mensaje</option>
                             <option value="LLAMADA">📞 Llamada</option>
-                            <option value="VIDEOLLAMADA">📹 Videollamada</option>
                           </select>
                           <div class="filter-placeholder" id="filtroTipoPlaceholder">Seleccionar tipos...</div>
                           <i class="bi bi-chevron-down filter-dropdown-icon"></i>
@@ -1640,8 +1650,7 @@
            const nombres = {
              'CORREO': '📧 Correo',
              'MENSAJE': '💬 Mensaje',
-             'LLAMADA': '📞 Llamada',
-             'VIDEOLLAMADA': '📹 Videollamada'
+             'LLAMADA': '📞 Llamada'
            };
            return nombres[campania.tipo] || campania.tipo;
          });
@@ -2423,7 +2432,7 @@
                             <th class="sortable" data-col="3" style="color:#fff;width:10%;cursor:pointer;">Puntos <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                             <th class="sortable" data-col="4" style="color:#fff;width:14%;cursor:pointer;">Fallas activas <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                             <th class="sortable" data-col="5" style="color:#fff;width:12%;cursor:pointer;">Reportados <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
-                            <th style="color:#fff;width:18%;">Scoring <i class="bi bi-info-circle ms-1" style="color:#da02e5;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Scoring</strong><br/>Base: +100 puntos<br/><strong>Fórmula:</strong> 100 - Fallas activas - Fallas pasadas + Reportados"></i></th>
+                            <th style="color:#fff;width:18%;">Scoring <i class="bi bi-info-circle ms-1" style="color:#da02e5;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Scoring</strong> <br> Fórmula: 100 (base) - 5 x Fallas Simples - 10 x Falla Grave + 5 x Reporte"></i></th>
                             <th style="color:#fff;width:4%;">Detalles</th>
                             <th class="sortable" data-col="8" style="color:#fff;width:4%;cursor:pointer;">Riesgo <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                           </tr>
@@ -2461,8 +2470,8 @@
                  }
 
                 const desgloseBadges = (() => {
-                  const iconos = { 'CORREO': '📧', 'MENSAJE': '💬', 'LLAMADA': '📞', 'VIDEOLLAMADA': '📹' };
-                  const nombres = { 'CORREO': 'Correo', 'MENSAJE': 'Mensaje', 'LLAMADA': 'Llamada', 'VIDEOLLAMADA': 'Videollamada' };
+                  const iconos = { 'CORREO': '📧', 'MENSAJE': '💬', 'LLAMADA': '📞' };
+                  const nombres = { 'CORREO': 'Correo', 'MENSAJE': 'Mensaje', 'LLAMADA': 'Llamada' };
                   
                   let badges = '';
                   
@@ -2882,17 +2891,17 @@
        }, 100);
      }
 
-     // Función para actualizar el indicador visual de nivel
-     function actualizarIndicadorNivel(nivel) {
-       const niveles = document.querySelectorAll('.kpi-level');
-       niveles.forEach((nivelElemento, index) => {
-         nivelElemento.classList.remove('active', 'critical');
+    // Función para actualizar el indicador visual de nivel
+    function actualizarIndicadorNivel(nivel) {
+      const niveles = document.querySelectorAll('#kpiIndicador .kpi-level');
+      niveles.forEach((nivelElemento, index) => {
+        nivelElemento.classList.remove('active', 'critical');
 
-         if (index < nivel) {
-           nivelElemento.classList.add('active');
-         }
-       });
-     }
+        if (index < nivel) {
+          nivelElemento.classList.add('active');
+        }
+      });
+    }
 
      // Event listener para el botón de actualizar
      document.getElementById('btnActualizarKPITiempo').addEventListener('click', () => {
@@ -3345,43 +3354,59 @@
          </div>
        `;
 
-      // Eventos activos
-      if (eventos.activos && eventos.activos.length > 0) {
-        html += `
-          <div class="mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-2" data-bs-toggle="collapse" data-bs-target="#collapseFallasActivas" aria-expanded="true" aria-controls="collapseFallasActivas" style="cursor: pointer;">
-              <h6 class="mb-0" style="color: #ff6b6b; font-weight: bold;">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                Fallas Activas (${eventos.activos.length})
-              </h6>
-              <i class="bi bi-chevron-down" style="color: #da02e5;"></i>
-            </div>
-            <div class="collapse show" id="collapseFallasActivas">
-              <div class="d-flex justify-content-end mb-2">
-                <div class="d-flex gap-2 align-items-center">
-                  <button class="btn btn-sm sort-btn-fecha" data-sort="fecha" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarFallasActivas('fecha', this);">
-                    <i class="bi sort-icon-fecha bi-caret-down" style="color: #da02e5;"></i> Fecha
-                  </button>
-                  <button class="btn btn-sm sort-btn-gravedad" data-sort="gravedad" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarFallasActivas('gravedad', this);">
-                    <i class="bi sort-icon-gravedad bi-caret-down" style="color: #da02e5;"></i> Gravedad
-                  </button>
+      // Eventos activos - SIEMPRE mostrar el título
+      html += `
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-2" data-bs-toggle="collapse" data-bs-target="#collapseFallasActivas" aria-expanded="true" aria-controls="collapseFallasActivas" style="cursor: pointer;">
+            <h6 class="mb-0" style="color: #ff6b6b; font-weight: bold;">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              Fallas Activas (${eventos.activos ? eventos.activos.length : 0})
+            </h6>
+            <i class="bi bi-chevron-down" style="color: #da02e5;"></i>
+          </div>
+          <div class="collapse show" id="collapseFallasActivas">
+            ${(eventos.activos && eventos.activos.length > 0) ? `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex gap-2 align-items-center">
+                <label class="text-white-50 small me-2">Filtrar por tipo:</label>
+                <div style="position: relative; width: 150px;">
+                  <select id="filtroTipoFallasActivas" class="form-select form-select-sm" style="width: 100%; background: #2d2d2d; color: white; border: 1px solid #da02e5;" onchange="filtrarFallasActivas();">
+                    <option value="">Todos</option>
+                    <option value="LLAMADA">📞 Llamada</option>
+                    <option value="MENSAJE">💬 Mensaje</option>
+                    <option value="CORREO">📧 Correo</option>
+                  </select>
+                  <i class="bi bi-chevron-down filter-dropdown-icon"></i>
                 </div>
               </div>
-              <div class="row" id="contenedorFallasActivas">
-        `;
+              <div class="d-flex gap-2 align-items-center">
+                <button class="btn btn-sm sort-btn-fecha" data-sort="fecha" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarFallasActivas('fecha', this);">
+                  <i class="bi sort-icon-fecha bi-caret-down" style="color: #da02e5;"></i> Fecha
+                </button>
+                <button class="btn btn-sm sort-btn-gravedad" data-sort="gravedad" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarFallasActivas('gravedad', this);">
+                  <i class="bi sort-icon-gravedad bi-caret-down" style="color: #da02e5;"></i> Gravedad
+                </button>
+                <button class="btn btn-sm sort-btn-dificultad" data-sort="dificultad" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarFallasActivas('dificultad', this);">
+                  <i class="bi sort-icon-dificultad bi-caret-down" style="color: #da02e5;"></i> Dificultad
+                </button>
+              </div>
+            </div>
+            ` : ''}
+            <div class="row" id="contenedorFallasActivas">
+      `;
+      
+      if (eventos.activos && eventos.activos.length > 0) {
 
          eventos.activos.forEach(evento => {
            const iconos = {
              'CORREO': '📧',
              'MENSAJE': '💬',
-             'LLAMADA': '📞',
-             'VIDEOLLAMADA': '📹'
+             'LLAMADA': '📞'
            };
            const nombres = {
              'CORREO': 'Correo',
              'MENSAJE': 'Mensaje',
-             'LLAMADA': 'Llamada',
-             'VIDEOLLAMADA': 'Videollamada'
+             'LLAMADA': 'Llamada'
            };
 
           // Formatear fecha y hora de creación
@@ -3400,7 +3425,7 @@
 
           // Estilo del card según si es falla grave o no
           const estiloCard = evento.esFallaGrave 
-            ? 'background: rgba(220,53,69,0.25); border: 4px solid #dc3545; box-shadow: 0 0 20px rgba(220,53,69,0.6), 0 0 40px rgba(220,53,69,0.4), inset 0 0 20px rgba(220,53,69,0.1); animation: pulse-grave 2s ease-in-out infinite;'
+            ? 'background: rgba(220,53,69,0.25); border: 4px solid #dc3545; box-shadow: 0 0 12px rgba(220,53,69,0.35), 0 0 24px rgba(220,53,69,0.25), inset 0 0 12px rgba(220,53,69,0.08); animation: pulse-grave 4s ease-in-out infinite;'
             : 'background: rgba(255,107,107,0.1); border: 2px solid #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.2);';
 
           // Tooltip según el tipo de falla
@@ -3408,14 +3433,25 @@
             ? '<strong>Falla Grave</strong><br/>El destinatario ingresó credenciales.'
             : '<strong>Falla Normal</strong><br/>Tocó un link o no sospechó de la llamada (en caso de llamadas).';
 
+          // Valor numérico para ordenamiento por dificultad
+          const dificultadNum = evento.dificultad === 'Fácil' ? 1 : evento.dificultad === 'Medio' ? 2 : evento.dificultad === 'Difícil' ? 3 : 0;
+          
+          // Formatear medio: SMS en mayúsculas, otros en formato capitalizado
+          const formatearMedio = (medio) => {
+            if (!medio) return '';
+            const medioLower = medio.toLowerCase();
+            if (medioLower === 'sms') return 'SMS';
+            return medio.charAt(0).toUpperCase() + medio.slice(1);
+          };
+
           html += `
-            <div class="col-md-6 mb-2 card-falla-activa" data-fecha-falla="${timestampFalla}" data-fecha-creacion="${timestampCreacion}" data-gravedad="${evento.esFallaGrave ? 'grave' : 'normal'}" data-gravedad-num="${evento.esFallaGrave ? 1 : 0}">
+            <div class="col-md-6 mb-2 card-falla-activa" data-fecha-falla="${timestampFalla}" data-fecha-creacion="${timestampCreacion}" data-gravedad="${evento.esFallaGrave ? 'grave' : 'normal'}" data-gravedad-num="${evento.esFallaGrave ? 1 : 0}" data-tipo-evento="${evento.tipoEvento}" data-dificultad="${evento.dificultad || ''}" data-dificultad-num="${dificultadNum}">
               <div class="card" style="${estiloCard}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="${tooltipText}">
                 <div class="card-body p-2">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
                       <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
-                      <strong style="color: white;">${evento.tipoEvento === 'MENSAJE' && evento.medio ? `${nombres[evento.tipoEvento] || evento.tipoEvento} ${evento.medio.charAt(0).toUpperCase() + evento.medio.slice(1)}` : (nombres[evento.tipoEvento] || evento.tipoEvento)}${(evento.tipoEvento === 'MENSAJE' || evento.tipoEvento === 'CORREO') && evento.dificultad ? ` | Nivel ${evento.dificultad}` : ''}</strong>
+                      <strong style="color: white;">${evento.tipoEvento === 'MENSAJE' && evento.medio ? `${nombres[evento.tipoEvento] || evento.tipoEvento} ${formatearMedio(evento.medio)}` : (nombres[evento.tipoEvento] || evento.tipoEvento)}${(evento.tipoEvento === 'MENSAJE' || evento.tipoEvento === 'CORREO') && evento.dificultad ? ` | Nivel ${evento.dificultad}` : ''}</strong>
                     </div>
                     <span class="badge" style="background: #ff6b6b; color: white; font-weight: bold;">-${evento.puntos} pts</span>
                   </div>
@@ -3432,9 +3468,54 @@
          });
 
          html += `</div></div></div>`;
+       } else {
+         // No hay fallas activas
+         html += `
+           <div class="text-center py-4">
+             <i class="bi bi-info-circle me-2" style="color: #ff6b6b;"></i>
+             <span style="color: #ccc;">No hay fallas activas registradas.</span>
+           </div>
+         </div></div></div>`;
        }
 
-       // Eventos reportados (incluyendo los que fueron fallados y luego reportados)
+       // Eventos reportados - SIEMPRE mostrar el título
+       html += `
+         <div class="mb-4">
+           <div class="d-flex justify-content-between align-items-center mb-2" data-bs-toggle="collapse" data-bs-target="#collapseEventosReportados" aria-expanded="false" aria-controls="collapseEventosReportados" style="cursor: pointer;">
+             <h6 class="mb-0" style="color: #28a745; font-weight: bold;">
+               <i class="bi bi-check-circle-fill me-2"></i>
+               Eventos Reportados (${eventos.reportados ? eventos.reportados.length : 0})
+             </h6>
+             <i class="bi bi-chevron-down" style="color: #da02e5;"></i>
+           </div>
+           <div class="collapse" id="collapseEventosReportados">
+             ${(eventos.reportados && eventos.reportados.length > 0) ? `
+             <div class="d-flex justify-content-between align-items-center mb-2">
+               <div class="d-flex gap-2 align-items-center">
+                 <label class="text-white-50 small me-2">Filtrar por tipo:</label>
+                 <div style="position: relative; width: 150px;">
+                   <select id="filtroTipoEventosReportados" class="form-select form-select-sm" style="width: 100%; background: #2d2d2d; color: white; border: 1px solid #da02e5;" onchange="filtrarEventosReportados();">
+                     <option value="">Todos</option>
+                     <option value="LLAMADA">📞 Llamada</option>
+                     <option value="MENSAJE">💬 Mensaje</option>
+                     <option value="CORREO">📧 Correo</option>
+                   </select>
+                   <i class="bi bi-chevron-down filter-dropdown-icon"></i>
+                 </div>
+               </div>
+               <div class="d-flex gap-2 align-items-center">
+                 <button class="btn btn-sm sort-btn-fecha-reportados" data-sort="fecha" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarEventosReportados('fecha', this);">
+                   <i class="bi sort-icon-fecha-reportados bi-caret-down" style="color: #da02e5;"></i> Fecha
+                 </button>
+                 <button class="btn btn-sm sort-btn-dificultad-reportados" data-sort="dificultad" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarEventosReportados('dificultad', this);">
+                   <i class="bi sort-icon-dificultad-reportados bi-caret-down" style="color: #da02e5;"></i> Dificultad
+                 </button>
+               </div>
+             </div>
+             ` : ''}
+             <div class="row" id="contenedorEventosReportados">
+       `;
+       
        if (eventos.reportados && eventos.reportados.length > 0) {
          html += `
            <div class="mb-4">
@@ -3446,10 +3527,25 @@
                <i class="bi bi-chevron-down" style="color: #da02e5;"></i>
              </div>
              <div class="collapse" id="collapseEventosReportados">
-               <div class="d-flex justify-content-end mb-2">
+               <div class="d-flex justify-content-between align-items-center mb-2">
+                 <div class="d-flex gap-2 align-items-center">
+                   <label class="text-white-50 small me-2">Filtrar por tipo:</label>
+                   <div style="position: relative; width: 150px;">
+                     <select id="filtroTipoEventosReportados" class="form-select form-select-sm" style="width: 100%; background: #2d2d2d; color: white; border: 1px solid #da02e5;" onchange="filtrarEventosReportados();">
+                       <option value="">Todos</option>
+                       <option value="LLAMADA">📞 Llamada</option>
+                       <option value="MENSAJE">💬 Mensaje</option>
+                       <option value="CORREO">📧 Correo</option>
+                     </select>
+                     <i class="bi bi-chevron-down filter-dropdown-icon"></i>
+                   </div>
+                 </div>
                  <div class="d-flex gap-2 align-items-center">
                    <button class="btn btn-sm sort-btn-fecha-reportados" data-sort="fecha" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarEventosReportados('fecha', this);">
                      <i class="bi sort-icon-fecha-reportados bi-caret-down" style="color: #da02e5;"></i> Fecha
+                   </button>
+                   <button class="btn btn-sm sort-btn-dificultad-reportados" data-sort="dificultad" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarEventosReportados('dificultad', this);">
+                     <i class="bi sort-icon-dificultad-reportados bi-caret-down" style="color: #da02e5;"></i> Dificultad
                    </button>
                  </div>
                </div>
@@ -3460,14 +3556,12 @@
            const iconos = {
              'CORREO': '📧',
              'MENSAJE': '💬',
-             'LLAMADA': '📞',
-             'VIDEOLLAMADA': '📹'
+             'LLAMADA': '📞'
            };
            const nombres = {
              'CORREO': 'Correo',
              'MENSAJE': 'Mensaje',
-             'LLAMADA': 'Llamada',
-             'VIDEOLLAMADA': 'Videollamada'
+             'LLAMADA': 'Llamada'
            };
 
           // Formatear fecha y hora
@@ -3492,8 +3586,11 @@
               ? '<strong>Falla Grave</strong><br/>El destinatario ingresó credenciales.'
               : '<strong>Falla Normal</strong><br/>Tocó un link o no sospechó de la llamada (en caso de llamadas).';
 
+            // Valor numérico para ordenamiento por dificultad
+            const dificultadNum = evento.dificultad === 'Fácil' ? 1 : evento.dificultad === 'Medio' ? 2 : evento.dificultad === 'Difícil' ? 3 : 0;
+
             html += `
-              <div class="col-md-6 mb-2 card-evento-reportado" data-fecha-creacion="${timestampCreacion}">
+              <div class="col-md-6 mb-2 card-evento-reportado" data-fecha-creacion="${timestampCreacion}" data-tipo-evento="${evento.tipoEvento}" data-dificultad="${evento.dificultad || ''}" data-dificultad-num="${dificultadNum}">
                 <div class="card" style="${estiloCard}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="${tooltipText}">
                   <div class="card-body p-2">
                     <div class="d-flex justify-content-between align-items-center">
@@ -3518,8 +3615,11 @@
             `;
           } else {
             // Solo reportado sin falla previa
+            // Valor numérico para ordenamiento por dificultad
+            const dificultadNumSolo = evento.dificultad === 'Fácil' ? 1 : evento.dificultad === 'Medio' ? 2 : evento.dificultad === 'Difícil' ? 3 : 0;
+
             html += `
-              <div class="col-md-6 mb-2 card-evento-reportado" data-fecha-creacion="${timestampCreacion}">
+              <div class="col-md-6 mb-2 card-evento-reportado" data-fecha-creacion="${timestampCreacion}" data-tipo-evento="${evento.tipoEvento}" data-dificultad="${evento.dificultad || ''}" data-dificultad-num="${dificultadNumSolo}">
                 <div class="card" style="background: rgba(40,167,69,0.1); border: 2px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.2);">
                   <div class="card-body p-2">
                     <div class="d-flex justify-content-between align-items-center">
@@ -3543,42 +3643,65 @@
          });
 
         html += `</div></div></div>`;
+      } else {
+        // No hay eventos reportados
+        html += `
+          <div class="text-center py-4">
+            <i class="bi bi-info-circle me-2" style="color: #28a745;"></i>
+            <span style="color: #ccc;">No hay eventos reportados registrados.</span>
+          </div>
+        </div></div></div>`;
       }
 
-      // Eventos pendientes
-      if (eventos.pendientes && eventos.pendientes.length > 0) {
-        html += `
-          <div class="mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-2" data-bs-toggle="collapse" data-bs-target="#collapseEventosPendientes" aria-expanded="false" aria-controls="collapseEventosPendientes" style="cursor: pointer;">
-              <h6 class="mb-0" style="color: #6c757d; font-weight: bold;">
-                <i class="bi bi-clock-fill me-2"></i>
-                Eventos Pendientes (${eventos.pendientes.length})
-              </h6>
-              <i class="bi bi-chevron-down" style="color: #da02e5;"></i>
-            </div>
-            <div class="collapse" id="collapseEventosPendientes">
-              <div class="d-flex justify-content-end mb-2">
-                <div class="d-flex gap-2 align-items-center">
-                  <button class="btn btn-sm sort-btn-fecha-pendientes" data-sort="fecha" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarEventosPendientes('fecha', this);">
-                    <i class="bi sort-icon-fecha-pendientes bi-caret-down" style="color: #da02e5;"></i> Fecha
-                  </button>
+      // Eventos pendientes - SIEMPRE mostrar el título
+      html += `
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-2" data-bs-toggle="collapse" data-bs-target="#collapseEventosPendientes" aria-expanded="false" aria-controls="collapseEventosPendientes" style="cursor: pointer;">
+            <h6 class="mb-0" style="color: #6c757d; font-weight: bold;">
+              <i class="bi bi-clock-fill me-2"></i>
+              Eventos Pendientes (${eventos.pendientes ? eventos.pendientes.length : 0})
+            </h6>
+            <i class="bi bi-chevron-down" style="color: #da02e5;"></i>
+          </div>
+          <div class="collapse" id="collapseEventosPendientes">
+            ${(eventos.pendientes && eventos.pendientes.length > 0) ? `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="d-flex gap-2 align-items-center">
+                <label class="text-white-50 small me-2">Filtrar por tipo:</label>
+                <div style="position: relative; width: 150px;">
+                  <select id="filtroTipoEventosPendientes" class="form-select form-select-sm" style="width: 100%; background: #2d2d2d; color: white; border: 1px solid #da02e5;" onchange="filtrarEventosPendientes();">
+                    <option value="">Todos</option>
+                    <option value="LLAMADA">📞 Llamada</option>
+                    <option value="MENSAJE">💬 Mensaje</option>
+                    <option value="CORREO">📧 Correo</option>
+                  </select>
+                  <i class="bi bi-chevron-down filter-dropdown-icon"></i>
                 </div>
               </div>
-              <div class="row" id="contenedorEventosPendientes">
-        `;
-
+              <div class="d-flex gap-2 align-items-center">
+                <button class="btn btn-sm sort-btn-fecha-pendientes" data-sort="fecha" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarEventosPendientes('fecha', this);">
+                  <i class="bi sort-icon-fecha-pendientes bi-caret-down" style="color: #da02e5;"></i> Fecha
+                </button>
+                <button class="btn btn-sm sort-btn-dificultad-pendientes" data-sort="dificultad" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarEventosPendientes('dificultad', this);">
+                  <i class="bi sort-icon-dificultad-pendientes bi-caret-down" style="color: #da02e5;"></i> Dificultad
+                </button>
+              </div>
+            </div>
+            ` : ''}
+            <div class="row" id="contenedorEventosPendientes">
+      `;
+      
+      if (eventos.pendientes && eventos.pendientes.length > 0) {
         eventos.pendientes.forEach(evento => {
           const iconos = {
             'CORREO': '📧',
             'MENSAJE': '💬',
-            'LLAMADA': '📞',
-            'VIDEOLLAMADA': '📹'
+            'LLAMADA': '📞'
           };
           const nombres = {
             'CORREO': 'Correo',
             'MENSAJE': 'Mensaje',
-            'LLAMADA': 'Llamada',
-            'VIDEOLLAMADA': 'Videollamada'
+            'LLAMADA': 'Llamada'
           };
 
           // Formatear fecha y hora
@@ -3588,15 +3711,26 @@
 
           // Timestamp para ordenamiento por fecha
           const timestampCreacion = evento.fechaCreacion ? new Date(evento.fechaCreacion).getTime() : 0;
+          
+          // Valor numérico para ordenamiento por dificultad
+          const dificultadNum = evento.dificultad === 'Fácil' ? 1 : evento.dificultad === 'Medio' ? 2 : evento.dificultad === 'Difícil' ? 3 : 0;
+          
+          // Formatear medio: SMS en mayúsculas, otros en formato capitalizado
+          const formatearMedio = (medio) => {
+            if (!medio) return '';
+            const medioLower = medio.toLowerCase();
+            if (medioLower === 'sms') return 'SMS';
+            return medio.charAt(0).toUpperCase() + medio.slice(1);
+          };
 
           html += `
-            <div class="col-md-6 mb-2 card-evento-pendiente" data-fecha-creacion="${timestampCreacion}">
+            <div class="col-md-6 mb-2 card-evento-pendiente" data-fecha-creacion="${timestampCreacion}" data-tipo-evento="${evento.tipoEvento}" data-dificultad="${evento.dificultad || ''}" data-dificultad-num="${dificultadNum}">
               <div class="card" style="background: rgba(108,117,125,0.1); border: 2px solid #6c757d; box-shadow: 0 0 10px rgba(108,117,125,0.2);">
                 <div class="card-body p-2">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
                       <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
-                      <strong style="color: white;">${evento.tipoEvento === 'MENSAJE' && evento.medio ? `${nombres[evento.tipoEvento] || evento.tipoEvento} ${evento.medio.charAt(0).toUpperCase() + evento.medio.slice(1)}` : (nombres[evento.tipoEvento] || evento.tipoEvento)}${(evento.tipoEvento === 'MENSAJE' || evento.tipoEvento === 'CORREO') && evento.dificultad ? ` | Nivel ${evento.dificultad}` : ''}</strong>
+                      <strong style="color: white;">${evento.tipoEvento === 'MENSAJE' && evento.medio ? `${nombres[evento.tipoEvento] || evento.tipoEvento} ${formatearMedio(evento.medio)}` : (nombres[evento.tipoEvento] || evento.tipoEvento)}${(evento.tipoEvento === 'MENSAJE' || evento.tipoEvento === 'CORREO') && evento.dificultad ? ` | Nivel ${evento.dificultad}` : ''}</strong>
                     </div>
                     <span class="badge" style="background: #6c757d; color: white; font-weight: bold;">0 pts</span>
                   </div>
@@ -3605,7 +3739,6 @@
                   </div>
                   <div class="small" style="color: #999;">
                     ID: ${evento.idEvento} | ${fechaFormateada}
-                    ${evento.tipoEvento === 'MENSAJE' && evento.medio ? ` | Medio: ${evento.medio.charAt(0).toUpperCase() + evento.medio.slice(1)}` : ''}
                   </div>
                 </div>
               </div>
@@ -3614,19 +3747,15 @@
         });
 
         html += `</div></div></div>`;
+      } else {
+        // No hay eventos pendientes
+        html += `
+          <div class="text-center py-4">
+            <i class="bi bi-info-circle me-2" style="color: #6c757d;"></i>
+            <span style="color: #ccc;">No hay eventos pendientes registrados.</span>
+          </div>
+        </div></div></div>`;
       }
-
-      // Si no hay eventos
-      if ((!eventos.activos || eventos.activos.length === 0) &&
-          (!eventos.reportados || eventos.reportados.length === 0) &&
-          (!eventos.pendientes || eventos.pendientes.length === 0)) {
-         html += `
-           <div class="text-center py-4">
-             <i class="bi bi-info-circle me-2" style="color: #da02e5;"></i>
-             <span style="color: #ccc;">No hay eventos registrados para este empleado.</span>
-           </div>
-         `;
-       }
 
        return html;
      }
@@ -3664,11 +3793,11 @@
       boton.setAttribute('data-asc', nuevoAsc);
 
       // Resetear otros botones
-      const otrosBotones = document.querySelectorAll('.sort-btn-fecha, .sort-btn-gravedad');
+      const otrosBotones = document.querySelectorAll('.sort-btn-fecha, .sort-btn-gravedad, .sort-btn-dificultad');
       otrosBotones.forEach(btn => {
         if (btn !== boton) {
           btn.setAttribute('data-asc', 'false');
-          const icon = btn.querySelector('.sort-icon-fecha, .sort-icon-gravedad');
+          const icon = btn.querySelector('.sort-icon-fecha, .sort-icon-gravedad, .sort-icon-dificultad');
           if (icon) {
             icon.classList.remove('bi-caret-up-fill', 'bi-caret-down-fill');
             icon.classList.add('bi-caret-down');
@@ -3677,14 +3806,18 @@
       });
 
       // Actualizar icono del botón actual
-      const icon = boton.querySelector('.sort-icon-fecha, .sort-icon-gravedad');
+      const icon = boton.querySelector('.sort-icon-fecha, .sort-icon-gravedad, .sort-icon-dificultad');
       if (icon) {
         icon.classList.remove('bi-caret-down', 'bi-caret-up-fill', 'bi-caret-down-fill');
         icon.classList.add(nuevoAsc ? 'bi-caret-up-fill' : 'bi-caret-down-fill');
       }
 
-      // Ordenar cards
-      cards.sort((a, b) => {
+      // Aplicar filtro antes de ordenar
+      const filtroTipo = document.getElementById('filtroTipoFallasActivas')?.value || '';
+      const cardsFiltradas = filtroTipo ? cards.filter(card => card.getAttribute('data-tipo-evento') === filtroTipo) : cards;
+
+      // Ordenar cards filtradas
+      cardsFiltradas.sort((a, b) => {
         let valorA, valorB;
 
         if (tipo === 'fecha') {
@@ -3693,14 +3826,124 @@
         } else if (tipo === 'gravedad') {
           valorA = parseInt(a.getAttribute('data-gravedad-num')) || 0;
           valorB = parseInt(b.getAttribute('data-gravedad-num')) || 0;
+        } else if (tipo === 'dificultad') {
+          valorA = parseInt(a.getAttribute('data-dificultad-num')) || 0;
+          valorB = parseInt(b.getAttribute('data-dificultad-num')) || 0;
         }
 
         const resultado = valorA - valorB;
         return nuevoAsc ? resultado : -resultado;
       });
 
-      // Reordenar en el DOM
-      cards.forEach(card => contenedor.appendChild(card));
+      // Ocultar todas las cards primero
+      cards.forEach(card => card.style.display = 'none');
+      
+      // Eliminar mensaje anterior si existe
+      const mensajeAnterior = contenedor.querySelector('.mensaje-filtro-vacio');
+      if (mensajeAnterior) mensajeAnterior.remove();
+      
+      if (cardsFiltradas.length === 0) {
+        // Mostrar mensaje cuando no hay resultados del filtro
+        const filtroTipo = document.getElementById('filtroTipoFallasActivas')?.value || '';
+        const nombresTipo = {
+          'LLAMADA': 'llamadas',
+          'MENSAJE': 'mensajes',
+          'CORREO': 'correos'
+        };
+        const tipoTexto = nombresTipo[filtroTipo] || 'eventos de ese tipo';
+        const mensaje = document.createElement('div');
+        mensaje.className = 'mensaje-filtro-vacio text-center py-4 col-12';
+        mensaje.innerHTML = `
+          <i class="bi bi-info-circle me-2" style="color: #ff6b6b;"></i>
+          <span style="color: #ccc;">No hay ${tipoTexto} en fallas activas.</span>
+        `;
+        contenedor.appendChild(mensaje);
+      } else {
+        // Mostrar y reordenar solo las filtradas
+        cardsFiltradas.forEach(card => {
+          card.style.display = 'block';
+          contenedor.appendChild(card);
+        });
+      }
+    }
+
+    // Función para filtrar fallas activas
+    window.filtrarFallasActivas = function() {
+      const contenedor = document.getElementById('contenedorFallasActivas');
+      if (!contenedor) return;
+      
+      const filtroTipo = document.getElementById('filtroTipoFallasActivas')?.value || '';
+      const cards = Array.from(contenedor.querySelectorAll('.card-falla-activa'));
+      
+      // Obtener el ordenamiento activo
+      const botonFecha = document.querySelector('.sort-btn-fecha');
+      const botonGravedad = document.querySelector('.sort-btn-gravedad');
+      const botonDificultad = document.querySelector('.sort-btn-dificultad');
+      
+      let tipoOrden = null;
+      let asc = false;
+      
+      if (botonFecha && botonFecha.getAttribute('data-asc') !== 'false') {
+        tipoOrden = 'fecha';
+        asc = botonFecha.getAttribute('data-asc') === 'true';
+      } else if (botonGravedad && botonGravedad.getAttribute('data-asc') !== 'false') {
+        tipoOrden = 'gravedad';
+        asc = botonGravedad.getAttribute('data-asc') === 'true';
+      } else if (botonDificultad && botonDificultad.getAttribute('data-asc') !== 'false') {
+        tipoOrden = 'dificultad';
+        asc = botonDificultad.getAttribute('data-asc') === 'true';
+      }
+      
+      // Filtrar cards
+      const cardsFiltradas = filtroTipo ? cards.filter(card => card.getAttribute('data-tipo-evento') === filtroTipo) : cards;
+      
+      // Aplicar ordenamiento si existe
+      if (tipoOrden) {
+        cardsFiltradas.sort((a, b) => {
+          let valorA, valorB;
+          if (tipoOrden === 'fecha') {
+            valorA = parseInt(a.getAttribute('data-fecha-falla')) || 0;
+            valorB = parseInt(b.getAttribute('data-fecha-falla')) || 0;
+          } else if (tipoOrden === 'gravedad') {
+            valorA = parseInt(a.getAttribute('data-gravedad-num')) || 0;
+            valorB = parseInt(b.getAttribute('data-gravedad-num')) || 0;
+          } else if (tipoOrden === 'dificultad') {
+            valorA = parseInt(a.getAttribute('data-dificultad-num')) || 0;
+            valorB = parseInt(b.getAttribute('data-dificultad-num')) || 0;
+          }
+          const resultado = valorA - valorB;
+          return asc ? resultado : -resultado;
+        });
+      }
+      
+      // Ocultar todas y mostrar solo las filtradas
+      cards.forEach(card => card.style.display = 'none');
+      
+      // Eliminar mensaje anterior si existe
+      const mensajeAnterior = contenedor.querySelector('.mensaje-filtro-vacio');
+      if (mensajeAnterior) mensajeAnterior.remove();
+      
+      if (cardsFiltradas.length === 0) {
+        // Mostrar mensaje cuando no hay resultados del filtro
+        const nombresTipo = {
+          'LLAMADA': 'llamadas',
+          'MENSAJE': 'mensajes',
+          'CORREO': 'correos'
+        };
+        const tipoTexto = nombresTipo[filtroTipo] || 'eventos de ese tipo';
+        const mensaje = document.createElement('div');
+        mensaje.className = 'mensaje-filtro-vacio text-center py-4 col-12';
+        mensaje.innerHTML = `
+          <i class="bi bi-info-circle me-2" style="color: #ff6b6b;"></i>
+          <span style="color: #ccc;">No hay ${tipoTexto} en fallas activas.</span>
+        `;
+        contenedor.appendChild(mensaje);
+      } else {
+        cardsFiltradas.forEach(card => {
+          card.style.display = 'block';
+          contenedor.appendChild(card);
+        });
+      }
     }
 
     // Función para ordenar eventos reportados (global)
@@ -3715,23 +3958,126 @@
       // Actualizar estado del botón
       boton.setAttribute('data-asc', nuevoAsc);
 
+      // Resetear otros botones
+      const otrosBotones = document.querySelectorAll('.sort-btn-fecha-reportados, .sort-btn-dificultad-reportados');
+      otrosBotones.forEach(btn => {
+        if (btn !== boton) {
+          btn.setAttribute('data-asc', 'false');
+          const icon = btn.querySelector('.sort-icon-fecha-reportados, .sort-icon-dificultad-reportados');
+          if (icon) {
+            icon.classList.remove('bi-caret-up-fill', 'bi-caret-down-fill');
+            icon.classList.add('bi-caret-down');
+          }
+        }
+      });
+
       // Actualizar icono del botón
-      const icon = boton.querySelector('.sort-icon-fecha-reportados');
+      const icon = boton.querySelector('.sort-icon-fecha-reportados, .sort-icon-dificultad-reportados');
       if (icon) {
         icon.classList.remove('bi-caret-down', 'bi-caret-up-fill', 'bi-caret-down-fill');
         icon.classList.add(nuevoAsc ? 'bi-caret-up-fill' : 'bi-caret-down-fill');
       }
 
-      // Ordenar cards
-      cards.sort((a, b) => {
-        const valorA = parseInt(a.getAttribute('data-fecha-creacion')) || 0;
-        const valorB = parseInt(b.getAttribute('data-fecha-creacion')) || 0;
+      // Aplicar filtro antes de ordenar
+      const filtroTipo = document.getElementById('filtroTipoEventosReportados')?.value || '';
+      const cardsFiltradas = filtroTipo ? cards.filter(card => card.getAttribute('data-tipo-evento') === filtroTipo) : cards;
+
+      // Ordenar cards filtradas
+      cardsFiltradas.sort((a, b) => {
+        let valorA, valorB;
+        
+        if (tipo === 'fecha') {
+          valorA = parseInt(a.getAttribute('data-fecha-creacion')) || 0;
+          valorB = parseInt(b.getAttribute('data-fecha-creacion')) || 0;
+        } else if (tipo === 'dificultad') {
+          valorA = parseInt(a.getAttribute('data-dificultad-num')) || 0;
+          valorB = parseInt(b.getAttribute('data-dificultad-num')) || 0;
+        }
+        
         const resultado = valorA - valorB;
         return nuevoAsc ? resultado : -resultado;
       });
 
-      // Reordenar en el DOM
-      cards.forEach(card => contenedor.appendChild(card));
+      // Ocultar todas las cards primero
+      cards.forEach(card => card.style.display = 'none');
+      
+      // Mostrar y reordenar solo las filtradas
+      cardsFiltradas.forEach(card => {
+        card.style.display = 'block';
+        contenedor.appendChild(card);
+      });
+    }
+
+    // Función para filtrar eventos reportados
+    window.filtrarEventosReportados = function() {
+      const contenedor = document.getElementById('contenedorEventosReportados');
+      if (!contenedor) return;
+      
+      const filtroTipo = document.getElementById('filtroTipoEventosReportados')?.value || '';
+      const cards = Array.from(contenedor.querySelectorAll('.card-evento-reportado'));
+      
+      // Obtener el ordenamiento activo
+      const botonFecha = document.querySelector('.sort-btn-fecha-reportados');
+      const botonDificultad = document.querySelector('.sort-btn-dificultad-reportados');
+      
+      let tipoOrden = null;
+      let asc = false;
+      
+      if (botonFecha && botonFecha.getAttribute('data-asc') !== 'false') {
+        tipoOrden = 'fecha';
+        asc = botonFecha.getAttribute('data-asc') === 'true';
+      } else if (botonDificultad && botonDificultad.getAttribute('data-asc') !== 'false') {
+        tipoOrden = 'dificultad';
+        asc = botonDificultad.getAttribute('data-asc') === 'true';
+      }
+      
+      // Filtrar cards
+      const cardsFiltradas = filtroTipo ? cards.filter(card => card.getAttribute('data-tipo-evento') === filtroTipo) : cards;
+      
+      // Aplicar ordenamiento si existe
+      if (tipoOrden) {
+        cardsFiltradas.sort((a, b) => {
+          let valorA, valorB;
+          if (tipoOrden === 'fecha') {
+            valorA = parseInt(a.getAttribute('data-fecha-creacion')) || 0;
+            valorB = parseInt(b.getAttribute('data-fecha-creacion')) || 0;
+          } else if (tipoOrden === 'dificultad') {
+            valorA = parseInt(a.getAttribute('data-dificultad-num')) || 0;
+            valorB = parseInt(b.getAttribute('data-dificultad-num')) || 0;
+          }
+          const resultado = valorA - valorB;
+          return asc ? resultado : -resultado;
+        });
+      }
+      
+      // Ocultar todas y mostrar solo las filtradas
+      cards.forEach(card => card.style.display = 'none');
+      
+      // Eliminar mensaje anterior si existe
+      const mensajeAnterior = contenedor.querySelector('.mensaje-filtro-vacio');
+      if (mensajeAnterior) mensajeAnterior.remove();
+      
+      if (cardsFiltradas.length === 0) {
+        // Mostrar mensaje cuando no hay resultados del filtro
+        const nombresTipo = {
+          'LLAMADA': 'llamadas',
+          'MENSAJE': 'mensajes',
+          'CORREO': 'correos'
+        };
+        const tipoTexto = nombresTipo[filtroTipo] || 'eventos de ese tipo';
+        const mensaje = document.createElement('div');
+        mensaje.className = 'mensaje-filtro-vacio text-center py-4 col-12';
+        mensaje.innerHTML = `
+          <i class="bi bi-info-circle me-2" style="color: #28a745;"></i>
+          <span style="color: #ccc;">No hay ${tipoTexto} en eventos reportados.</span>
+        `;
+        contenedor.appendChild(mensaje);
+      } else {
+        cardsFiltradas.forEach(card => {
+          card.style.display = 'block';
+          contenedor.appendChild(card);
+        });
+      }
     }
 
     // Función para ordenar eventos pendientes (global)
@@ -3746,23 +4092,148 @@
       // Actualizar estado del botón
       boton.setAttribute('data-asc', nuevoAsc);
 
+      // Resetear otros botones
+      const otrosBotones = document.querySelectorAll('.sort-btn-fecha-pendientes, .sort-btn-dificultad-pendientes');
+      otrosBotones.forEach(btn => {
+        if (btn !== boton) {
+          btn.setAttribute('data-asc', 'false');
+          const icon = btn.querySelector('.sort-icon-fecha-pendientes, .sort-icon-dificultad-pendientes');
+          if (icon) {
+            icon.classList.remove('bi-caret-up-fill', 'bi-caret-down-fill');
+            icon.classList.add('bi-caret-down');
+          }
+        }
+      });
+
       // Actualizar icono del botón
-      const icon = boton.querySelector('.sort-icon-fecha-pendientes');
+      const icon = boton.querySelector('.sort-icon-fecha-pendientes, .sort-icon-dificultad-pendientes');
       if (icon) {
         icon.classList.remove('bi-caret-down', 'bi-caret-up-fill', 'bi-caret-down-fill');
         icon.classList.add(nuevoAsc ? 'bi-caret-up-fill' : 'bi-caret-down-fill');
       }
 
-      // Ordenar cards
-      cards.sort((a, b) => {
-        const valorA = parseInt(a.getAttribute('data-fecha-creacion')) || 0;
-        const valorB = parseInt(b.getAttribute('data-fecha-creacion')) || 0;
+      // Aplicar filtro antes de ordenar
+      const filtroTipo = document.getElementById('filtroTipoEventosPendientes')?.value || '';
+      const cardsFiltradas = filtroTipo ? cards.filter(card => card.getAttribute('data-tipo-evento') === filtroTipo) : cards;
+
+      // Ordenar cards filtradas
+      cardsFiltradas.sort((a, b) => {
+        let valorA, valorB;
+        
+        if (tipo === 'fecha') {
+          valorA = parseInt(a.getAttribute('data-fecha-creacion')) || 0;
+          valorB = parseInt(b.getAttribute('data-fecha-creacion')) || 0;
+        } else if (tipo === 'dificultad') {
+          valorA = parseInt(a.getAttribute('data-dificultad-num')) || 0;
+          valorB = parseInt(b.getAttribute('data-dificultad-num')) || 0;
+        }
+        
         const resultado = valorA - valorB;
         return nuevoAsc ? resultado : -resultado;
       });
 
-      // Reordenar en el DOM
-      cards.forEach(card => contenedor.appendChild(card));
+      // Ocultar todas las cards primero
+      cards.forEach(card => card.style.display = 'none');
+      
+      // Eliminar mensaje anterior si existe
+      const mensajeAnterior = contenedor.querySelector('.mensaje-filtro-vacio');
+      if (mensajeAnterior) mensajeAnterior.remove();
+      
+      if (cardsFiltradas.length === 0) {
+        // Mostrar mensaje cuando no hay resultados del filtro
+        const filtroTipo = document.getElementById('filtroTipoEventosPendientes')?.value || '';
+        const nombresTipo = {
+          'LLAMADA': 'llamadas',
+          'MENSAJE': 'mensajes',
+          'CORREO': 'correos'
+        };
+        const tipoTexto = nombresTipo[filtroTipo] || 'eventos de ese tipo';
+        const mensaje = document.createElement('div');
+        mensaje.className = 'mensaje-filtro-vacio text-center py-4 col-12';
+        mensaje.innerHTML = `
+          <i class="bi bi-info-circle me-2" style="color: #6c757d;"></i>
+          <span style="color: #ccc;">No hay ${tipoTexto} en eventos pendientes.</span>
+        `;
+        contenedor.appendChild(mensaje);
+      } else {
+        // Mostrar y reordenar solo las filtradas
+        cardsFiltradas.forEach(card => {
+          card.style.display = 'block';
+          contenedor.appendChild(card);
+        });
+      }
+    }
+
+    // Función para filtrar eventos pendientes
+    window.filtrarEventosPendientes = function() {
+      const contenedor = document.getElementById('contenedorEventosPendientes');
+      if (!contenedor) return;
+      
+      const filtroTipo = document.getElementById('filtroTipoEventosPendientes')?.value || '';
+      const cards = Array.from(contenedor.querySelectorAll('.card-evento-pendiente'));
+      
+      // Obtener el ordenamiento activo
+      const botonFecha = document.querySelector('.sort-btn-fecha-pendientes');
+      const botonDificultad = document.querySelector('.sort-btn-dificultad-pendientes');
+      
+      let tipoOrden = null;
+      let asc = false;
+      
+      if (botonFecha && botonFecha.getAttribute('data-asc') !== 'false') {
+        tipoOrden = 'fecha';
+        asc = botonFecha.getAttribute('data-asc') === 'true';
+      } else if (botonDificultad && botonDificultad.getAttribute('data-asc') !== 'false') {
+        tipoOrden = 'dificultad';
+        asc = botonDificultad.getAttribute('data-asc') === 'true';
+      }
+      
+      // Filtrar cards
+      const cardsFiltradas = filtroTipo ? cards.filter(card => card.getAttribute('data-tipo-evento') === filtroTipo) : cards;
+      
+      // Aplicar ordenamiento si existe
+      if (tipoOrden) {
+        cardsFiltradas.sort((a, b) => {
+          let valorA, valorB;
+          if (tipoOrden === 'fecha') {
+            valorA = parseInt(a.getAttribute('data-fecha-creacion')) || 0;
+            valorB = parseInt(b.getAttribute('data-fecha-creacion')) || 0;
+          } else if (tipoOrden === 'dificultad') {
+            valorA = parseInt(a.getAttribute('data-dificultad-num')) || 0;
+            valorB = parseInt(b.getAttribute('data-dificultad-num')) || 0;
+          }
+          const resultado = valorA - valorB;
+          return asc ? resultado : -resultado;
+        });
+      }
+      
+      // Ocultar todas y mostrar solo las filtradas
+      cards.forEach(card => card.style.display = 'none');
+      
+      // Eliminar mensaje anterior si existe
+      const mensajeAnterior = contenedor.querySelector('.mensaje-filtro-vacio');
+      if (mensajeAnterior) mensajeAnterior.remove();
+      
+      if (cardsFiltradas.length === 0) {
+        // Mostrar mensaje cuando no hay resultados del filtro
+        const nombresTipo = {
+          'LLAMADA': 'llamadas',
+          'MENSAJE': 'mensajes',
+          'CORREO': 'correos'
+        };
+        const tipoTexto = nombresTipo[filtroTipo] || 'eventos de ese tipo';
+        const mensaje = document.createElement('div');
+        mensaje.className = 'mensaje-filtro-vacio text-center py-4 col-12';
+        mensaje.innerHTML = `
+          <i class="bi bi-info-circle me-2" style="color: #6c757d;"></i>
+          <span style="color: #ccc;">No hay ${tipoTexto} en eventos pendientes.</span>
+        `;
+        contenedor.appendChild(mensaje);
+      } else {
+        cardsFiltradas.forEach(card => {
+          card.style.display = 'block';
+          contenedor.appendChild(card);
+        });
+      }
     }
   </script>
 

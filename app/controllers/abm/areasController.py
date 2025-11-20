@@ -271,7 +271,7 @@ class AreasController:
         session = SessionLocal()
         try:
             # Tipos de campaña hardcodeados
-            tipos_campania = [TipoEvento.CORREO, TipoEvento.MENSAJE, TipoEvento.LLAMADA, TipoEvento.VIDEOLLAMADA]
+            tipos_campania = [TipoEvento.CORREO, TipoEvento.MENSAJE, TipoEvento.LLAMADA]
             
             # Inicializar el diccionario con todos los tipos de campaña
             campanias_dict = {

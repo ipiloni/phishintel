@@ -148,16 +148,6 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
-                  <div class="card h-100 cursor-pointer border-danger"
-                  style="cursor: not-allowed; opacity: 0.6; background-color: #2d2d2d; color: white;">
-                    <div class="card-body text-center p-2">
-                      <div style="font-size: 1.5em;"><i class="bi bi-camera-video"></i></div>
-                      <h6 class="card-title mb-0" style="font-size: 0.8em;">Videollamada</h6>
-                      <small class="card-text" style="font-size: 0.7em;">Próximamente</small>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -403,7 +393,6 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
             'CORREO': '📧',
             'MENSAJE': '💬',
             'LLAMADA': '📞',
-            'VIDEOLLAMADA': '📹'
           };
           return icons[tipo] || '❓';
         },
@@ -413,7 +402,6 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
             'CORREO': 'Correo Electrónico',
             'MENSAJE': 'Mensaje (WhatsApp/SMS)',
             'LLAMADA': 'Llamada Telefónica',
-            'VIDEOLLAMADA': 'Videollamada'
           };
           return nombres[tipo] || tipo;
         },

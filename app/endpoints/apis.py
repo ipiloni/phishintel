@@ -636,8 +636,7 @@ def obtenerFallasPorArea():
         tipo_mapping = {
             'CORREO': TipoEvento.CORREO,
             'MENSAJE': TipoEvento.MENSAJE,
-            'LLAMADA': TipoEvento.LLAMADA,
-            'VIDEOLLAMADA': TipoEvento.VIDEOLLAMADA
+            'LLAMADA': TipoEvento.LLAMADA
         }
         tipos_evento = [tipo_mapping.get(tipo.upper()) for tipo in tipos_evento_params if
                         tipo_mapping.get(tipo.upper())]
@@ -660,8 +659,7 @@ def obtenerFallasPorFecha():
         tipo_mapping = {
             'CORREO': TipoEvento.CORREO,
             'MENSAJE': TipoEvento.MENSAJE,
-            'LLAMADA': TipoEvento.LLAMADA,
-            'VIDEOLLAMADA': TipoEvento.VIDEOLLAMADA
+            'LLAMADA': TipoEvento.LLAMADA
         }
         tipos_evento = [tipo_mapping.get(tipo.upper()) for tipo in tipos_evento_params if
                         tipo_mapping.get(tipo.upper())]
@@ -700,8 +698,7 @@ def obtenerFallasPorEmpleado():
         tipo_mapping = {
             'CORREO': TipoEvento.CORREO,
             'MENSAJE': TipoEvento.MENSAJE,
-            'LLAMADA': TipoEvento.LLAMADA,
-            'VIDEOLLAMADA': TipoEvento.VIDEOLLAMADA
+            'LLAMADA': TipoEvento.LLAMADA
         }
         tipos_evento = [tipo_mapping.get(tipo.upper()) for tipo in tipos_evento_params if
                         tipo_mapping.get(tipo.upper())]
@@ -722,8 +719,7 @@ def obtenerFallasPorEmpleadoConScoring():
         tipo_mapping = {
             'CORREO': TipoEvento.CORREO,
             'MENSAJE': TipoEvento.MENSAJE,
-            'LLAMADA': TipoEvento.LLAMADA,
-            'VIDEOLLAMADA': TipoEvento.VIDEOLLAMADA
+            'LLAMADA': TipoEvento.LLAMADA
         }
         tipos_evento = [tipo_mapping.get(tipo.upper()) for tipo in tipos_evento_params if
                         tipo_mapping.get(tipo.upper())]

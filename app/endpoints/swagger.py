@@ -345,7 +345,7 @@ def openapi_spec():
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"]
+                                    "enum": ["CORREO", "MENSAJE", "LLAMADA"]
                                 }
                             },
                             "style": "form",
@@ -388,7 +388,7 @@ def openapi_spec():
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"]
+                                    "enum": ["CORREO", "MENSAJE", "LLAMADA"]
                                 }
                             },
                             "style": "form",
@@ -487,7 +487,7 @@ def openapi_spec():
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"]
+                                    "enum": ["CORREO", "MENSAJE", "LLAMADA"]
                                 }
                             },
                             "style": "form",
@@ -544,7 +544,7 @@ def openapi_spec():
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"]
+                                    "enum": ["CORREO", "MENSAJE", "LLAMADA"]
                                 }
                             },
                             "style": "form",
@@ -1909,7 +1909,7 @@ def openapi_spec():
             "/api/eventos/batch-prueba": {
                 "post": {
                     "summary": "Crear batch de eventos de prueba",
-                    "description": "Crea un conjunto de eventos de phishing de prueba para los empleados especificados. Los eventos incluyen diferentes tipos (correo, mensaje, llamada, videollamada) con fechas personalizables. Los usuarios 1-6 tienen distribución normal (40% fallas activas, 20% reportados, 40% pendientes). Los usuarios 7-9 tienen mayor probabilidad de reportar eventos (10% fallas activas, 20% reportados con falla previa, 50% reportados sin falla previa, 20% pendientes) para ganar puntos. Aproximadamente el 50% de las fallas creadas serán fallas graves (esFallaGrave=true), que restan 10 puntos en lugar de 5.",
+                    "description": "Crea un conjunto de eventos de phishing de prueba para los empleados especificados. Los eventos incluyen diferentes tipos (correo, mensaje, llamada) con fechas personalizables. Los usuarios 1-6 tienen distribución normal (40% fallas activas, 20% reportados, 40% pendientes). Los usuarios 7-9 tienen mayor probabilidad de reportar eventos (10% fallas activas, 20% reportados con falla previa, 50% reportados sin falla previa, 20% pendientes) para ganar puntos. Aproximadamente el 50% de las fallas creadas serán fallas graves (esFallaGrave=true), que restan 10 puntos en lugar de 5.",
                     "tags": ["📅 Eventos"],
                     "requestBody": {
                         "required": True,
@@ -1931,7 +1931,7 @@ def openapi_spec():
                                                 "properties": {
                                                     "tipoEvento": {
                                                         "type": "string",
-                                                        "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"],
+                                                        "enum": ["CORREO", "MENSAJE", "LLAMADA"],
                                                         "description": "Tipo de evento de phishing"
                                                     },
                                                     "asunto": {
@@ -2010,7 +2010,7 @@ def openapi_spec():
                                                     "type": "object",
                                                     "properties": {
                                                         "idEvento": {"type": "integer"},
-                                                        "tipoEvento": {"type": "string", "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"]},
+                                                        "tipoEvento": {"type": "string", "enum": ["CORREO", "MENSAJE", "LLAMADA"]},
                                                         "fechaEvento": {"type": "string", "format": "date-time"},
                                                         "asunto": {"type": "string"},
                                                         "usuariosAsociados": {"type": "integer"}
@@ -2160,7 +2160,7 @@ def openapi_spec():
                                     "properties": {
                                         "tipoEvento": {
                                             "type": "string",
-                                            "enum": ["CORREO", "MENSAJE", "LLAMADA", "VIDEOLLAMADA"],
+                                            "enum": ["CORREO", "MENSAJE", "LLAMADA"],
                                             "example": "CORREO",
                                             "description": "Tipo de evento de phishing"
                                         },
@@ -2648,7 +2648,7 @@ def openapi_spec():
                 },
                 "TipoEvento": {
                     "type": "string",
-                    "enum": ["LLAMADA", "CORREO", "MENSAJE", "VIDEOLLAMADA"]
+                    "enum": ["LLAMADA", "CORREO", "MENSAJE"]
                 },
                 "RegistroEvento": {
                     "type": "object",
