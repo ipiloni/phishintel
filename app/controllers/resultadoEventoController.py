@@ -40,7 +40,14 @@ class ResultadoEventoController:
             if not usuario_evento:
                 log.error(f"[SUMAR_FALLA] ERROR - No existe relación Usuario {idUsuario} - Evento {idEvento}")
                 session.close()
-                return responseError("RELACION_NO_ENCONTRADA", "No existe relación entre el usuario y el evento", 404)
+                # Verificar si estamos en contexto de aplicación
+                try:
+                    from flask import current_app
+                    current_app._get_current_object()
+                    return responseError("RELACION_NO_ENCONTRADA", "No existe relación entre el usuario y el evento", 404)
+                except RuntimeError:
+                    log.error(f"[SUMAR_FALLA] Error sin contexto de aplicación: No existe relación")
+                    return None
 
             log.info(f"[SUMAR_FALLA] Relación encontrada - Estado anterior: resultado={usuario_evento.resultado.value}, esFallaGrave={usuario_evento.esFallaGrave}")
 
@@ -58,21 +65,45 @@ class ResultadoEventoController:
             log.info(f"[SUMAR_FALLA] Antes de commit - resultado={usuario_evento.resultado.value}, esFallaGrave={usuario_evento.esFallaGrave}, fechaFalla={usuario_evento.fechaFalla}")
             session.commit()
             log.info(f"[SUMAR_FALLA] Commit exitoso - Falla registrada correctamente")
+            session.close()
 
-            return jsonify({
-                "mensaje": "Falla registrada", 
-                "idUsuario": idUsuario, 
-                "idEvento": idEvento,
-                "fechaFalla": fechaFalla.isoformat(),
-                "esFallaGrave": esFallaGrave
-            }), 200
+            # Verificar si estamos en un contexto de aplicación Flask
+            try:
+                from flask import current_app
+                current_app._get_current_object()
+                # Si llegamos aquí, hay contexto de aplicación, usar jsonify
+                return jsonify({
+                    "mensaje": "Falla registrada", 
+                    "idUsuario": idUsuario, 
+                    "idEvento": idEvento,
+                    "fechaFalla": fechaFalla.isoformat(),
+                    "esFallaGrave": esFallaGrave
+                }), 200
+            except RuntimeError:
+                # No hay contexto de aplicación (probablemente llamado desde un hilo)
+                # Retornar diccionario en lugar de Response
+                log.info(f"[SUMAR_FALLA] Retornando diccionario (sin contexto de aplicación)")
+                return {
+                    "mensaje": "Falla registrada", 
+                    "idUsuario": idUsuario, 
+                    "idEvento": idEvento,
+                    "fechaFalla": fechaFalla.isoformat(),
+                    "esFallaGrave": esFallaGrave
+                }
 
         except Exception as e:
             log.error(f"[SUMAR_FALLA] ERROR - Excepción al intentar sumar la falla: {str(e)}", exc_info=True)
             session.rollback()
-            return responseError("ERROR", f"No se pudo registrar la falla: {str(e)}", 500)
-        finally:
             session.close()
+            # Verificar si estamos en contexto de aplicación para retornar responseError
+            try:
+                from flask import current_app
+                current_app._get_current_object()
+                return responseError("ERROR", f"No se pudo registrar la falla: {str(e)}", 500)
+            except RuntimeError:
+                # Sin contexto, solo loguear el error
+                log.error(f"[SUMAR_FALLA] Error sin contexto de aplicación: {str(e)}")
+                return None
 
     @staticmethod
     def sumarFallaGrave(idUsuario, idEvento, fechaFalla=None):
@@ -259,9 +290,16 @@ class ResultadoEventoController:
 
             # Función auxiliar para obtener el título del evento
             def obtener_titulo_evento(evento, registro):
-                """Obtiene el título del evento. Para MENSAJE, muestra los primeros 40 caracteres del mensaje."""
+                """Obtiene el título del evento. Para MENSAJE, muestra los primeros 40 caracteres del mensaje. Para LLAMADA, muestra el remitente."""
                 if not registro:
                     return f"Evento {evento.tipoEvento.value}"
+                
+                # Para eventos de tipo LLAMADA, mostrar el remitente
+                if evento.tipoEvento == TipoEvento.LLAMADA:
+                    if registro.remitente:
+                        return f"Llamada de {registro.remitente}"
+                    else:
+                        return f"Evento {evento.tipoEvento.value}"
                 
                 # Para eventos de tipo MENSAJE, usar el contenido del mensaje
                 if evento.tipoEvento == TipoEvento.MENSAJE:
@@ -343,6 +381,7 @@ class ResultadoEventoController:
                             "titulo": obtener_titulo_evento(evento, registro),
                             "tipoEvento": evento.tipoEvento.value,
                             "fechaCreacion": evento.fechaEvento.isoformat() if evento.fechaEvento else None,
+                            "fechaFalla": usuario_evento.fechaFalla.isoformat() if usuario_evento.fechaFalla else None,
                             "puntos": PUNTOS_FALLA_GRAVE if usuario_evento.esFallaGrave else PUNTOS_FALLA_SIMPLE,
                             "esFallaGrave": usuario_evento.esFallaGrave,
                             "tipo": "falla_activa"

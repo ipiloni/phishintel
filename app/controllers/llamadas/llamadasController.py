@@ -169,6 +169,7 @@ class LlamadasController:
             "tipoEvento": "LLAMADA",
             "registroEvento": {
                 "objetivo": " ".join(conversacion.objetivoActual.split()).strip(),  # elimina doble espacios y \n
+                "remitente": nombreRemitente  # Guardar el nombre del remitente
             }
         }
 

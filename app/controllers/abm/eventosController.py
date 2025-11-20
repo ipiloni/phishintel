@@ -49,7 +49,8 @@ class EventosController:
                         "asunto": evento.registroEvento.asunto,
                         "cuerpo": evento.registroEvento.cuerpo,
                         "objetivo": evento.registroEvento.objetivo,
-                        "conversacion": evento.registroEvento.conversacion
+                        "conversacion": evento.registroEvento.conversacion,
+                        "remitente": evento.registroEvento.remitente
                     } if evento.registroEvento else None,
                     "usuarios": usuarios_info
                 })
@@ -136,12 +137,13 @@ class EventosController:
 
             if "registroEvento" in data:
                 registro_evento_data = data["registroEvento"]
-                if "asunto" in registro_evento_data or "cuerpo" in registro_evento_data or "objetivo" in registro_evento_data or "conversacion" in registro_evento_data:
+                if "asunto" in registro_evento_data or "cuerpo" in registro_evento_data or "objetivo" in registro_evento_data or "conversacion" in registro_evento_data or "remitente" in registro_evento_data:
                     nuevo_registro_evento = RegistroEvento(
                         asunto=registro_evento_data.get("asunto"),
                         cuerpo=registro_evento_data.get("cuerpo"),
                         objetivo=registro_evento_data.get("objetivo"),
-                        conversacion=registro_evento_data.get("conversacion")
+                        conversacion=registro_evento_data.get("conversacion"),
+                        remitente=registro_evento_data.get("remitente")
                     )
                     nuevo_evento.registroEvento = nuevo_registro_evento
 
@@ -195,8 +197,12 @@ class EventosController:
                     evento.registroEvento.asunto = registro_evento_data["asunto"]
                 if "cuerpo" in registro_evento_data:
                     evento.registroEvento.cuerpo = registro_evento_data["cuerpo"]
+                if "objetivo" in registro_evento_data:
+                    evento.registroEvento.objetivo = registro_evento_data["objetivo"]
                 if "conversacion" in registro_evento_data:
                     evento.registroEvento.conversacion = registro_evento_data["conversacion"]
+                if "remitente" in registro_evento_data:
+                    evento.registroEvento.remitente = registro_evento_data["remitente"]
 
             session.commit()
             session.close()
@@ -315,20 +321,34 @@ class EventosController:
                 if not evento_data.get("tipoEvento") or not evento_data.get("asunto"):
                     continue
                 
+                tipo_evento = TipoEvento(evento_data["tipoEvento"])
+                
                 # Crear evento
                 evento = Evento(
-                    tipoEvento=TipoEvento(evento_data["tipoEvento"]),
+                    tipoEvento=tipo_evento,
                     fechaEvento=datetime.fromisoformat(evento_data["fechaEvento"])
                 )
                 session.add(evento)
                 session.flush()  # Para obtener el ID
+                
+                # Para eventos de tipo LLAMADA, generar remitente si no se proporciona
+                remitente = evento_data.get("remitente")
+                if tipo_evento == TipoEvento.LLAMADA and not remitente:
+                    # Generar un remitente por defecto para eventos de llamada del batch
+                    remitentes_default = [
+                        "Juan Pérez", "María González", "Carlos Rodríguez", 
+                        "Ana Martínez", "Luis Fernández", "Laura Sánchez"
+                    ]
+                    remitente = random.choice(remitentes_default)
+                    log.info(f"Generando remitente por defecto para evento LLAMADA: {remitente}")
                 
                 # Crear registro del evento
                 registro = RegistroEvento(
                     idEvento=evento.idEvento,
                     asunto=evento_data["asunto"],
                     cuerpo=evento_data.get("cuerpo"),
-                    mensaje=evento_data.get("mensaje")
+                    mensaje=evento_data.get("mensaje"),
+                    remitente=remitente  # Para eventos de tipo LLAMADA
                 )
                 session.add(registro)
                 

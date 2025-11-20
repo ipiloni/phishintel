@@ -443,6 +443,18 @@
         }
       }
 
+      @keyframes pulse-grave {
+        0% {
+          box-shadow: 0 0 20px rgba(220,53,69,0.6), 0 0 40px rgba(220,53,69,0.4), inset 0 0 20px rgba(220,53,69,0.1);
+        }
+        50% {
+          box-shadow: 0 0 30px rgba(220,53,69,0.8), 0 0 60px rgba(220,53,69,0.6), inset 0 0 30px rgba(220,53,69,0.2);
+        }
+        100% {
+          box-shadow: 0 0 20px rgba(220,53,69,0.6), 0 0 40px rgba(220,53,69,0.4), inset 0 0 20px rgba(220,53,69,0.1);
+        }
+      }
+
       /* Colores para diferentes niveles */
       .kpi-level[data-level="0"].active { background-color: #dc3545; border-color: #dc3545; }
       .kpi-level[data-level="1"].active { background-color: #fd7e14; border-color: #fd7e14; }
@@ -501,6 +513,11 @@
 
       .tooltip.bs-tooltip-top .tooltip-arrow::before {
         border-top-color: #da02e5;
+      }
+
+      /* Modal personalizado con ancho intermedio */
+      #modalDetalleEventos .modal-dialog {
+        max-width: 1000px;
       }
 
       /* Estilos para el dropdown de navegación */
@@ -820,98 +837,6 @@
                         <div class="card-body p-4">
                           <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="mb-0">
-                              <i class="bi bi-clock-history me-2" style="color: #da02e5;"></i>
-                              Tiempo de Respuesta Promedio
-                            </h5>
-                            <div class="d-flex align-items-center">
-                              <i class="bi bi-info-circle me-2" style="color: #da02e5; cursor: pointer;"
-                                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-                                 title="<strong>Tiempo de Respuesta Promedio</strong><br/>Tiempo promedio que tardan los usuarios en reportar un evento de phishing simulado, contado desde que se generó el evento hasta que el sistema lo registra como reportado.<br/>Mide qué tan rápido los usuarios detectan y reportan los intentos de phishing."></i>
-                              <span id="kpiTiempoRespuesta" class="display-4 fw-bold" style="color: #da02e5;">0</span>
-                              <span class="ms-2 fs-5 text-white">horas</span>
-                            </div>
-                          </div>
-
-                          <div class="row g-3 mb-3">
-                            <div class="col-md-4">
-                              <div class="text-center">
-                                <div class="fs-6 text-white">Mediana</div>
-                                <div id="kpiMediana" class="fs-4 fw-bold" style="color: #00d4aa;">0h</div>
-                              </div>
-                            </div>
-                            <div class="col-md-4">
-                              <div class="text-center">
-                                <div class="fs-6 text-white">P90</div>
-                                <div id="kpiP90" class="fs-4 fw-bold" style="color: #ff6b6b;">0h</div>
-                              </div>
-                            </div>
-                            <div class="col-md-4">
-                              <div class="text-center">
-                                <div class="fs-6 text-white">Eventos</div>
-                                <div id="kpiTotalEventos" class="fs-4 fw-bold" style="color: #feca57;">0</div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                              <span class="fs-6 text-white">Nivel de Madurez</span>
-                              <span id="kpiNivel" class="badge fs-6 px-3 py-2">0/5</span>
-                            </div>
-                            <div class="progress" style="height: 12px; background-color: #333;">
-                              <div id="kpiProgreso" class="progress-bar" role="progressbar" style="width: 0%; transition: width 2s ease-in-out;"></div>
-                            </div>
-                            <div id="kpiEstadoNivel" class="text-center mt-2" style="display: none;">
-                              <span id="kpiBadgeNivel" class="badge fs-6 px-3 py-2">
-                                <i id="kpiIconoNivel" class="bi me-1"></i>
-                                <span id="kpiTextoNivel">Nivel 1</span>
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="col-lg-4">
-                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
-                        <div class="card-body p-4">
-                          <h6 class="mb-3">
-                            <i class="bi bi-shield-check me-2" style="color: #da02e5;"></i>
-                            Clasificación Actual
-                          </h6>
-
-                          <div class="text-center mb-3">
-                            <div id="kpiClasificacion" class="fs-4 fw-bold mb-2" style="color: #da02e5;">Cargando...</div>
-                            <div id="kpiDescripcion" class="text-white small">Obteniendo datos...</div>
-                          </div>
-
-                          <div class="d-flex justify-content-center mb-3">
-                            <div id="kpiIndicador" class="kpi-indicator">
-                              <div class="kpi-level" data-level="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 1: Presas del Phishing</strong><br/>Mediana > 12h o P90 > 60h<br/>Necesitan mejorar significativamente"></div>
-                              <div class="kpi-level" data-level="1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 2: Aprendices de Seguridad</strong><br/>Mediana ≤ 12h, P90 ≤ 60h<br/>En proceso de mejora"></div>
-                              <div class="kpi-level" data-level="2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 3: Defensores Digitales</strong><br/>Mediana ≤ 4h, P90 ≤ 48h<br/>Respuesta estándar"></div>
-                              <div class="kpi-level" data-level="3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 4: Guardianes Anti-Phishing</strong><br/>Mediana ≤ 2h, P90 ≤ 36h<br/>Responden rápido"></div>
-                              <div class="kpi-level" data-level="4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 5: Vigilantes del Ciberespacio</strong><br/>Mediana ≤ 1h, P90 ≤ 24h<br/>Excelencia en ciberseguridad"></div>
-                            </div>
-                          </div>
-
-                          <div class="text-center">
-                            <button id="btnActualizarKPITiempo" class="btn btn-outline-primary btn-sm">
-                              <i class="bi bi-arrow-clockwise me-1"></i>
-                              Actualizar
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row g-4 mt-4">
-                    <div class="col-lg-8">
-                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
-                        <div class="card-body p-4">
-                          <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0">
                               <i class="bi bi-exclamation-triangle me-2" style="color: #ff6b6b;"></i>
                               Tasa de Fallas
                             </h5>
@@ -1087,6 +1012,98 @@
                             <button id="btnDetalleKPIScoring" class="btn btn-info btn-sm">
                               <i class="bi bi-eye me-1"></i>
                               Detalle
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row g-4 mt-4">
+                    <div class="col-lg-8">
+                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
+                        <div class="card-body p-4">
+                          <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">
+                              <i class="bi bi-clock-history me-2" style="color: #da02e5;"></i>
+                              Tiempo de Respuesta Promedio
+                            </h5>
+                            <div class="d-flex align-items-center">
+                              <i class="bi bi-info-circle me-2" style="color: #da02e5; cursor: pointer;"
+                                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                                 title="<strong>Tiempo de Respuesta Promedio</strong><br/>Tiempo promedio que tardan los usuarios en reportar un evento de phishing simulado, contado desde que se generó el evento hasta que el sistema lo registra como reportado.<br/>Mide qué tan rápido los usuarios detectan y reportan los intentos de phishing."></i>
+                              <span id="kpiTiempoRespuesta" class="display-4 fw-bold" style="color: #da02e5;">0</span>
+                              <span class="ms-2 fs-5 text-white">horas</span>
+                            </div>
+                          </div>
+
+                          <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">Mediana</div>
+                                <div id="kpiMediana" class="fs-4 fw-bold" style="color: #00d4aa;">0h</div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">P90</div>
+                                <div id="kpiP90" class="fs-4 fw-bold" style="color: #ff6b6b;">0h</div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="text-center">
+                                <div class="fs-6 text-white">Eventos</div>
+                                <div id="kpiTotalEventos" class="fs-4 fw-bold" style="color: #feca57;">0</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                              <span class="fs-6 text-white">Nivel de Madurez</span>
+                              <span id="kpiNivel" class="badge fs-6 px-3 py-2">0/5</span>
+                            </div>
+                            <div class="progress" style="height: 12px; background-color: #333;">
+                              <div id="kpiProgreso" class="progress-bar" role="progressbar" style="width: 0%; transition: width 2s ease-in-out;"></div>
+                            </div>
+                            <div id="kpiEstadoNivel" class="text-center mt-2" style="display: none;">
+                              <span id="kpiBadgeNivel" class="badge fs-6 px-3 py-2">
+                                <i id="kpiIconoNivel" class="bi me-1"></i>
+                                <span id="kpiTextoNivel">Nivel 1</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                      <div class="card bg-gradient h-100" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #444;">
+                        <div class="card-body p-4">
+                          <h6 class="mb-3">
+                            <i class="bi bi-shield-check me-2" style="color: #da02e5;"></i>
+                            Clasificación Actual
+                          </h6>
+
+                          <div class="text-center mb-3">
+                            <div id="kpiClasificacion" class="fs-4 fw-bold mb-2" style="color: #da02e5;">Cargando...</div>
+                            <div id="kpiDescripcion" class="text-white small">Obteniendo datos...</div>
+                          </div>
+
+                          <div class="d-flex justify-content-center mb-3">
+                            <div id="kpiIndicador" class="kpi-indicator">
+                              <div class="kpi-level" data-level="0" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 1: Presas del Phishing</strong><br/>Mediana > 12h o P90 > 60h<br/>Necesitan mejorar significativamente"></div>
+                              <div class="kpi-level" data-level="1" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 2: Aprendices de Seguridad</strong><br/>Mediana ≤ 12h, P90 ≤ 60h<br/>En proceso de mejora"></div>
+                              <div class="kpi-level" data-level="2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 3: Defensores Digitales</strong><br/>Mediana ≤ 4h, P90 ≤ 48h<br/>Respuesta estándar"></div>
+                              <div class="kpi-level" data-level="3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 4: Guardianes Anti-Phishing</strong><br/>Mediana ≤ 2h, P90 ≤ 36h<br/>Responden rápido"></div>
+                              <div class="kpi-level" data-level="4" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Nivel 5: Vigilantes del Ciberespacio</strong><br/>Mediana ≤ 1h, P90 ≤ 24h<br/>Excelencia en ciberseguridad"></div>
+                            </div>
+                          </div>
+
+                          <div class="text-center">
+                            <button id="btnActualizarKPITiempo" class="btn btn-outline-primary btn-sm">
+                              <i class="bi bi-arrow-clockwise me-1"></i>
+                              Actualizar
                             </button>
                           </div>
                         </div>
@@ -3266,13 +3283,24 @@
          // Actualizar nombre del empleado en el modal
          document.getElementById('nombreEmpleadoModal').textContent = `${data.nombre} ${data.apellido}`;
 
-         // Generar contenido del modal
-         const contenido = generarContenidoDetalleEventos(data);
-         document.getElementById('contenidoDetalleEventos').innerHTML = contenido;
+        // Generar contenido del modal
+        const contenido = generarContenidoDetalleEventos(data);
+        document.getElementById('contenidoDetalleEventos').innerHTML = contenido;
 
-         // Mostrar el modal
-         const modal = new bootstrap.Modal(document.getElementById('modalDetalleEventos'));
-         modal.show();
+        // Mostrar el modal
+        const modal = new bootstrap.Modal(document.getElementById('modalDetalleEventos'));
+        modal.show();
+
+        // Inicializar tooltips después de mostrar el modal
+        setTimeout(() => {
+          const tooltipTriggerList = [].slice.call(document.querySelectorAll('#modalDetalleEventos [data-bs-toggle="tooltip"]'));
+          tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+          });
+          
+          // Inicializar rotación de chevrons en collapses
+          inicializarChevronsCollapse();
+        }, 100);
 
        } catch (error) {
          console.error('❌ Error obteniendo detalle de eventos:', error);
@@ -3317,16 +3345,30 @@
          </div>
        `;
 
-       // Eventos activos
-       if (eventos.activos && eventos.activos.length > 0) {
-         html += `
-           <div class="mb-4">
-             <h6 class="mb-3" style="color: #ff6b6b; font-weight: bold;">
-               <i class="bi bi-exclamation-triangle-fill me-2"></i>
-               Fallas Activas (${eventos.activos.length})
-             </h6>
-             <div class="row">
-         `;
+      // Eventos activos
+      if (eventos.activos && eventos.activos.length > 0) {
+        html += `
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2" data-bs-toggle="collapse" data-bs-target="#collapseFallasActivas" aria-expanded="true" aria-controls="collapseFallasActivas" style="cursor: pointer;">
+              <h6 class="mb-0" style="color: #ff6b6b; font-weight: bold;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Fallas Activas (${eventos.activos.length})
+              </h6>
+              <i class="bi bi-chevron-down" style="color: #da02e5;"></i>
+            </div>
+            <div class="collapse show" id="collapseFallasActivas">
+              <div class="d-flex justify-content-end mb-2">
+                <div class="d-flex gap-2 align-items-center">
+                  <button class="btn btn-sm sort-btn-fecha" data-sort="fecha" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarFallasActivas('fecha', this);">
+                    <i class="bi sort-icon-fecha bi-caret-down" style="color: #da02e5;"></i> Fecha
+                  </button>
+                  <button class="btn btn-sm sort-btn-gravedad" data-sort="gravedad" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarFallasActivas('gravedad', this);">
+                    <i class="bi sort-icon-gravedad bi-caret-down" style="color: #da02e5;"></i> Gravedad
+                  </button>
+                </div>
+              </div>
+              <div class="row" id="contenedorFallasActivas">
+        `;
 
          eventos.activos.forEach(evento => {
            const iconos = {
@@ -3342,46 +3384,76 @@
              'VIDEOLLAMADA': 'Videollamada'
            };
 
-           // Formatear fecha a día/mes/año
-           const fechaFormateada = evento.fechaCreacion ?
-             new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) :
-             'Sin fecha';
+          // Formatear fecha y hora de creación
+          const fechaCreacionFormateada = evento.fechaCreacion ?
+            new Date(evento.fechaCreacion).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '') :
+            'Sin fecha';
+          
+          // Formatear fecha y hora de falla
+          const fechaFallaFormateada = evento.fechaFalla ?
+            new Date(evento.fechaFalla).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '') :
+            'Sin fecha de falla';
 
-           html += `
-             <div class="col-md-6 mb-2">
-               <div class="card" style="background: rgba(255,107,107,0.1); border: 2px solid #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.2);">
-                 <div class="card-body p-2">
-                   <div class="d-flex justify-content-between align-items-center">
-                     <div>
-                       <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
-                       <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
-                     </div>
-                     <span class="badge" style="background: #ff6b6b; color: white; font-weight: bold;">-${evento.puntos} pts</span>
-                   </div>
-                   <div class="small mt-1" style="color: #ccc;">
-                     <strong>${evento.titulo}</strong>
-                   </div>
-                   <div class="small" style="color: #999;">
-                     ID: ${evento.idEvento} | ${fechaFormateada}${evento.esFallaGrave ? ' | <span style="color: #dc3545;">Falla Grave</span>' : ' | <span style="color: #6c757d;">Falla Simple</span>'}
-                   </div>
-                 </div>
-               </div>
-             </div>
-           `;
+          // Timestamp para ordenamiento por fecha
+          const timestampFalla = evento.fechaFalla ? new Date(evento.fechaFalla).getTime() : 0;
+          const timestampCreacion = evento.fechaCreacion ? new Date(evento.fechaCreacion).getTime() : 0;
+
+          // Estilo del card según si es falla grave o no
+          const estiloCard = evento.esFallaGrave 
+            ? 'background: rgba(220,53,69,0.25); border: 4px solid #dc3545; box-shadow: 0 0 20px rgba(220,53,69,0.6), 0 0 40px rgba(220,53,69,0.4), inset 0 0 20px rgba(220,53,69,0.1); animation: pulse-grave 2s ease-in-out infinite;'
+            : 'background: rgba(255,107,107,0.1); border: 2px solid #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.2);';
+
+          // Tooltip según el tipo de falla
+          const tooltipText = evento.esFallaGrave 
+            ? '<strong>Falla Grave</strong><br/>El destinatario ingresó credenciales.'
+            : '<strong>Falla Normal</strong><br/>Tocó un link o no sospechó de la llamada (en caso de llamadas).';
+
+          html += `
+            <div class="col-md-6 mb-2 card-falla-activa" data-fecha-falla="${timestampFalla}" data-fecha-creacion="${timestampCreacion}" data-gravedad="${evento.esFallaGrave ? 'grave' : 'normal'}" data-gravedad-num="${evento.esFallaGrave ? 1 : 0}">
+              <div class="card" style="${estiloCard}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="${tooltipText}">
+                <div class="card-body p-2">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
+                      <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                    </div>
+                    <span class="badge" style="background: #ff6b6b; color: white; font-weight: bold;">-${evento.puntos} pts</span>
+                  </div>
+                  <div class="small mt-1" style="color: #ccc;">
+                    <strong>${evento.titulo}</strong>
+                  </div>
+                  <div class="small" style="color: #999;">
+                    ID: ${evento.idEvento} | ${fechaCreacionFormateada} | Falla: ${fechaFallaFormateada}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
          });
 
-         html += `</div></div>`;
+         html += `</div></div></div>`;
        }
 
        // Eventos reportados (incluyendo los que fueron fallados y luego reportados)
        if (eventos.reportados && eventos.reportados.length > 0) {
          html += `
            <div class="mb-4">
-             <h6 class="mb-3" style="color: #28a745; font-weight: bold;">
-               <i class="bi bi-check-circle-fill me-2"></i>
-               Eventos Reportados (${eventos.reportados.length})
-             </h6>
-             <div class="row">
+             <div class="d-flex justify-content-between align-items-center mb-2" data-bs-toggle="collapse" data-bs-target="#collapseEventosReportados" aria-expanded="false" aria-controls="collapseEventosReportados" style="cursor: pointer;">
+               <h6 class="mb-0" style="color: #28a745; font-weight: bold;">
+                 <i class="bi bi-check-circle-fill me-2"></i>
+                 Eventos Reportados (${eventos.reportados.length})
+               </h6>
+               <i class="bi bi-chevron-down" style="color: #da02e5;"></i>
+             </div>
+             <div class="collapse" id="collapseEventosReportados">
+               <div class="d-flex justify-content-end mb-2">
+                 <div class="d-flex gap-2 align-items-center">
+                   <button class="btn btn-sm sort-btn-fecha-reportados" data-sort="fecha" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarEventosReportados('fecha', this);">
+                     <i class="bi sort-icon-fecha-reportados bi-caret-down" style="color: #da02e5;"></i> Fecha
+                   </button>
+                 </div>
+               </div>
+               <div class="row" id="contenedorEventosReportados">
          `;
 
          eventos.reportados.forEach(evento => {
@@ -3398,75 +3470,101 @@
              'VIDEOLLAMADA': 'Videollamada'
            };
 
-           // Formatear fecha a día/mes/año
-           const fechaFormateada = evento.fechaCreacion ?
-             new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) :
-             'Sin fecha';
+          // Formatear fecha y hora
+          const fechaFormateada = evento.fechaCreacion ?
+            new Date(evento.fechaCreacion).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '') :
+            'Sin fecha';
 
-           // Si el evento fue fallado en el pasado y luego reportado (tiene puntos de falla pasada)
-           if (evento.haFalladoEnElPasado && evento.puntosFallaPasada && evento.puntosFallaPasada > 0) {
-             html += `
-               <div class="col-md-6 mb-2">
-                 <div class="card" style="background: rgba(255,193,7,0.1); border: 2px solid #ffc107; box-shadow: 0 0 10px rgba(255,193,7,0.2);">
-                   <div class="card-body p-2">
-                     <div class="d-flex justify-content-between align-items-center">
-                       <div>
-                         <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
-                         <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
-                       </div>
-                       <div class="d-flex gap-1 flex-wrap">
-                         <span class="badge" style="background: #28a745; color: white; font-weight: bold;">Reportado +${evento.puntos}</span>
-                         <span class="badge" style="background: #ffc107; color: #000; font-weight: bold;">Fallado -${evento.puntosFallaPasada}</span>
-                       </div>
-                     </div>
-                     <div class="small mt-1" style="color: #ccc;">
-                       <strong>${evento.titulo}</strong>
-                     </div>
-                     <div class="small" style="color: #999;">
-                       ID: ${evento.idEvento} | ${fechaFormateada}${evento.esFallaGrave ? ' | <span style="color: #dc3545;">Falla Grave</span>' : ' | <span style="color: #6c757d;">Falla Simple</span>'}
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             `;
-           } else {
-             // Solo reportado sin falla previa
-             html += `
-               <div class="col-md-6 mb-2">
-                 <div class="card" style="background: rgba(40,167,69,0.1); border: 2px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.2);">
-                   <div class="card-body p-2">
-                     <div class="d-flex justify-content-between align-items-center">
-                       <div>
-                         <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
-                         <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
-                       </div>
-                       <span class="badge" style="background: #28a745; color: white; font-weight: bold;">+${evento.puntos} pts</span>
-                     </div>
-                     <div class="small mt-1" style="color: #ccc;">
-                       <strong>${evento.titulo}</strong>
-                     </div>
-                     <div class="small" style="color: #999;">
-                       ID: ${evento.idEvento} | ${fechaFormateada}
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             `;
-           }
+          // Timestamp para ordenamiento por fecha
+          const timestampCreacion = evento.fechaCreacion ? new Date(evento.fechaCreacion).getTime() : 0;
+
+          // Si el evento fue fallado en el pasado y luego reportado (tiene puntos de falla pasada)
+          if (evento.haFalladoEnElPasado && evento.puntosFallaPasada && evento.puntosFallaPasada > 0) {
+            // Estilo del card según si es falla grave o no
+            // Para fallas graves reportadas: borde amarillo más grueso (sin efecto pulsante rojo)
+            // Para fallas normales reportadas: borde amarillo estándar
+            const estiloCard = evento.esFallaGrave 
+              ? 'background: rgba(255,193,7,0.15); border: 4px solid #ffc107; box-shadow: 0 0 10px rgba(255,193,7,0.3);'
+              : 'background: rgba(255,193,7,0.1); border: 2px solid #ffc107; box-shadow: 0 0 10px rgba(255,193,7,0.2);';
+
+            // Tooltip según el tipo de falla (mantener el tooltip para fallas graves)
+            const tooltipText = evento.esFallaGrave 
+              ? '<strong>Falla Grave</strong><br/>El destinatario ingresó credenciales.'
+              : '<strong>Falla Normal</strong><br/>Tocó un link o no sospechó de la llamada (en caso de llamadas).';
+
+            html += `
+              <div class="col-md-6 mb-2 card-evento-reportado" data-fecha-creacion="${timestampCreacion}">
+                <div class="card" style="${estiloCard}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="${tooltipText}">
+                  <div class="card-body p-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
+                        <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                      </div>
+                      <div class="d-flex gap-1 flex-wrap">
+                        <span class="badge" style="background: #28a745; color: white; font-weight: bold;">Reportado +${evento.puntos}</span>
+                        <span class="badge" style="background: #ffc107; color: #000; font-weight: bold;">Fallado -${evento.puntosFallaPasada}</span>
+                      </div>
+                    </div>
+                    <div class="small mt-1" style="color: #ccc;">
+                      <strong>${evento.titulo}</strong>
+                    </div>
+                    <div class="small" style="color: #999;">
+                      ID: ${evento.idEvento} | ${fechaFormateada}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          } else {
+            // Solo reportado sin falla previa
+            html += `
+              <div class="col-md-6 mb-2 card-evento-reportado" data-fecha-creacion="${timestampCreacion}">
+                <div class="card" style="background: rgba(40,167,69,0.1); border: 2px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.2);">
+                  <div class="card-body p-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <span class="me-2">${iconos[evento.tipoEvento] || '❓'}</span>
+                        <strong style="color: white;">${nombres[evento.tipoEvento] || evento.tipoEvento}</strong>
+                      </div>
+                      <span class="badge" style="background: #28a745; color: white; font-weight: bold;">+${evento.puntos} pts</span>
+                    </div>
+                    <div class="small mt-1" style="color: #ccc;">
+                      <strong>${evento.titulo}</strong>
+                    </div>
+                    <div class="small" style="color: #999;">
+                      ID: ${evento.idEvento} | ${fechaFormateada}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }
          });
 
-        html += `</div></div>`;
+        html += `</div></div></div>`;
       }
 
       // Eventos pendientes
       if (eventos.pendientes && eventos.pendientes.length > 0) {
         html += `
           <div class="mb-4">
-            <h6 class="mb-3" style="color: #6c757d; font-weight: bold;">
-              <i class="bi bi-clock-fill me-2"></i>
-              Eventos Pendientes (${eventos.pendientes.length})
-            </h6>
-            <div class="row">
+            <div class="d-flex justify-content-between align-items-center mb-2" data-bs-toggle="collapse" data-bs-target="#collapseEventosPendientes" aria-expanded="false" aria-controls="collapseEventosPendientes" style="cursor: pointer;">
+              <h6 class="mb-0" style="color: #6c757d; font-weight: bold;">
+                <i class="bi bi-clock-fill me-2"></i>
+                Eventos Pendientes (${eventos.pendientes.length})
+              </h6>
+              <i class="bi bi-chevron-down" style="color: #da02e5;"></i>
+            </div>
+            <div class="collapse" id="collapseEventosPendientes">
+              <div class="d-flex justify-content-end mb-2">
+                <div class="d-flex gap-2 align-items-center">
+                  <button class="btn btn-sm sort-btn-fecha-pendientes" data-sort="fecha" data-asc="false" style="background: transparent; border: 1px solid #da02e5; color: #da02e5; padding: 2px 8px;" onclick="ordenarEventosPendientes('fecha', this);">
+                    <i class="bi sort-icon-fecha-pendientes bi-caret-down" style="color: #da02e5;"></i> Fecha
+                  </button>
+                </div>
+              </div>
+              <div class="row" id="contenedorEventosPendientes">
         `;
 
         eventos.pendientes.forEach(evento => {
@@ -3483,13 +3581,16 @@
             'VIDEOLLAMADA': 'Videollamada'
           };
 
-          // Formatear fecha a día/mes/año
+          // Formatear fecha y hora
           const fechaFormateada = evento.fechaCreacion ?
-            new Date(evento.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) :
+            new Date(evento.fechaCreacion).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', '') :
             'Sin fecha';
 
+          // Timestamp para ordenamiento por fecha
+          const timestampCreacion = evento.fechaCreacion ? new Date(evento.fechaCreacion).getTime() : 0;
+
           html += `
-            <div class="col-md-6 mb-2">
+            <div class="col-md-6 mb-2 card-evento-pendiente" data-fecha-creacion="${timestampCreacion}">
               <div class="card" style="background: rgba(108,117,125,0.1); border: 2px solid #6c757d; box-shadow: 0 0 10px rgba(108,117,125,0.2);">
                 <div class="card-body p-2">
                   <div class="d-flex justify-content-between align-items-center">
@@ -3511,7 +3612,7 @@
           `;
         });
 
-        html += `</div></div>`;
+        html += `</div></div></div>`;
       }
 
       // Si no hay eventos
@@ -3528,10 +3629,144 @@
 
        return html;
      }
+
+    // Función para inicializar rotación de chevrons en collapses
+    function inicializarChevronsCollapse() {
+      const collapses = ['collapseFallasActivas', 'collapseEventosReportados', 'collapseEventosPendientes'];
+      collapses.forEach(collapseId => {
+        const collapseElement = document.getElementById(collapseId);
+        if (collapseElement) {
+          const trigger = collapseElement.previousElementSibling;
+          const chevron = trigger ? trigger.querySelector('.bi-chevron-down') : null;
+          if (chevron) {
+            collapseElement.addEventListener('show.bs.collapse', function () {
+              chevron.style.transform = 'rotate(180deg)';
+            });
+            collapseElement.addEventListener('hide.bs.collapse', function () {
+              chevron.style.transform = 'rotate(0deg)';
+            });
+          }
+        }
+      });
+    }
+
+    // Función para ordenar fallas activas (global)
+    window.ordenarFallasActivas = function(tipo, boton) {
+      const contenedor = document.getElementById('contenedorFallasActivas');
+      if (!contenedor) return;
+
+      const cards = Array.from(contenedor.querySelectorAll('.card-falla-activa'));
+      const asc = boton.getAttribute('data-asc') === 'true';
+      const nuevoAsc = !asc;
+
+      // Actualizar estado del botón
+      boton.setAttribute('data-asc', nuevoAsc);
+
+      // Resetear otros botones
+      const otrosBotones = document.querySelectorAll('.sort-btn-fecha, .sort-btn-gravedad');
+      otrosBotones.forEach(btn => {
+        if (btn !== boton) {
+          btn.setAttribute('data-asc', 'false');
+          const icon = btn.querySelector('.sort-icon-fecha, .sort-icon-gravedad');
+          if (icon) {
+            icon.classList.remove('bi-caret-up-fill', 'bi-caret-down-fill');
+            icon.classList.add('bi-caret-down');
+          }
+        }
+      });
+
+      // Actualizar icono del botón actual
+      const icon = boton.querySelector('.sort-icon-fecha, .sort-icon-gravedad');
+      if (icon) {
+        icon.classList.remove('bi-caret-down', 'bi-caret-up-fill', 'bi-caret-down-fill');
+        icon.classList.add(nuevoAsc ? 'bi-caret-up-fill' : 'bi-caret-down-fill');
+      }
+
+      // Ordenar cards
+      cards.sort((a, b) => {
+        let valorA, valorB;
+
+        if (tipo === 'fecha') {
+          valorA = parseInt(a.getAttribute('data-fecha-falla')) || 0;
+          valorB = parseInt(b.getAttribute('data-fecha-falla')) || 0;
+        } else if (tipo === 'gravedad') {
+          valorA = parseInt(a.getAttribute('data-gravedad-num')) || 0;
+          valorB = parseInt(b.getAttribute('data-gravedad-num')) || 0;
+        }
+
+        const resultado = valorA - valorB;
+        return nuevoAsc ? resultado : -resultado;
+      });
+
+      // Reordenar en el DOM
+      cards.forEach(card => contenedor.appendChild(card));
+    }
+
+    // Función para ordenar eventos reportados (global)
+    window.ordenarEventosReportados = function(tipo, boton) {
+      const contenedor = document.getElementById('contenedorEventosReportados');
+      if (!contenedor) return;
+
+      const cards = Array.from(contenedor.querySelectorAll('.card-evento-reportado'));
+      const asc = boton.getAttribute('data-asc') === 'true';
+      const nuevoAsc = !asc;
+
+      // Actualizar estado del botón
+      boton.setAttribute('data-asc', nuevoAsc);
+
+      // Actualizar icono del botón
+      const icon = boton.querySelector('.sort-icon-fecha-reportados');
+      if (icon) {
+        icon.classList.remove('bi-caret-down', 'bi-caret-up-fill', 'bi-caret-down-fill');
+        icon.classList.add(nuevoAsc ? 'bi-caret-up-fill' : 'bi-caret-down-fill');
+      }
+
+      // Ordenar cards
+      cards.sort((a, b) => {
+        const valorA = parseInt(a.getAttribute('data-fecha-creacion')) || 0;
+        const valorB = parseInt(b.getAttribute('data-fecha-creacion')) || 0;
+        const resultado = valorA - valorB;
+        return nuevoAsc ? resultado : -resultado;
+      });
+
+      // Reordenar en el DOM
+      cards.forEach(card => contenedor.appendChild(card));
+    }
+
+    // Función para ordenar eventos pendientes (global)
+    window.ordenarEventosPendientes = function(tipo, boton) {
+      const contenedor = document.getElementById('contenedorEventosPendientes');
+      if (!contenedor) return;
+
+      const cards = Array.from(contenedor.querySelectorAll('.card-evento-pendiente'));
+      const asc = boton.getAttribute('data-asc') === 'true';
+      const nuevoAsc = !asc;
+
+      // Actualizar estado del botón
+      boton.setAttribute('data-asc', nuevoAsc);
+
+      // Actualizar icono del botón
+      const icon = boton.querySelector('.sort-icon-fecha-pendientes');
+      if (icon) {
+        icon.classList.remove('bi-caret-down', 'bi-caret-up-fill', 'bi-caret-down-fill');
+        icon.classList.add(nuevoAsc ? 'bi-caret-up-fill' : 'bi-caret-down-fill');
+      }
+
+      // Ordenar cards
+      cards.sort((a, b) => {
+        const valorA = parseInt(a.getAttribute('data-fecha-creacion')) || 0;
+        const valorB = parseInt(b.getAttribute('data-fecha-creacion')) || 0;
+        const resultado = valorA - valorB;
+        return nuevoAsc ? resultado : -resultado;
+      });
+
+      // Reordenar en el DOM
+      cards.forEach(card => contenedor.appendChild(card));
+    }
   </script>
 
   <div class="modal fade" id="modalDetalleEventos" tabindex="-1" aria-labelledby="modalDetalleEventosLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
       <div class="modal-content" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); color: white; border: 2px solid #da02e5; box-shadow: 0 0 20px rgba(218, 2, 229, 0.3);">
         <div class="modal-header" style="border-bottom: 2px solid #da02e5; background: rgba(218, 2, 229, 0.1);">
           <h5 class="modal-title" id="modalDetalleEventosLabel" style="color: #da02e5; font-weight: bold;">

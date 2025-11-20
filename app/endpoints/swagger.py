@@ -99,14 +99,18 @@ def openapi_spec():
                                         "password": "marcos.gurruchaga1",
                                         "nombre": "Marcos",
                                         "apellido": "Gurruchaga",
-                                        "correo": "marcos.gurruchaga@pgcontrol.com.ar"
+                                        "correo": "marcos.gurruchaga@pgcontrol.com.ar",
+                                        "telefono": "+5491141635935",
+                                        "idVoz": "GHUI7Bui6hqAYVXaCoEX"
                                     },
                                     {
                                         "nombreUsuario": "morarodriguez",
                                         "password": "mora.rodriguez1",
                                         "nombre": "Mora",
                                         "apellido": "Rodriguez",
-                                        "correo": "mora.rodriguez@pgcontrol.com.ar"
+                                        "correo": "mora.rodriguez@pgcontrol.com.ar",
+                                        "telefono": "+5491141635935",
+                                        "idVoz": "8DIlA8oISdnZSzlAFJq4"
                                     },
                                     {
                                         "nombreUsuario": "juanperez",

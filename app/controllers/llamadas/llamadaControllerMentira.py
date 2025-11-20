@@ -4,7 +4,7 @@ import time
 import threading
 from datetime import datetime
 
-from flask import jsonify
+from flask import jsonify, current_app
 
 from app.backend.models.error import responseError
 from app.backend.models.tipoEvento import TipoEvento
@@ -106,12 +106,13 @@ class LlamadaControllerMentira:
             Destinatario: {nombreEmpleado}
             Objetivo: {objetivoEspecifico} {eventoDesencadenador}
         """
-
-        # Crear evento en la base de datos
+        
+        # Crear evento en la base de datos con el mismo formato que llamadasController
         dataEvento = {
             "tipoEvento": "LLAMADA",
             "registroEvento": {
-                "objetivo": " ".join(conversacion.objetivoActual.split()).strip(),
+                "objetivo": " ".join(conversacion.objetivoActual.split()).strip(),  # elimina doble espacios y \n
+                "remitente": nombreRemitente  # Guardar el nombre del remitente
             }
         }
 
@@ -152,8 +153,17 @@ class LlamadaControllerMentira:
         ESTADO_SIMULADO["status"] = "queued"
         ESTADO_SIMULADO["mensaje_actual"] = 0
 
-        # Iniciar el hilo que simula la llamada
-        hilo = threading.Thread(target=LlamadaControllerMentira.simularProgresoLlamada)
+        # Capturar el contexto de la aplicación antes de crear el hilo
+        try:
+            # Intentar obtener el contexto desde current_app si está disponible
+            app_context = current_app._get_current_object().app_context()
+        except RuntimeError:
+            # Si no hay contexto activo, importar la app directamente
+            from app.main import app
+            app_context = app.app_context()
+        
+        # Iniciar el hilo que simula la llamada con contexto de aplicación
+        hilo = threading.Thread(target=lambda: LlamadaControllerMentira.simularProgresoLlamada(app_context))
         hilo.daemon = True
         hilo.start()
 
@@ -165,162 +175,90 @@ class LlamadaControllerMentira:
         }), 201
 
     @staticmethod
-    def simularProgresoLlamada():
+    def simularProgresoLlamada(app_context):
         """
         Simula el progreso de una llamada agregando mensajes y cambiando estados.
         """
         import time
+        
+        # Usar el contexto de la aplicación dentro del hilo
+        with app_context:
+            # Esperar un poco antes de iniciar
+            time.sleep(1)
 
-        # Esperar un poco antes de iniciar
-        time.sleep(1)
+            # Cambiar estado a initiated
+            ESTADO_SIMULADO["status"] = "initiated"
+            time.sleep(2)
 
-        # Cambiar estado a initiated
-        ESTADO_SIMULADO["status"] = "initiated"
-        time.sleep(2)
+            # Cambiar estado a ringing
+            ESTADO_SIMULADO["status"] = "ringing"
+            time.sleep(2)
 
-        # Cambiar estado a ringing
-        ESTADO_SIMULADO["status"] = "ringing"
-        time.sleep(2)
+            # Cambiar estado a in-progress
+            ESTADO_SIMULADO["status"] = "in-progress"
 
-        # Cambiar estado a in-progress
-        ESTADO_SIMULADO["status"] = "in-progress"
+            # Agregar mensajes siguiendo el flujo lógico de la conversación hardcodeada
+            for mensaje_obj in CONVERSACION_FLUJO:
+                # Agregar el mensaje a la conversación
+                conversacion.conversacionActual.append(mensaje_obj)
+                ESTADO_SIMULADO["mensaje_actual"] += 1
 
-        # Agregar mensajes siguiendo el flujo lógico de la conversación hardcodeada
-        for mensaje_obj in CONVERSACION_FLUJO:
-            # Agregar el mensaje a la conversación
-            conversacion.conversacionActual.append(mensaje_obj)
-            ESTADO_SIMULADO["mensaje_actual"] += 1
+                # Actualizar evento en paralelo con contexto de aplicación
+                def actualizarEvento():
+                    try:
+                        with app_context:
+                            dataEvento = {
+                                "registroEvento": {
+                                    "conversacion": json.dumps(conversacion.conversacionActual)
+                                }
+                            }
+                            statusEvento = EventosController.editarEvento(conversacion.idEvento, dataEvento)
+                            if statusEvento != 200:
+                                log.error("No se pudo actualizar el evento en hilo paralelo")
+                            else:
+                                log.info("Evento actualizado correctamente en hilo paralelo")
+                    except Exception as e:
+                        log.error(f"Error actualizando evento en hilo: {str(e)}")
 
-            # Actualizar evento en paralelo
-            def actualizarEvento():
-                try:
-                    dataEvento = {
-                        "registroEvento": {
-                            "conversacion": json.dumps(conversacion.conversacionActual)
-                        }
-                    }
-                    statusEvento = EventosController.editarEvento(conversacion.idEvento, dataEvento)
-                    if statusEvento != 200:
-                        log.error("No se pudo actualizar el evento en hilo paralelo")
-                    else:
-                        log.info("Evento actualizado correctamente en hilo paralelo")
-                except Exception as e:
-                    log.error(f"Error actualizando evento en hilo: {str(e)}")
+                hilo_actualizacion = threading.Thread(target=actualizarEvento)
+                hilo_actualizacion.start()
 
-            hilo_actualizacion = threading.Thread(target=actualizarEvento)
-            hilo_actualizacion.start()
+                # Esperar entre mensajes (3-5 segundos)
+                time.sleep(random.uniform(3, 5))
 
-            # Esperar entre mensajes (3-5 segundos)
-            time.sleep(random.uniform(3, 5))
+            # Después de todos los mensajes, cambiar estado a completed
+            ESTADO_SIMULADO["status"] = "completed"
 
-        # Después de todos los mensajes, cambiar estado a completed
-        ESTADO_SIMULADO["status"] = "completed"
-
-        # Ejecutar lógica de envío de mail/mensaje (similar a analizarLlamada)
-        log.info("Llamada simulada completada, generando evento posterior...")
-        LlamadaControllerMentira.generarEventoPosterior()
+            # Ejecutar lógica de envío de mail/mensaje (similar a analizarLlamada)
+            log.info("Llamada simulada completada, generando evento posterior...")
+            LlamadaControllerMentira.generarEventoPosterior()
 
     @staticmethod
     def generarEventoPosterior():
         """
-        Genera el evento posterior (mail o mensaje) después de completar la llamada simulada.
+        Marca la llamada simulada como falla después de completarla.
         """
         try:
-            # Marcar como falla (objetivo cumplido en simulación)
-            ResultadoEventoController.sumarFalla(conversacion.destinatario, conversacion.idEvento)
-
-            if conversacion.eventoDesencadenador.lower() == "correo":
-                log.info("El evento desencadenador es un correo, generando email...")
-
-                # Generar email con dificultad difícil y mensaje genérico
-                contexto = "Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
-                data = {
-                    "contexto": contexto,
-                    "nivel": 3,
-                    "formato": "texto"
-                }
-                respuesta = AIController.armarEmail(data)
-
-                # armarEmail devuelve (texto_json, 201) o responseError (Response)
-                if isinstance(respuesta, tuple):
-                    respuesta_texto, status = respuesta
-                    if status != 201:
-                        log.error(f"La IA no pudo armar el email: {respuesta_texto}")
-                        return
+            # Obtener contexto de aplicación
+            try:
+                app_context = current_app._get_current_object().app_context()
+            except RuntimeError:
+                from app.main import app
+                app_context = app.app_context()
+            
+            # Marcar como falla (objetivo cumplido en simulación) dentro del contexto
+            with app_context:
+                resultado = ResultadoEventoController.sumarFalla(conversacion.destinatario, conversacion.idEvento)
+                # Verificar que el resultado sea válido (puede ser dict o Response)
+                if resultado is None:
+                    log.error("Error al sumar falla: resultado es None")
+                elif hasattr(resultado, 'status_code') and resultado.status_code != 200:
+                    log.error(f"Error al sumar falla: {resultado}")
                 else:
-                    # Es un Response de error
-                    if hasattr(respuesta, 'status_code') and respuesta.status_code != 201:
-                        log.error(f"La IA no pudo armar el email")
-                        return
-                    respuesta_texto = respuesta.get_data(as_text=True) if hasattr(respuesta, 'get_data') else str(respuesta)
-
-                try:
-                    data_email = json.loads(respuesta_texto)
-                except (json.JSONDecodeError, TypeError) as e:
-                    log.error(f"El texto devuelto no es JSON válido: {respuesta_texto}, error: {str(e)}")
-                    return
-
-                dataMail = {
-                    "proveedor": "twilio",
-                    "idUsuarioDestinatario": conversacion.destinatario,
-                    "idUsuarioRemitente": conversacion.remitente,
-                    "asunto": data_email["asunto"],
-                    "cuerpo": data_email["cuerpo"],
-                    "dificultad": "dificil"
-                }
-
-                EmailController.enviarMailPorID(dataMail)
-
-            else:
-                log.info(f"El evento desencadenador es un mensaje, generando mensaje...")
-
-                # Generar mensaje según el objetivo específico
-                if conversacion.objetivoEspecifico == "Abra un link que se le enviara por":
-                    dificultad = "facil"
-                    contexto = "Genera un mensaje de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación."
-                elif conversacion.objetivoEspecifico == "Abra un link para ingresar sus credenciales que se le enviara por":
-                    dificultad = "medio"
-                    contexto = "Se pedirá login en un formulario (como caisteLogin.html) y credenciales. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
-                else:
-                    dificultad = "dificil"
-                    contexto = "Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
-
-                datamsj2 = {
-                    "contexto": contexto,
-                    "nivel": dificultad
-                }
-                respuesta = AIController.armarMensaje(datamsj2)
-
-                # armarMensaje devuelve ({"mensaje": texto}, 201) o responseError (Response)
-                if isinstance(respuesta, tuple):
-                    respuesta_dict, status = respuesta
-                    if status != 201:
-                        log.error(f"La IA no pudo armar el mensaje: {respuesta_dict}")
-                        return
-                    mensaje_texto = respuesta_dict.get("mensaje", "")
-                else:
-                    # Es un Response de error
-                    if hasattr(respuesta, 'status_code') and respuesta.status_code != 201:
-                        log.error(f"La IA no pudo armar el mensaje")
-                        return
-                    # Intentar obtener JSON del error
-                    try:
-                        respuesta_dict = respuesta.get_json() if hasattr(respuesta, 'get_json') else {}
-                        mensaje_texto = respuesta_dict.get("mensaje", "")
-                    except:
-                        log.error(f"Error procesando respuesta de armarMensaje")
-                        return
-
-                datamsj = {
-                    "medio": conversacion.eventoDesencadenador.lower(),
-                    "idUsuario": conversacion.destinatario,
-                    "mensaje": mensaje_texto,
-                    "dificultad": dificultad
-                }
-                MsjController.enviarMensajePorID(datamsj)
+                    log.info("Falla registrada correctamente en evento posterior")
 
         except Exception as e:
-            log.error(f"Error generando evento posterior: {str(e)}")
+            log.error(f"Error generando evento posterior: {str(e)}", exc_info=True)
 
     @staticmethod
     def obtenerEstadoLlamadaSimulada():

@@ -122,6 +122,7 @@ class UsuariosController:
                         direccion=data.get("direccion"),
                         esAdministrador=data.get("esAdministrador"),
                         idArea=data.get("idArea"),
+                        idVoz=data.get("idVoz"),
                         perfilLinkedin=data.get("perfilLinkedin")
                     )
                     if data.get("esAdministrador") is None:
