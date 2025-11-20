@@ -116,6 +116,7 @@ class LlamadasController:
         objetivoEspecifico = data["objetivoEspecifico"]
         eventoDesencadenador = data["eventoDesencadenador"]
         conversacion.eventoDesencadenador = eventoDesencadenador
+        conversacion.nombreEmpleado = nombreEmpleado
 
         # conversacion.objetivoActual = f"""
         #     Tienes el rol de {rolAImitar} dentro de la empresa 'PG Control'. Te llamas '{nombreRemitente}'.
@@ -353,6 +354,10 @@ class LlamadasController:
         return None
 
     @staticmethod
+    def convertirConversacionAString(lista):
+        return "\n".join([f"{msg['rol']}: {msg['mensaje']}" for msg in lista])
+
+    @staticmethod
     def analizarLlamada():
         log.info(f"[ANÁLISIS] ========== INICIANDO ANÁLISIS DE LLAMADA ==========")
         log.info(f"[ANÁLISIS] Evento ID: {conversacion.idEvento}, Destinatario: {conversacion.destinatario}, Remitente: {conversacion.remitente}")
@@ -373,7 +378,8 @@ class LlamadasController:
         log.info(f"[ANÁLISIS] Conversación a analizar: {json.dumps(conversacion.conversacionActual, ensure_ascii=False)}")
         
         objetivoCumplido = AIController.analizarConversacionLlamada(objetivo, conversacion.conversacionActual)
-        
+        conversacionString = LlamadasController.convertirConversacionAString(conversacion.conversacionActual)
+
         log.info(f"[ANÁLISIS] Resultado del análisis de IA: {'OBJETIVO CUMPLIDO' if objetivoCumplido else 'OBJETIVO NO CUMPLIDO'}")
 
         if objetivoCumplido:
@@ -390,15 +396,15 @@ class LlamadasController:
                 # Determinar dificultad basándose en objetivoEspecifico (igual que para mensajes)
                 if conversacion.objetivoEspecifico == "Abra un link que se le enviara por":
                     dificultad = "facil"
-                    contexto = "Genera un email de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación."
+                    contexto = f"En base a la conversación mantenida por llamada, donde el remitente tenía el rol de IA, genera un email de phishing formal dirigido al empleado de PG Control: {conversacion.nombreEmpleado} que tiene el rol de destinatario. Aquí tienes la conversación completa: {conversacionString}"
                     log.info(f"[ANÁLISIS] Dificultad determinada: FÁCIL (objetivo: abrir link)")
                 elif conversacion.objetivoEspecifico == "Abra un link para ingresar sus credenciales que se le enviara por":
                     dificultad = "medio"
-                    contexto = "Se pedirá login en un formulario (como caisteLogin.html) y credenciales. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
+                    contexto = f"En base a la conversación mantenida por llamada, donde el remitente tenía el rol de IA, pedi el login en un formulario (como caisteLogin.html) y credenciales del empleado de la empresa PG Control: {conversacion.nombreEmpleado} que tiene el rol de destinatario. Aquí tienes la conversación completa: {conversacionString}"
                     log.info(f"[ANÁLISIS] Dificultad determinada: MEDIO (objetivo: ingresar credenciales)")
                 else:
                     dificultad = "dificil"
-                    contexto = "Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
+                    contexto = f"En base a la conversación mantenida por llamada, donde el remitente tenía el rol de IA, pedi que el empleado de la empresa PG Control: {conversacion.nombreEmpleado} que tiene el rol de destinatario actualice urgente sus datos con enlace a caisteDatos.html. Aquí tienes la conversación completa: {conversacionString}"
                     log.info(f"[ANÁLISIS] Dificultad determinada: DIFÍCIL (objetivo por defecto)")
 
                 nivel = 3 if dificultad == "dificil" else (2 if dificultad == "medio" else 1)
@@ -444,15 +450,15 @@ class LlamadasController:
 
                 if conversacion.objetivoEspecifico == "Abra un link que se le enviara por":
                     dificultad = "facil"
-                    contexto = "Genera un mensaje de phishing formal para empleados de PG Control, contexto variable, sin marcadores como [Nombre de la empresa], no incluyas ningún enlace; indica que el enlace se adjuntará a continuación."
+                    contexto = f"En base a la conversación mantenida por llamada, donde el remitente tenía el rol de IA, genera un mensaje de phishing formal para el empleado de PG Control: {conversacion.nombreEmpleado}, que tiene el rol de destinatario. Aquí tienes la conversación completa: {conversacionString}"
                     log.info(f"[ANÁLISIS] Dificultad determinada: FÁCIL (objetivo: abrir link)")
                 elif conversacion.objetivoEspecifico == "Abra un link para ingresar sus credenciales que se le enviara por":
                     dificultad = "medio"
-                    contexto = "Se pedirá login en un formulario (como caisteLogin.html) y credenciales. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
+                    contexto = f"En base a la conversación mantenida por llamada, donde el remitente tenía el rol de IA, genera un mensaje de phishing formal para pedir el login en un formulario (como caisteLogin.html) y credenciales del empleado de la empresa PG Control: {conversacion.nombreEmpleado} que tiene el rol de destinatario. Aquí tienes la conversación completa: {conversacionString}"
                     log.info(f"[ANÁLISIS] Dificultad determinada: MEDIO (objetivo: ingresar credenciales)")
                 else:
                     dificultad = "dificil"
-                    contexto = "Se pedirá actualización urgente de datos con enlace a caisteDatos.html. Empresa: PG Control. Sin placeholders. No incluyas enlaces; indica que el enlace se adjuntará a continuación."
+                    contexto = f"En base a la conversación mantenida por llamada, donde el remitente tenía el rol de IA, genera un mensaje de phishing formal para pedir la actualización urgente de datos con enlace a caisteDatos.html para el empleado de PG Control: {conversacion.nombreEmpleado}, que tiene el rol de destinatario. Aquí tienes la conversación completa: {conversacionString}"
                     log.info(f"[ANÁLISIS] Dificultad determinada: DIFÍCIL (objetivo por defecto)")
 
                 datamsj2 = {
