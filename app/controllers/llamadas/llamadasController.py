@@ -400,11 +400,11 @@ class LlamadasController:
                     log.info(f"[ANÁLISIS] Dificultad determinada: FÁCIL (objetivo: abrir link)")
                 elif conversacion.objetivoEspecifico == "Abra un link para ingresar sus credenciales que se le enviara por":
                     dificultad = "medio"
-                    contexto = f"En base a la conversación mantenida por llamada, donde el remitente tenía el rol de IA, pedi el login en un formulario (como caisteLogin.html) y credenciales del empleado de la empresa PG Control: {conversacion.nombreEmpleado} que tiene el rol de destinatario. Aquí tienes la conversación completa: {conversacionString}"
+                    contexto = f"En base a la conversación mantenida por llamada, donde el remitente tenía el rol de IA, genera un email de phishing formal que pida el login en un formulario (como caisteLogin.html) y credenciales del empleado de la empresa PG Control: {conversacion.nombreEmpleado} que tiene el rol de destinatario. Aquí tienes la conversación completa: {conversacionString}"
                     log.info(f"[ANÁLISIS] Dificultad determinada: MEDIO (objetivo: ingresar credenciales)")
                 else:
                     dificultad = "dificil"
-                    contexto = f"En base a la conversación mantenida por llamada, donde el remitente tenía el rol de IA, pedi que el empleado de la empresa PG Control: {conversacion.nombreEmpleado} que tiene el rol de destinatario actualice urgente sus datos con enlace a caisteDatos.html. Aquí tienes la conversación completa: {conversacionString}"
+                    contexto = f"En base a la conversación mantenida por llamada, donde el remitente tenía el rol de IA, genera un email de phishing formal que pida que el empleado de la empresa PG Control: {conversacion.nombreEmpleado} que tiene el rol de destinatario actualice urgente sus datos con enlace a caisteDatos.html. Aquí tienes la conversación completa: {conversacionString}"
                     log.info(f"[ANÁLISIS] Dificultad determinada: DIFÍCIL (objetivo por defecto)")
 
                 nivel = 3 if dificultad == "dificil" else (2 if dificultad == "medio" else 1)
