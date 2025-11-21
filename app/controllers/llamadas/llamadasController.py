@@ -367,7 +367,7 @@ def convertirConversacionAString(lista):
         elif rol == "destinatario":
             prompt += f"Usuario: {contenido}\n"
 
-    return prompt.strip()
+    return prompt
 
     @staticmethod
     def analizarLlamada():
@@ -379,7 +379,7 @@ def convertirConversacionAString(lista):
         
         # Luego de los 2 minutos, la IA analiza la conversacion guardada en la variable global
         try:
-            objetivo = conversacion.objetivoActual.split("intentando que el empleado")[1].split("Reglas:")[0].strip() # Obtenemos lo que hay entre estas dos oraciones
+            objetivo = conversacion.objetivoActual.split("Tu meta es que el empleado")[1].split("inmediatamente después")[0].strip() # Obtenemos lo que hay entre estas dos oraciones
             log.info(f"[ANÁLISIS] Objetivo extraído para análisis: '{objetivo}'")
         except Exception as e:
             log.error(f"[ANÁLISIS] Error al extraer el objetivo: {str(e)}")
