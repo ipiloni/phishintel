@@ -353,21 +353,21 @@ class LlamadasController:
 
         return None
 
-    @staticmethod
-def convertirConversacionAString(lista):
-    """Convierte la conversación (lista de dicts) a un string legible para un prompt."""
-    prompt = ""
+    #@staticmethod
+    #def convertirConversacionAString(lista):
+    #"""Convierte la conversación (lista de dicts) a un string legible para un prompt."""
+    #prompt = ""
 
-    for msg in lista:
-        rol = msg.get("rol", "").lower()
-        contenido = msg.get("mensaje", "").strip()
+    #for msg in lista:
+        #    rol = msg.get("rol", "").lower()
+        #   contenido = msg.get("mensaje", "").strip()
 
-        if rol == "ia":
-            prompt += f"IA: {contenido}\n"
-        elif rol == "destinatario":
-            prompt += f"Usuario: {contenido}\n"
+        #  if rol == "ia":
+        #       prompt += f"IA: {contenido}\n"
+        #   elif rol == "destinatario":
+        #       prompt += f"Usuario: {contenido}\n"
 
-    return prompt
+    #   return prompt
 
     @staticmethod
     def analizarLlamada():
