@@ -109,7 +109,7 @@ def openapi_spec():
                                         "nombre": "Mora",
                                         "apellido": "Rodriguez",
                                         "correo": "mora.rodriguez@pgcontrol.com.ar",
-                                        "telefono": "+5491141635935",
+                                        "telefono": "+5491165482219",
                                         "idVoz": "8DIlA8oISdnZSzlAFJq4"
                                     },
                                     {
@@ -1921,8 +1921,8 @@ def openapi_spec():
                                         "usuarios": {
                                             "type": "array",
                                             "items": {"type": "integer"},
-                                            "description": "IDs de usuarios a los que aplicar los eventos (por defecto 1-9)",
-                                            "example": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+                                            "description": "IDs de usuarios a los que aplicar los eventos (por defecto 4-9)",
+                                            "example": [4, 5, 6, 7, 8, 9]
                                         },
                                         "eventos": {
                                             "type": "array",
@@ -1965,28 +1965,28 @@ def openapi_spec():
                                     "required": ["eventos"]
                                 },
                                 "example": {
-                                    "usuarios": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                                    "usuarios": [4, 5, 6, 7, 8, 9],
                                     "eventos": [
                                         {
                                             "tipoEvento": "CORREO",
                                             "asunto": "Oferta especial de trabajo remoto",
                                             "fechaEvento": "2025-09-05T10:30:00",
                                             "cuerpo": "Estimado/a, tenemos una oferta especial de trabajo remoto con excelentes beneficios...",
-                                            "usuarios": [1, 2, 3, 4, 5]
+                                            "usuarios": [4, 5, 6, 7]
                                         },
                                         {
                                             "tipoEvento": "MENSAJE",
                                             "asunto": "Mensaje de WhatsApp",
                                             "fechaEvento": "2025-09-08T11:30:00",
                                             "mensaje": "Hola! Te escribo porque necesito que me confirmes algunos datos de tu cuenta bancaria...",
-                                            "usuarios": [1, 2, 5, 6, 7]
+                                            "usuarios": [5, 6, 7, 8]
                                         },
                                         {
                                             "tipoEvento": "LLAMADA",
                                             "asunto": "Llamada de soporte técnico",
                                             "fechaEvento": "2025-09-10T10:15:00",
                                             "mensaje": "Llamada simulada: 'Buenos días, soy del departamento de soporte técnico...'",
-                                            "usuarios": [1, 2, 4, 6, 7, 9]
+                                            "usuarios": [4, 6, 7, 8, 9]
                                         }
                                     ]
                                 }
