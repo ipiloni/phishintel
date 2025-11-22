@@ -1,5 +1,5 @@
 from flask import jsonify
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.backend.models.error import responseError
 from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.usuarioxevento import UsuarioxEvento
@@ -674,7 +674,12 @@ class ResultadoEventoController:
         Procesa un intento de reporte de phishing por parte de un empleado.
         Verifica si existe un evento asignado al usuario en el rango de fechas especificado.
         """
+        # Resto 3 horas por inconsistencias
+        fechaInicio = fechaInicio - timedelta(hours=3)
+        fechaFin = fechaFin - timedelta(hours=3)
+
         session = SessionLocal()
+        log.info(f"Se recibio una solicitud para reportar un evento (user: {idUsuario} - tipoEvento: {tipoEvento} - fechaInicio: {fechaInicio} - fechaFin: {fechaFin})")
         try:
             # Crear el intento de reporte
             intento = IntentoReporte(
@@ -684,6 +689,7 @@ class ResultadoEventoController:
                 fechaFin=fechaFin,
                 fechaIntento=datetime.now()
             )
+            log.info("Se crea un intento de reporte")
             
             # Buscar si existe un evento asignado al usuario en el rango de fechas
             evento_encontrado = session.query(Evento).join(UsuarioxEvento).filter(
@@ -695,6 +701,7 @@ class ResultadoEventoController:
             
             if evento_encontrado:
                 # Evento encontrado - marcar como verificado
+                log.info("Se encontro el evento")
                 intento.verificado = True
                 intento.idEventoVerificado = evento_encontrado.idEvento
                 intento.resultadoVerificacion = f"Evento verificado correctamente. ID: {evento_encontrado.idEvento}"
@@ -712,12 +719,14 @@ class ResultadoEventoController:
                 mensaje = "¡Gracias por reportar! El evento ha sido verificado correctamente."
             else:
                 # No se encontró evento - marcar como no verificado
+                log.info("No se encontro el evento que el usuario indico")
                 intento.verificado = False
                 intento.resultadoVerificacion = "No se encontró un evento asignado en el rango de fechas especificado"
                 mensaje = "¡Gracias por reportar! Sin embargo, no se encontró un evento asignado en el rango de fechas especificado."
             
             session.add(intento)
             session.commit()
+            log.info("Se actualizan las novedades en la BDD")
             
             return jsonify({
                 "mensaje": mensaje,
