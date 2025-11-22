@@ -4,7 +4,6 @@ import requests
 from app.backend.models.error import responseError
 from app.controllers.abm.areasController import AreasController
 from app.controllers.aiController import AIController
-from app.controllers.webScrappingController import WebScrappingController
 from app.controllers.llamadas.elevenLabsController import ElevenLabsController
 from app.controllers.llamadas.audioController import AudioController
 from app.controllers.emails.emailController import EmailController
@@ -23,9 +22,8 @@ from app.controllers.login import AuthController
 from app.utils.config import get
 from app.utils.logger import log
 from app.config.db_config import SessionLocal
-from app.backend.models import Usuario, Area, Evento, RegistroEvento, UsuarioxEvento, ResultadoEvento, IntentoReporte
+from app.backend.models import Usuario, Area, Evento, RegistroEvento, UsuarioxEvento, IntentoReporte
 from flask_cors import CORS
-import os
 
 GOOGLE_CLIENT_ID = get("GOOGLE_AUTH_CLIENT")
 GOOGLE_CLIENT_SECRET = get("GOOGLE_AUTH_SECRET")
@@ -100,7 +98,6 @@ def enviarPromptGemini():
 def enviarAudio(nombreAudio):
     return exponerAudio(nombreAudio)
 
-
 def exponerAudio(nombreAudio):  # es una funcion que nos permite reutilizarla internamente
     return send_file(f"./audios/{nombreAudio}", mimetype="audio/mpeg")
 
@@ -134,25 +131,6 @@ def obtenerConversacionLlamada():
     import app.utils.conversacion as conversacion
     con = conversacion.conversacionActual
     return jsonify(con), 200
-
-# TODO: borrar este metodo, es de prueba
-@apis.route("/api/llamadas/conversacion", methods=["POST"])
-def actualizarConversacionLlamada():
-    data = request.get_json()
-    rol = data["rol"]
-    mensaje = data["mensaje"]
-    import app.utils.conversacion as conversacion
-    conversacion.conversacionActual.append({"rol": rol, "mensaje": mensaje})
-    return Response(status=201)
-
-# TODO: borrar este metodo, es de prueba
-@apis.route("/api/llamadas/en-ejecucion", methods=["POST"])
-def actualizarIdConversacion():
-    data = request.get_json()
-    idConver = data["idConversacion"]
-    import app.utils.conversacion as conversacion
-    conversacion.idConversacion = idConver
-    return Response(status=201)
 
 @apis.route("/api/llamadas/en-ejecucion", methods=["GET"])
 def obtenerLlamadaEnEjecucion():
@@ -874,7 +852,7 @@ def googleLogin():
             "code": auth_code,
             "client_id": GOOGLE_CLIENT_ID,
             "client_secret": GOOGLE_CLIENT_SECRET,
-            "redirect_uri": redirect_uri,
+            "redirect_uri": "postmessage",
             "grant_type": "authorization_code",
         }
 
