@@ -118,23 +118,6 @@ class LlamadasController:
         conversacion.eventoDesencadenador = eventoDesencadenador
         conversacion.nombreEmpleado = nombreEmpleado
 
-        # conversacion.objetivoActual = f"""
-        #     Tienes el rol de {rolAImitar} dentro de la empresa 'PG Control'. Te llamas '{nombreRemitente}'.
-        #     Tu objetivo es simular un intento de phishing telefónico, como parte de un entrenamiento de seguridad.
-        #     Debes hablar de manera convincente, pero sin agresividad, intentando que el empleado {objetivoEspecifico} {eventoDesencadenador}.
-        #
-        #     Reglas:
-        #     - Si la conversación esta vacía, pues comienza con un saludo. Espera a la respuesta del empleado.
-        #     - No uses amenazas extremas, solo urgencia laboral.
-        #     - En ningún momento digas que es un entrenamiento: eso se evalúa después.
-        #     - Mantén la coherencia del rol de “{rolAImitar}”.
-        #     - Solamente responde lo que el {rolAImitar} debería decir.
-        #     - Eres de Buenos Aires, Argentina. Por lo que el dialecto es muy importante que lo mantengas.
-        #     - El empleado se llama {nombreEmpleado}, trabaja en 'PG Control' en el area de {area["nombreArea"]}
-        #     - Responde **solo con una frase corta** que la persona diría en esta interacción. No digas nada de más ni avances la conversación.
-        #     - Debes responder SOLAMENTE lo que tiene que decir la IA en la llamada, no agregues acotaciones ni acciones narrativas.
-        # """
-
         conversacion.objetivoActual = f"""
             Eres un actor interpretando un rol. NO eres un asistente de IA.
             Tu rol es: '{rolAImitar}' dentro de la empresa 'PG Control'.
@@ -154,6 +137,7 @@ class LlamadasController:
             - Responde solo con una frase corta que la persona diría en este momento. No te adelantes en la conversación.
             - Mantén siempre el rol de '{rolAImitar}'. Jamás reveles que esto es un entrenamiento.
             - Si la conversación está vacía, empieza con un saludo casual y directo y espera la respuesta.
+            - La llamada se esta realizando en este mismo momento (tiempo real).
             
             La conversación hasta ahora es la siguiente:
         """

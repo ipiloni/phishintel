@@ -9,7 +9,6 @@ from app.controllers.llamadas.audioController import AudioController
 from app.controllers.emails.emailController import EmailController
 from app.controllers.abm.eventosController import EventosController
 from app.controllers.llamadas.llamadasController import LlamadasController
-from app.controllers.llamadas.llamadaControllerMentira import LlamadaControllerMentira
 from app.controllers.abm.usuariosController import UsuariosController
 from app.controllers.resultadoEventoController import ResultadoEventoController
 from app.controllers.kpiController import KpiController
@@ -116,11 +115,6 @@ def procesarRespuestaLlamada():
 def generarLlamada():
     data = request.get_json()
     return LlamadasController.generarLlamada(data)
-
-@apis.route("/api/llamadas/simulada", methods=["POST"])
-def generarLlamadaSimulada():
-    data = request.get_json()
-    return LlamadaControllerMentira.generarLlamadaSimulada(data)
 
 @apis.route("/api/twilio/accion", methods=["POST"])
 def generarAccionesEnLlamada():
