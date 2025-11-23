@@ -6,3 +6,4 @@ from .usuarioxevento import UsuarioxEvento
 from .resultadoEvento import ResultadoEvento
 from .intentoReporte import IntentoReporte
 from .telethonSession import TelethonSession
+from .estadoReporte import EstadoReporte

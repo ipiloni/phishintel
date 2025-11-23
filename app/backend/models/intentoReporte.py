@@ -1,7 +1,8 @@
-from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, DateTime, Text
+from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, DateTime, Text, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from app.config.db_config import Base
 from datetime import datetime
+from app.backend.models.estadoReporte import EstadoReporte
 
 class IntentoReporte(Base):
     __tablename__ = 'intentos_reporte'
@@ -15,6 +16,8 @@ class IntentoReporte(Base):
     verificado = Column(Boolean, default=False, nullable=False)
     resultadoVerificacion = Column(Text, nullable=True)  # Para guardar detalles del resultado
     idEventoVerificado = Column(Integer, ForeignKey('eventos.idEvento'), nullable=True)  # Si se encontró el evento
+    observaciones = Column(Text, nullable=True)  # Observaciones del administrador sobre el reporte
+    estado = Column(SQLEnum(EstadoReporte), default=EstadoReporte.PENDIENTE, nullable=False)  # Estado del reporte
 
     # Relaciones
     usuario = relationship("Usuario", back_populates="intentosReporte")
@@ -30,5 +33,7 @@ class IntentoReporte(Base):
             "fechaIntento": self.fechaIntento.isoformat() if self.fechaIntento else None,
             "verificado": self.verificado,
             "resultadoVerificacion": self.resultadoVerificacion,
-            "idEventoVerificado": self.idEventoVerificado
+            "idEventoVerificado": self.idEventoVerificado,
+            "observaciones": self.observaciones,
+            "estado": self.estado.value if self.estado else EstadoReporte.PENDIENTE.value
         }

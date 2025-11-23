@@ -5,6 +5,7 @@ from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.usuarioxevento import UsuarioxEvento
 from app.backend.models.tipoEvento import TipoEvento
 from app.backend.models.intentoReporte import IntentoReporte
+from app.backend.models.estadoReporte import EstadoReporte
 from app.backend.models.evento import Evento
 from app.config.db_config import SessionLocal
 from app.utils.logger import log
@@ -669,7 +670,7 @@ class ResultadoEventoController:
             return "Riesgo máximo"
 
     @staticmethod
-    def procesarIntentoReporte(idUsuario, tipoEvento, fechaInicio, fechaFin):
+    def procesarIntentoReporte(idUsuario, tipoEvento, fechaInicio, fechaFin, observaciones=None):
         """
         Procesa un intento de reporte de phishing por parte de un empleado.
         Verifica si existe un evento asignado al usuario en el rango de fechas especificado.
@@ -687,7 +688,8 @@ class ResultadoEventoController:
                 tipoEvento=tipoEvento,
                 fechaInicio=fechaInicio,
                 fechaFin=fechaFin,
-                fechaIntento=datetime.now()
+                fechaIntento=datetime.now(),
+                observaciones=observaciones
             )
             log.info("Se crea un intento de reporte")
 
@@ -717,6 +719,7 @@ class ResultadoEventoController:
                 # Evento nuevo encontrado - marcar como verificado
                 log.info("Se encontro un evento elegible para verificar el reporte")
                 intento.verificado = True
+                intento.estado = EstadoReporte.VERIFICADO
                 intento.idEventoVerificado = evento_encontrado.idEvento
                 intento.resultadoVerificacion = f"Evento verificado correctamente. ID: {evento_encontrado.idEvento}"
 
@@ -736,12 +739,14 @@ class ResultadoEventoController:
                     # Había eventos en el rango, pero todos ya habían sido reportados antes
                     log.info("Todos los eventos que coinciden con el rango ya fueron reportados anteriormente por el usuario")
                     intento.verificado = False
+                    intento.estado = EstadoReporte.PENDIENTE
                     intento.resultadoVerificacion = "Ya reportaste previamente los eventos que coinciden con el rango indicado. No se encontró un nuevo evento para asociar a este reporte. El evento quedará pendiente para revisión por los administradores"
                     mensaje = "¡Gracias por reportar! Ya habías reportado previamente los eventos de este período, tu nuevo intento quedará pendiente."
                 else:
                     # No se encontró ningún evento asignado en ese rango
                     log.info("No se encontro el evento que el usuario indico")
                     intento.verificado = False
+                    intento.estado = EstadoReporte.PENDIENTE
                     intento.resultadoVerificacion = "No se encontró un evento asignado en el rango de fechas especificado"
                     mensaje = "¡Gracias por reportar! No se encontró un evento simulado asignado en el rango de fechas especificado. El evento quedará pendiente para revisión por los administradores"
             

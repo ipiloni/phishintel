@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from sqlalchemy.orm import joinedload
-from app.backend.models import Evento, RegistroEvento, UsuarioxEvento, Usuario
+from app.backend.models import Evento, RegistroEvento, UsuarioxEvento, Usuario, IntentoReporte, EstadoReporte
 from app.backend.models.error import responseError
 from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.tipoEvento import TipoEvento
@@ -521,5 +521,204 @@ class EventosController:
             session.rollback()
             log.error(f"Error creando batch de eventos: {str(e)}")
             return responseError("ERROR", f"No se pudo crear el batch de eventos: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def obtenerIntentosReporte():
+        """
+        Obtiene todos los intentos de reporte con información del usuario
+        """
+        session = SessionLocal()
+        try:
+            intentos = session.query(IntentoReporte).options(
+                joinedload(IntentoReporte.usuario),
+                joinedload(IntentoReporte.eventoVerificado)
+            ).order_by(IntentoReporte.fechaIntento.desc()).all()
+
+            intentos_data = []
+            for intento in intentos:
+                intento_info = {
+                    "idIntentoReporte": intento.idIntentoReporte,
+                    "idUsuario": intento.idUsuario,
+                    "nombreUsuario": f"{intento.usuario.nombre} {intento.usuario.apellido}" if intento.usuario else "N/A",
+                    "tipoEvento": intento.tipoEvento,
+                    "fechaInicio": intento.fechaInicio.isoformat() if intento.fechaInicio else None,
+                    "fechaFin": intento.fechaFin.isoformat() if intento.fechaFin else None,
+                    "fechaIntento": intento.fechaIntento.isoformat() if intento.fechaIntento else None,
+                    "verificado": intento.verificado,
+                    "resultadoVerificacion": intento.resultadoVerificacion,
+                    "idEventoVerificado": intento.idEventoVerificado,
+                    "observaciones": intento.observaciones,
+                    "estado": intento.estado.value if intento.estado else EstadoReporte.PENDIENTE.value
+                }
+                intentos_data.append(intento_info)
+
+            return jsonify({"intentos": intentos_data}), 200
+        except Exception as e:
+            log.error(f"Error obteniendo intentos de reporte: {str(e)}")
+            return responseError("ERROR", f"Error al obtener intentos de reporte: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def actualizarIntentoReporte(idIntentoReporte, data):
+        """
+        Actualiza un intento de reporte (observaciones, estado, etc.)
+        """
+        session = SessionLocal()
+        try:
+            intento = session.query(IntentoReporte).filter_by(idIntentoReporte=idIntentoReporte).first()
+            
+            if not intento:
+                return responseError("INTENTO_NO_ENCONTRADO", "No se encontró el intento de reporte", 404)
+
+            # Actualizar campos permitidos
+            if "observaciones" in data:
+                intento.observaciones = data["observaciones"]
+            
+            if "estado" in data:
+                estado_val = data["estado"]
+                if estado_val not in [e.value for e in EstadoReporte]:
+                    return responseError("ESTADO_INVALIDO", "El estado proporcionado no es válido", 400)
+                intento.estado = EstadoReporte(estado_val)
+            
+            if "verificado" in data:
+                intento.verificado = data["verificado"]
+            
+            if "resultadoVerificacion" in data:
+                intento.resultadoVerificacion = data["resultadoVerificacion"]
+            
+            if "idEventoVerificado" in data:
+                intento.idEventoVerificado = data["idEventoVerificado"]
+
+            session.commit()
+            log.info(f"Intento de reporte {idIntentoReporte} actualizado correctamente")
+            return jsonify({"mensaje": "Intento de reporte actualizado correctamente"}), 200
+
+        except Exception as e:
+            session.rollback()
+            log.error(f"Error actualizando intento de reporte: {str(e)}")
+            return responseError("ERROR", f"Error al actualizar intento de reporte: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def validarIntentoReporte(idIntentoReporte, observaciones=None):
+        """
+        Valida un intento de reporte sin asignar evento (cuando no hay evento correspondiente)
+        """
+        session = SessionLocal()
+        try:
+            intento = session.query(IntentoReporte).filter_by(idIntentoReporte=idIntentoReporte).first()
+            
+            if not intento:
+                return responseError("INTENTO_NO_ENCONTRADO", "No se encontró el intento de reporte", 404)
+
+            intento.estado = EstadoReporte.VALIDADO_SIN_EVENTO
+            intento.verificado = True
+            intento.resultadoVerificacion = "Validado por el administrador sin evento asociado"
+            
+            if observaciones:
+                intento.observaciones = observaciones
+
+            session.commit()
+            log.info(f"Intento de reporte {idIntentoReporte} validado sin evento")
+            return jsonify({"mensaje": "Intento validado correctamente"}), 200
+
+        except Exception as e:
+            session.rollback()
+            log.error(f"Error validando intento de reporte: {str(e)}")
+            return responseError("ERROR", f"Error al validar intento de reporte: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def rechazarIntentoReporte(idIntentoReporte, observaciones=None):
+        """
+        Rechaza/descarta un intento de reporte
+        """
+        session = SessionLocal()
+        try:
+            intento = session.query(IntentoReporte).filter_by(idIntentoReporte=idIntentoReporte).first()
+            
+            if not intento:
+                return responseError("INTENTO_NO_ENCONTRADO", "No se encontró el intento de reporte", 404)
+
+            intento.estado = EstadoReporte.RECHAZADO
+            intento.verificado = False
+            intento.resultadoVerificacion = "Rechazado por el administrador"
+            
+            if observaciones:
+                intento.observaciones = observaciones
+
+            session.commit()
+            log.info(f"Intento de reporte {idIntentoReporte} rechazado")
+            return jsonify({"mensaje": "Intento rechazado correctamente"}), 200
+
+        except Exception as e:
+            session.rollback()
+            log.error(f"Error rechazando intento de reporte: {str(e)}")
+            return responseError("ERROR", f"Error al rechazar intento de reporte: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def verificarIntentoReporte(idIntentoReporte, idEvento, observaciones=None):
+        """
+        Verifica un intento de reporte asociándolo a un evento existente
+        """
+        session = SessionLocal()
+        try:
+            intento = session.query(IntentoReporte).filter_by(idIntentoReporte=idIntentoReporte).first()
+            
+            if not intento:
+                return responseError("INTENTO_NO_ENCONTRADO", "No se encontró el intento de reporte", 404)
+
+            # Verificar que el evento existe
+            evento = session.query(Evento).filter_by(idEvento=idEvento).first()
+            if not evento:
+                return responseError("EVENTO_NO_ENCONTRADO", "No se encontró el evento especificado", 404)
+
+            intento.estado = EstadoReporte.VERIFICADO
+            intento.verificado = True
+            intento.idEventoVerificado = idEvento
+            intento.resultadoVerificacion = f"Verificado y asociado al evento #{idEvento}"
+            
+            if observaciones:
+                intento.observaciones = observaciones
+
+            session.commit()
+            log.info(f"Intento de reporte {idIntentoReporte} verificado con evento {idEvento}")
+            return jsonify({"mensaje": "Intento verificado correctamente"}), 200
+
+        except Exception as e:
+            session.rollback()
+            log.error(f"Error verificando intento de reporte: {str(e)}")
+            return responseError("ERROR", f"Error al verificar intento de reporte: {str(e)}", 500)
+        finally:
+            session.close()
+
+    @staticmethod
+    def eliminarIntentoReporte(idIntentoReporte):
+        """
+        Elimina un intento de reporte
+        """
+        session = SessionLocal()
+        try:
+            intento = session.query(IntentoReporte).filter_by(idIntentoReporte=idIntentoReporte).first()
+            
+            if not intento:
+                return responseError("INTENTO_NO_ENCONTRADO", "No se encontró el intento de reporte", 404)
+
+            session.delete(intento)
+            session.commit()
+            log.info(f"Intento de reporte {idIntentoReporte} eliminado")
+            return jsonify({"mensaje": "Intento eliminado correctamente"}), 200
+
+        except Exception as e:
+            session.rollback()
+            log.error(f"Error eliminando intento de reporte: {str(e)}")
+            return responseError("ERROR", f"Error al eliminar intento de reporte: {str(e)}", 500)
         finally:
             session.close()

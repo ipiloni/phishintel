@@ -171,6 +171,11 @@
                 <i class="bi bi-calendar-event"></i> Gestionar Eventos
               </button>
             </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" :class="{active: activeTab==='reportes'}" @click="activeTab='reportes'" type="button" role="tab">
+                <i class="bi bi-flag"></i> Gestionar Reportes
+              </button>
+            </li>
           </ul>
 
           <!-- ÁREAS -->
@@ -311,6 +316,70 @@
                     </tr>
                     <tr v-if="eventos.length===0">
                       <td colspan="7" class="text-center" style="color:#b0b0b0;">Sin eventos</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- INTENTOS DE REPORTE -->
+          <div v-show="activeTab==='reportes'">
+            <div class="card h-100 bg-dark text-white">
+              <div class="card-header d-flex justify-content-between align-items-center bg-dark border-secondary">
+                <h5 class="mb-0">Intentos de Reporte</h5>
+                <div>
+                  <button class="btn btn-primary btn-sm" @click="cargarIntentosReporte"><i class="bi bi-arrow-clockwise"></i></button>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table id="tablaReportes" class="table table-hover table-dark mb-0">
+                  <thead>
+                    <tr>
+                      <th class="sortable" data-col="0" style="cursor:pointer;"># <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="1" style="cursor:pointer;">Usuario <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="2" style="cursor:pointer;">Tipo <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="3" style="cursor:pointer;">Fecha Reporte <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="4" style="cursor:pointer;">Estado <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th>Observaciones</th>
+                      <th class="text-end">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="reporte in intentosReporte" :key="reporte.idIntentoReporte">
+                      <td>{{ reporte.idIntentoReporte }}</td>
+                      <td>{{ reporte.nombreUsuario }}</td>
+                      <td>
+                        <span class="badge" :class="{
+                          'bg-info': reporte.tipoEvento === 'CORREO',
+                          'bg-success': reporte.tipoEvento === 'MENSAJE',
+                          'bg-warning': reporte.tipoEvento === 'LLAMADA'
+                        }">
+                          {{ reporte.tipoEvento }}
+                        </span>
+                      </td>
+                      <td>{{ formatearFecha(reporte.fechaIntento) }}</td>
+                      <td>
+                        <span class="badge" :class="{
+                          'bg-success': reporte.estado === 'VERIFICADO',
+                          'bg-info': reporte.estado === 'VALIDADO_SIN_EVENTO',
+                          'bg-danger': reporte.estado === 'RECHAZADO',
+                          'bg-warning': reporte.estado === 'PENDIENTE'
+                        }">
+                          {{ getEstadoNombre(reporte.estado) }}
+                        </span>
+                      </td>
+                      <td>
+                        <span v-if="reporte.observaciones" style="color: #ddd;">{{ reporte.observaciones.substring(0, 50) }}{{ reporte.observaciones.length > 50 ? '...' : '' }}</span>
+                        <span v-else style="color: #777;">Sin observaciones</span>
+                      </td>
+                      <td class="text-end">
+                        <button class="btn btn-sm btn-primary me-2" @click="editarReporte(reporte)"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-primary" @click="eliminarReporte(reporte)"><i class="bi bi-trash"></i></button>
+                      </td>
+                    </tr>
+                    <tr v-if="intentosReporte.length===0">
+                      <td colspan="7" class="text-center" style="color:#b0b0b0;">Sin intentos de reporte</td>
                     </tr>
                   </tbody>
                 </table>
@@ -579,6 +648,68 @@
             </div>
           </div>
 
+          <!-- Modal para Reportes -->
+          <div class="modal fade" id="modalReporte" tabindex="-1" aria-labelledby="modalReporteLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                  <h5 class="modal-title" id="modalReporteLabel">Editar Intento de Reporte #{{ reporteForm.idIntentoReporte }}</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <strong>Usuario:</strong> {{ reporteForm.nombreUsuario }}
+                    </div>
+                    <div class="col-md-6">
+                      <strong>Tipo:</strong> {{ reporteForm.tipoEvento }}
+                    </div>
+                    <div class="col-md-6">
+                      <strong>Fecha Inicio:</strong> {{ formatearFecha(reporteForm.fechaInicio) }}
+                    </div>
+                    <div class="col-md-6">
+                      <strong>Fecha Fin:</strong> {{ formatearFecha(reporteForm.fechaFin) }}
+                    </div>
+                    <div class="col-md-6">
+                      <strong>Fecha Reporte:</strong> {{ formatearFecha(reporteForm.fechaIntento) }}
+                    </div>
+                  </div>
+
+                  <hr class="border-secondary">
+
+                  <div class="mb-3">
+                    <label class="form-label">Estado</label>
+                    <select class="form-select" v-model="reporteForm.estado">
+                      <option value="PENDIENTE">Pendiente</option>
+                      <option value="VERIFICADO">Verificado</option>
+                      <option value="VALIDADO_SIN_EVENTO">Validado sin Evento</option>
+                      <option value="RECHAZADO">Rechazado</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Observaciones</label>
+                    <textarea class="form-control" v-model="reporteForm.observaciones" rows="4" placeholder="Agrega observaciones sobre este reporte..."></textarea>
+                    <small style="color:#b0b0b0;">Estas observaciones serán visibles para el empleado</small>
+                  </div>
+
+                  <div class="mb-3" v-if="reporteForm.estado === 'VERIFICADO'">
+                    <label class="form-label">ID Evento Asociado</label>
+                    <input type="number" class="form-control" v-model.number="reporteForm.idEventoVerificado" placeholder="ID del evento">
+                  </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="loadingReporte">Cancelar</button>
+                  <button type="button" class="btn btn-primary" @click="submitReporte" :disabled="loadingReporte">
+                    <span v-if="loadingReporte" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <i v-else class="bi bi-save"></i>
+                    {{ loadingReporte ? 'Guardando...' : 'Guardar cambios' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Modal de Confirmación de Eliminación -->
           <div class="modal fade" id="modalConfirmarEliminacion" tabindex="-1" aria-labelledby="modalConfirmarEliminacionLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -672,15 +803,17 @@
           seleccionAsignados: [],
           loadingArea: false,
           loadingUsuario: false,
+          loadingReporte: false,
           eliminando: false,
           confirmacionEliminacion: {
-            tipo: null, // 'area', 'usuario' o 'evento'
+            tipo: null, // 'area', 'usuario', 'evento' o 'reporte'
             item: null,
             mensaje: ''
           },
           eventos: [],
           seleccionUsuariosDisponibles: [],
           seleccionUsuariosAsociados: [],
+          intentosReporte: [],
           eventoForm: {
             idEvento: null,
             tipoEvento: '',
@@ -708,6 +841,18 @@
             idVoz: '',
             perfilLinkedin: '',
             esAdministrador: false
+          },
+          reporteForm: {
+            idIntentoReporte: null,
+            idUsuario: null,
+            nombreUsuario: '',
+            tipoEvento: '',
+            fechaInicio: '',
+            fechaFin: '',
+            fechaIntento: '',
+            estado: 'PENDIENTE',
+            observaciones: '',
+            idEventoVerificado: null
           }
         }
       },
@@ -927,6 +1072,15 @@
               }
               this.showToast('success', `Evento #${evento.idEvento} eliminado correctamente ✅`);
               await this.cargarEventos();
+            } else if (this.confirmacionEliminacion.tipo === 'reporte') {
+              const reporte = this.confirmacionEliminacion.item;
+              const resp = await fetch(`${API}/api/admin/intentos-reporte/${reporte.idIntentoReporte}`, { method: 'DELETE' });
+              if (!resp.ok) {
+                this.showToast('error', 'No se pudo eliminar el intento de reporte');
+                return;
+              }
+              this.showToast('success', `Intento de reporte #${reporte.idIntentoReporte} eliminado correctamente ✅`);
+              await this.cargarIntentosReporte();
             }
             // Cerrar modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmarEliminacion'));
@@ -1273,6 +1427,81 @@
             this.showToast('error', `Error al actualizar estado: ${e.message}`);
           }
         },
+
+        // ------- INTENTOS DE REPORTE -------
+        async cargarIntentosReporte() {
+          try {
+            const resp = await fetch(`${API}/api/admin/intentos-reporte`);
+            if (!resp.ok) throw new Error('Error al cargar intentos de reporte');
+            const data = await resp.json();
+            this.intentosReporte = data.intentos || [];
+            this.$nextTick(() => {
+              const tablaReportes = document.getElementById('tablaReportes');
+              if (tablaReportes) {
+                this.configurarOrdenamientoTabla(tablaReportes);
+              }
+            });
+          } catch (e) {
+            this.showToast('error', e.message || 'Error al cargar intentos de reporte');
+          }
+        },
+        getEstadoNombre(estado) {
+          const nombres = {
+            'PENDIENTE': 'Pendiente',
+            'VERIFICADO': 'Verificado',
+            'VALIDADO_SIN_EVENTO': 'Validado',
+            'RECHAZADO': 'Rechazado'
+          };
+          return nombres[estado] || estado;
+        },
+        editarReporte(reporte) {
+          this.reporteForm = {
+            idIntentoReporte: reporte.idIntentoReporte,
+            idUsuario: reporte.idUsuario,
+            nombreUsuario: reporte.nombreUsuario,
+            tipoEvento: reporte.tipoEvento,
+            fechaInicio: reporte.fechaInicio,
+            fechaFin: reporte.fechaFin,
+            fechaIntento: reporte.fechaIntento,
+            estado: reporte.estado,
+            observaciones: reporte.observaciones || '',
+            idEventoVerificado: reporte.idEventoVerificado
+          };
+          const modal = new bootstrap.Modal(document.getElementById('modalReporte'));
+          modal.show();
+        },
+        async submitReporte() {
+          this.loadingReporte = true;
+          try {
+            const payload = {
+              estado: this.reporteForm.estado,
+              observaciones: this.reporteForm.observaciones,
+              idEventoVerificado: this.reporteForm.idEventoVerificado
+            };
+            const resp = await fetch(`${API}/api/admin/intentos-reporte/${this.reporteForm.idIntentoReporte}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            if (!resp.ok) throw new Error('Error actualizando reporte');
+            this.showToast('success', 'Reporte actualizado correctamente ✅');
+            await this.cargarIntentosReporte();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalReporte'));
+            if (modal) modal.hide();
+          } catch (e) {
+            this.showToast('error', e.message || 'Error en operación de reporte');
+          } finally {
+            this.loadingReporte = false;
+          }
+        },
+        eliminarReporte(reporte) {
+          this.confirmacionEliminacion.tipo = 'reporte';
+          this.confirmacionEliminacion.item = reporte;
+          this.confirmacionEliminacion.mensaje = `¿Estás seguro de que deseas eliminar el intento de reporte #${reporte.idIntentoReporte}?`;
+          const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminacion'));
+          modal.show();
+        },
+
         inicializarOrdenamientoTablas() {
           // Inicializar ordenamiento para tabla de áreas
           const tablaAreas = document.getElementById('tablaAreas');
@@ -1290,6 +1519,12 @@
           const tablaEventos = document.getElementById('tablaEventos');
           if (tablaEventos) {
             this.configurarOrdenamientoTabla(tablaEventos);
+          }
+
+          // Inicializar ordenamiento para tabla de reportes
+          const tablaReportes = document.getElementById('tablaReportes');
+          if (tablaReportes) {
+            this.configurarOrdenamientoTabla(tablaReportes);
           }
         },
         configurarOrdenamientoTabla(tabla) {
@@ -1351,7 +1586,7 @@
         }
       },
       async mounted() {
-        await Promise.all([this.cargarAreas(), this.cargarUsuarios(), this.cargarEventos()]);
+        await Promise.all([this.cargarAreas(), this.cargarUsuarios(), this.cargarEventos(), this.cargarIntentosReporte()]);
         this.$nextTick(() => {
           this.inicializarOrdenamientoTablas();
         });

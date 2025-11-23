@@ -210,7 +210,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
             <!-- Rango de Fechas -->
             <div class="mb-4">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <label class="form-label mb-0">Rango de Fechas en las que Ocurrió el Evento</label>
+                <label class="form-label mb-0">¿Cuando Ocurrió el Evento?</label>
               </div>
 
               <!-- Botones rápidos de fecha - SIN AZUL NUNCA -->
@@ -234,6 +234,16 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
                   Elegir rango manual
                 </button>
               </div>
+
+               <!-- Observaciones -->
+            <div class="mb-4">
+              <label class="form-label">Observaciones (Opcional)</label>
+              <textarea class="form-control" v-model="observaciones" rows="3" placeholder="Agrega contexto sobre el evento que reportas..." style="background-color: #2d2d2d; color: white; border: 1px solid #da02e5;"></textarea>
+              <small style="color: white; font-size: 0.8em;">
+                <i class="bi bi-info-circle me-1" style="color: white;"></i>
+                Puedes agregar detalles como el remitente, asunto del correo, o cualquier información relevante
+              </small>
+            </div>
 
               <div class="row g-3" v-if="dateMode === 'RANGO'">
                 <div class="col-md-6">
@@ -375,6 +385,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
           tipoEvento: '',
           fechaInicio: '',
           fechaFin: '',
+          observaciones: '',
           cargando: false,
           errorFechas: '',
           dateMode: '',
@@ -488,7 +499,8 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
             const formData = {
               tipoEvento: this.tipoEvento,
               fechaInicio: new Date(this.fechaInicio).toISOString(),
-              fechaFin: new Date(this.fechaFin).toISOString()
+              fechaFin: new Date(this.fechaFin).toISOString(),
+              observaciones: this.observaciones
             };
             
             const response = await fetch(`${API_BASE_URL}/api/empleado/reportar-evento`, {
@@ -516,6 +528,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
             this.tipoEvento = '';
             this.fechaInicio = '';
             this.fechaFin = '';
+            this.observaciones = '';
             this.dateMode = '';
             this.errorFechas = '';
             
@@ -557,21 +570,37 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
             
             if (data.intentos && data.intentos.length > 0) {
               let html = '<div class="table-responsive"><table class="table table-dark table-striped">';
-              html += '<thead><tr><th>Tipo</th><th>Fecha Inicio</th><th>Fecha Fin</th><th>Fecha Reporte</th><th>Estado</th><th>Resultado</th></tr></thead>';
+              html += '<thead><tr><th>Tipo</th><th>Fecha Inicio</th><th>Fecha Fin</th><th>Fecha Reporte</th><th>Estado</th><th>Resultado</th><th>Observaciones</th></tr></thead>';
               html += '<tbody>';
               
               data.intentos.forEach(intento => {
-                const estado = intento.verificado ? 
-                  '<span class="badge bg-success">Verificado</span>' : 
-                  '<span class="badge bg-warning">Pendiente</span>';
+                let estadoBadge = '';
+                switch(intento.estado) {
+                  case 'VERIFICADO':
+                    estadoBadge = '<span class="badge bg-success">Verificado</span>';
+                    break;
+                  case 'VALIDADO_SIN_EVENTO':
+                    estadoBadge = '<span class="badge bg-info">Validado</span>';
+                    break;
+                  case 'RECHAZADO':
+                    estadoBadge = '<span class="badge bg-danger">Rechazado</span>';
+                    break;
+                  default:
+                    estadoBadge = '<span class="badge bg-warning">Pendiente</span>';
+                }
+                
+                const observaciones = intento.observaciones ? 
+                  `<span style="color: #ddd;">${intento.observaciones}</span>` : 
+                  '<span style="color: #777;">Sin observaciones</span>';
                 
                 html += `<tr>
                   <td>${this.getTipoIcon(intento.tipoEvento)} ${this.getTipoNombre(intento.tipoEvento)}</td>
                   <td>${new Date(intento.fechaInicio).toLocaleString()}</td>
                   <td>${new Date(intento.fechaFin).toLocaleString()}</td>
                   <td>${new Date(intento.fechaIntento).toLocaleString()}</td>
-                  <td>${estado}</td>
+                  <td>${estadoBadge}</td>
                   <td>${intento.resultadoVerificacion || 'N/A'}</td>
+                  <td>${observaciones}</td>
                 </tr>`;
               });
               

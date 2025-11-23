@@ -960,11 +960,14 @@ def reportar_evento():
     except ValueError:
         return responseError("FECHA_INVALIDA", "Formato de fecha inválido. Use ISO format (YYYY-MM-DDTHH:MM:SS)", 400)
     
+    observaciones = data.get("observaciones")
+    
     return ResultadoEventoController.procesarIntentoReporte(
         idUsuario, 
         data["tipoEvento"], 
         fechaInicio, 
-        fechaFin
+        fechaFin,
+        observaciones
     )
 
 
@@ -990,6 +993,145 @@ def obtener_scoring_empleado():
     
     idUsuario = session.get('user_id')
     return ResultadoEventoController.calcularScoringPorEmpleado(idUsuario)
+
+
+# =================== GESTIÓN DE INTENTOS DE REPORTE (ADMIN) =================== #
+
+@apis.route("/api/admin/intentos-reporte", methods=["GET"])
+def obtener_intentos_reporte():
+    """
+    Endpoint para obtener todos los intentos de reporte (solo admin)
+    """
+    if not AuthController.is_logged_in():
+        return jsonify({"error": "Debe estar logueado"}), 401
+    
+    # Verificar que sea administrador
+    idUsuario = session.get('user_id')
+    session_db = SessionLocal()
+    try:
+        usuario = session_db.query(Usuario).filter_by(idUsuario=idUsuario).first()
+        if not usuario or not usuario.esAdministrador:
+            return jsonify({"error": "Solo los administradores pueden acceder a esta información"}), 403
+    finally:
+        session_db.close()
+    
+    return EventosController.obtenerIntentosReporte()
+
+
+@apis.route("/api/admin/intentos-reporte/<int:idIntentoReporte>", methods=["PUT"])
+def actualizar_intento_reporte(idIntentoReporte):
+    """
+    Endpoint para actualizar un intento de reporte (observaciones, estado, etc.)
+    """
+    if not AuthController.is_logged_in():
+        return jsonify({"error": "Debe estar logueado"}), 401
+    
+    # Verificar que sea administrador
+    idUsuario = session.get('user_id')
+    session_db = SessionLocal()
+    try:
+        usuario = session_db.query(Usuario).filter_by(idUsuario=idUsuario).first()
+        if not usuario or not usuario.esAdministrador:
+            return jsonify({"error": "Solo los administradores pueden modificar intentos de reporte"}), 403
+    finally:
+        session_db.close()
+    
+    data = request.get_json()
+    return EventosController.actualizarIntentoReporte(idIntentoReporte, data)
+
+
+@apis.route("/api/admin/intentos-reporte/<int:idIntentoReporte>/validar", methods=["POST"])
+def validar_intento_reporte(idIntentoReporte):
+    """
+    Endpoint para validar un intento de reporte sin evento asociado
+    """
+    if not AuthController.is_logged_in():
+        return jsonify({"error": "Debe estar logueado"}), 401
+    
+    # Verificar que sea administrador
+    idUsuario = session.get('user_id')
+    session_db = SessionLocal()
+    try:
+        usuario = session_db.query(Usuario).filter_by(idUsuario=idUsuario).first()
+        if not usuario or not usuario.esAdministrador:
+            return jsonify({"error": "Solo los administradores pueden validar intentos de reporte"}), 403
+    finally:
+        session_db.close()
+    
+    data = request.get_json() or {}
+    observaciones = data.get("observaciones")
+    return EventosController.validarIntentoReporte(idIntentoReporte, observaciones)
+
+
+@apis.route("/api/admin/intentos-reporte/<int:idIntentoReporte>/rechazar", methods=["POST"])
+def rechazar_intento_reporte(idIntentoReporte):
+    """
+    Endpoint para rechazar/descartar un intento de reporte
+    """
+    if not AuthController.is_logged_in():
+        return jsonify({"error": "Debe estar logueado"}), 401
+    
+    # Verificar que sea administrador
+    idUsuario = session.get('user_id')
+    session_db = SessionLocal()
+    try:
+        usuario = session_db.query(Usuario).filter_by(idUsuario=idUsuario).first()
+        if not usuario or not usuario.esAdministrador:
+            return jsonify({"error": "Solo los administradores pueden rechazar intentos de reporte"}), 403
+    finally:
+        session_db.close()
+    
+    data = request.get_json() or {}
+    observaciones = data.get("observaciones")
+    return EventosController.rechazarIntentoReporte(idIntentoReporte, observaciones)
+
+
+@apis.route("/api/admin/intentos-reporte/<int:idIntentoReporte>/verificar", methods=["POST"])
+def verificar_intento_reporte(idIntentoReporte):
+    """
+    Endpoint para verificar un intento de reporte asociándolo a un evento
+    """
+    if not AuthController.is_logged_in():
+        return jsonify({"error": "Debe estar logueado"}), 401
+    
+    # Verificar que sea administrador
+    idUsuario = session.get('user_id')
+    session_db = SessionLocal()
+    try:
+        usuario = session_db.query(Usuario).filter_by(idUsuario=idUsuario).first()
+        if not usuario or not usuario.esAdministrador:
+            return jsonify({"error": "Solo los administradores pueden verificar intentos de reporte"}), 403
+    finally:
+        session_db.close()
+    
+    data = request.get_json()
+    if not data or "idEvento" not in data:
+        return responseError("CAMPOS_OBLIGATORIOS", "Se requiere el campo 'idEvento'", 400)
+    
+    idEvento = data["idEvento"]
+    observaciones = data.get("observaciones")
+    return EventosController.verificarIntentoReporte(idIntentoReporte, idEvento, observaciones)
+
+
+@apis.route("/api/admin/intentos-reporte/<int:idIntentoReporte>", methods=["DELETE"])
+def eliminar_intento_reporte(idIntentoReporte):
+    """
+    Endpoint para eliminar un intento de reporte
+    """
+    if not AuthController.is_logged_in():
+        return jsonify({"error": "Debe estar logueado"}), 401
+    
+    # Verificar que sea administrador
+    idUsuario = session.get('user_id')
+    session_db = SessionLocal()
+    try:
+        usuario = session_db.query(Usuario).filter_by(idUsuario=idUsuario).first()
+        if not usuario or not usuario.esAdministrador:
+            return jsonify({"error": "Solo los administradores pueden eliminar intentos de reporte"}), 403
+    finally:
+        session_db.close()
+    
+    return EventosController.eliminarIntentoReporte(idIntentoReporte)
 
 @apis.route("/api/admin/limpiar-bd", methods=["DELETE"])
 def limpiarBaseDatos():
