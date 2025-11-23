@@ -681,7 +681,7 @@ class ResultadoEventoController:
         session = SessionLocal()
         log.info(f"Se recibio una solicitud para reportar un evento (user: {idUsuario} - tipoEvento: {tipoEvento} - fechaInicio: {fechaInicio} - fechaFin: {fechaFin})")
         try:
-            # Crear el intento de reporte
+            # Crear el intento de reporte (aún sin asociar a un evento específico)
             intento = IntentoReporte(
                 idUsuario=idUsuario,
                 tipoEvento=tipoEvento,
@@ -690,39 +690,60 @@ class ResultadoEventoController:
                 fechaIntento=datetime.now()
             )
             log.info("Se crea un intento de reporte")
-            
-            # Buscar si existe un evento asignado al usuario en el rango de fechas
-            evento_encontrado = session.query(Evento).join(UsuarioxEvento).filter(
+
+            # Buscar todos los eventos asignados al usuario en el rango de fechas
+            eventos_candidatos = session.query(Evento).join(UsuarioxEvento).filter(
                 UsuarioxEvento.idUsuario == idUsuario,
                 Evento.tipoEvento == tipoEvento,
                 Evento.fechaEvento >= fechaInicio,
                 Evento.fechaEvento <= fechaFin
-            ).first()
-            
+            ).order_by(Evento.fechaEvento.asc()).all()
+
+            evento_encontrado = None
+
+            # Seleccionar el primer evento que NO haya sido ya verificado/reportado previamente por el usuario
+            for evento in eventos_candidatos:
+                intento_previo = session.query(IntentoReporte).filter_by(
+                    idUsuario=idUsuario,
+                    idEventoVerificado=evento.idEvento,
+                    verificado=True
+                ).first()
+
+                if not intento_previo:
+                    evento_encontrado = evento
+                    break
+
             if evento_encontrado:
-                # Evento encontrado - marcar como verificado
-                log.info("Se encontro el evento")
+                # Evento nuevo encontrado - marcar como verificado
+                log.info("Se encontro un evento elegible para verificar el reporte")
                 intento.verificado = True
                 intento.idEventoVerificado = evento_encontrado.idEvento
                 intento.resultadoVerificacion = f"Evento verificado correctamente. ID: {evento_encontrado.idEvento}"
-                
+
                 # Actualizar el estado del usuarioxevento a REPORTADO
                 usuario_evento = session.query(UsuarioxEvento).filter_by(
                     idUsuario=idUsuario,
                     idEvento=evento_encontrado.idEvento
                 ).first()
-                
+
                 if usuario_evento:
                     usuario_evento.resultado = ResultadoEvento.REPORTADO
                     usuario_evento.fechaReporte = datetime.now()
-                
+
                 mensaje = "¡Gracias por reportar! El evento ha sido verificado correctamente."
             else:
-                # No se encontró evento - marcar como no verificado
-                log.info("No se encontro el evento que el usuario indico")
-                intento.verificado = False
-                intento.resultadoVerificacion = "No se encontró un evento asignado en el rango de fechas especificado"
-                mensaje = "¡Gracias por reportar! Sin embargo, no se encontró un evento asignado en el rango de fechas especificado."
+                if eventos_candidatos:
+                    # Había eventos en el rango, pero todos ya habían sido reportados antes
+                    log.info("Todos los eventos que coinciden con el rango ya fueron reportados anteriormente por el usuario")
+                    intento.verificado = False
+                    intento.resultadoVerificacion = "Ya reportaste previamente los eventos que coinciden con el rango indicado. No se encontró un nuevo evento para asociar a este reporte. El evento quedará pendiente para revisión por los administradores"
+                    mensaje = "¡Gracias por reportar! Ya habías reportado previamente los eventos de este período, tu nuevo intento quedará pendiente."
+                else:
+                    # No se encontró ningún evento asignado en ese rango
+                    log.info("No se encontro el evento que el usuario indico")
+                    intento.verificado = False
+                    intento.resultadoVerificacion = "No se encontró un evento asignado en el rango de fechas especificado"
+                    mensaje = "¡Gracias por reportar! No se encontró un evento simulado asignado en el rango de fechas especificado. El evento quedará pendiente para revisión por los administradores"
             
             session.add(intento)
             session.commit()

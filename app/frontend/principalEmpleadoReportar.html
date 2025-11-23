@@ -36,7 +36,58 @@
 .custom-radio[type="radio"] {
   accent-color: #da02e5; /* Soporta Chrome/Edge/Firefox modernos */
 }
+/* Botones de fecha rápida - ESTÉTICA 100% NEGRO/BLANCO/ROSA */
+.fecha-rapida-btn {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  border: 1px solid #555 !important; /* gris oscuro para no seleccionado */
+  border-radius: 0.375rem !important;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  flex: 1;
+}
 
+.fecha-rapida-btn:hover {
+  background-color: rgba(218, 2, 229, 0.15) !important; /* rosa muy suave */
+  border-color: #da02e5 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(218, 2, 229, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+/* Cuando está seleccionado/activo */
+.fecha-rapida-btn.active,
+.fecha-rapida-btn.selected {
+  background: linear-gradient(135deg, #da02e5, #b800c9) !important;
+  border-color: #da02e5 !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(218, 2, 229, 0.4) !important;
+}
+
+/* Quitar foco azul molesto */
+.fecha-rapida-btn:focus,
+.fecha-rapida-btn:active {
+  box-shadow: 0 0 0 0.2rem rgba(218, 2, 229, 0.3) !important;
+  outline: none !important;
+}
+.fecha-rapida-btn.active {
+  position: relative;
+  overflow: hidden;
+}
+
+.fecha-rapida-btn.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
 /* Mejorar el selector de fecha */
 input[type="datetime-local"] {
   background-color: #2d2d2d !important;
@@ -71,6 +122,11 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 
 input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   background-color: #b802c7;
+}
+
+.disabled-date-input {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
 <body class="index-page">
@@ -115,7 +171,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
             <div class="mb-4">
               <label class="form-label mb-3">Tipo de Evento</label>
               <div class="row g-2">
-                <div class="col-md-3">
+                <div class="col-md-4">
                   <div class="card bloque bloque-normal"
                        @click="tipoEvento = 'CORREO'"
                        :style="tipoEvento === 'CORREO' ? 'border-color: var(--accent-color);' : 'bloque-normal'">
@@ -126,7 +182,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                   <div class="card bloque bloque-normal"
                        @click="tipoEvento = 'MENSAJE'"
                        :style="tipoEvento === 'MENSAJE' ? 'border-color: var(--accent-color);' : 'bloque-normal'">
@@ -137,7 +193,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                   <div class="card bloque bloque-normal"
                        @click="tipoEvento = 'LLAMADA'"
                        :style="tipoEvento === 'LLAMADA' ? 'border-color: var(--accent-color);' : 'bloque-normal'">
@@ -153,8 +209,33 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
 
             <!-- Rango de Fechas -->
             <div class="mb-4">
-              <label class="form-label mb-3">Rango de Fechas en las que Ocurrió el Evento</label>
-              <div class="row g-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label mb-0">Rango de Fechas en las que Ocurrió el Evento</label>
+              </div>
+
+              <!-- Botones rápidos de fecha - SIN AZUL NUNCA -->
+              <div class="btn-group w-100 mb-3" role="group" aria-label="Seleccionar rango rápido de fechas">
+                <button type="button"
+                        class="btn fecha-rapida-btn"
+                        :class="{ 'active': dateMode === 'HOY', 'selected': dateMode === 'HOY' }"
+                        @click="setFechaRapida('HOY')">
+                  {{ getDescripcionFechaRapida('HOY') }}
+                </button>
+                <button type="button"
+                        class="btn fecha-rapida-btn"
+                        :class="{ 'active': dateMode === 'AYER', 'selected': dateMode === 'AYER' }"
+                        @click="setFechaRapida('AYER')">
+                  {{ getDescripcionFechaRapida('AYER') }}
+                </button>
+                <button type="button"
+                        class="btn fecha-rapida-btn"
+                        :class="{ 'active': dateMode === 'RANGO', 'selected': dateMode === 'RANGO' }"
+                        @click="setFechaRapida('RANGO')">
+                  Elegir rango manual
+                </button>
+              </div>
+
+              <div class="row g-3" v-if="dateMode === 'RANGO'">
                 <div class="col-md-6">
                   <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
                   <input type="datetime-local" v-model="fechaInicio" class="form-control" id="fechaInicio" required
@@ -168,11 +249,12 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
                          style="background-color: #2d2d2d; color: white; border: 1px solid #da02e5;">
                 </div>
               </div>
+
               <div v-if="errorFechas" class="alert alert-warning mt-2" style="background-color: rgba(255,193,7,0.1); border: 1px solid #ffc107; color: #ffc107;">
                 <i class="bi bi-exclamation-triangle me-2"></i>
                 {{ errorFechas }}
               </div>
-              <small style="color: white; font-size: 0.8em;">
+              <small v-if="dateMode === 'RANGO'" style="color: white; font-size: 0.8em;">
                 <i class="bi bi-info-circle me-1" style="color: white;"></i>
                 Máximo 2 días de diferencia entre las fechas
               </small>
@@ -210,10 +292,10 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
                       <!-- Tipo de Evento -->
                       <div class="col-md-6">
                         <div class="d-flex align-items-center p-2 rounded" style="background-color: #2d2d2d; color: white;">
-                          <span class="me-2">{{ getTipoIcon(tipoEvento) }}</span>
+                          <span class="me-2">{{ getTipoIcon(resultado.tipoEvento) }}</span>
                           <div>
                             <small class="d-block" style="color: #ccc;">Tipo de Evento</small>
-                            <strong>{{ getTipoNombre(tipoEvento) }}</strong>
+                            <strong>{{ getTipoNombre(resultado.tipoEvento) }}</strong>
                           </div>
                         </div>
                       </div>
@@ -233,7 +315,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
                       <div class="col-12">
                         <div class="alert" :class="resultado.verificado ? 'alert-success' : 'alert-warning'" style="background-color: #2d2d2d; border: 1px solid #da02e5;">
                           <h6>{{ resultado.mensaje }}</h6>
-                          <p class="mb-0">{{ resultado.resultadoVerificacion }}</p>
+
                         </div>
                       </div>
                     </div>
@@ -295,14 +377,71 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
           fechaFin: '',
           cargando: false,
           errorFechas: '',
+          dateMode: '',
           resultado: {
             mensaje: '',
             verificado: false,
-            resultadoVerificacion: ''
+            resultadoVerificacion: '',
+            tipoEvento: ''
           }
         }
       },
       methods: {
+        setFechaRapida(modo) {
+          this.dateMode = modo;
+
+          const ahora = new Date();
+          let inicio, fin;
+
+          if (modo === 'HOY') {
+            inicio = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 0, 0, 0);
+            fin = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 23, 59, 0);
+          } else if (modo === 'AYER') {
+            const ayer = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - 1);
+            inicio = new Date(ayer.getFullYear(), ayer.getMonth(), ayer.getDate(), 0, 0, 0);
+            fin = new Date(ayer.getFullYear(), ayer.getMonth(), ayer.getDate(), 23, 59, 0);
+          } else if (modo === 'RANGO') {
+            // En modo rango, no sobreescribimos las fechas actuales; solo habilitamos los campos
+            this.errorFechas = '';
+            return;
+          } else {
+            return;
+          }
+
+          const toLocalInput = (d) => {
+            const pad = (n) => n.toString().padStart(2, '0');
+            const year = d.getFullYear();
+            const month = pad(d.getMonth() + 1);
+            const day = pad(d.getDate());
+            const hours = pad(d.getHours());
+            const minutes = pad(d.getMinutes());
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+          };
+
+          this.fechaInicio = toLocalInput(inicio);
+          this.fechaFin = toLocalInput(fin);
+          this.errorFechas = '';
+        },
+        getDescripcionFechaRapida(modo) {
+          const hoy = new Date();
+
+          const formatoFecha = (d) => {
+            const dia = d.getDate().toString().padStart(2, '0');
+            const mes = (d.getMonth() + 1).toString().padStart(2, '0');
+            return `${dia}/${mes}`;
+          };
+
+          if (modo === 'HOY') {
+            return `Ocurrió hoy ${formatoFecha(hoy)}`;
+          }
+
+          if (modo === 'AYER') {
+            const ayer = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1);
+            return `Ocurrió ayer ${formatoFecha(ayer)}`;
+          }
+
+          return '';
+        },
         validarRangoFechas() {
           if (!this.fechaInicio || !this.fechaFin) {
             this.errorFechas = '';
@@ -365,7 +504,8 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
             this.resultado = {
               mensaje: data.mensaje,
               verificado: data.verificado,
-              resultadoVerificacion: data.resultadoVerificacion
+              resultadoVerificacion: data.resultadoVerificacion,
+              tipoEvento: this.tipoEvento
             };
             
             // Mostrar modal
@@ -376,6 +516,8 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
             this.tipoEvento = '';
             this.fechaInicio = '';
             this.fechaFin = '';
+            this.dateMode = '';
+            this.errorFechas = '';
             
             // Recargar reportes
             this.loadReports();
@@ -447,6 +589,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
       },
       mounted() {
         this.loadReports();
+      
       }
     }).mount('#app');
 
