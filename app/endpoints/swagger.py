@@ -165,8 +165,8 @@ def openapi_spec():
                                         "nombreUsuario": "admin",
                                         "password": "adminadmin",
                                         "nombre": "Admin",
-                                        "apellido": "Admin",
-                                        "correo": "admin@admin.com",
+                                        "apellido": "de PhishIntel",
+                                        "correo": "phishingintel@gmail.com",
                                         "esAdministrador": True
                                     }
                                 ]
