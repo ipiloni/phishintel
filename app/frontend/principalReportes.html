@@ -795,10 +795,22 @@
       <div class="container" data-aos="fade-up">
         <div class="mb-3">
            <ul class="nav nav-tabs" role="tablist">
-             <li class="nav-item" role="presentation">
-               <button class="nav-link active" id="tab-empleado" data-bs-toggle="tab" data-bs-target="#panel-empleado" type="button" role="tab">
-                 <i class="bi bi-person-badge"></i> Scoring Empleado
+             <li class="nav-item dropdown" role="presentation">
+               <button class="nav-link dropdown-toggle active" id="dropdown-scoring" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+                 <i class="bi bi-person-badge"></i> Scoring Empleado <i class="bi bi-chevron-down ms-1"></i>
                </button>
+               <ul class="dropdown-menu" aria-labelledby="dropdown-scoring">
+                 <li>
+                   <button class="dropdown-item active" id="tab-empleado-area" data-bs-toggle="tab" data-bs-target="#panel-empleado-area" type="button" role="tab">
+                     <i class="bi bi-building me-2"></i> Scoring Empleado por Área
+                   </button>
+                 </li>
+                 <li>
+                   <button class="dropdown-item" id="tab-empleado-general" data-bs-toggle="tab" data-bs-target="#panel-empleado-general" type="button" role="tab">
+                     <i class="bi bi-people-fill me-2"></i> Scoring Empleado General
+                   </button>
+                 </li>
+               </ul>
              </li>
              <li class="nav-item" role="presentation">
                <button class="nav-link" id="tab-kpis" data-bs-toggle="tab" data-bs-target="#panel-kpis" type="button" role="tab">
@@ -1259,14 +1271,14 @@
             </div>
           </div>
 
-          <div class="tab-pane fade show active" id="panel-empleado" role="tabpanel" aria-labelledby="tab-empleado">
+          <div class="tab-pane fade show active" id="panel-empleado-area" role="tabpanel" aria-labelledby="tab-empleado-area">
             <div class="row g-4">
               <div class="col-12">
                 <div class="card p-3 bg-dark text-white">
                           <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="mb-0">
                       <i class="bi bi-person-badge me-2" style="color: #da02e5;"></i>
-                      Fallas por Empleado con Scoring
+                      Fallas por Empleado con Scoring (por Área)
                             </h5>
                             <button class="btn btn-sm" onclick="recargarEmpleados()" title="Recargar datos de empleados" style="background: linear-gradient(135deg, #da02e5, #e533f0); color: white; border: none; font-weight: 600;">
                               <i class="bi bi-arrow-clockwise me-1"></i>Recargar
@@ -1274,7 +1286,7 @@
                           </div>
 
 
-                  <div id="contenidoEmpleados">
+                  <div id="contenidoEmpleadosArea">
                     <div class="text-center py-5">
                       <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Cargando...</span>
@@ -1286,6 +1298,33 @@
                         </div>
                       </div>
                     </div>
+
+          <div class="tab-pane fade" id="panel-empleado-general" role="tabpanel" aria-labelledby="tab-empleado-general">
+            <div class="row g-4">
+              <div class="col-12">
+                <div class="card p-3 bg-dark text-white">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">
+                      <i class="bi bi-people-fill me-2" style="color: #da02e5;"></i>
+                      Fallas por Empleado con Scoring (General)
+                    </h5>
+                    <button class="btn btn-sm" onclick="recargarEmpleadosGeneral()" title="Recargar datos de empleados (general)" style="background: linear-gradient(135deg, #da02e5, #e533f0); color: white; border: none; font-weight: 600;">
+                      <i class="bi bi-arrow-clockwise me-1"></i>Recargar
+                    </button>
+                  </div>
+
+                  <div id="contenidoEmpleadosGeneral">
+                    <div class="text-center py-5">
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                      </div>
+                      <p class="mt-3 text-muted">Cargando datos de empleados (general)...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div>
       </div>
@@ -2287,12 +2326,15 @@
       const tbody = tabla.querySelector('tbody');
       const filas = Array.from(tbody.querySelectorAll('tr'));
 
+      const headers = Array.from(tabla.querySelectorAll('thead th'));
+      const indiceRiesgo = headers.findIndex(th => th.dataset.tipoColumna === 'riesgo');
+
       const comparar = (a, b) => {
         const celdaA = a.children[indiceColumna]?.textContent.trim() || '';
         const celdaB = b.children[indiceColumna]?.textContent.trim() || '';
         
         // Para columnas de riesgo, usar orden específico
-        if (indiceColumna === 8) { // Columna Riesgo
+        if (indiceRiesgo !== -1 && indiceColumna === indiceRiesgo) {
           const ordenRiesgo = {
             'Sin riesgo': 0,
             'Riesgo bajo': 1,
@@ -2325,14 +2367,231 @@
     }
     
     function recargarEmpleados() {
-      console.log('🔄 Recargando datos de empleados...');
+      console.log('🔄 Recargando datos de empleados por área...');
       cargarFallasPorEmpleado();
     }
     
-    async function cargarFallasPorEmpleado() {
-      console.log('🚀 Iniciando carga de fallas por empleado...');
+    function recargarEmpleadosGeneral() {
+      console.log('🔄 Recargando datos de empleados (general)...');
+      cargarFallasPorEmpleadoGeneral();
+    }
+    
+    async function cargarFallasPorEmpleadoGeneral() {
+      console.log('🚀 Iniciando carga de fallas por empleado (general)...');
 
-      const contenido = document.getElementById('contenidoEmpleados');
+      const contenido = document.getElementById('contenidoEmpleadosGeneral');
+
+      try {
+        contenido.innerHTML = `
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visualmente-hidden">Cargando...</span>
+            </div>
+            <p class="mt-3 text-muted">Cargando datos de empleados (general)...</p>
+          </div>
+        `;
+
+        const url = `${API_BASE_URL}/api/areas/fallas-empleados-scoring`;
+        console.log('📡 Haciendo petición (general) a:', url);
+        const resp = await fetch(url);
+
+        if (!resp.ok) {
+          throw new Error(`Error HTTP: ${resp.status} - ${resp.statusText}`);
+        }
+
+        const data = await resp.json();
+        console.log('📊 Datos recibidos (general):', data);
+
+        const areas = data.areas || [];
+
+        const empleados = [];
+        areas.forEach(area => {
+          (area.empleados || []).forEach(empleado => {
+            empleados.push({
+              ...empleado,
+              nombreArea: area.nombreArea || 'Área sin nombre'
+            });
+          });
+        });
+
+        if (empleados.length === 0) {
+          contenido.innerHTML = `
+            <div class="text-center py-5">
+              <i class="bi bi-info-circle" style="font-size: 3rem; color: #da02e5;"></i>
+              <h5 class="mt-3 text-muted">No hay datos disponibles</h5>
+              <p class="text-muted">No se encontraron empleados con fallas.</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Determinar el máximo de puntos para marcar candidato a Security Champion
+        const maxPuntos = empleados.reduce((max, emp) => {
+          const puntos = typeof emp.puntos_restantes === 'number' ? emp.puntos_restantes : 100;
+          return puntos > max ? puntos : max;
+        }, -Infinity);
+
+        let html = '';
+
+        html += `
+          <div class="card mb-3 bg-dark border-0" style="border-left: 4px solid #da02e5 !important;">
+            <div class="card-body p-3">
+              <div class="table-responsive">
+                <table id="tabla-empleados-general" class="table table-dark table-hover align-middle mb-0" style="background-color:#111;color:#fff;">
+                  <thead style="background-color:#1a1a1a;border-bottom:2px solid #da02e5;">
+                    <tr class="text-center">
+                      <th class="sortable" data-col="0" style="color:#fff;width:18%;cursor:pointer;">Empleado <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="1" style="color:#fff;width:8%;cursor:pointer;">ID <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="2" style="color:#fff;width:8%;cursor:pointer;">Área <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="3" style="color:#fff;width:10%;cursor:pointer;">Eventos <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="4" style="color:#fff;width:10%;cursor:pointer;">Puntos <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="5" style="color:#fff;width:14%;cursor:pointer;">Fallas Activas <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th class="sortable" data-col="6" style="color:#fff;width:12%;cursor:pointer;">Reportados <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                      <th style="color:#fff;width:14%;">Scoring <i class="bi bi-info-circle ms-1" style="color:#da02e5;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Scoring</strong> <br> Fórmula: 100 (base) - 5 x Fallas Simples - 10 x Falla Grave + 5 x Reporte"></i></th>
+                      <th style="color:#fff;width:4%;">Detalles</th>
+                      <th class="sortable" data-col="9" data-tipo-columna="riesgo" style="color:#fff;width:6%;cursor:pointer;">Riesgo <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+        `;
+
+        empleados.forEach(empleado => {
+          let riesgoColor = '#da02e5';
+          let riesgoIcon = 'bi-check-circle-fill';
+
+          switch(empleado.nivel_riesgo) {
+            case 'Sin riesgo':
+              riesgoColor = '#ff51ff';
+              riesgoIcon = 'bi-check-circle-fill';
+              break;
+            case 'Riesgo bajo':
+              riesgoColor = '#A51CB0';
+              riesgoIcon = 'bi-exclamation-triangle-fill';
+              break;
+            case 'Riesgo medio':
+              riesgoColor = '#87178F';
+              riesgoIcon = 'bi-exclamation-triangle-fill';
+              break;
+            case 'Riesgo alto':
+              riesgoColor = '#540E59';
+              riesgoIcon = 'bi-exclamation-triangle-fill';
+              break;
+            case 'Riesgo máximo':
+              riesgoColor = '#000000';
+              riesgoIcon = 'bi-exclamation-triangle-fill';
+              break;
+          }
+
+          const iconos = { 'CORREO': '📧', 'MENSAJE': '💬', 'LLAMADA': '📞' };
+          const nombres = { 'CORREO': 'Correo', 'MENSAJE': 'Mensaje', 'LLAMADA': 'Llamada' };
+          let badges = '';
+
+          if (empleado.fallas_por_tipo) {
+            Object.entries(empleado.fallas_por_tipo).forEach(([tipo, info]) => {
+              if (info && info.cantidad > 0) {
+                const cantidad = info.cantidad || 0;
+                const puntos = info.puntos_perdidos || 0;
+                badges += `<span class="badge" style="background: #540E59; color: white; font-size: 0.7rem;">${iconos[tipo] || '❓'} ${cantidad} ${nombres[tipo] || tipo} (-${puntos} pts)</span>`;
+              }
+            });
+          }
+
+          const reportados = (empleado.total_reportados || 0) > 0 ? `<span class="badge" style="background: rgba(255,51,255,0.8); color: white; font-size: 0.7rem;"><i class="bi bi-check-circle-fill me-1"></i> Reportados: +${empleado.puntos_ganados || 0} pts</span>` : '';
+
+          const puntosEmpleado = typeof empleado.puntos_restantes === 'number' ? empleado.puntos_restantes : 100;
+          const esSecurityChampion = puntosEmpleado === maxPuntos;
+
+          html += `
+            <tr class="text-center">
+              <td class="text-start">
+                <span class="text-white"><i class="bi bi-person-fill me-2" style="color:#da02e5;"></i>${empleado.nombre || 'N/A'} ${empleado.apellido || 'N/A'}</span>
+                ${esSecurityChampion ? '<span class="badge ms-2" style="background: linear-gradient(135deg, #ffc107, #ffdd57); color: #000; font-size: 0.7rem;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Security Champion</strong><br/>Este empleado ha demostrado una conducta ejemplar en simulaciones de phishing, con el máximo puntaje de seguridad de la organización">' +
+                  '<i class="bi bi-award me-1"></i>Security Champion</span>' : ''}
+              </td>
+              <td style="color:#ffffff;">
+                <span><i style="color:#da02e5;"></i>${String(empleado.idUsuario || 'N/A').padStart(3, '0')}</span>
+              </td>
+              <td style="color:#ffffff;">${empleado.nombreArea}</td>
+              <td style="color:#ffffff;">${empleado.total_eventos || 0}</td>
+              <td style="color:#ffffff; font-weight: bold;">${empleado.puntos_restantes || 100}</td>
+              <td style="color:#ffffff;">${empleado.total_fallas || 0}</td>
+              <td style="color:#ffffff;">${empleado.total_reportados || 0}</td>
+              <td>
+                <div class="d-flex flex-wrap gap-1 justify-content-center">${badges || ''} ${reportados}</div>
+              </td>
+              <td>
+                <button class="btn btn-sm" style="background-color:#da02e5;border-color:#da02e5;color:#fff;" onclick="mostrarDetalleEventos(${empleado.idUsuario})" title="Ver eventos específicos">
+                  <i class="bi bi-list-ul me-1"></i>
+                </button>
+              </td>
+              <td class="text-end">
+                <span class="badge" style="background: ${riesgoColor}; color: white; font-size: 0.75rem;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Escala de Riesgo (100-0 puntos):</strong><br/>• Sin riesgo: 100 puntos<br/>• Riesgo bajo: 90-99 puntos<br/>• Riesgo medio: 75-89 puntos<br/>• Riesgo alto: 50-74 puntos<br/>• Riesgo máximo: 0-49 puntos">
+                  <i class="bi ${riesgoIcon} me-1"></i>${empleado.nivel_riesgo || 'Sin riesgo'}
+                </span>
+              </td>
+            </tr>
+          `;
+        });
+
+        html += `
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+
+        contenido.innerHTML = html;
+
+        const tabla = document.getElementById('tabla-empleados-general');
+        if (tabla) {
+          const headers = tabla.querySelectorAll('thead th.sortable');
+          headers.forEach((th) => {
+            let asc = false;
+            th.addEventListener('click', () => {
+              const colIndex = parseInt(th.getAttribute('data-col'), 10);
+              asc = !asc;
+              ordenarTablaPorColumna(tabla, colIndex, asc);
+              headers.forEach(h => {
+                const icon = h.querySelector('.sort-icon');
+                if (!icon) return;
+                if (h === th) {
+                  icon.classList.remove('bi-caret-down','bi-caret-up-fill','bi-caret-down-fill');
+                  icon.classList.add(asc ? 'bi-caret-up-fill' : 'bi-caret-down-fill');
+                } else {
+                  icon.classList.remove('bi-caret-up-fill','bi-caret-down-fill');
+                  icon.classList.add('bi-caret-down');
+                }
+              });
+            });
+          });
+        }
+
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+      } catch (e) {
+        console.error('❌ Error cargando fallas por empleado (general):', e);
+        contenido.innerHTML = `
+          <div class="text-center py-5">
+            <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #da02e5;"></i>
+            <h5 class="mt-3 text-danger">Error al cargar datos</h5>
+            <p class="text-muted">Error: ${e.message}</p>
+            <button class="btn btn-outline-primary btn-sm mt-2" onclick="cargarFallasPorEmpleadoGeneral()">
+              <i class="bi bi-arrow-clockwise me-1"></i>
+              Reintentar
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+    async function cargarFallasPorEmpleado() {
+      console.log('🚀 Iniciando carga de fallas por empleado (por área)...');
+
+      const contenido = document.getElementById('contenidoEmpleadosArea');
 
       try {
         // Mostrar loading
@@ -2371,10 +2630,20 @@
            return;
          }
 
-         let html = '';
+        // Calcular el máximo de puntos entre todos los empleados (Security Champion global)
+        let maxPuntosGlobal = -Infinity;
+        areas.forEach(area => {
+          (area.empleados || []).forEach(emp => {
+            const puntos = typeof emp.puntos_restantes === 'number' ? emp.puntos_restantes : 100;
+            if (puntos > maxPuntosGlobal) maxPuntosGlobal = puntos;
+          });
+        });
 
-         areas.forEach((area, index) => {
-             const areaId = `area-${index}`;
+        let html = '';
+
+        areas.forEach((area, index) => {
+            const areaId = `area-${index}`;
+
              html += `
              <div class="card mb-3 bg-dark border-0" style="border-left: 4px solid #da02e5 !important;">
                <div class="card-header bg-dark" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#${areaId}" aria-expanded="false">
@@ -2490,10 +2759,14 @@
                   return `${badges} ${reportados}`;
                 })();
 
+                const puntosEmpleadoArea = typeof empleado.puntos_restantes === 'number' ? empleado.puntos_restantes : 100;
+                const esSecurityChampionArea = puntosEmpleadoArea === maxPuntosGlobal;
+
                 html += `
                   <tr class="text-center">
                     <td class="text-start">
                       <span class="text-white"><i class="bi bi-person-fill me-2" style="color:#da02e5;"></i>${empleado.nombre || 'N/A'} ${empleado.apellido || 'N/A'}</span>
+                      ${esSecurityChampionArea ? '<span class="badge ms-2" style="background: linear-gradient(135deg, #ffc107, #ffdd57); color: #000; font-size: 0.7rem;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Security Champion</strong><br/>Este empleado ha demostrado una conducta ejemplar en simulaciones de phishing, con el máximo puntaje de seguridad de la organización"><i class="bi bi-award me-1"></i>Security Champion</span>' : ''}
                     </td>
                      <td style="color:#ffffff;">
                        <span ><i style="color:#da02e5;"></i>${String(empleado.idUsuario || 'N/A').padStart(3, '0')}</span>
@@ -2618,7 +2891,8 @@
        cargarFallasPorFecha([], [], false); // Cargar primero el reporte por fecha
        cargarFallasPorArea(); // Cargar también el reporte por área
        cargarFallasPorCampania(); // Cargar también el reporte por campaña
-       cargarFallasPorEmpleado(); // Cargar también el reporte por empleado
+       cargarFallasPorEmpleado(); // Cargar también el reporte por empleado por área
+       cargarFallasPorEmpleadoGeneral(); // Cargar también el reporte general de empleados
        cargarKPITiempoRespuesta(); // Cargar KPI de tiempo de respuesta
        cargarKPITasaFallas(); // Cargar KPI de tasa de fallas
        cargarKPIPromedioScoring(); // Cargar KPI de promedio de scoring
@@ -2629,14 +2903,21 @@
          return new bootstrap.Tooltip(tooltipTriggerEl);
        });
 
-       // Inicializar funcionalidad del dropdown de estadísticas
+       // Inicializar funcionalidad de los dropdowns
        inicializarDropdownEstadisticas();
+       inicializarDropdownScoring();
      });
 
      // Función para inicializar el dropdown de estadísticas
-     function inicializarDropdownEstadisticas() {
-       const dropdownToggle = document.getElementById('dropdown-estadisticas');
-       const dropdownItems = document.querySelectorAll('.nav-item.dropdown .dropdown-item');
+    function inicializarDropdownEstadisticas() {
+      const dropdownToggle = document.getElementById('dropdown-estadisticas');
+      if (!dropdownToggle) return;
+
+      // Limitar los items solo al menú de Estadísticas Fallas
+      const dropdownMenu = dropdownToggle.nextElementSibling;
+      if (!dropdownMenu) return;
+
+      const dropdownItems = dropdownMenu.querySelectorAll('.dropdown-item');
        const kpisTab = document.getElementById('tab-kpis');
 
        // Texto original del dropdown
@@ -2704,6 +2985,78 @@
          this.setAttribute('aria-expanded', 'false');
        });
      }
+
+     function inicializarDropdownScoring() {
+      const dropdownToggle = document.getElementById('dropdown-scoring');
+      if (!dropdownToggle) return;
+
+      const dropdownMenu = dropdownToggle.nextElementSibling;
+      if (!dropdownMenu) return;
+
+      const dropdownItems = dropdownMenu.querySelectorAll('.dropdown-item');
+      const kpisTab = document.getElementById('tab-kpis');
+      const fechaTab = document.getElementById('tab-fecha');
+      const areaTab = document.getElementById('tab-area');
+      const campaniaTab = document.getElementById('tab-campania');
+
+      const textoBase = '<i class="bi bi-person-badge"></i> Scoring Empleado <i class="bi bi-chevron-down ms-1"></i>';
+      const textoPorArea = '<i class="bi bi-person-badge"></i> Scoring Empleado por Área <i class="bi bi-chevron-down ms-1"></i>';
+      const textoGeneral = '<i class="bi bi-person-badge"></i> Scoring Empleado General <i class="bi bi-chevron-down ms-1"></i>';
+
+      function setTextoBase() {
+        dropdownToggle.innerHTML = textoBase;
+      }
+
+      function setTextoPorArea() {
+        dropdownToggle.innerHTML = textoPorArea;
+      }
+
+      function setTextoGeneral() {
+        dropdownToggle.innerHTML = textoGeneral;
+      }
+
+      // Estado inicial: por área
+      setTextoPorArea();
+
+      dropdownItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          dropdownItems.forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+
+          const dropdownInstance = bootstrap.Dropdown.getInstance(dropdownToggle);
+          if (dropdownInstance) {
+            dropdownInstance.hide();
+          }
+
+          const targetSelector = this.getAttribute('data-bs-target');
+          if (targetSelector) {
+            const targetTab = document.querySelector(`button[data-bs-target="${targetSelector}"]`);
+            if (targetTab) {
+              const tabInstance = new bootstrap.Tab(targetTab);
+              tabInstance.show();
+            }
+          }
+
+          if (this.id === 'tab-empleado-area') {
+            setTextoPorArea();
+            setTimeout(() => cargarFallasPorEmpleado(), 100);
+          } else if (this.id === 'tab-empleado-general') {
+            setTextoGeneral();
+            setTimeout(() => cargarFallasPorEmpleadoGeneral(), 100);
+          }
+        });
+      });
+
+      // Cuando se navega a otras pestañas (KPIs o estadísticas), volver a texto base
+      [kpisTab, fechaTab, areaTab, campaniaTab].forEach(tab => {
+        if (!tab) return;
+        tab.addEventListener('click', function() {
+          setTextoBase();
+        });
+      });
+    }
 
      // Función para cargar el KPI de tiempo de respuesta
      async function cargarKPITiempoRespuesta() {
