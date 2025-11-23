@@ -1,5 +1,6 @@
 remitente = ""
 destinatario = ""
+nombreEmpleado = ""
 conversacionActual = []
 objetivoActual = "" #Incluye todo
 objetivoEspecifico = "" #Dificultad

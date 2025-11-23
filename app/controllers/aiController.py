@@ -256,6 +256,8 @@ class AIController:
         model = genai.GenerativeModel(model_name=modelo)
 
         try:
+            log.info(f"Se esta por enviar este Prompt a la IA: \n{prompt}")
+
             return model.generate_content(prompt)
         except Exception as ex:
             log.warning(f"Hubo un error al intentar obtener la respuesta: {str(ex)}, posiblemente no hay mas creditos de Google, cambiando el API_KEY...")
@@ -280,9 +282,10 @@ class AIController:
         prompt = f"""
         Analizá la siguiente conversación. Tu deber es retornar sólamente la palabra 'true' si la conversación cumplió el objetivo; caso contrario retorna 'false'.
         Para saber si la conversación cumplió el objetivo, tenés que basarte en el siguiente criterio: El objetivo se considera cumplido si en la conversación la IA nombra o referencia algo similar o parecido al objetivo.
-        El objetivo de esta llamada fue el siguiente: '{objetivoActual}'.
-        La conversación resultó ser la siguiente, en formato JSON: {conversacionActual}.
+        El objetivo de esta llamada fue que el usuario {objetivoActual}.
         Recordá sólamente responder con 'true' o 'false'.
+        La conversación resultó ser la siguiente:
+        {conversacionActual}.        
         """
         response = AIController.enviarPrompt(prompt, modelAI)
 

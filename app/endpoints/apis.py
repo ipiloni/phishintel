@@ -60,6 +60,51 @@ CORS(apis, resources={r"/api/*": {"origins": "*"}},
 
 
 # =================== ENDPOINTS =================== #
+@apis.route("/api/falsoHilo", methods=["POST"])
+def analizarFalsoHilo():
+    # TODO: borrar metodo luego
+    from app.utils import conversacion
+
+    conversacion.hilo = True
+    conversacion.idEvento = 1
+    conversacion.destinatario = 1
+    conversacion.remitente = 2
+    conversacion.objetivoEspecifico = "abra un link que se le enviara por"
+    conversacion.objetivoActual = """
+        Eres un actor interpretando un rol. NO eres un asistente de IA.
+        Tu rol es: 'jefe de area' dentro de la empresa 'PG Control'.
+        Tu nombre en esta simulación es: 'Marcos Gurruchaga'.
+        El empleado (usuario) se llama Mora Rodriguez, trabaja en 'PG Control' en el área de Ventas.
+        Tu dialecto: Eres de Buenos Aires, Argentina. El uso del 'vos', el 'che' y el tono porteño es crucial.
+        
+        El objetivo es simular un intento de phishing telefónico para un entrenamiento de seguridad.
+        Debes ser convincente, pero no agresivo, usando urgencia laboral.
+        Tu meta es que el empleado abra un link que se le enviará por Correo inmediatamente después de cortar esta llamada.
+        Tu pretexto es avisarle que le vas a mandar algo urgente y que necesitás que lo abra ni bien se lo mandes porque es urgente.
+    
+        Reglas:
+        - Tu respuesta debe ser única y exclusivamente el diálogo hablado por tu rol ('{nombreRemitente}').
+        - NUNCA incluyas prefijos (ej: `IA:`, `Marcos Gurruchaga:`, `Respuesta:`).
+        - NUNCA incluyas narración, acotaciones (ej: `sonríe`, `duda`) ni explicaciones fuera del personaje.
+        - Responde solo con una frase corta que la persona diría en este momento. No te adelantes en la conversación.
+        - Mantén siempre el rol de 'jefe de area'. Jamás reveles que esto es un entrenamiento.
+        - Si la conversación está vacía, empieza con un saludo casual y directo y espera la respuesta.
+        - La llamada se esta realizando en este mismo momento (tiempo real).
+        
+        La conversación hasta ahora es la siguiente:
+    """
+    conversacion.conversacionActual.append({"rol": "IA", "mensaje": "Buenos dias Mora, como estas?"})
+    conversacion.conversacionActual.append({"rol": "destinatario", "mensaje": "Hola Marcos, que necesitas?"})
+    conversacion.conversacionActual.append({"rol": "IA", "mensaje": "Te voy a enviar un enlace por mail, completalo y avisame cuando lo recibas"})
+    conversacion.conversacionActual.append({"rol": "destinatario", "mensaje": "Dale buenisimo, gracias!"})
+    conversacion.conversacionActual.append({"rol": "IA", "mensaje": "Chau Mora"})
+
+    conversacion.eventoDesencadenador = "Correo"
+    conversacion.nombreEmpleado = "Marcos Gurruchaga"
+
+    LlamadasController.analizarLlamada()
+    return jsonify({}, 201)
+
 @apis.route("/api/config/url", methods=["GET"])
 def get_api_url():
     """Endpoint que devuelve la URL completa del backend desde properties.env"""
@@ -133,17 +178,8 @@ def obtenerLlamadaEnEjecucion():
     idConversacion = conversacion.idConversacion
     if idConversacion == "":
         return Response(status=404)
-    
-    # Detectar si es llamada simulada (prefijo SIM_)
-    if idConversacion.startswith("SIM_"):
-        estado_simulado = LlamadaControllerMentira.obtenerEstadoLlamadaSimulada()
-        if estado_simulado is None:
-            return Response(status=404)
-        return jsonify(estado_simulado), 200
-    else:
-        # Llamada real
-        estadoLlamada = twilio.obtenerEstadoLlamada(idConversacion)
-        return estadoLlamada, 200
+    estadoLlamada = twilio.obtenerEstadoLlamada(idConversacion)
+    return estadoLlamada, 200
 
 # ------ # TRANSFORMADORES TTS Y STT # ------ #
 @apis.route("/api/tts", methods=["POST"])
@@ -299,7 +335,6 @@ def getCaisteSession():
             "idEvento": None
         }), 200
 
-
 @apis.route("/api/sumar-reportado", methods=["POST"])
 def sumarReportado():
     data = request.get_json()
@@ -330,18 +365,15 @@ def obtenerEventos():
 def obtenerEventoPorId(idEvento):
     return EventosController.obtenerEventoPorId(idEvento)
 
-
 @apis.route("/api/eventos", methods=["POST"])
 def crearEvento():
     data = request.get_json()
     return EventosController.crearEvento(data)
 
-
 @apis.route("/api/eventos/<int:idEvento>", methods=["PUT"])
 def editarEvento(idEvento):
     data = request.get_json()
     return EventosController.editarEvento(idEvento, data)
-
 
 @apis.route("/api/eventos/<int:idEvento>/usuarios/<int:idUsuario>", methods=["POST"])
 def asociarUsuarioEvento(idEvento, idUsuario):
