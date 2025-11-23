@@ -573,6 +573,10 @@ class EventosController:
             if not intento:
                 return responseError("INTENTO_NO_ENCONTRADO", "No se encontró el intento de reporte", 404)
 
+            # Guardar el estado anterior para detectar cambios
+            estado_anterior = intento.estado
+            id_evento_anterior = intento.idEventoVerificado
+
             # Actualizar campos permitidos
             if "observaciones" in data:
                 intento.observaciones = data["observaciones"]
@@ -591,6 +595,20 @@ class EventosController:
             
             if "idEventoVerificado" in data:
                 intento.idEventoVerificado = data["idEventoVerificado"]
+
+            # Si se cambió de VERIFICADO a otro estado, revertir el estado REPORTADO del evento
+            if estado_anterior == EstadoReporte.VERIFICADO and intento.estado != EstadoReporte.VERIFICADO:
+                if id_evento_anterior:
+                    usuario_evento = session.query(UsuarioxEvento).filter_by(
+                        idUsuario=intento.idUsuario,
+                        idEvento=id_evento_anterior
+                    ).first()
+                    
+                    if usuario_evento and usuario_evento.resultado == ResultadoEvento.REPORTADO:
+                        # Revertir a PENDIENTE
+                        usuario_evento.resultado = ResultadoEvento.PENDIENTE
+                        usuario_evento.fechaReporte = None
+                        log.info(f"Revertido estado REPORTADO del evento {id_evento_anterior} para usuario {intento.idUsuario}")
 
             session.commit()
             log.info(f"Intento de reporte {idIntentoReporte} actualizado correctamente")
