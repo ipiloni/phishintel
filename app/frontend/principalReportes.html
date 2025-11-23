@@ -467,21 +467,12 @@
         }
       }
 
-      /* Colores para diferentes niveles */
-      .kpi-level[data-level="0"].active { background-color: #dc3545; border-color: #dc3545; }
-      .kpi-level[data-level="1"].active { background-color: #fd7e14; border-color: #fd7e14; }
-      .kpi-level[data-level="2"].active { background-color: #ffc107; border-color: #ffc107; }
-      .kpi-level[data-level="3"].active { background-color: #20c997; border-color: #20c997; }
-      .kpi-level[data-level="4"].active { background-color: #0d6efd; border-color: #0d6efd; }
-      .kpi-level[data-level="5"].active { background-color: #6f42c1; border-color: #6f42c1; }
-
-       /* Colores específicos para KPI de fallas */
-       #kpiIndicadorFallas .kpi-level[data-level="0"].active { background-color: #dc3545 !important; border-color: #dc3545 !important; }
-       #kpiIndicadorFallas .kpi-level[data-level="1"].active { background-color: #dc3545 !important; border-color: #dc3545 !important; }
-       #kpiIndicadorFallas .kpi-level[data-level="2"].active { background-color: #ffc107 !important; border-color: #ffc107 !important; }
-       #kpiIndicadorFallas .kpi-level[data-level="3"].active { background-color: #20c997 !important; border-color: #20c997 !important; }
-       #kpiIndicadorFallas .kpi-level[data-level="4"].active { background-color: #0d6efd !important; border-color: #0d6efd !important; }
-       #kpiIndicadorFallas .kpi-level[data-level="5"].active { background-color: #6f42c1 !important; border-color: #6f42c1 !important; }
+      /* Colores para diferentes niveles - TODOS los círculos activos tienen el mismo color según el nivel alcanzado */
+      .kpi-indicator.nivel-alcanzado-1 .kpi-level.active { background-color: #dc3545 !important; border-color: #dc3545 !important; }
+      .kpi-indicator.nivel-alcanzado-2 .kpi-level.active { background-color: #fd7e14 !important; border-color: #fd7e14 !important; }
+      .kpi-indicator.nivel-alcanzado-3 .kpi-level.active { background-color: #ffc107 !important; border-color: #ffc107 !important; }
+      .kpi-indicator.nivel-alcanzado-4 .kpi-level.active { background-color: #20c997 !important; border-color: #20c997 !important; }
+      .kpi-indicator.nivel-alcanzado-5 .kpi-level.active { background-color: #0d6efd !important; border-color: #0d6efd !important; }
 
        /* Botón de actualizar del KPI de tiempo de respuesta en rosa */
        #btnActualizarKPITiempo {
@@ -3246,7 +3237,15 @@
 
     // Función para actualizar el indicador visual de nivel
     function actualizarIndicadorNivel(nivel) {
+      const contenedor = document.getElementById('kpiIndicador');
       const niveles = document.querySelectorAll('#kpiIndicador .kpi-level');
+      
+      // Remover clases de nivel anteriores
+      contenedor.classList.remove('nivel-alcanzado-1', 'nivel-alcanzado-2', 'nivel-alcanzado-3', 'nivel-alcanzado-4', 'nivel-alcanzado-5');
+      
+      // Agregar clase del nivel alcanzado
+      contenedor.classList.add(`nivel-alcanzado-${nivel}`);
+      
       niveles.forEach((nivelElemento, index) => {
         nivelElemento.classList.remove('active', 'critical');
 
@@ -3436,8 +3435,15 @@
 
      // Función para actualizar el indicador visual de nivel de tasa de fallas
      function actualizarIndicadorNivelFallas(nivel) {
+       const contenedor = document.getElementById('kpiIndicadorFallas');
        const niveles = document.querySelectorAll('#kpiIndicadorFallas .kpi-level');
        console.log('Actualizando indicador de tasa de fallas, nivel:', nivel, 'elementos encontrados:', niveles.length);
+
+       // Remover clases de nivel anteriores
+       contenedor.classList.remove('nivel-alcanzado-1', 'nivel-alcanzado-2', 'nivel-alcanzado-3', 'nivel-alcanzado-4', 'nivel-alcanzado-5');
+       
+       // Agregar clase del nivel alcanzado
+       contenedor.classList.add(`nivel-alcanzado-${nivel}`);
 
        niveles.forEach((nivelElemento, index) => {
          nivelElemento.classList.remove('active', 'critical');
@@ -3463,8 +3469,15 @@
 
      // Función para actualizar indicador visual de scoring
      function actualizarIndicadorVisual(indicadorId, nivel) {
+       const contenedor = document.getElementById(indicadorId);
        const niveles = document.querySelectorAll(`#${indicadorId} .kpi-level`);
        console.log('Actualizando indicador de scoring, nivel:', nivel, 'elementos encontrados:', niveles.length);
+
+       // Remover clases de nivel anteriores
+       contenedor.classList.remove('nivel-alcanzado-1', 'nivel-alcanzado-2', 'nivel-alcanzado-3', 'nivel-alcanzado-4', 'nivel-alcanzado-5');
+       
+       // Agregar clase del nivel alcanzado
+       contenedor.classList.add(`nivel-alcanzado-${nivel}`);
 
        niveles.forEach((nivelElemento, index) => {
          nivelElemento.classList.remove('active', 'critical');
