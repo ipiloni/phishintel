@@ -586,16 +586,6 @@ select:disabled option {
 
             <!-- Modo de llamada y botones -->
             <div class="text-center mb-3">
-              <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
-                <label class="form-label mb-0" style="color: #e0e0e0;">Modo:</label>
-                <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" id="modoSimulado" v-model="modoSimulado" 
-                         style="width: 50px; height: 25px; cursor: pointer;">
-                  <label class="form-check-label ms-2" for="modoSimulado" style="color: #e0e0e0;">
-                    {{ modoSimulado ? 'Simulado' : 'Real' }}
-                  </label>
-                </div>
-              </div>
               <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill me-2" :disabled="cargando">
                 <span v-if="cargando">
                   <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -1391,10 +1381,8 @@ select:disabled option {
               eventoDesencadenador: this.mapearEventoDesencadenador(this.eventoDesencadenador)
             };
 
-            // Determinar endpoint según el modo
-            const endpoint = this.modoSimulado 
-              ? `${API_BASE_URL}/api/llamadas/simulada`
-              : `${API_BASE_URL}/api/llamadas`;
+            // Endpoint de llamada real (modo siempre real)
+            const endpoint = `${API_BASE_URL}/api/llamadas`;
 
             const response = await fetch(endpoint, {
               method: 'POST',
