@@ -16,7 +16,7 @@ conteo_fallas = {"total": 0}
 PUNTOS_FALLA_SIMPLE = 5
 
 # Puntos de falla grave (se RESTAN del puntaje inicial de 100)
-PUNTOS_FALLA_GRAVE = 10
+PUNTOS_FALLA_GRAVE = 20
 
 # Puntos por evento reportado (se SUMAN al puntaje)
 PUNTOS_REPORTADO = 5
@@ -661,7 +661,7 @@ class ResultadoEventoController:
             return "Sin riesgo"
         elif puntos >= 90:
             return "Riesgo bajo"
-        elif puntos >= 75:
+        elif puntos >= 70:
             return "Riesgo medio"
         elif puntos >= 50:
             return "Riesgo alto"

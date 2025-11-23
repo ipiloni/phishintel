@@ -959,7 +959,7 @@
                             <div class="d-flex align-items-center">
                               <i class="bi bi-info-circle me-2" style="color: #17a2b8; cursor: pointer;"
                                  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-                                 title="<strong>Promedio de Scoring</strong><br/>Sistema de puntuación que evalúa el comportamiento de seguridad de los empleados.<br/><strong>Fórmula:</strong> 100 (base) - 5 x Fallas Simples - 10 x Falla Grave + 5 x Reporte"></i>
+                                 title="<strong>Promedio de Scoring</strong><br/>Sistema de puntuación que evalúa el comportamiento de seguridad de los empleados.<br/><strong>Fórmula:</strong> 100 (base) - 5 x Fallas Simples - 20 x Falla Grave + 5 x Reporte"></i>
                               <span id="kpiPromedioScoring" class="display-4 fw-bold" style="color: #17a2b8;">0</span>
                               <span class="ms-2 fs-5 text-white">pts</span>
                             </div>
@@ -2447,7 +2447,7 @@
                       <th class="sortable" data-col="4" style="color:#fff;width:10%;cursor:pointer;">Puntos <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                       <th class="sortable" data-col="5" style="color:#fff;width:14%;cursor:pointer;">Fallas Activas <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                       <th class="sortable" data-col="6" style="color:#fff;width:12%;cursor:pointer;">Reportados <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
-                      <th style="color:#fff;width:14%;">Scoring <i class="bi bi-info-circle ms-1" style="color:#da02e5;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Scoring</strong> <br> Fórmula: 100 (base) - 5 x Fallas Simples - 10 x Falla Grave + 5 x Reporte"></i></th>
+                      <th style="color:#fff;width:14%;">Scoring <i class="bi bi-info-circle ms-1" style="color:#da02e5;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Scoring</strong> <br> Fórmula: 100 (base) - 5 x Fallas Simples - 20 x Falla Grave + 5 x Reporte"></i></th>
                       <th style="color:#fff;width:4%;">Detalles</th>
                       <th class="sortable" data-col="9" data-tipo-columna="riesgo" style="color:#fff;width:6%;cursor:pointer;">Riesgo <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                     </tr>
@@ -2525,7 +2525,7 @@
                 </button>
               </td>
               <td class="text-end">
-                <span class="badge" style="background: ${riesgoColor}; color: white; font-size: 0.75rem;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Escala de Riesgo (100-0 puntos):</strong><br/>• Sin riesgo: 100 puntos<br/>• Riesgo bajo: 90-99 puntos<br/>• Riesgo medio: 75-89 puntos<br/>• Riesgo alto: 50-74 puntos<br/>• Riesgo máximo: 0-49 puntos">
+                <span class="badge" style="background: ${riesgoColor}; color: white; font-size: 0.75rem;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Escala de Riesgo (100-0 puntos):</strong><br/>• Sin riesgo: 100+ puntos<br/>• Riesgo bajo: 90-99 puntos<br/>• Riesgo medio: 70-89 puntos<br/>• Riesgo alto: 50-69 puntos<br/>• Riesgo máximo: 0-49 puntos">
                   <i class="bi ${riesgoIcon} me-1"></i>${empleado.nivel_riesgo || 'Sin riesgo'}
                 </span>
               </td>
@@ -2701,7 +2701,7 @@
                             <th class="sortable" data-col="3" style="color:#fff;width:10%;cursor:pointer;">Puntos <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                             <th class="sortable" data-col="4" style="color:#fff;width:14%;cursor:pointer;">Fallas activas <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                             <th class="sortable" data-col="5" style="color:#fff;width:12%;cursor:pointer;">Reportados <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
-                            <th style="color:#fff;width:18%;">Scoring <i class="bi bi-info-circle ms-1" style="color:#da02e5;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Scoring</strong> <br> Fórmula: 100 (base) - 5 x Fallas Simples - 10 x Falla Grave + 5 x Reporte"></i></th>
+                            <th style="color:#fff;width:18%;">Scoring <i class="bi bi-info-circle ms-1" style="color:#da02e5;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Scoring</strong> <br> Fórmula: 100 (base) - 5 x Fallas Simples - 20 x Falla Grave + 5 x Reporte"></i></th>
                             <th style="color:#fff;width:4%;">Detalles</th>
                             <th class="sortable" data-col="8" style="color:#fff;width:4%;cursor:pointer;">Riesgo <i class="bi sort-icon bi-caret-down ms-1" style="color:#da02e5;"></i></th>
                           </tr>
@@ -2784,7 +2784,7 @@
                       </button>
                     </td>
                     <td class="text-end">
-                      <span class="badge" style="background: ${riesgoColor}; color: white; font-size: 0.75rem;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Escala de Riesgo (100-0 puntos):</strong><br/>• Sin riesgo: 100 puntos<br/>• Riesgo bajo: 90-99 puntos<br/>• Riesgo medio: 75-89 puntos<br/>• Riesgo alto: 50-74 puntos<br/>• Riesgo máximo: 0-49 puntos">
+                      <span class="badge" style="background: ${riesgoColor}; color: white; font-size: 0.75rem;" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="<strong>Escala de Riesgo (100-0 puntos):</strong><br/>• Sin riesgo: 100+ puntos<br/>• Riesgo bajo: 90-99 puntos<br/>• Riesgo medio: 70-89 puntos<br/>• Riesgo alto: 50-69 puntos<br/>• Riesgo máximo: 0-49 puntos">
                         <i class="bi ${riesgoIcon} me-1"></i>${empleado.nivel_riesgo || 'Sin riesgo'}
                       </span>
                     </td>
