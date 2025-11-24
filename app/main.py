@@ -68,4 +68,5 @@ def init_tunnel():
 if __name__ == "__main__":
     load_dotenv(dotenv_path="properties.env")
     init_tunnel()
-    app.run(debug=True, port=8000)
+    port = int(os.environ.get("PORT", 8080))  # Koyeb requires this
+    app.run(host="0.0.0.0",debug=True, port=port)
