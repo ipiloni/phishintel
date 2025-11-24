@@ -14,6 +14,7 @@ def openapi_spec():
             "description": "Documentación básica de endpoints"
         },
         "tags": [
+            {"name": "🎯 DEMO", "description": "Inicialización y configuración del sistema de demostración"},
             {"name": "👥 Usuarios", "description": "Gestión de usuarios"},
             {"name": "👤 Empleados", "description": "Funcionalidades específicas para empleados"},
             {"name": "🏢 Áreas", "description": "Gestión de áreas"},
@@ -29,6 +30,149 @@ def openapi_spec():
             {"name": "⚠️ PELIGRO", "description": "Operaciones destructivas - USAR CON EXTREMA PRECAUCIÓN"}
         ],
         "paths": {
+            "/api/demo/01-crear-usuarios-areas": {
+                "post": {
+                    "summary": "🎯 Crear áreas y usuarios de demostración",
+                    "description": "Crea un conjunto completo de áreas y usuarios para inicializar el sistema de demostración. Los datos son completamente editables desde el cuerpo del request.\n\n**Estructura del ejemplo:**\n- Área 1: Ventas (vacía para pruebas) - Marcos, Mora, Juan\n- Área 2: RRHH (mal comportamiento) - Leandro, Laura, Carlos\n- Área 3: Compras (buen comportamiento) - Leonardo, David, Juan Martin\n- Sin área: Admin (administrador del sistema)",
+                    "tags": ["🎯 DEMO"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "areas": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "nombreArea": {"type": "string"}
+                                                },
+                                                "required": ["nombreArea"]
+                                            }
+                                        },
+                                        "usuarios": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "nombreUsuario": {"type": "string"},
+                                                    "password": {"type": "string"},
+                                                    "nombre": {"type": "string"},
+                                                    "apellido": {"type": "string"},
+                                                    "email": {"type": "string"},
+                                                    "telefono": {"type": "string"},
+                                                    "idVoz": {"type": "string"},
+                                                    "idArea": {"type": "integer"},
+                                                    "esAdministrador": {"type": "boolean"}
+                                                },
+                                                "required": ["nombreUsuario", "password", "nombre", "apellido", "email"]
+                                            }
+                                        }
+                                    },
+                                    "required": ["areas", "usuarios"]
+                                },
+                                "example": {
+                                    "areas": [
+                                        {"nombreArea": "Ventas"},
+                                        {"nombreArea": "RRHH"},
+                                        {"nombreArea": "Compras"}
+                                    ],
+                                    "usuarios": [
+                                        {"nombreUsuario": "marcosgurruchaga", "password": "marcos.gurruchaga1", "nombre": "Marcos", "apellido": "Gurruchaga", "email": "marcos.gurruchaga@pgcontrol.com.ar", "telefono": "+5491141635935", "idVoz": "GHUI7Bui6hqAYVXaCoEX", "idArea": 1, "esAdministrador": False},
+                                        {"nombreUsuario": "morarodriguez", "password": "mora.rodriguez1", "nombre": "Mora", "apellido": "Rodriguez", "email": "mora.rodriguez@pgcontrol.com.ar", "telefono": "+5491165482219", "idVoz": "8DIlA8oISdnZSzlAFJq4", "idArea": 1, "esAdministrador": False},
+                                        {"nombreUsuario": "juanperez", "password": "juan.perez1", "nombre": "Juan", "apellido": "Perez", "email": "juan.perez@pgcontrol.com.ar", "idArea": 1, "esAdministrador": False},
+                                        {"nombreUsuario": "pipiromagnoli", "password": "leandro.romagnoli1", "nombre": "Leandro", "apellido": "Romagnoli", "email": "leandro.romagnoli@pgcontrol.com.ar", "idArea": 2, "esAdministrador": False},
+                                        {"nombreUsuario": "lauramartinez", "password": "laura.martinez1", "nombre": "Laura", "apellido": "Martinez", "email": "laura.martinez@pgcontrol.com.ar", "idArea": 2, "esAdministrador": False},
+                                        {"nombreUsuario": "carloslopez", "password": "carlos.lopez1", "nombre": "Carlos", "apellido": "Lopez", "email": "carlos.lopez@pgcontrol.com.ar", "idArea": 2, "esAdministrador": False},
+                                        {"nombreUsuario": "leonardopisculichi", "password": "leonardo.pisculichi1", "nombre": "Leonardo", "apellido": "Pisculichi", "email": "leonardo.pisculichi@pgcontrol.com.ar", "idArea": 3, "esAdministrador": False},
+                                        {"nombreUsuario": "davidnalbandian", "password": "david.nalbandian1", "nombre": "David", "apellido": "Nalbandian", "email": "david.nalbandian@pgcontrol.com.ar", "idArea": 3, "esAdministrador": False},
+                                        {"nombreUsuario": "delpo", "password": "juan.delpotro1", "nombre": "Juan Martin", "apellido": "Del Potro", "email": "juan.delpotro@pgcontrol.com.ar", "idArea": 3, "esAdministrador": False},
+                                        {"nombreUsuario": "admin", "password": "adminadmin", "nombre": "Admin", "apellido": "de PhishIntel", "email": "phishingintel@gmail.com", "esAdministrador": True}
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {"description": "Áreas y usuarios creados exitosamente"},
+                        "400": {"description": "Datos inválidos"},
+                        "500": {"description": "Error del servidor"}
+                    }
+                }
+            },
+            "/api/demo/02-crear-eventos-reportes": {
+                "post": {
+                    "summary": "🎯 Crear eventos e intentos de reporte de demostración",
+                    "description": "Crea eventos de prueba con resultados e intentos de reporte asociados. El comportamiento varía según el área:\n\n**Área 3 (Compras):** 70% reporta correctamente ✅ (Buen comportamiento) - Leonardo, David, Juan Martin\n**Área 2 (RRHH):** 60% falla ❌ (Mal comportamiento) - Leandro, Laura, Carlos\n**Área 1 (Ventas):** Vacía para pruebas 📝 - Marcos, Mora, Juan\n\nLos intentos de reporte se crean automáticamente para eventos reportados con fecha brevemente anterior a la verificación.",
+                    "tags": ["🎯 DEMO"],
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "eventos": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "tipoEvento": {"type": "string", "enum": ["CORREO", "MENSAJE", "LLAMADA"]},
+                                                    "asunto": {"type": "string"},
+                                                    "cuerpo": {"type": "string"},
+                                                    "mensaje": {"type": "string"},
+                                                    "fechaEvento": {"type": "string", "format": "date-time"},
+                                                    "dificultad": {"type": "string", "enum": ["Fácil", "Medio", "Difícil"]},
+                                                    "medio": {"type": "string", "enum": ["whatsapp", "telegram", "sms"]},
+                                                    "remitente": {"type": "string"},
+                                                    "usuarios": {"type": "array", "items": {"type": "integer"}}
+                                                },
+                                                "required": ["tipoEvento", "asunto", "fechaEvento", "usuarios"]
+                                            }
+                                        }
+                                    },
+                                    "required": ["eventos"]
+                                },
+                                "example": {
+                                    "eventos": [
+                                        {
+                                            "tipoEvento": "CORREO",
+                                            "asunto": "Urgente: Actualizar contraseña",
+                                            "cuerpo": "Su cuenta será bloqueada si no actualiza su contraseña inmediatamente.",
+                                            "fechaEvento": "2024-09-15T10:30:00",
+                                            "dificultad": "Medio",
+                                            "usuarios": [4, 5, 6, 7, 8, 9]
+                                        },
+                                        {
+                                            "tipoEvento": "MENSAJE",
+                                            "asunto": "Verificación de cuenta",
+                                            "mensaje": "Haz click aquí para verificar tu cuenta",
+                                            "fechaEvento": "2024-09-20T14:00:00",
+                                            "dificultad": "Fácil",
+                                            "medio": "whatsapp",
+                                            "usuarios": [4, 5, 6, 7, 8, 9]
+                                        },
+                                        {
+                                            "tipoEvento": "LLAMADA",
+                                            "asunto": "Soporte técnico falso",
+                                            "remitente": "Soporte IT",
+                                            "fechaEvento": "2024-09-25T16:45:00",
+                                            "usuarios": [4, 5, 6, 7, 8, 9]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "201": {"description": "Eventos e intentos de reporte creados exitosamente"},
+                        "400": {"description": "Datos inválidos"},
+                        "500": {"description": "Error del servidor"}
+                    }
+                }
+            },
             "/api/usuarios": {
                 "get": {
                     "summary": "Obtener todos los usuarios",

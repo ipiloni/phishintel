@@ -2482,7 +2482,9 @@
               if (info && info.cantidad > 0) {
                 const cantidad = info.cantidad || 0;
                 const puntos = info.puntos_perdidos || 0;
-                badges += `<span class="badge" style="background: #540E59; color: white; font-size: 0.7rem;">${iconos[tipo] || '❓'} ${cantidad} ${nombres[tipo] || tipo} (-${puntos} pts)</span>`;
+                const nombreBase = nombres[tipo] || tipo;
+                const nombreMostrado = cantidad === 1 ? nombreBase : `${nombreBase}s`;
+                badges += `<span class="badge" style="background: #540E59; color: white; font-size: 0.7rem;">${iconos[tipo] || '❓'} ${cantidad} ${nombreMostrado} (-${puntos} pts)</span>`;
               }
             });
           }
@@ -2741,7 +2743,9 @@
                       if (info && info.cantidad > 0) {
                         const cantidad = info.cantidad || 0;
                         const puntos = info.puntos_perdidos || 0;
-                        badges += `<span class=\"badge\" style=\"background: #540E59; color: white; font-size: 0.7rem;\">${iconos[tipo] || '❓'} ${cantidad} ${nombres[tipo] || tipo} (-${puntos} pts)</span>`;
+                        const nombreBase = nombres[tipo] || tipo;
+                        const nombreMostrado = cantidad === 1 ? nombreBase : `${nombreBase}s`;
+                        badges += `<span class=\"badge\" style=\"background: #540E59; color: white; font-size: 0.7rem;\">${iconos[tipo] || '❓'} ${cantidad} ${nombreMostrado} (-${puntos} pts)</span>`;
                       }
                     });
                   }

@@ -18,6 +18,7 @@ from app.controllers.mensajes.whatsapp import WhatsAppController
 from app.controllers.mensajes.sms import SMSController
 from app.controllers.ngrokController import NgrokController
 from app.controllers.login import AuthController
+from app.controllers.demoController import DemoController
 from app.utils.config import get
 from app.utils.logger import log
 from app.config.db_config import SessionLocal
@@ -60,6 +61,198 @@ CORS(apis, resources={r"/api/*": {"origins": "*"}},
 
 
 # =================== ENDPOINTS =================== #
+
+# =================== DEMO - Inicialización del Sistema =================== #
+@apis.route("/api/demo/01-crear-usuarios-areas", methods=["POST"])
+def crearUsuariosYAreasDemo():
+    """
+    🎯 DEMO: Crear áreas y usuarios en batch
+    
+    Crea las áreas y usuarios de demostración del sistema.
+    Los datos son editables desde el cuerpo del request.
+    
+    ---
+    tags:
+      - 🎯 DEMO
+    summary: Crear áreas y usuarios de demostración
+    description: |
+      Crea un conjunto completo de áreas y usuarios para inicializar el sistema.
+      
+      **Estructura esperada:**
+      - Área 1: TI (vacía para pruebas)
+      - Área 2: Ventas (mal comportamiento)
+      - Área 3: Compras (buen comportamiento)
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              areas:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    nombreArea:
+                      type: string
+                    descripcion:
+                      type: string
+              usuarios:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    nombre:
+                      type: string
+                    apellido:
+                      type: string
+                    email:
+                      type: string
+                    idArea:
+                      type: integer
+                    esAdministrador:
+                      type: boolean
+          example:
+            areas:
+              - nombreArea: "TI"
+                descripcion: "Área de Tecnología de la Información"
+              - nombreArea: "Ventas"
+                descripcion: "Área de Ventas y Marketing"
+              - nombreArea: "Compras"
+                descripcion: "Área de Compras y Adquisiciones"
+            usuarios:
+              - nombre: "Admin"
+                apellido: "Sistema"
+                email: "admin@phishintel.com"
+                idArea: 1
+                esAdministrador: true
+              - nombre: "Juan"
+                apellido: "Pérez"
+                email: "juan.perez@empresa.com"
+                idArea: 2
+                esAdministrador: false
+              - nombre: "María"
+                apellido: "González"
+                email: "maria.gonzalez@empresa.com"
+                idArea: 2
+                esAdministrador: false
+              - nombre: "Carlos"
+                apellido: "Rodríguez"
+                email: "carlos.rodriguez@empresa.com"
+                idArea: 3
+                esAdministrador: false
+              - nombre: "Ana"
+                apellido: "Martínez"
+                email: "ana.martinez@empresa.com"
+                idArea: 3
+                esAdministrador: false
+              - nombre: "Luis"
+                apellido: "Fernández"
+                email: "luis.fernandez@empresa.com"
+                idArea: 3
+                esAdministrador: false
+    responses:
+      201:
+        description: Áreas y usuarios creados exitosamente
+      400:
+        description: Datos inválidos
+      500:
+        description: Error del servidor
+    """
+    data = request.get_json()
+    return DemoController.crearUsuariosYAreas(data)
+
+
+@apis.route("/api/demo/02-crear-eventos-reportes", methods=["POST"])
+def crearEventosYReportesDemo():
+    """
+    🎯 DEMO: Crear eventos e intentos de reporte
+    
+    Crea eventos de septiembre con sus resultados e intentos de reporte asociados.
+    
+    ---
+    tags:
+      - 🎯 DEMO
+    summary: Crear eventos e intentos de reporte de demostración
+    description: |
+      Crea eventos con comportamiento diferenciado por área:
+      
+      **Área 3 (Compras):** 70% reporta correctamente ✅ (Buen comportamiento)  
+      **Área 2 (Ventas):** 60% falla ❌ (Mal comportamiento)  
+      **Área 1 (TI):** Vacía para pruebas 📝
+      
+      Los intentos de reporte se crean automáticamente para eventos reportados,
+      con fecha brevemente anterior a la verificación del evento.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              eventos:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    tipoEvento:
+                      type: string
+                      enum: [CORREO, MENSAJE, LLAMADA]
+                    asunto:
+                      type: string
+                    cuerpo:
+                      type: string
+                    mensaje:
+                      type: string
+                    fechaEvento:
+                      type: string
+                      format: date-time
+                    dificultad:
+                      type: string
+                      enum: [Fácil, Medio, Difícil]
+                    medio:
+                      type: string
+                      enum: [whatsapp, telegram, sms]
+                    remitente:
+                      type: string
+                    usuarios:
+                      type: array
+                      items:
+                        type: integer
+          example:
+            eventos:
+              - tipoEvento: "CORREO"
+                asunto: "Urgente: Actualizar contraseña"
+                cuerpo: "Su cuenta será bloqueada si no actualiza su contraseña inmediatamente."
+                fechaEvento: "2024-09-15T10:30:00"
+                dificultad: "Medio"
+                usuarios: [2, 3, 4, 5, 6]
+              - tipoEvento: "MENSAJE"
+                asunto: "Verificación de cuenta"
+                mensaje: "Haz click aquí para verificar tu cuenta"
+                fechaEvento: "2024-09-20T14:00:00"
+                dificultad: "Fácil"
+                medio: "whatsapp"
+                usuarios: [2, 3, 4, 5, 6]
+              - tipoEvento: "LLAMADA"
+                asunto: "Soporte técnico falso"
+                remitente: "Soporte IT"
+                fechaEvento: "2024-09-25T16:45:00"
+                usuarios: [2, 3, 4, 5, 6]
+    responses:
+      201:
+        description: Eventos e intentos de reporte creados exitosamente
+      400:
+        description: Datos inválidos
+      500:
+        description: Error del servidor
+    """
+    data = request.get_json()
+    return DemoController.crearEventosEIntentosReporte(data)
+
+
+# =================== OTROS ENDPOINTS =================== #
 @apis.route("/api/falsoHilo", methods=["POST"])
 def analizarFalsoHilo():
     # TODO: borrar metodo luego
@@ -844,18 +1037,6 @@ def cerrar_tuneles_ngrok():
     Cierra todos los túneles ngrok activos.
     """
     return NgrokController.cerrar_tuneles()
-
-@apis.route("/api/eventos/batch-prueba", methods=["POST"])
-def crearBatchEventos():
-    """
-    Crear un batch de eventos y resultados de prueba para empleados 1-9
-    """
-    try:
-        data = request.get_json()
-        return EventosController.crearBatchEventos(data)
-    except Exception as e:
-        log.error(f"Error creando batch de eventos: {str(e)}")
-        return responseError("ERROR", f"No se pudo crear el batch de eventos: {str(e)}", 500)
 
 
 # =================== SESIÓN Y AUTENTICACIÓN =================== #
