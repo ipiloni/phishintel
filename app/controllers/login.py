@@ -1,8 +1,9 @@
 from flask import jsonify, request, redirect, url_for, session
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.config.db_config import SessionLocal
 from app.backend.models import Usuario
-from app.utils.hash import check_password  # función que compara hash vs texto plano
+from app.utils.hash import check_password, hash_password  # función que compara hash vs texto plano
 # from app.utils.config import get
 # from google.oauth2 import id_token
 # from google.auth.transport import requests
@@ -17,13 +18,21 @@ class AuthController:
             return jsonify({"error": "Faltan campos obligatorios"}), 400
 
         session_db: Session = SessionLocal()
-        usuario = session_db.query(Usuario).filter_by(correo=data["email"]).first()
+        identifier = (data.get("email") or "").strip()
+        ident_lower = identifier.lower()
+        usuario = session_db.query(Usuario).filter(func.lower(Usuario.correo) == ident_lower).first()
+        if usuario is None:
+            usuario = session_db.query(Usuario).filter(func.lower(Usuario.nombreUsuario) == ident_lower).first()
+        if usuario is None and "@" in identifier:
+            local_part = identifier.split("@", 1)[0].lower()
+            usuario = session_db.query(Usuario).filter(func.lower(Usuario.nombreUsuario) == local_part).first()
 
         if usuario is None:
             session_db.close()
             return jsonify({"error": "Credenciales inválidas"}), 401
 
-        if not check_password(data["password"], usuario.password):
+        password_hash = usuario.password or ""
+        if not check_password(data["password"], password_hash):
             session_db.close()
             return jsonify({"error": "Credenciales inválidas"}), 401
 

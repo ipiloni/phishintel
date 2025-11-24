@@ -13,6 +13,7 @@ from app.backend.models.estadoReporte import EstadoReporte
 from app.config.db_config import SessionLocal
 from app.utils.logger import log
 import random
+from app.utils.hash import hash_password
 
 class DemoController:
     
@@ -48,9 +49,10 @@ class DemoController:
             # Crear usuarios
             usuarios_creados = []
             for usuario_data in usuarios_data:
+                hashed = hash_password(usuario_data["password"])  # bcrypt
                 usuario = Usuario(
                     nombreUsuario=usuario_data["nombreUsuario"],
-                    password=usuario_data["password"],
+                    password=hashed,
                     nombre=usuario_data["nombre"],
                     apellido=usuario_data["apellido"],
                     correo=usuario_data["email"],

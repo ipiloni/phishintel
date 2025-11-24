@@ -63,8 +63,8 @@
 
        <form id="loginForm" class="php-email-form">
   <div class="mb-3">
-    <label for="loginEmail" class="form-label">Correo electrónico</label>
-    <input type="email" class="form-control" name="email" id="loginEmail" placeholder="Ingresa tu correo electrónico" required>
+    <label for="loginEmail" class="form-label">Correo o usuario</label>
+    <input type="text" class="form-control" name="email" id="loginEmail" placeholder="Ingresa tu correo o usuario" required>
   </div>
 
   <div class="mb-3">
@@ -128,13 +128,20 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
   loginButtonSpinner.style.display = "inline-block";
   errorMessage.style.display = "none";
 
-  const email = document.getElementById("loginEmail").value;
+  const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value;
+
+  if (!email || !password) {
+    mostrarToastError("Completá email y contraseña");
+    resetearBoton();
+    return;
+  }
 
   try {
     const res = await fetch("/verificarlogin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify({ email, password })
     });
 
@@ -147,11 +154,13 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
     } else {
       // Mostrar toast de error
       mostrarToastError(data.error || "Error al iniciar sesión");
+      document.getElementById("loginPassword").value = "";
       resetearBoton();
     }
   } catch (err) {
     // Mostrar toast de error
     mostrarToastError("Error de conexión con el servidor");
+    document.getElementById("loginPassword").value = "";
     resetearBoton();
   }
 });
