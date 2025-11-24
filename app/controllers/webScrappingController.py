@@ -2,12 +2,12 @@ from bs4 import BeautifulSoup
 from flask import jsonify
 
 from app.backend.models.error import responseError
-from app.utils.config import get
+import os
 from app.utils.logger import log
 import requests
 
-API_KEY = get("API_KEY_WEB_SCRAPPING_IGNA")
-CX = get("CX_WEB_SCRAPPING_IGNA")
+API_KEY = os.environ.get("API_KEY_WEB_SCRAPPING_IGNA")
+CX = os.environ.get("CX_WEB_SCRAPPING_IGNA")
 
 class WebScrappingController:
 

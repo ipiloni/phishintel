@@ -1,11 +1,9 @@
-import logging
-
 from flask import Blueprint, send_from_directory, request, redirect, url_for, session
 import os
 
 from app.controllers.login import AuthController
 from app.controllers.resultadoEventoController import ResultadoEventoController
-from app.utils.url_encoder import decode_phishing_params, decode_route
+from app.utils.url_encoder import decode_phishing_params
 from app.utils.logger import log
 
 frontend = Blueprint("frontend", __name__, static_folder="frontend")

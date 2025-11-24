@@ -13,7 +13,6 @@ from telethon.errors import SessionPasswordNeededError
 
 from app.backend.models.error import responseError
 from app.utils.logger import log
-from app.utils.config import get
 from app.config.db_config import SessionLocal
 from app.backend.models.telethonSession import TelethonSession
 
@@ -21,7 +20,7 @@ from app.backend.models.telethonSession import TelethonSession
 class TelegramController:
     
     def __init__(self):
-        self.token = get("TELEGRAM_TOKEN")
+        self.token = os.environ.get("TELEGRAM_TOKEN")
         self.app = None
         self.is_running = False
         self.user_chat_ids = {}  # Diccionario para almacenar chat_ids de usuarios
@@ -222,14 +221,14 @@ class TelegramController:
 
         try:
             # Obtener el token desde las variables de entorno
-            token = get("TELEGRAM_TOKEN")
+            token = os.environ.get("TELEGRAM_TOKEN")
             if not token:
                 log.error("Token de Telegram no configurado")
                 return responseError("TOKEN_NO_CONFIGURADO", "Token de Telegram no configurado", 500)
 
             # Si no se proporciona chat_id, usar el configurado como fallback
             if not chat_id:
-                chat_id = get("TELEGRAM_DEFAULT_CHAT_ID")
+                chat_id = os.environ.get("TELEGRAM_DEFAULT_CHAT_ID")
                 if not chat_id:
                     log.error("No se proporcionó chat_id y no se configuró TELEGRAM_DEFAULT_CHAT_ID")
                     return responseError("CHAT_ID_NO_CONFIGURADO", "No se proporcionó chat_id y no se configuró TELEGRAM_DEFAULT_CHAT_ID", 400)
@@ -282,14 +281,14 @@ class TelegramController:
 
         try:
             # Obtener el token desde las variables de entorno
-            token = get("TELEGRAM_TOKEN")
+            token = os.environ.get("TELEGRAM_TOKEN")
             if not token:
                 log.error("Token de Telegram no configurado")
                 return responseError("TOKEN_NO_CONFIGURADO", "Token de Telegram no configurado", 500)
 
             # Si no se proporciona chat_id, usar el configurado como fallback
             if not chat_id:
-                chat_id = get("TELEGRAM_DEFAULT_CHAT_ID")
+                chat_id = os.environ.get("TELEGRAM_DEFAULT_CHAT_ID")
                 if not chat_id:
                     log.error("No se proporcionó chat_id y no se configuró TELEGRAM_DEFAULT_CHAT_ID")
                     return responseError("CHAT_ID_NO_CONFIGURADO", "No se proporcionó chat_id y no se configuró TELEGRAM_DEFAULT_CHAT_ID", 400)
@@ -519,8 +518,8 @@ class TelegramController:
         """
         log.info("Se recibió solicitud de autenticación Telethon")
         
-        api_id = get("TELEGRAM_APP_ID")
-        api_hash = get("TELEGRAM_API_HASH")
+        api_id = os.environ.get("TELEGRAM_APP_ID")
+        api_hash = os.environ.get("TELEGRAM_API_HASH")
         
         if not api_id or not api_hash:
             return responseError(

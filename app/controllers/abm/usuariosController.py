@@ -1,6 +1,5 @@
 from flask import jsonify
 from app.backend.models import Usuario, UsuarioxEvento
-from app.backend.models.area import Area
 from app.backend.models.error import responseError
 from app.config.db_config import SessionLocal
 from app.utils.hash import hash_password

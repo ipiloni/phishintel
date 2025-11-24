@@ -1,11 +1,10 @@
 from flask import jsonify
 from twilio.rest import Client
 import requests
+import os
 
 from app.backend.models.error import responseError
-from app.utils.config import get
 from app.utils.logger import log
-
 
 class SMSController:
     
@@ -29,8 +28,8 @@ class SMSController:
             return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios (mensaje o destinatario)", 400)
 
         try:
-            account_sid = get("TWILIO_ACCOUNT_SID_IGNA")
-            auth_token = get("TWILIO_AUTH_TOKEN_IGNA")
+            account_sid = os.environ.get("TWILIO_ACCOUNT_SID_IGNA")
+            auth_token = os.environ.get("TWILIO_AUTH_TOKEN_IGNA")
             
             if not account_sid or not auth_token:
                 log.error("Credenciales de Twilio no configuradas")
@@ -70,8 +69,8 @@ class SMSController:
             return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios (mensaje o destinatario)", 400)
 
         try:
-            token = get("TEXTBEE_TOKEN")
-            device_id = get("TEXTBEE_DEVICE_ID")
+            token = os.environ.get("TEXTBEE_TOKEN")
+            device_id = os.environ.get("TEXTBEE_DEVICE_ID")
             
             if not token:
                 log.error("Token de TextBee no configurado")

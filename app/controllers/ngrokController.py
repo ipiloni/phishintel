@@ -1,11 +1,9 @@
 import subprocess
-import json
 import time
 import requests
 import os
 from flask import jsonify
 from app.backend.models.error import responseError
-from app.utils.config import get
 from app.utils.logger import log
 
 try:
@@ -32,7 +30,7 @@ class NgrokController:
         
         try:
             # Obtener el token de ngrok desde las variables de entorno
-            token = get("NGROK_TOKEN")
+            token = os.environ.get("NGROK_TOKEN")
             if not token:
                 log.error("Token de ngrok no configurado")
                 return responseError("TOKEN_NO_CONFIGURADO", "Token de ngrok no configurado", 500)

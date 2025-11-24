@@ -1,13 +1,12 @@
-import re
+import re, os
 import google.generativeai as genai
 from flask import jsonify
 
-from app.utils.config import get
 from app.backend.models.error import responseError
 from app.utils.logger import log
 
-api_key_igna = get("GEMINI_API_KEY_IGNA")
-api_key_marcos = get("GEMINI_API_KEY_MARCOS")
+api_key_igna = os.environ.get("GEMINI_API_KEY_IGNA")
+api_key_marcos = os.environ.get("GEMINI_API_KEY_MARCOS")
 
 modelAI = "gemini-2.5-flash"
 
