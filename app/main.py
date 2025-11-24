@@ -11,7 +11,9 @@ import atexit
 from app.backend.models import TelethonSession  # noqa: F401
 from app.utils.cloudflare_tunnel import tunnel_manager
 from app.utils.logger import log
+from generar_properties import generar_properties_env
 
+generar_properties_env()
 load_dotenv(dotenv_path="properties.env")
 
 app = Flask(__name__)
