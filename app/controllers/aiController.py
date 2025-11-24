@@ -180,7 +180,7 @@ class AIController:
         El mensaje debe ser:
         - Conciso (como un mensaje de WhatsApp)
         - Creíble para el nivel de dificultad {nivel}
-        - Sin enlaces obvios o sospechosos
+        - Sin enlaces
         - Con un tono natural y conversacional"""
 
         try:
