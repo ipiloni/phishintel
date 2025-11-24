@@ -17,7 +17,6 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException, NoSuchElementException
 
 from app.backend.models.error import responseError
-from app.utils.config import get
 from app.utils.logger import log
 from app.utils.url_encoder import build_phishing_url
 # Comentar import de NgrokController - ya no se usa, se usa directamente URL_APP
@@ -46,8 +45,8 @@ class WhatsAppController:
             return responseError("CAMPOS_OBLIGATORIOS", "Faltan campos obligatorios (mensaje o destinatario)", 400)
 
         try:
-            account_sid = get("TWILIO_ACCOUNT_SID_IGNA")
-            auth_token = get("TWILIO_AUTH_TOKEN_IGNA")
+            account_sid = os.environ.get("TWILIO_ACCOUNT_SID_IGNA")
+            auth_token = os.environ.get("TWILIO_AUTH_TOKEN_IGNA")
             
             if not account_sid or not auth_token:
                 log.error("Credenciales de Twilio no configuradas")
@@ -409,7 +408,7 @@ class WhatsAppController:
 
         try:
             # Obtener el token desde las variables de entorno
-            token = get("WHAPI_CLOUD_TOKEN")
+            token = os.environ.get("WHAPI_CLOUD_TOKEN")
             if not token:
                 log.error("Token de whapi.cloud no configurado")
                 return responseError("TOKEN_NO_CONFIGURADO", "Token de whapi.cloud no configurado", 500)
@@ -486,7 +485,7 @@ class WhatsAppController:
 
         try:
             # Obtener el token desde las variables de entorno
-            token = get("WHAPI_CLOUD_TOKEN")
+            token = os.environ.get("WHAPI_CLOUD_TOKEN")
             if not token:
                 log.error("Token de whapi.cloud no configurado")
                 return responseError("TOKEN_NO_CONFIGURADO", "Token de whapi.cloud no configurado", 500)
@@ -578,7 +577,7 @@ class WhatsAppController:
         url_enlace = None
         if id_usuario and id_evento:
             # Obtener URL_APP del properties.env
-            url_app = get("URL_APP")
+            url_app = os.environ.get("URL_APP")
             if not url_app:
                 log.error("URL_APP no configurada en properties.env")
                 return responseError("URL_APP_NO_CONFIGURADA", "URL_APP no configurada en properties.env", 500)
@@ -656,7 +655,7 @@ class WhatsAppController:
 
         try:
             # Obtener el token desde las variables de entorno
-            token = get("WHAPI_CLOUD_TOKEN")
+            token = os.environ.get("WHAPI_CLOUD_TOKEN")
             if not token:
                 log.error("Token de whapi.cloud no configurado")
                 return responseError("TOKEN_NO_CONFIGURADO", "Token de whapi.cloud no configurado", 500)

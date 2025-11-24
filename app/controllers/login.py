@@ -1,14 +1,9 @@
-from flask import jsonify, request, redirect, url_for, session
+from flask import jsonify, session
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.config.db_config import SessionLocal
 from app.backend.models import Usuario
-from app.utils.hash import check_password, hash_password  # función que compara hash vs texto plano
-# from app.utils.config import get
-# from google.oauth2 import id_token
-# from google.auth.transport import requests
-
-# googleAuth = get("GOOGLE_AUTH_CLIENT")
+from app.utils.hash import check_password  # función que compara hash vs texto plano
 
 class AuthController:
 

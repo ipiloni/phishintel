@@ -7,11 +7,8 @@ import subprocess
 import threading
 import time
 import sys
-import re
 from pathlib import Path
-from app.utils.config import get
 from app.utils.logger import log
-
 
 class CloudflareTunnel:
     """Clase para manejar el túnel de Cloudflare"""
@@ -24,7 +21,7 @@ class CloudflareTunnel:
         
     def is_enabled(self):
         """Verifica si el despliegue local está habilitado"""
-        despliegue_local = get('DESPLIEGUE_LOCAL')
+        despliegue_local = os.environ.get('DESPLIEGUE_LOCAL')
         return despliegue_local and despliegue_local.strip().upper() == 'SI'
     
     def check_cloudflared_installed(self):
@@ -76,7 +73,7 @@ class CloudflareTunnel:
     
     def validate_hostname(self):
         """Valida que el hostname del túnel coincida con URL_APP. Si no coincide, cierra la aplicación."""
-        url_app = get('URL_APP')
+        url_app = os.environ.get('URL_APP')
         if not url_app:
             log.error("URL_APP no está configurado en properties.env")
             log.error("La aplicación se cerrará debido a la configuración incorrecta.")

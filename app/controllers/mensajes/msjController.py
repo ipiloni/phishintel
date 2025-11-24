@@ -1,5 +1,5 @@
 import datetime
-import requests
+import os
 
 from flask import jsonify
 
@@ -10,7 +10,6 @@ from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.tipoEvento import TipoEvento
 from app.backend.models.usuarioxevento import UsuarioxEvento
 from app.config.db_config import SessionLocal
-from app.utils.config import get
 from app.utils.logger import log
 from app.utils.url_encoder import build_phishing_url
 
@@ -82,7 +81,7 @@ class MsjController:
             session.commit()
 
             # Obtener URL_APP del properties.env
-            url_app = get("URL_APP")
+            url_app = os.environ.get("URL_APP")
             if not url_app:
                 url_app = "http://localhost:8080"  # Fallback si no está configurado
                 log.warn("URL_APP no configurada, usando fallback: http://localhost:8080")

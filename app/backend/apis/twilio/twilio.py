@@ -1,11 +1,11 @@
+import os
 from flask import jsonify
 from twilio.rest import Client
 
-from app.utils.config import get
 from app.utils.logger import log
 
-account_sid = get("TWILIO_ACCOUNT_SID_MORA")
-auth_token = get("TWILIO_AUTH_TOKEN_MORA")
+account_sid = os.environ.get("TWILIO_ACCOUNT_SID_MORA")
+auth_token = os.environ.get("TWILIO_AUTH_TOKEN_MORA")
 
 client = Client(account_sid, auth_token)
 

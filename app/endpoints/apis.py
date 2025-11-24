@@ -1,6 +1,6 @@
 from flask import request, Blueprint, send_file, jsonify, session, Response
 from datetime import datetime
-import requests
+import requests, os
 from app.backend.models.error import responseError
 from app.controllers.abm.areasController import AreasController
 from app.controllers.aiController import AIController
@@ -19,18 +19,17 @@ from app.controllers.mensajes.sms import SMSController
 from app.controllers.ngrokController import NgrokController
 from app.controllers.login import AuthController
 from app.controllers.demoController import DemoController
-from app.utils.config import get
 from app.utils.logger import log
 from app.config.db_config import SessionLocal
 from app.backend.models import Usuario, Area, Evento, RegistroEvento, UsuarioxEvento, IntentoReporte
 from flask_cors import CORS
 
-GOOGLE_CLIENT_ID = get("GOOGLE_AUTH_CLIENT")
-GOOGLE_CLIENT_SECRET = get("GOOGLE_AUTH_SECRET")
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_AUTH_CLIENT")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_AUTH_SECRET")
 
 def get_google_redirect_uri():
     """Obtiene el redirect_uri dinámicamente basado en la URL de la aplicación"""
-    url_app = get("URL_APP")
+    url_app = os.environ.get("URL_APP")
     if url_app:
         # Normalizar la URL
         url_app = url_app.strip()
@@ -301,7 +300,7 @@ def analizarFalsoHilo():
 @apis.route("/api/config/url", methods=["GET"])
 def get_api_url():
     """Endpoint que devuelve la URL completa del backend desde properties.env"""
-    url_app = get("URL_APP")
+    url_app = os.environ.get("URL_APP")
     if not url_app:
         # Fallback a localhost si no está configurado
         url_app = "http://localhost:8080"

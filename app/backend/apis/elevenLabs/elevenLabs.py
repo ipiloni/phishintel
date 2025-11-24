@@ -1,21 +1,16 @@
 import os
 import uuid
-from io import BytesIO
 
 from dotenv import load_dotenv
 from elevenlabs import VoiceSettings
 from elevenlabs.client import ElevenLabs
-from elevenlabs import play
-from flask import jsonify
 from io import BytesIO
 
 from app.backend.models.error import responseError
 from app.utils.logger import log
 
-from app.utils.config import get
-
-api_key = get("ELEVEN_LABS_IGNA")
-api_key_2 = get("API_KEY_CLONACION_VOZ")
+api_key = os.environ.get("ELEVEN_LABS_IGNA")
+api_key_2 = os.environ.get("API_KEY_CLONACION_VOZ")
 
 # def generarVoz(texto):
 #     load_dotenv()

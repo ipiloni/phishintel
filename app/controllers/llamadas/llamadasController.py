@@ -1,4 +1,5 @@
 import json
+import os
 
 from flask import Response, current_app
 from twilio.twiml.voice_response import Gather, VoiceResponse
@@ -13,13 +14,12 @@ from app.controllers.aiController import AIController
 from app.controllers.emails.emailController import EmailController
 from app.controllers.mensajes.msjController import MsjController
 from app.controllers.resultadoEventoController import ResultadoEventoController
-from app.utils.config import get
 from app.utils import conversacion
 from app.utils.logger import log
 import threading
 
-password = get("LLAMAR_PASSWORD")
-host_raw = get("URL_APP")
+password = os.environ.get("LLAMAR_PASSWORD")
+host_raw = os.environ.get("URL_APP")
 
 # Normalizar la URL para asegurar que tenga protocolo
 if host_raw:
@@ -33,7 +33,7 @@ if host_raw:
 else:
     host = "http://localhost:8080"  # fallback
 
-nroRemitente = get("NRO_REMITENTE")
+nroRemitente = os.environ.get("NRO_REMITENTE")
 
 class LlamadasController:
 

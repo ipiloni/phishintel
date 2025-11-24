@@ -1,11 +1,11 @@
-from app.utils.config import get
+import os
 from sendgrid import SendGridAPIClient, Email
 from sendgrid.helpers.mail import Mail
 from app.utils.logger import log
 
-api_key = get("SENDGRID_TOKEN_IGNA")
-phishintel_api_key = get("SENDGRID_EMAILS_PHISHINTEL")
-pgcontrol_api_key = get("SENDGRID_EMAILS_PGCONTROL")
+api_key = os.environ.get("SENDGRID_TOKEN_IGNA")
+phishintel_api_key = os.environ.get("SENDGRID_EMAILS_PHISHINTEL")
+pgcontrol_api_key = os.environ.get("SENDGRID_EMAILS_PGCONTROL")
 
 def enviarMail(asunto, cuerpo, destinatario):
     from_email = Email(email='ipiloni@frba.utn.edu.ar', name='Phishintel')

@@ -1,9 +1,8 @@
 from flask import jsonify
-from sqlalchemy import func, and_
+from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 from app.backend.models import Usuario
 from app.backend.models.usuarioxevento import UsuarioxEvento
-from app.backend.models.resultadoEvento import ResultadoEvento
 from app.backend.models.evento import Evento
 from app.backend.models.error import responseError
 from app.config.db_config import SessionLocal
