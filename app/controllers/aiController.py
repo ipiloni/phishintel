@@ -282,7 +282,7 @@ class AIController:
         prompt = f"""
         Analizá la siguiente conversación. Tu deber es retornar sólamente la palabra 'true' si la conversación cumplió el objetivo; caso contrario retorna 'false'.
         Para saber si la conversación cumplió el objetivo, tenés que basarte en el siguiente criterio: El objetivo se considera cumplido si en la conversación la IA nombra o referencia algo similar o parecido al objetivo.
-        El objetivo de esta llamada fue que el usuario {objetivoActual}.
+        El objetivo de esta llamada fue que el usuario acepte (o de indicios de aceptar) recibir un link.
         Recordá sólamente responder con 'true' o 'false'.
         La conversación resultó ser la siguiente:
         {conversacionActual}.        

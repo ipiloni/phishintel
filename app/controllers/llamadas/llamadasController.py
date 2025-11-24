@@ -224,8 +224,8 @@ class LlamadasController:
             # Usar el contexto de la aplicación dentro del hilo
             with app_context:
                 log.info(f"[HILO ANÁLISIS] Hilo de análisis iniciado para evento ID: {conversacion.idEvento}, destinatario: {conversacion.destinatario}")
-                log.info(f"[HILO ANÁLISIS] Esperando 2 minutos (120 segundos) antes de analizar la llamada...")
-                time.sleep(120)  # Esperar 2 minutos (120 segundos)
+                log.info(f"[HILO ANÁLISIS] Esperando 1 minuto (60 segundos) antes de analizar la llamada...")
+                time.sleep(60)  # Esperar 1 minuto
                 log.info(f"[HILO ANÁLISIS] Tiempo de espera completado, iniciando análisis de la llamada...")
                 try:
                     LlamadasController.analizarLlamada()
