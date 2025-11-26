@@ -65,9 +65,9 @@ class EmailController:
             session.add(usuario_evento)
             session.commit()
 
-            # Obtener URL_APP del properties.env
-            from app.utils.config import get as get_config
-            url_app = get_config("URL_APP")
+            import os
+            url_app = os.environ.get("URL_APP")
+
             if not url_app:
                 url_app = "http://localhost:8080"  # Fallback si no está configurado
                 log.warn("URL_APP no configurada, usando fallback: http://localhost:8080")
@@ -124,11 +124,10 @@ class EmailController:
                     log.info(f"Respuesta del servicio Twilio sendgrid (Administracion PGControl): {response.status_code}")
                 elif proveedor == "smtp":
                     # TODO: Hardcoded - configuración SMTP debe ser configurable
-                    from app.utils.config import get
-                    smtp_host = get("SMTP_MEDIO_HOST")
-                    smtp_port = get("SMTP_MEDIO_PORT")
-                    smtp_user = get("SMTP_MEDIO_USER")
-                    smtp_password = get("SMTP_MEDIO_PASSWORD")
+                    smtp_host = os.environ.get("SMTP_MEDIO_HOST")
+                    smtp_port = os.environ.get("SMTP_MEDIO_PORT")
+                    smtp_user = os.environ.get("SMTP_MEDIO_USER")
+                    smtp_password = os.environ.get("SMTP_MEDIO_PASSWORD")
                     
                     log.info(f"Enviando email con dificultad '{dificultad}' usando SMTP PrivateEmail desde '{smtp_user}'")
                     smtp = SMTPConnection(smtp_host, smtp_port)
@@ -156,23 +155,22 @@ class EmailController:
                     log.info(f"Respuesta del servicio Twilio sendgrid: {response.status_code}")
                 elif proveedor == "smtp":
                     # Mapeo fijo de credenciales basado en email del remitente
-                    from app.utils.config import get
-                    
+
                     if usuario_remitente.correo == "juan.perez@pgcontrol.com.ar":
-                        smtp_host = get("SMTP_DIFICIL_HOST")
-                        smtp_port = get("SMTP_DIFICIL_PORT")
-                        smtp_user = get("SMTP_DIFICIL_USER")
-                        smtp_password = get("SMTP_DIFICIL_PASSWORD")
+                        smtp_host = os.environ.get("SMTP_DIFICIL_HOST")
+                        smtp_port = os.environ.get("SMTP_DIFICIL_PORT")
+                        smtp_user = os.environ.get("SMTP_DIFICIL_USER")
+                        smtp_password = os.environ.get("SMTP_DIFICIL_PASSWORD")
                     elif usuario_remitente.correo == "marcos.gurruchaga@pgcontrol.com.ar":
-                        smtp_host = get("SMTP_DIFICIL_HOST")
-                        smtp_port = get("SMTP_DIFICIL_PORT")
-                        smtp_user = get("SMTP_DIFICIL_MARCOS_USER")
-                        smtp_password = get("SMTP_DIFICIL_MARCOS_PASSWORD")
+                        smtp_host = os.environ.get("SMTP_DIFICIL_HOST")
+                        smtp_port = os.environ.get("SMTP_DIFICIL_PORT")
+                        smtp_user = os.environ.get("SMTP_DIFICIL_MARCOS_USER")
+                        smtp_password = os.environ.get("SMTP_DIFICIL_MARCOS_PASSWORD")
                     elif usuario_remitente.correo == "mora.rodriguez@pgcontrol.com.ar":
-                        smtp_host = get("SMTP_DIFICIL_HOST")
-                        smtp_port = get("SMTP_DIFICIL_PORT")
-                        smtp_user = get("SMTP_DIFICIL_MORA_USER")
-                        smtp_password = get("SMTP_DIFICIL_MORA_PASSWORD")
+                        smtp_host = os.environ.get("SMTP_DIFICIL_HOST")
+                        smtp_port = os.environ.get("SMTP_DIFICIL_PORT")
+                        smtp_user = os.environ.get("SMTP_DIFICIL_MORA_USER")
+                        smtp_password = os.environ.get("SMTP_DIFICIL_MORA_PASSWORD")
                     else:
                         session.rollback()
                         return responseError("REMITENTE_NO_CONFIGURADO", f"Email del remitente '{usuario_remitente.correo}' no está configurado para SMTP", 400)
