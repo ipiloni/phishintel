@@ -1,4 +1,6 @@
 import os
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 from sendgrid import SendGridAPIClient, Email
 from sendgrid.helpers.mail import Mail
 from app.utils.logger import log
@@ -6,6 +8,12 @@ from app.utils.logger import log
 api_key = os.environ.get("SENDGRID_TOKEN_IGNA")
 phishintel_api_key = os.environ.get("SENDGRID_EMAILS_PHISHINTEL")
 pgcontrol_api_key = os.environ.get("SENDGRID_EMAILS_PGCONTROL")
+
+class SendGridInseguro(SendGridAPIClient):
+    def _resolve_http_client(self):
+        client = super()._resolve_http_client()
+        client._default_params["verify_ssl"] = False
+        return client
 
 def enviarMail(asunto, cuerpo, destinatario):
     from_email = Email(email='ipiloni@frba.utn.edu.ar', name='Phishintel')
@@ -15,7 +23,7 @@ def enviarMail(asunto, cuerpo, destinatario):
         subject=asunto,
         html_content=cuerpo
     )
-    sg = SendGridAPIClient(api_key)
+    sg = SendGridInseguro(api_key)
     return sg.send(message)
 
 def enviarNotificacionEmail(asunto, cuerpo, destinatario):
@@ -28,7 +36,7 @@ def enviarNotificacionEmail(asunto, cuerpo, destinatario):
     )
     log.info(f"Enviando email con PhishIntel API a: {destinatario}")
     log.info(f"API Key configurada: {'Sí' if phishintel_api_key else 'No'}")
-    sg = SendGridAPIClient(phishintel_api_key)
+    sg = SendGridInseguro(phishintel_api_key)
     try:
         response = sg.send(message)
         log.info(f"Email enviado exitosamente. Status: {response.status_code}")
@@ -51,7 +59,7 @@ def enviarMailPG(asunto, cuerpo, remitente, destinatario, name="PGControl"):
     )
     log.info(f"Enviando email con PGControl API desde: {remitente} ({name}) a: {destinatario}")
     log.info(f"API Key configurada: {'Sí' if pgcontrol_api_key else 'No'}")
-    sg = SendGridAPIClient(pgcontrol_api_key)
+    sg = SendGridInseguro(pgcontrol_api_key)
     try:
         response = sg.send(message)
         log.info(f"Email enviado exitosamente. Status: {response.status_code}")
