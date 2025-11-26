@@ -5,11 +5,11 @@ import os
 from datetime import datetime
 
 from flask import jsonify
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
-from telegram import Bot
-from telethon import TelegramClient
-from telethon.sessions import StringSession
-from telethon.errors import SessionPasswordNeededError
+# from telegram.ext import Application, CommandHandler, MessageHandler, filters
+# from telegram import Bot
+# from telethon import TelegramClient
+# from telethon.sessions import StringSession
+# from telethon.errors import SessionPasswordNeededError
 
 from app.backend.models.error import responseError
 from app.utils.logger import log
@@ -91,12 +91,12 @@ class TelegramController:
 
         try:
             # Crear la aplicación
-            self.app = Application.builder().token(self.token).build()
-
-            # Agregar handlers
-            self.app.add_handler(CommandHandler("start", self.start_command))
-            self.app.add_handler(CommandHandler("chatid", self.get_chat_id_command))
-            self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
+            # self.app = Application.builder().token(self.token).build()
+            #
+            # # Agregar handlers
+            # self.app.add_handler(CommandHandler("start", self.start_command))
+            # self.app.add_handler(CommandHandler("chatid", self.get_chat_id_command))
+            # self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
 
             # Iniciar el bot en un hilo separado
             def run_bot():
@@ -236,13 +236,13 @@ class TelegramController:
                 log.info(f"No se proporcionó chat_id, usando configurado: {chat_id}")
 
             # Crear el bot
-            bot = Bot(token=token)
-            
-            # Enviar mensaje via Telegram (usando asyncio para manejar la función async)
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(bot.send_message(chat_id=chat_id, text=mensaje))
-            loop.close()
+            # # bot = Bot(token=token)
+            #
+            # # Enviar mensaje via Telegram (usando asyncio para manejar la función async)
+            # loop = asyncio.new_event_loop()
+            # asyncio.set_event_loop(loop)
+            # loop.run_until_complete(bot.send_message(chat_id=chat_id, text=mensaje))
+            # loop.close()
             
             log.info(f"Mensaje de Telegram enviado a {chat_id}")
             
@@ -296,13 +296,13 @@ class TelegramController:
                 log.info(f"No se proporcionó chat_id, usando configurado: {chat_id}")
 
             # Crear el bot
-            bot = Bot(token=token)
-            
-            # Enviar mensaje via Telegram con formato HTML (usando asyncio para manejar la función async)
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(bot.send_message(chat_id=chat_id, text=mensaje, parse_mode="HTML"))
-            loop.close()
+            # bot = Bot(token=token)
+            #
+            # # Enviar mensaje via Telegram con formato HTML (usando asyncio para manejar la función async)
+            # loop = asyncio.new_event_loop()
+            # asyncio.set_event_loop(loop)
+            # loop.run_until_complete(bot.send_message(chat_id=chat_id, text=mensaje, parse_mode="HTML"))
+            # loop.close()
             
             log.info(f"Mensaje HTML de Telegram enviado a {chat_id}")
             
@@ -344,20 +344,20 @@ class TelegramController:
                 
                 # Crear StringSession desde datos de BD
                 session_string = session_record.sessionData.decode('utf-8')
-                session = StringSession(session_string)
-                
-                # Crear cliente con configuración DC 2
-                client = TelegramClient(
-                    session,
-                    int(api_id),
-                    api_hash,
-                    connection_retries=3,
-                    retry_delay=1,
-                    timeout=10
-                )
+                # session = StringSession(session_string)
+                #
+                # # Crear cliente con configuración DC 2
+                # client = TelegramClient(
+                #     session,
+                #     int(api_id),
+                #     api_hash,
+                #     connection_retries=3,
+                #     retry_delay=1,
+                #     timeout=10
+                # )
                 
                 log.info("Cliente Telethon creado desde sesión de BD")
-                return client
+                # return client
                 
             finally:
                 session_db.close()
@@ -441,21 +441,21 @@ class TelegramController:
                             log.info(f"Usuario {phone_normalized} no encontrado, intentando agregar como contacto")
                             
                             # Agregar contacto temporalmente
-                            contact = InputPhoneContact(
-                                client_id=0,
-                                phone=phone_normalized,
-                                first_name="Usuario",
-                                last_name="PhishIntel"
-                            )
-                            
-                            result = loop.run_until_complete(
-                                client(ImportContactsRequest([contact]))
-                            )
-                            
-                            # Intentar enviar nuevamente después de agregar contacto
-                            loop.run_until_complete(
-                                client.send_message(phone_normalized, mensaje, parse_mode='HTML')
-                            )
+                            # contact = InputPhoneContact(
+                            #     client_id=0,
+                            #     phone=phone_normalized,
+                            #     first_name="Usuario",
+                            #     last_name="PhishIntel"
+                            # )
+                            #
+                            # result = loop.run_until_complete(
+                            #     client(ImportContactsRequest([contact]))
+                            # )
+                            #
+                            # # Intentar enviar nuevamente después de agregar contacto
+                            # loop.run_until_complete(
+                            #     client.send_message(phone_normalized, mensaje, parse_mode='HTML')
+                            # )
                         else:
                             raise
                     
@@ -535,22 +535,22 @@ class TelegramController:
         
         try:
             # Crear cliente temporal para autenticación
-            temp_session = StringSession()
-            client = TelegramClient(
-                temp_session,
-                int(api_id),
-                api_hash,
-                connection_retries=3,
-                retry_delay=1,
-                timeout=10
-            )
+            # temp_session = StringSession()
+            # client = TelegramClient(
+            #     temp_session,
+            #     int(api_id),
+            #     api_hash,
+            #     connection_retries=3,
+            #     retry_delay=1,
+            #     timeout=10
+            # )
             
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             
             try:
                 # Conectar cliente
-                loop.run_until_complete(client.connect())
+                # loop.run_until_complete(client.connect())
                 
                 # Etapa 1: Enviar teléfono
                 if phone and not code and not password:
@@ -558,30 +558,30 @@ class TelegramController:
                         phone = '+' + phone
                     
                     # Enviar código y obtener phone_code_hash
-                    result = loop.run_until_complete(client.send_code_request(phone))
-                    phone_code_hash = result.phone_code_hash
-                    
-                    # Guardar solo los datos necesarios (NO el cliente)
-                    session_string = temp_session.save()
-                    
-                    # Guardar estado en BD para persistencia
-                    TelegramController._guardarEstadoAuthEnBD(phone, phone_code_hash, session_string)
-                    
-                    # También guardar en memoria por si acaso
-                    _telethon_auth_state['phone'] = phone
-                    _telethon_auth_state['session_string'] = session_string
-                    _telethon_auth_state['phone_code_hash'] = phone_code_hash
-                    
-                    # Desconectar y cerrar el cliente
-                    try:
-                        if client.is_connected():
-                            loop.run_until_complete(client.disconnect())
-                    except Exception as e:
-                        log.warn(f"Error al desconectar cliente: {str(e)}")
-                    finally:
-                        loop.close()
-                    
-                    log.info(f"Código de verificación enviado a {phone}")
+                    # result = loop.run_until_complete(client.send_code_request(phone))
+                    # phone_code_hash = result.phone_code_hash
+                    #
+                    # # Guardar solo los datos necesarios (NO el cliente)
+                    # session_string = temp_session.save()
+                    #
+                    # # Guardar estado en BD para persistencia
+                    # TelegramController._guardarEstadoAuthEnBD(phone, phone_code_hash, session_string)
+                    #
+                    # # También guardar en memoria por si acaso
+                    # _telethon_auth_state['phone'] = phone
+                    # _telethon_auth_state['session_string'] = session_string
+                    # _telethon_auth_state['phone_code_hash'] = phone_code_hash
+                    #
+                    # # Desconectar y cerrar el cliente
+                    # try:
+                    #     if client.is_connected():
+                    #         loop.run_until_complete(client.disconnect())
+                    # except Exception as e:
+                    #     log.warn(f"Error al desconectar cliente: {str(e)}")
+                    # finally:
+                    #     loop.close()
+                    #
+                    # log.info(f"Código de verificación enviado a {phone}")
                     
                     return jsonify({
                         "status": "code_sent",
@@ -628,84 +628,84 @@ class TelegramController:
                         )
                     
                     # Crear nuevo cliente desde la sesión guardada (con nuevo event loop)
-                    restored_session = StringSession(stored_session_string)
-                    restored_client = TelegramClient(
-                        restored_session,
-                        int(api_id),
-                        api_hash,
-                        connection_retries=3,
-                        retry_delay=1,
-                        timeout=10
-                    )
+                    # restored_session = StringSession(stored_session_string)
+                    # restored_client = TelegramClient(
+                    #     restored_session,
+                    #     int(api_id),
+                    #     api_hash,
+                    #     connection_retries=3,
+                    #     retry_delay=1,
+                    #     timeout=10
+                    # )
                     
                     try:
                         # Conectar con el nuevo event loop
-                        loop.run_until_complete(restored_client.connect())
-                        
-                        # Intentar iniciar sesión con código y hash
-                        loop.run_until_complete(
-                            restored_client.sign_in(phone, code, phone_code_hash=stored_hash)
-                        )
-                        
+                        # loop.run_until_complete(restored_client.connect())
+                        #
+                        # # Intentar iniciar sesión con código y hash
+                        # loop.run_until_complete(
+                        #     restored_client.sign_in(phone, code, phone_code_hash=stored_hash)
+                        # )
+                        #
                         # Si llegamos aquí, autenticación exitosa (sin 2FA)
-                        final_session_string = restored_session.save()
-                        
-                        # Guardar sesión en BD
-                        TelegramController._guardarSesionEnBD(final_session_string)
-                        
-                        # Limpiar estado temporal
-                        _telethon_auth_state.clear()
-                        
-                        # Desconectar
-                        try:
-                            if restored_client.is_connected():
-                                loop.run_until_complete(restored_client.disconnect())
-                        except Exception as e:
-                            log.warn(f"Error al desconectar cliente: {str(e)}")
-                        finally:
-                            loop.close()
+                        # final_session_string = restored_session.save()
+                        #
+                        # # Guardar sesión en BD
+                        # TelegramController._guardarSesionEnBD(final_session_string)
+                        #
+                        # # Limpiar estado temporal
+                        # _telethon_auth_state.clear()
+                        #
+                        # # Desconectar
+                        # try:
+                        #     if restored_client.is_connected():
+                        #         loop.run_until_complete(restored_client.disconnect())
+                        # except Exception as e:
+                        #     log.warn(f"Error al desconectar cliente: {str(e)}")
+                        # finally:
+                        #     loop.close()
                         
                         log.info("Autenticación Telethon exitosa")
-                        
+
                         return jsonify({
                             "status": "authenticated",
                             "message": "Autenticación exitosa. Sesión guardada."
                         }), 200
                         
-                    except SessionPasswordNeededError:
-                        # Requiere contraseña 2FA - guardar el cliente actualizado
-                        updated_session_string = restored_session.save()
-                        _telethon_auth_state['session_string'] = updated_session_string
-                        
-                        # Actualizar estado en BD
-                        TelegramController._actualizarEstadoAuthEnBD(phone, stored_hash, updated_session_string)
-                        
-                        # Desconectar pero mantener el estado
-                        try:
-                            if restored_client.is_connected():
-                                loop.run_until_complete(restored_client.disconnect())
-                        except Exception as e:
-                            log.warn(f"Error al desconectar cliente: {str(e)}")
-                        finally:
-                            loop.close()
-                        
-                        log.info("Se requiere contraseña 2FA")
-                        
+                    except Exception:
+                    #     # Requiere contraseña 2FA - guardar el cliente actualizado
+                    #     updated_session_string = restored_session.save()
+                    #     _telethon_auth_state['session_string'] = updated_session_string
+                    #
+                    #     # Actualizar estado en BD
+                    #     TelegramController._actualizarEstadoAuthEnBD(phone, stored_hash, updated_session_string)
+                    #
+                    #     # Desconectar pero mantener el estado
+                    #     try:
+                    #         if restored_client.is_connected():
+                    #             loop.run_until_complete(restored_client.disconnect())
+                    #     except Exception as e:
+                    #         log.warn(f"Error al desconectar cliente: {str(e)}")
+                    #     finally:
+                    #         loop.close()
+                    #
+                    #     log.info("Se requiere contraseña 2FA")
+                    #
                         return jsonify({
                             "status": "password_required",
                             "message": "Se requiere contraseña de autenticación de dos factores. Por favor, envía la contraseña.",
                             "phone": phone
                         }), 200
                     
-                    except Exception as e:
-                        try:
-                            if restored_client.is_connected():
-                                loop.run_until_complete(restored_client.disconnect())
-                        except Exception as disconnect_error:
-                            log.warn(f"Error al desconectar cliente: {str(disconnect_error)}")
-                        finally:
-                            loop.close()
-                        raise
+                    # except Exception as e:
+                    #     try:
+                    #         if restored_client.is_connected():
+                    #             loop.run_until_complete(restored_client.disconnect())
+                    #     except Exception as disconnect_error:
+                    #         log.warn(f"Error al desconectar cliente: {str(disconnect_error)}")
+                    #     finally:
+                    #         loop.close()
+                    #     raise
                 
                 # Etapa 3: Verificar contraseña 2FA
                 if phone and code and password:
@@ -746,57 +746,57 @@ class TelegramController:
                         )
                     
                     # Crear nuevo cliente desde la sesión guardada
-                    restored_session = StringSession(stored_session_string)
-                    restored_client = TelegramClient(
-                        restored_session,
-                        int(api_id),
-                        api_hash,
-                        connection_retries=3,
-                        retry_delay=1,
-                        timeout=10
-                    )
+                    # restored_session = StringSession(stored_session_string)
+                    # restored_client = TelegramClient(
+                    #     restored_session,
+                    #     int(api_id),
+                    #     api_hash,
+                    #     connection_retries=3,
+                    #     retry_delay=1,
+                    #     timeout=10
+                    # )
                     
                     try:
                         # Conectar con el nuevo event loop
-                        loop.run_until_complete(restored_client.connect())
-                        
-                        loop.run_until_complete(
-                            restored_client.sign_in(phone, code, phone_code_hash=stored_hash, password=password)
-                        )
-                        
-                        # Autenticación exitosa con 2FA
-                        final_session_string = restored_session.save()
-                        
+                        # loop.run_until_complete(restored_client.connect())
+                        #
+                        # loop.run_until_complete(
+                        #     restored_client.sign_in(phone, code, phone_code_hash=stored_hash, password=password)
+                        # )
+                        #
+                        # # Autenticación exitosa con 2FA
+                        # final_session_string = restored_session.save()
+                        #
                         # Guardar sesión en BD
-                        TelegramController._guardarSesionEnBD(final_session_string)
-                        
+                        # TelegramController._guardarSesionEnBD(final_session_string)
+
                         # Limpiar estado temporal
                         _telethon_auth_state.clear()
-                        
+
                         # Desconectar
-                        try:
-                            if restored_client.is_connected():
-                                loop.run_until_complete(restored_client.disconnect())
-                        except Exception as e:
-                            log.warn(f"Error al desconectar cliente: {str(e)}")
-                        finally:
-                            loop.close()
-                        
+                        # try:
+                        #     if restored_client.is_connected():
+                        #         loop.run_until_complete(restored_client.disconnect())
+                        # except Exception as e:
+                        #     log.warn(f"Error al desconectar cliente: {str(e)}")
+                        # finally:
+                        #     loop.close()
+
                         log.info("Autenticación Telethon exitosa con 2FA")
-                        
+
                         return jsonify({
                             "status": "authenticated",
                             "message": "Autenticación exitosa con 2FA. Sesión guardada."
                         }), 200
                         
                     except Exception as e:
-                        try:
-                            if restored_client.is_connected():
-                                loop.run_until_complete(restored_client.disconnect())
-                        except Exception as disconnect_error:
-                            log.warn(f"Error al desconectar cliente: {str(disconnect_error)}")
-                        finally:
-                            loop.close()
+                        # try:
+                            # if restored_client.is_connected():
+                            #     loop.run_until_complete(restored_client.disconnect())
+                        # except Exception as disconnect_error:
+                        #     log.warn(f"Error al desconectar cliente: {str(disconnect_error)}")
+                        # finally:
+                        #     loop.close()
                         return responseError(
                             "ERROR_AUTENTICACION",
                             f"Error al verificar contraseña 2FA: {str(e)}",
