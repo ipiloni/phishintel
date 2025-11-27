@@ -399,7 +399,7 @@ class LlamadasController:
                     log.info(f"[ANÁLISIS] Dificultad determinada: MEDIO (objetivo: ingresar credenciales)")
                 else:
                     dificultad = "dificil"
-                    contexto = f"Se realizo una llamada hace pocos minutos entre el remitente (que tiene el rol de IA) y el destinatario (que es empleado de 'PG Control' y se llama {conversacion.nombreEmpleado}). Dentro de este email, solicita que el empleado abra un link que actualice urgente sus datos con enlace a caisteDatos.html. No generes ningun enlace ni link. Aquí tienes la conversación completa para mayor contexto: {conversacionString}"
+                    contexto = f"Se realizo una llamada hace pocos minutos entre el remitente (que tiene el rol de IA) y el destinatario (que es empleado de 'PG Control' y se llama {conversacion.nombreEmpleado}). Dentro de este email, solicita que el empleado abra un link que actualice urgente sus datos. No generes ningun enlace ni link. Aquí tienes la conversación completa para mayor contexto: {conversacionString}"
 
                     # contexto = f"En base a la conversación mantenida por llamada, donde el remitente tenía el rol de IA, genera un email de phishing formal que pida que el empleado de la empresa PG Control: {conversacion.nombreEmpleado} que tiene el rol de destinatario actualice urgente sus datos con enlace a caisteDatos.html. Aquí tienes la conversación completa: {conversacionString}"
                     log.info(f"[ANÁLISIS] Dificultad determinada: DIFÍCIL (objetivo por defecto)")
